@@ -5,8 +5,11 @@
 	"main": "src/index.ts",
 	"scripts": {
 		"generate": "pnpm generate:system && pnpm generate:user",
-		"generate:system": "pnpm prisma generate --schema ./prisma/system-schema.prisma",
-		"generate:user": "pnpm prisma generate --schema ./prisma/user-schema.prisma"
+		"generate:system": "prisma generate --schema ./prisma/system-schema.prisma",
+		"generate:user": "prisma generate --schema ./prisma/user-schema.prisma",
+		"migrate:dev": "pnpm migrate:dev:system && pnpm migrate:dev:user",
+		"migrate:dev:system": "prisma migrate dev --schema ./prisma/system-schema.prisma",
+		"migrate:dev:user": "prisma migrate dev --schema ./prisma/user-schema.prisma"
 	},
 	"keywords": [],
 	"author": "",
@@ -15,5 +18,8 @@
 		"@libsql/client": "^0.10.0",
 		"@prisma/adapter-libsql": "^5.19.1",
 		"@prisma/client": "^5.19.1"
+	},
+	"devDependencies": {
+		"prisma": "^5.19.1"
 	}
 }

@@ -7,12 +7,12 @@
 generator client {
   provider = "prisma-client-js"
 	previewFeatures = ["driverAdapters"]
-	output = "../generated/user"
+	output = "../node_modules/@ridi/generated-user"
 }
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev-user.db"
+  url      = "file:../dbs/user.sqlite"
 }
 
 model UserPreferences {
