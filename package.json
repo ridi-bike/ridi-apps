@@ -1,34 +1,19 @@
 {
-  "name": "ridi-apps",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@types/eslint": "^9.6.1",
-    "@types/node": "^22.5.4",
-    "@typescript-eslint/eslint-plugin": "^8.4.0",
-    "@typescript-eslint/parser": "^8.4.0",
-    "eslint": "^9.9.1",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-import-resolver-typescript": "^3.6.3",
-    "eslint-plugin-import": "^2.30.0",
-    "eslint-plugin-jest": "^28.8.3",
-    "eslint-plugin-jest-dom": "^5.4.0",
-    "eslint-plugin-jsx-a11y": "^6.10.0",
-    "eslint-plugin-markdown": "^5.1.0",
-    "eslint-plugin-react": "^7.35.2",
-    "eslint-plugin-react-compiler": "0.0.0-experimental-b8a7b48-20240903",
-    "eslint-plugin-react-hooks": "^4.6.2",
-    "eslint-plugin-tailwindcss": "^3.17.4",
-    "eslint-plugin-testing-library": "^6.3.0",
-    "prisma": "^5.19.1",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.5.4"
-  }
+	"name": "ridi-apps",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"@biomejs/biome": "1.8.3",
+		"@types/node": "^22.5.4",
+		"prisma": "^5.19.1",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.5.4"
+	}
 }
