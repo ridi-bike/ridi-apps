@@ -1,0 +1,19 @@
+{
+	"name": "@ridi/database",
+	"version": "1.0.0",
+	"description": "",
+	"main": "src/index.ts",
+	"scripts": {
+		"generate": "pnpm generate:system && pnpm generate:user",
+		"generate:system": "pnpm prisma generate --schema ./prisma/system-schema.prisma",
+		"generate:user": "pnpm prisma generate --schema ./prisma/user-schema.prisma"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@libsql/client": "^0.10.0",
+		"@prisma/adapter-libsql": "^5.19.1",
+		"@prisma/client": "^5.19.1"
+	}
+}
