@@ -1,11 +1,9 @@
-import DiscordProvider from "@auth/core/providers/discord";
+import GithubProvider from "@auth/core/providers/github";
 import type { SolidAuthConfig } from "@solid-mediakit/auth/src/index";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { systemDbClient } from "@ridi/database";
 
 export const authOptions: SolidAuthConfig = {
-  providers: [
-    DiscordProvider({
-      clientId: process.env.DISCORD_CLIENT_ID as string,
-      clientSecret: process.env.DISCORD_CLIENT_SECRET as string
-    })
-  ]
+	adapter: PrismaAdapter(systemDbClient),
+	providers: [GithubProvider({})],
 };
