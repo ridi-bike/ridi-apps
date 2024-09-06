@@ -5,5 +5,10 @@ import { systemDbClient } from "@ridi/database";
 
 export const authOptions: SolidAuthConfig = {
 	adapter: PrismaAdapter(systemDbClient),
-	providers: [GithubProvider({})],
+	providers: [
+		GithubProvider({
+			clientId: process.env.GITHUB_CLIENT_ID,
+			clientSecret: process.env.GITHUB_SECRET,
+		}),
+	],
 };
