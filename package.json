@@ -5,6 +5,7 @@
 	"main": "index.js",
 	"scripts": {
 		"dev:web": "pnpm -F \"@ridi/web\" dev",
+		"db:push": "pnpm -F \"@ridi/database\" push",
 		"clean": "rm -rf ./node_modules/ && rm -rf ./apps/web/node_modules/ && rm -rf ./apps/mobile/node_modules/ && rm -rf ./packages/database/node_modules/ && rm -rf pnpm-lock.yaml"
 	},
 	"keywords": [],

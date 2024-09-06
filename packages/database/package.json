@@ -7,9 +7,9 @@
 		"generate": "pnpm generate:system && pnpm generate:user",
 		"generate:system": "prisma generate --schema ./prisma/system-schema.prisma",
 		"generate:user": "prisma generate --schema ./prisma/user-schema.prisma",
-		"migrate:dev": "pnpm migrate:dev:system && pnpm migrate:dev:user",
-		"migrate:dev:system": "prisma migrate dev --schema ./prisma/system-schema.prisma",
-		"migrate:dev:user": "prisma migrate dev --schema ./prisma/user-schema.prisma"
+		"push": "pnpm push:system && pnpm push:user",
+		"push:system": "prisma db push --accept-data-loss --schema ./prisma/system-schema.prisma",
+		"push:user": "prisma db push --accept-data-loss --schema ./prisma/user-schema.prisma"
 	},
 	"keywords": [],
 	"author": "",
