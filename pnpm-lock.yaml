@@ -135,15 +135,30 @@ importers:
       '@solidjs/start':
         specifier: ^1.0.6
         version: 1.0.6(rollup@4.21.2)(solid-js@1.8.22)(vinxi@0.4.2(@types/node@20.16.5)(ioredis@5.4.1)(terser@5.31.6))(vite@5.4.3(@types/node@20.16.5)(terser@5.31.6))
+      '@trpc/client':
+        specifier: 11.0.0-rc.502
+        version: 11.0.0-rc.502(@trpc/server@11.0.0-rc.502)
+      '@trpc/server':
+        specifier: 11.0.0-rc.502
+        version: 11.0.0-rc.502
+      '@typeschema/valibot':
+        specifier: ^0.14.0
+        version: 0.14.0(@types/json-schema@7.0.15)(valibot@0.41.0(typescript@5.5.4))
+      client-only:
+        specifier: ^0.0.1
+        version: 0.0.1
+      server-only:
+        specifier: ^0.0.1
+        version: 0.0.1
       solid-js:
         specifier: ^1.8.18
         version: 1.8.22
+      valibot:
+        specifier: ^0.41.0
+        version: 0.41.0(typescript@5.5.4)
       vinxi:
         specifier: ^0.4.1
         version: 0.4.2(@types/node@20.16.5)(ioredis@5.4.1)(terser@5.31.6)
-      zod:
-        specifier: ^3.23.8
-        version: 3.23.8
     devDependencies:
       '@types/node':
         specifier: ^20.12.7
@@ -2201,6 +2216,14 @@ packages:
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
     engines: {node: '>= 10'}
 
+  '@trpc/client@11.0.0-rc.502':
+    resolution: {integrity: sha512-ysFQ3wHnjzLcAqeuwx9/B/YV+2XN/kmfAdTUG+O/SUAdP2wAwo6XbhOxlHw0HWS5pDCsTfJkxDr1nMVkuFM07Q==}
+    peerDependencies:
+      '@trpc/server': 11.0.0-rc.502+2a8c56027
+
+  '@trpc/server@11.0.0-rc.502':
+    resolution: {integrity: sha512-n6B8Q/UqF+hFXyCTXq9AWSn6EkXBbVo/Bs7/QzZxe5KD5CdnBomC7A1y6Qr+i0eiOWwTHJZQ0az+gJetb2fdxw==}
+
   '@tsconfig/node10@1.0.11':
     resolution: {integrity: sha512-DcRjDCujK/kCk/cUe8Xz8ZSpm8mS3mNNpta+jGCA6USEDfktlNvm1+IuZ9eTcDbNk41BHwpHHeW+N1lKCz4zOw==}
 
@@ -2308,6 +2331,25 @@ packages:
 
   '@types/yargs@17.0.33':
     resolution: {integrity: sha512-WpxBCKWPLr4xSsHgz511rFJAM+wS28w2zEO1QDNY5zM/S8ok70NNfztH0xwhqKyaK0OHCbN98LDAZuy1ctxDkA==}
+
+  '@typeschema/core@0.14.0':
+    resolution: {integrity: sha512-Ia6PtZHcL3KqsAWXjMi5xIyZ7XMH4aSnOQes8mfMLx+wGFGtGRNlwe6Y7cYvX+WfNK67OL0/HSe9t8QDygV0/w==}
+    peerDependencies:
+      '@types/json-schema': ^7.0.15
+    peerDependenciesMeta:
+      '@types/json-schema':
+        optional: true
+
+  '@typeschema/valibot@0.14.0':
+    resolution: {integrity: sha512-Q2HTTSfXoEgo+55Nx0iprlpGolXgDbnGss6avLlXNtjvTNx606VDnLkpSyA6u/MS2mOIUO7GVGdCF6LLbLcqlg==}
+    peerDependencies:
+      '@gcornut/valibot-json-schema': ^0.37.0
+      valibot: ^0.39.0
+    peerDependenciesMeta:
+      '@gcornut/valibot-json-schema':
+        optional: true
+      valibot:
+        optional: true
 
   '@urql/core@2.3.6':
     resolution: {integrity: sha512-PUxhtBh7/8167HJK6WqBv6Z0piuiaZHQGYbhwpNL9aIQmLROPEdaUYkY4wh45wPQXcTpnd11l0q3Pw+TI11pdw==}
@@ -5788,6 +5830,9 @@ packages:
     resolution: {integrity: sha512-XGuRDNjXUijsUL0vl6nSD7cwURuzEgglbOaFuZM9g3kwDXOWVTck0jLzjPzGD+TazWbboZYu52/9/XPdUgne9g==}
     engines: {node: '>= 0.8.0'}
 
+  server-only@0.0.1:
+    resolution: {integrity: sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==}
+
   set-blocking@2.0.0:
     resolution: {integrity: sha512-KiKBS8AnWGEyLzofFfmvKwpdPzqiy16LvQfK3yv/fVH7Bj13/wl3JSR1J+rfgRE9q7xUJK4qvgS8raSOeLUehw==}
 
@@ -6541,6 +6586,14 @@ packages:
   v8-to-istanbul@9.3.0:
     resolution: {integrity: sha512-kiGUalWN+rgBJ/1OHZsBtU4rXZOfj/7rKQxULKlIzwzQSvMJUUNgPwJEEh7gU6xEVxC0ahoOBvN2YI8GH6FNgA==}
     engines: {node: '>=10.12.0'}
+
+  valibot@0.41.0:
+    resolution: {integrity: sha512-igDBb8CTYr8YTQlOKgaN9nSS0Be7z+WRuaeYqGf3Cjz3aKmSnqEmYnkfVjzIuumGqfHpa3fLIvMEAfhrpqN8ng==}
+    peerDependencies:
+      typescript: '>=5'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   valid-url@1.0.9:
     resolution: {integrity: sha512-QQDsV8OnSf5Uc30CKSwG9lnhMPe6exHtTXLRYX8uMwKENy640pU+2BgBL0LRbDh/eYRahNCS7aewCx0wf3NYVA==}
@@ -9490,6 +9543,12 @@ snapshots:
 
   '@tootallnate/once@2.0.0': {}
 
+  '@trpc/client@11.0.0-rc.502(@trpc/server@11.0.0-rc.502)':
+    dependencies:
+      '@trpc/server': 11.0.0-rc.502
+
+  '@trpc/server@11.0.0-rc.502': {}
+
   '@tsconfig/node10@1.0.11': {}
 
   '@tsconfig/node12@1.0.11': {}
@@ -9613,6 +9672,18 @@ snapshots:
   '@types/yargs@17.0.33':
     dependencies:
       '@types/yargs-parser': 21.0.3
+
+  '@typeschema/core@0.14.0(@types/json-schema@7.0.15)':
+    optionalDependencies:
+      '@types/json-schema': 7.0.15
+
+  '@typeschema/valibot@0.14.0(@types/json-schema@7.0.15)(valibot@0.41.0(typescript@5.5.4))':
+    dependencies:
+      '@typeschema/core': 0.14.0(@types/json-schema@7.0.15)
+    optionalDependencies:
+      valibot: 0.41.0(typescript@5.5.4)
+    transitivePeerDependencies:
+      - '@types/json-schema'
 
   '@urql/core@2.3.6(graphql@15.8.0)':
     dependencies:
@@ -13840,6 +13911,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  server-only@0.0.1: {}
+
   set-blocking@2.0.0: {}
 
   set-cookie-parser@2.7.0: {}
@@ -14579,6 +14652,10 @@ snapshots:
       '@jridgewell/trace-mapping': 0.3.25
       '@types/istanbul-lib-coverage': 2.0.6
       convert-source-map: 2.0.0
+
+  valibot@0.41.0(typescript@5.5.4):
+    optionalDependencies:
+      typescript: 5.5.4
 
   valid-url@1.0.9: {}
 
