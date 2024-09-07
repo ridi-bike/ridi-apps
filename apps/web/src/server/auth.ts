@@ -1,5 +1,5 @@
 import GithubProvider from "@auth/core/providers/github";
-import type { SolidAuthConfig } from "@solid-mediakit/auth/src/index";
+import type { SolidAuthConfig } from "@solid-mediakit/auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prismaClient } from "@ridi/database";
 
