@@ -12,13 +12,15 @@
 		"next-auth": "^4.24.7",
 		"postcss": "^8.4.38",
 		"typescript": "^5.4.5",
-		"vite": "^5.2.8"
+		"vite": "^5.2.8",
+		"vite-plugin-checker": "^0.8.0"
 	},
 	"dependencies": {
 		"@auth/core": "^0.29.0",
 		"@auth/prisma-adapter": "^2.4.2",
 		"@babel/core": "7.24.4",
 		"@ridi/database": "workspace:^",
+		"@ridi/server-client-check": "workspace:^",
 		"@solid-mediakit/auth": "^2.0.11",
 		"@solidjs/meta": "^0.29.4",
 		"@solidjs/router": "^0.14.1",
@@ -26,8 +28,6 @@
 		"@trpc/client": "11.0.0-rc.502",
 		"@trpc/server": "11.0.0-rc.502",
 		"@typeschema/valibot": "^0.14.0",
-		"client-only": "^0.0.1",
-		"server-only": "^0.0.1",
 		"solid-js": "^1.8.18",
 		"valibot": "^0.41.0",
 		"vinxi": "^0.4.1"

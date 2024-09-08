@@ -1,0 +1,20 @@
+{
+	"name": "@ridi/server-client-check",
+	"version": "1.0.0",
+	"description": "",
+	"main": "src/index.ts",
+	"exports": {
+		".": {
+			"default": "src/index.ts"
+		},
+		"./server-only": {
+			"default": "src/server.ts"
+		},
+		"./client-only": {
+			"default": "src/client.ts"
+		}
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC"
+}

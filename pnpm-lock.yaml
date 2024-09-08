@@ -123,6 +123,9 @@ importers:
       '@ridi/database':
         specifier: workspace:^
         version: link:../../packages/database
+      '@ridi/server-client-check':
+        specifier: workspace:^
+        version: link:../../packages/ssr-check
       '@solid-mediakit/auth':
         specifier: ^2.0.11
         version: 2.1.2(@auth/core@0.29.0)(@solidjs/meta@0.29.4(solid-js@1.8.22))(@solidjs/router@0.14.3(solid-js@1.8.22))(@solidjs/start@1.0.6(rollup@4.21.2)(solid-js@1.8.22)(vinxi@0.4.2(@types/node@20.16.5)(ioredis@5.4.1)(terser@5.31.6))(vite@5.4.3(@types/node@20.16.5)(terser@5.31.6)))(rollup@4.21.2)(solid-js@1.8.22)(vinxi@0.4.2(@types/node@20.16.5)(ioredis@5.4.1)(terser@5.31.6))
@@ -144,12 +147,6 @@ importers:
       '@typeschema/valibot':
         specifier: ^0.14.0
         version: 0.14.0(@types/json-schema@7.0.15)(valibot@0.41.0(typescript@5.5.4))
-      client-only:
-        specifier: ^0.0.1
-        version: 0.0.1
-      server-only:
-        specifier: ^0.0.1
-        version: 0.0.1
       solid-js:
         specifier: ^1.8.18
         version: 1.8.22
@@ -178,6 +175,9 @@ importers:
       vite:
         specifier: ^5.2.8
         version: 5.4.3(@types/node@20.16.5)(terser@5.31.6)
+      vite-plugin-checker:
+        specifier: ^0.8.0
+        version: 0.8.0(@biomejs/biome@1.8.3)(typescript@5.5.4)(vite@5.4.3(@types/node@20.16.5)(terser@5.31.6))
 
   packages/database:
     dependencies:
@@ -194,6 +194,8 @@ importers:
       prisma:
         specifier: ^5.19.1
         version: 5.19.1
+
+  packages/ssr-check: {}
 
 packages:
 
@@ -1360,7 +1362,7 @@ packages:
 
   '@expo/bunyan@4.0.1':
     resolution: {integrity: sha512-+Lla7nYSiHZirgK+U/uYzsLv/X+HaJienbD5AKX1UQZHYfWaP+9uuQluRB4GrEVWF0GZ7vEVp/jzaOT9k/SQlg==}
-    engines: {node: '>=0.10.0'}
+    engines: {'0': node >=0.10.0}
 
   '@expo/cli@0.18.29':
     resolution: {integrity: sha512-X810C48Ss+67RdZU39YEO1khNYo1RmjouRV+vVe0QhMoTe8R6OA3t+XYEdwaNbJ5p/DJN7szfHfNmX2glpC7xg==}
@@ -2989,6 +2991,10 @@ packages:
   commander@7.2.0:
     resolution: {integrity: sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw==}
     engines: {node: '>= 10'}
+
+  commander@8.3.0:
+    resolution: {integrity: sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==}
+    engines: {node: '>= 12'}
 
   commander@9.5.0:
     resolution: {integrity: sha512-KRs7WVDKg86PWiuAqhDrAQnTXZKraVcCc6vFdL14qrZ/DcWwuRo7VoiYXalXO7S5GKpqYiVEwCbgFDfxNHKJBQ==}
@@ -5830,9 +5836,6 @@ packages:
     resolution: {integrity: sha512-XGuRDNjXUijsUL0vl6nSD7cwURuzEgglbOaFuZM9g3kwDXOWVTck0jLzjPzGD+TazWbboZYu52/9/XPdUgne9g==}
     engines: {node: '>= 0.8.0'}
 
-  server-only@0.0.1:
-    resolution: {integrity: sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==}
-
   set-blocking@2.0.0:
     resolution: {integrity: sha512-KiKBS8AnWGEyLzofFfmvKwpdPzqiy16LvQfK3yv/fVH7Bj13/wl3JSR1J+rfgRE9q7xUJK4qvgS8raSOeLUehw==}
 
@@ -6612,6 +6615,40 @@ packages:
     resolution: {integrity: sha512-BbvIum9BLUQ22O/lU1RX0+aKNMXXcl58hofNoWFnFcKkm+efgVsHiD2d7HG3w8QLdb2Asdhmz5/ZzI1Y3zTBXw==}
     hasBin: true
 
+  vite-plugin-checker@0.8.0:
+    resolution: {integrity: sha512-UA5uzOGm97UvZRTdZHiQVYFnd86AVn8EVaD4L3PoVzxH+IZSfaAw14WGFwX9QS23UW3lV/5bVKZn6l0w+q9P0g==}
+    engines: {node: '>=14.16'}
+    peerDependencies:
+      '@biomejs/biome': '>=1.7'
+      eslint: '>=7'
+      meow: ^9.0.0
+      optionator: ^0.9.1
+      stylelint: '>=13'
+      typescript: '*'
+      vite: '>=2.0.0'
+      vls: '*'
+      vti: '*'
+      vue-tsc: ~2.1.6
+    peerDependenciesMeta:
+      '@biomejs/biome':
+        optional: true
+      eslint:
+        optional: true
+      meow:
+        optional: true
+      optionator:
+        optional: true
+      stylelint:
+        optional: true
+      typescript:
+        optional: true
+      vls:
+        optional: true
+      vti:
+        optional: true
+      vue-tsc:
+        optional: true
+
   vite-plugin-inspect@0.7.42:
     resolution: {integrity: sha512-JCyX86wr3siQc+p9Kd0t8VkFHAJag0RaQVIpdFGSv5FEaePEVB6+V/RGtz2dQkkGSXQzRWrPs4cU3dRKg32bXw==}
     engines: {node: '>=14'}
@@ -6673,6 +6710,30 @@ packages:
 
   vlq@1.0.1:
     resolution: {integrity: sha512-gQpnTgkubC6hQgdIcRdYGDSDc+SaujOdyesZQMv6JlfQee/9Mp0Qhnys6WxDWvQnL5WZdT7o2Ul187aSt0Rq+w==}
+
+  vscode-jsonrpc@6.0.0:
+    resolution: {integrity: sha512-wnJA4BnEjOSyFMvjZdpiOwhSq9uDoK8e/kpRJDTaMYzwlkrhG1fwDIZI94CLsLzlCK5cIbMMtFlJlfR57Lavmg==}
+    engines: {node: '>=8.0.0 || >=10.0.0'}
+
+  vscode-languageclient@7.0.0:
+    resolution: {integrity: sha512-P9AXdAPlsCgslpP9pRxYPqkNYV7Xq8300/aZDpO35j1fJm/ncize8iGswzYlcvFw5DQUx4eVk+KvfXdL0rehNg==}
+    engines: {vscode: ^1.52.0}
+
+  vscode-languageserver-protocol@3.16.0:
+    resolution: {integrity: sha512-sdeUoAawceQdgIfTI+sdcwkiK2KU+2cbEYA0agzM2uqaUy2UpnnGHtWTHVEtS0ES4zHU0eMFRGN+oQgDxlD66A==}
+
+  vscode-languageserver-textdocument@1.0.12:
+    resolution: {integrity: sha512-cxWNPesCnQCcMPeenjKKsOCKQZ/L6Tv19DTRIGuLWe32lyzWhihGVJ/rcckZXJxfdKCFvRLS3fpBIsV/ZGX4zA==}
+
+  vscode-languageserver-types@3.16.0:
+    resolution: {integrity: sha512-k8luDIWJWyenLc5ToFQQMaSrqCHiLwyKPHKPQZ5zz21vM+vIVUSvsRpcbiECH4WR88K2XZqc4ScRcZ7nk/jbeA==}
+
+  vscode-languageserver@7.0.0:
+    resolution: {integrity: sha512-60HTx5ID+fLRcgdHfmz0LDZAXYEV68fzwG0JWwEPBode9NuMYTIxuYXPg4ngO8i8+Ou0lM7y6GzaYWbiDL0drw==}
+    hasBin: true
+
+  vscode-uri@3.0.8:
+    resolution: {integrity: sha512-AyFQ0EVmsOZOlAnxoFOGOq1SQDWAB7C6aqMGS23svWAllfOaxbuFvcT8D1i8z3Gyn8fraVeZNNmN6e9bxxXkKw==}
 
   w3c-xmlserializer@4.0.0:
     resolution: {integrity: sha512-d+BFHzbiCx6zGfz0HyQ6Rg69w9k19nviJspaj4yNscGjrHu94sVP+aRm75yEbCh+r2/yR+7q6hux9LVtbuTGBw==}
@@ -10434,6 +10495,8 @@ snapshots:
 
   commander@7.2.0: {}
 
+  commander@8.3.0: {}
+
   commander@9.5.0: {}
 
   commondir@1.0.1: {}
@@ -13911,8 +13974,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  server-only@0.0.1: {}
-
   set-blocking@2.0.0: {}
 
   set-cookie-parser@2.7.0: {}
@@ -14736,6 +14797,27 @@ snapshots:
       - webpack-sources
       - xml2js
 
+  vite-plugin-checker@0.8.0(@biomejs/biome@1.8.3)(typescript@5.5.4)(vite@5.4.3(@types/node@20.16.5)(terser@5.31.6)):
+    dependencies:
+      '@babel/code-frame': 7.24.7
+      ansi-escapes: 4.3.2
+      chalk: 4.1.2
+      chokidar: 3.6.0
+      commander: 8.3.0
+      fast-glob: 3.3.2
+      fs-extra: 11.2.0
+      npm-run-path: 4.0.1
+      strip-ansi: 6.0.1
+      tiny-invariant: 1.3.3
+      vite: 5.4.3(@types/node@20.16.5)(terser@5.31.6)
+      vscode-languageclient: 7.0.0
+      vscode-languageserver: 7.0.0
+      vscode-languageserver-textdocument: 1.0.12
+      vscode-uri: 3.0.8
+    optionalDependencies:
+      '@biomejs/biome': 1.8.3
+      typescript: 5.5.4
+
   vite-plugin-inspect@0.7.42(rollup@4.21.2)(vite@5.4.3(@types/node@20.16.5)(terser@5.31.6)):
     dependencies:
       '@antfu/utils': 0.7.10
@@ -14779,6 +14861,29 @@ snapshots:
       vite: 5.4.3(@types/node@20.16.5)(terser@5.31.6)
 
   vlq@1.0.1: {}
+
+  vscode-jsonrpc@6.0.0: {}
+
+  vscode-languageclient@7.0.0:
+    dependencies:
+      minimatch: 3.1.2
+      semver: 7.6.3
+      vscode-languageserver-protocol: 3.16.0
+
+  vscode-languageserver-protocol@3.16.0:
+    dependencies:
+      vscode-jsonrpc: 6.0.0
+      vscode-languageserver-types: 3.16.0
+
+  vscode-languageserver-textdocument@1.0.12: {}
+
+  vscode-languageserver-types@3.16.0: {}
+
+  vscode-languageserver@7.0.0:
+    dependencies:
+      vscode-languageserver-protocol: 3.16.0
+
+  vscode-uri@3.0.8: {}
 
   w3c-xmlserializer@4.0.0:
     dependencies:
