@@ -1,12 +1,15 @@
 import { defineConfig } from "@solidjs/start/config";
+import checker from "vite-plugin-checker";
 
 export default defineConfig({
 	vite: {
-		ssr: {
-			resolve: {
-				// this so we can use server-only and client-only packages from next.js
-				externalConditions: ["react-server"],
-			},
-		},
+		plugins: [
+			checker({
+				biome: true,
+				typescript: true,
+				overlay: true,
+				enableBuild: true,
+			}),
+		],
 	},
 });
