@@ -1,5 +1,5 @@
 import { createHandler, StartServer } from "@solidjs/start/server";
-import { checkEnvVariables } from "./server/env";
+import { checkEnvVariables } from "./server/env-args";
 
 checkEnvVariables();
 
