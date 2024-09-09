@@ -1,6 +1,13 @@
 {
 	"flagWords": [],
-	"words": ["valibot", "typeschema"],
+	"words": [
+		"valibot",
+		"typeschema",
+		"ridi",
+		"mediakit",
+		"vinxi",
+		"bugsnag"
+	],
 	"version": "0.2",
 	"language": "en"
 }

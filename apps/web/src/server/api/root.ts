@@ -6,4 +6,4 @@ export const appRouter = createTRPCRouter({
 });
 
 export type AppRouter = typeof appRouter;
-export const createApiCaller = createCallerFactory(appRouter);
+export const createApiClient = createCallerFactory(appRouter);

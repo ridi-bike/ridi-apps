@@ -77,3 +77,8 @@ model Authenticator {
  
   @@id([userId, credentialID])
 }
+
+model Testing {
+	id	String @id @default(cuid())
+	msg String
+}

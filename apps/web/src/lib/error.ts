@@ -1,4 +1,4 @@
-import type { LogContext } from "./context/log-context.server";
+import cuid from "@bugsnag/cuid";
 
 function hasMessage(v: unknown): v is { message: string } {
 	if (v && (v as { message: string }).message) {
@@ -8,12 +8,10 @@ function hasMessage(v: unknown): v is { message: string } {
 }
 
 export class AppError extends Error {
-	public context: LogContext | null = null;
-
+	public errorId = cuid();
 	constructor(
 		public readonly code: string,
 		public readonly text: string,
-		public readonly requestId: string | null,
 		public readonly metadata?: Record<string, unknown> | null,
 		public readonly innerError?: unknown,
 	) {

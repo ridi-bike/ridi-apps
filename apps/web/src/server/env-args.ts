@@ -1,3 +1,4 @@
+import "@ridi/server-client-check/server-only";
 import * as v from "valibot";
 
 const nodeEnvSchema = v.object({
