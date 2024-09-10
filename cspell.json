@@ -6,7 +6,10 @@
 		"ridi",
 		"mediakit",
 		"vinxi",
-		"bugsnag"
+		"bugsnag",
+		"actionbar",
+		"stacklayout",
+		"dominative"
 	],
 	"version": "0.2",
 	"language": "en"
