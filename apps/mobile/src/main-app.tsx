@@ -10,7 +10,6 @@ export const MainApp = () => {
 				<textfield on:textChange={(e) => setText(e.value || "")}>
 					some text
 				</textfield>
-				{/* biome-ignore lint/a11y/useButtonType: <explanation> */}
 				<button
 					className="rounded-md border-solid border-4 border-red-500 bg-green-300"
 					on:tap={async () => {
