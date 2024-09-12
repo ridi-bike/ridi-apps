@@ -1,3 +1,4 @@
+import "@ridi/server-client-check/server-only";
 import pino from "pino";
 import { isLocalDev } from "~/lib/env";
 

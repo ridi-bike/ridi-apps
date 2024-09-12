@@ -4,12 +4,11 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"dev":"./dev-all.sh",
+		"dev": "bun scripts/dev.ts",
 		"dev:web": "pnpm -F \"@ridi/web\" dev",
 		"db:push": "env $(cat ./apps/web/.env | xargs) pnpm -F \"@ridi/database\" push",
 		"dev:db": "docker compose -f docker-compose.local.yml up -d",
-		"dev:mobile":"pnpm -F \"@ridi/mobile\" dev",
-		"dev:tunnel":"ngrok http http://localhost:3000",
+		"dev:mobile": "pnpm -F \"@ridi/mobile\" dev",
 		"clean": "rm -rf ./node_modules/ && rm -rf ./apps/web/node_modules/ && rm -rf ./apps/mobile/node_modules/ && rm -rf ./packages/database/node_modules/ && rm -rf pnpm-lock.yaml"
 	},
 	"keywords": [],
@@ -17,7 +16,10 @@
 	"license": "ISC",
 	"devDependencies": {
 		"@biomejs/biome": "1.8.3",
+		"@types/bun": "^1.1.9",
 		"@types/node": "^22.5.4",
+		"concurrently": "^9.0.0",
+		"open": "^10.1.0",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.5.4"
 	}

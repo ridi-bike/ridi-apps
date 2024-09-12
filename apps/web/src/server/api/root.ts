@@ -1,3 +1,4 @@
+import "@ridi/server-client-check/server-only";
 import { exampleRouter } from "./routers/example";
 import { createCallerFactory, createTRPCRouter } from "./trpc";
 

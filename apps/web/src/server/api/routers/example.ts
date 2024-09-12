@@ -1,18 +1,23 @@
+import "@ridi/server-client-check/server-only";
 import { wrap } from "@typeschema/valibot";
 import { string } from "valibot";
 import { createTRPCRouter, baseProcedure } from "../trpc";
 
 export const exampleRouter = createTRPCRouter({
 	hello: baseProcedure.input(wrap(string())).query(({ input }) => {
+		console.log("hello called");
 		return `Hello ${input}!`;
 	}),
-	sendMsg: baseProcedure.input(wrap(string())).mutation(async ({ input, ctx }) => {
-		await ctx.db.testing.create({
-			data: {
-				msg: input
-			}
-		})
+	sendMsg: baseProcedure
+		.input(wrap(string()))
+		.mutation(async ({ input, ctx }) => {
+			console.log("sendMsg called");
+			await ctx.db.testing.create({
+				data: {
+					msg: input,
+				},
+			});
 
-		return "ok"
-	})
+			return "ok";
+		}),
 });

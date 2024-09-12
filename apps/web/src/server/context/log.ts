@@ -1,3 +1,5 @@
+import "@ridi/server-client-check/server-only";
+
 type LogContextBase = {
 	env: string;
 };
