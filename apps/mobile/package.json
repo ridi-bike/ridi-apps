@@ -6,9 +6,13 @@
   "dependencies": {
     "@nativescript-community/solid-js": "^0.0.7",
     "@nativescript/core": "~8.8.0",
+    "@trpc/client": "11.0.0-rc.502",
+    "@trpc/server": "11.0.0-rc.502",
+    "abortcontroller-polyfill": "^1.7.5",
     "dominative": "^0.1.3",
     "solid-js": "^1.8.18",
-    "undom-ng": "^1.1.2"
+    "undom-ng": "^1.1.2",
+    "valibot": "^0.41.0"
   },
   "devDependencies": {
     "@babel/core": "^7.24.4",
@@ -27,9 +31,9 @@
     "tailwindcss": "~3.4.3"
   },
   "scripts": {
-    "dev:android": "ns run android",
-    "dev:ios": "ns run ios",
-    "dev": "ns preview",
+    "dev:android": "ns run android --no-hmr",
+    "dev:ios": "ns run ios --no-hmr",
+    "dev": "ns preview --no-hmr",
     "clean": "ns clean",
     "list:devices": "ns devices"
   }

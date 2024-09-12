@@ -1,3 +1,4 @@
+import "@ridi/server-client-check/server-only";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { AppError } from "~/lib/error";
 import type { createRequestContext } from "../context/context";

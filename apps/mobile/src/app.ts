@@ -1,3 +1,4 @@
+import "abortcontroller-polyfill/dist/polyfill-patch-fetch";
 import { Application } from "@nativescript/core";
 // @ts-expect-error missing ts defs
 import { render } from "@nativescript-community/solid-js";
