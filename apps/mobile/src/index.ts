@@ -4,10 +4,10 @@ import { Application } from "@nativescript/core";
 import { render } from "@nativescript-community/solid-js";
 
 import { document } from "dominative";
-import { MainApp } from "./main-app";
+import { App } from "./app";
 
-document.body.actionBarHidden = false;
-render(MainApp, document.body);
+document.body.actionBarHidden = true;
+render(App, document.body);
 
 const create = () => document;
 

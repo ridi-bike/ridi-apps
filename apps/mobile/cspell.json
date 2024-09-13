@@ -1,7 +1,12 @@
 {
   "flagWords": [],
   "words": [
-    "flexboxlayout"
+    "flexboxlayout",
+    "collectionview",
+    "itemtemplate",
+    "arrayprop",
+    "keyprop",
+    "solidjs"
   ],
   "version": "0.2",
   "language": "en"
