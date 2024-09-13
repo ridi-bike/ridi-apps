@@ -14,7 +14,7 @@ do {
 	}
 } while (!newUrl);
 
-newUrl += "/api";
+newUrl += "/api/trpc";
 
 if (!newUrl) {
 	throw new Error("url missing in args");

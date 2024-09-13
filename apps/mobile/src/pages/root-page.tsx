@@ -1,8 +1,11 @@
 import { createSignal } from "solid-js";
-import { apiClient } from "./api/router";
+import { Frame } from "@nativescript/core";
+import { apiClient } from "~/api/api-client";
+import { useRoute, useRouter } from "solid-navigation";
 
-export const MainApp = () => {
+export const RootPage = () => {
 	const [text, setText] = createSignal("");
+	const router = useRouter();
 	return (
 		<>
 			<actionbar title="Hello, SolidJS!" />
@@ -24,6 +27,17 @@ export const MainApp = () => {
 					}}
 				>
 					do stuff
+				</button>
+				<button
+					on:tap={() => {
+						try {
+							router.navigate("AuthPage");
+						} catch (error) {
+							console.error(error);
+						}
+					}}
+				>
+					open auth
 				</button>
 			</flexboxlayout>
 		</>
