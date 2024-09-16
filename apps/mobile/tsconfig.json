@@ -1,38 +1,17 @@
 {
+  "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
-    "target": "ESNext",
-    "module": "ESNext",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "isolatedModules": true,
-    "jsxImportSource": "@nativescript-dom/solidjs-types",
-    "jsx": "preserve",
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "noEmitHelpers": true,
-    "noEmitOnError": true,
-    "skipLibCheck": true,
-    "lib": [
-      "ESNext",
-      "dom"
-    ],
-    "baseUrl": ".",
     "paths": {
-      "~/*": [
-        "src/*"
+      "@/*": [
+        "./*"
       ]
     }
   },
   "include": [
-    "src/**/*"
-  ],
-  "files": [
-    "./references.d.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "platforms"
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
   ]
 }
