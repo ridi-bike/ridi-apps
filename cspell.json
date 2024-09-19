@@ -1,15 +1,10 @@
 {
 	"flagWords": [],
 	"words": [
-		"valibot",
-		"typeschema",
 		"ridi",
-		"mediakit",
-		"vinxi",
-		"bugsnag",
-		"actionbar",
-		"stacklayout",
-		"dominative"
+		"supabase",
+		"nativewind",
+		"pressable"
 	],
 	"version": "0.2",
 	"language": "en"
