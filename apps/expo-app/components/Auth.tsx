@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Alert, StyleSheet, View, Text } from "react-native";
 import { supabase } from "../lib/supabase";
-import { Input } from "~/components/ui/input"
-import { Button } from "~/components/ui/button"
-import { Label } from "~/components/ui/label"
+import { Input } from "~/components/ui/input";
+import { Button } from "~/components/ui/button";
+import { Label } from "~/components/ui/label";
 
 export default function Auth() {
 	const [email, setEmail] = useState("");
@@ -37,24 +37,31 @@ export default function Auth() {
 		setLoading(false);
 	}
 
+	async function signInWithGithub() {
+		setLoading(true);
+		const { data, error } = await supabase.auth.signInWithOAuth({
+			provider: "github",
+		});
+		if (error) Alert.alert(error.message);
+		setLoading(false);
+	}
+
 	return (
-		<View style={styles.container}>
-			<View style={[styles.verticallySpaced, styles.mt20]}>
+		<View className="">
+			<View>
 				<Label nativeID="email">Email</Label>
 				<Input
 					nativeID="email"
-					leftIcon={{ type: "font-awesome", name: "envelope" }}
 					onChangeText={(text) => setEmail(text)}
 					value={email}
 					placeholder="email@address.com"
 					autoCapitalize={"none"}
 				/>
 			</View>
-			<View style={styles.verticallySpaced}>
-				<Label nativeID="password">Password	j</Label>
+			<View>
+				<Label nativeID="password">Password j</Label>
 				<Input
 					nativeID="password"
-					leftIcon={{ type: "font-awesome", name: "lock" }}
 					onChangeText={(text) => setPassword(text)}
 					value={password}
 					secureTextEntry={true}
@@ -62,35 +69,30 @@ export default function Auth() {
 					autoCapitalize={"none"}
 				/>
 			</View>
-			<View style={[styles.verticallySpaced, styles.mt20]}>
-				<Button
-					disabled={loading}
-					onPress={() => signInWithEmail()}
-				>
+			<View>
+				<Button disabled={loading} onPress={() => signInWithEmail()}>
 					<Text>Sign in</Text>
 				</Button>
 			</View>
-			<View style={styles.verticallySpaced}>
+			<View>
+				<Button disabled={loading} onPress={() => signUpWithEmail()}>
+					<Text>Sign up</Text>
+				</Button>
+			</View>
+
+			<View>
 				<Button
+					className="bg-red-400 w-24 h-24"
+					onPress={() => {
+						console.log("stuff and things");
+						signInWithGithub();
+					}}
+					variant={"default"}
 					disabled={loading}
-					onPress={() => signUpWithEmail()}
-				><Text>Sign up</Text></Button>
+				>
+					<Text>GitHub</Text>
+				</Button>
 			</View>
 		</View>
 	);
 }
-
-const styles = StyleSheet.create({
-	container: {
-		marginTop: 40,
-		padding: 12,
-	},
-	verticallySpaced: {
-		paddingTop: 4,
-		paddingBottom: 4,
-		alignSelf: "stretch",
-	},
-	mt20: {
-		marginTop: 20,
-	},
-});
