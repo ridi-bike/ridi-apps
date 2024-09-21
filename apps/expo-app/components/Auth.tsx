@@ -87,10 +87,10 @@ export default function Auth() {
 						console.log("stuff and things");
 						signInWithGithub();
 					}}
-					variant={"default"}
+					variant="default"
 					disabled={loading}
 				>
-					<Text>GitHub</Text>
+					<Text className="text-green-700">GitHub xx</Text>
 				</Button>
 			</View>
 		</View>
