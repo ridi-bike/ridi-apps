@@ -1,98 +1,103 @@
-import React, { useState } from "react";
-import { Alert, StyleSheet, View, Text } from "react-native";
-import { supabase } from "../lib/supabase";
-import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
-import { Label } from "~/components/ui/label";
+import { makeRedirectUri } from "expo-auth-session";
+import { router } from "expo-router";
+import * as QueryParams from "expo-auth-session/build/QueryParams";
+import * as Linking from "expo-linking";
+import * as WebBrowser from "expo-web-browser";
+import { Button } from "react-native";
+import { Platform } from "react-native";
+import { supabase } from "~/lib/supabase";
+import { useEffect } from "react";
+
+const redirectTo = makeRedirectUri();
+
+const createSessionFromUrl = async (url: string) => {
+	const { params, errorCode } = QueryParams.getQueryParams(url);
+
+	if (errorCode) {
+		throw new Error(errorCode);
+	}
+
+	const { access_token, refresh_token } = params;
+
+	if (!access_token) {
+		return;
+	}
+
+	console.log({ access_token, refresh_token });
+	if (access_token || refresh_token) {
+		WebBrowser.maybeCompleteAuthSession(); // required for web only
+		router.setParams({ access_token: undefined, refresh_token: undefined });
+	}
+
+	const { data, error } = await supabase.auth.setSession({
+		access_token,
+		refresh_token,
+	});
+
+	if (error) {
+		throw error;
+	}
+
+	return data.session;
+};
+
+const performOAuth = async () => {
+	const { data, error } = await supabase.auth.signInWithOAuth({
+		provider: "github",
+		options: {
+			redirectTo,
+			skipBrowserRedirect: true,
+		},
+	});
+	if (error) {
+		throw error;
+	}
+	console.log("test here 2", { redirectTo });
+	// if (Platform.OS !== "web") {
+	const res = await WebBrowser.openAuthSessionAsync(
+		data?.url ?? "",
+		redirectTo,
+	);
+	console.log("after open auth session");
+
+	if (res.type === "success") {
+		const { url } = res;
+		await createSessionFromUrl(url);
+	}
+	// } else {
+	// 	window.location.href = data?.url;
+	// }
+};
+
+const sendMagicLink = async () => {
+	const { error } = await supabase.auth.signInWithOtp({
+		email: "example@email.com",
+		options: {
+			emailRedirectTo: redirectTo,
+		},
+	});
+
+	if (error) {
+		throw error;
+	}
+	// Email sent.
+};
 
 export default function Auth() {
-	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
-	const [loading, setLoading] = useState(false);
+	// Handle linking into app from email app.
 
-	async function signInWithEmail() {
-		setLoading(true);
-		const { error } = await supabase.auth.signInWithPassword({
-			email: email,
-			password: password,
-		});
-
-		if (error) Alert.alert(error.message);
-		setLoading(false);
-	}
-
-	async function signUpWithEmail() {
-		setLoading(true);
-		const {
-			data: { session },
-			error,
-		} = await supabase.auth.signUp({
-			email: email,
-			password: password,
-		});
-
-		if (error) Alert.alert(error.message);
-		if (!session)
-			Alert.alert("Please check your inbox for email verification!");
-		setLoading(false);
-	}
-
-	async function signInWithGithub() {
-		setLoading(true);
-		const { data, error } = await supabase.auth.signInWithOAuth({
-			provider: "github",
-		});
-		if (error) Alert.alert(error.message);
-		setLoading(false);
-	}
+	const url = Linking.useURL();
+	useEffect(() => {
+		if (url) {
+			createSessionFromUrl(url);
+		}
+	}, [url]);
 
 	return (
-		<View className="">
-			<View>
-				<Label nativeID="email">Email</Label>
-				<Input
-					nativeID="email"
-					onChangeText={(text) => setEmail(text)}
-					value={email}
-					placeholder="email@address.com"
-					autoCapitalize={"none"}
-				/>
-			</View>
-			<View>
-				<Label nativeID="password">Password j</Label>
-				<Input
-					nativeID="password"
-					onChangeText={(text) => setPassword(text)}
-					value={password}
-					secureTextEntry={true}
-					placeholder="Password"
-					autoCapitalize={"none"}
-				/>
-			</View>
-			<View>
-				<Button disabled={loading} onPress={() => signInWithEmail()}>
-					<Text>Sign in</Text>
-				</Button>
-			</View>
-			<View>
-				<Button disabled={loading} onPress={() => signUpWithEmail()}>
-					<Text>Sign up</Text>
-				</Button>
-			</View>
-
-			<View>
-				<Button
-					className="bg-red-400 w-24 h-24"
-					onPress={() => {
-						console.log("stuff and things");
-						signInWithGithub();
-					}}
-					variant="default"
-					disabled={loading}
-				>
-					<Text className="text-green-700">GitHub xx</Text>
-				</Button>
-			</View>
-		</View>
+		<>
+			<Button onPress={performOAuth} title="Sign in with Github" />
+			<Button onPress={() => supabase.auth.signOut()} title="sign out" />
+			<Button onPress={sendMagicLink} title="Send Magic Link" />
+		</>
 	);
 }
