@@ -4,7 +4,9 @@
 		"ridi",
 		"supabase",
 		"nativewind",
-		"pressable"
+		"pressable",
+		"dotenvy",
+		"hmac"
 	],
 	"version": "0.2",
 	"language": "en"
