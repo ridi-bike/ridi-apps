@@ -47,7 +47,9 @@ async fn main() {
         .route("/", get(root))
         .route("/test", post(test));
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let address = "0.0.0.0:2727";
+    let listener = tokio::net::TcpListener::bind(&address).await.unwrap();
+    println!("Listening: {address}");
     axum::serve(listener, app).await.unwrap();
 }
 
