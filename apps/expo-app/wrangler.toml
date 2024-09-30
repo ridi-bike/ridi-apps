@@ -3,8 +3,8 @@ name = "ridi-apps-expo"
 pages_build_output_dir = "dist"
 compatibility_date = "2024-09-26"
 
-[env]
-production = { }
+# [env]
+# production = { }
 
 [env.production.vars]
 EXPO_PUBLIC_SUPABASE_URL = "https://pounrylqyyfbeepksvpu.supabase.co"
