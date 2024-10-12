@@ -1,0 +1,19 @@
+procs:
+  ngrok:
+    shell: "ngrok http http://localhost:2727"
+  supabase_status:
+    shell: "supabase status"
+  supabase_functions:
+    shell: "deno --allow-net --allow-read --allow-write scripts/router-url-env.ts && supabase functions serve"
+  astro:
+    shell: "pnpm start"
+    cwd: "apps/astro-app"
+  expo:
+    shell: "pnpm start"
+    cwd: "apps/expo-app"
+  axum:
+    shell: "cargo run"
+    cwd: "apps/axum-app"
+  deno:
+    shell: "deno --env --allow-env --allow-net main.ts"
+    cwd: "apps/deno-app"

@@ -1,11 +1,16 @@
 use axum::{
-    http::StatusCode,
+    body::Bytes,
+    http::{HeaderMap, StatusCode},
     routing::{get, post},
     Json, Router,
 };
 use dotenvy::{self, from_filename};
-use jws::compact::decode_verify;
-use jws::hmac::HmacVerifier;
+use rsa::pkcs8::DecodePublicKey;
+use rsa::signature::Verifier;
+use rsa::{
+    pkcs1v15::{Signature, VerifyingKey},
+    sha2::Sha256,
+};
 use serde::Deserialize;
 use std::{env, str::FromStr};
 
@@ -38,10 +43,10 @@ async fn main() {
         .unwrap_or(AppEnv::Dev);
 
     if app_env == AppEnv::Dev {
-        from_filename("../../.env").expect("Could not load env file");
+        from_filename("../../supabase/functions/.env").expect("Could not load env file");
     }
 
-    env::var("RIDI_ROUTER_SECRET_KEY").expect("Missing router signature key");
+    env::var("RIDI_API_SIGNING_PUBLIC_KEY").expect("Missing router signature key");
 
     let app = Router::new()
         .route("/", get(root))
@@ -57,24 +62,40 @@ async fn root() -> &'static str {
     "Hello, World!"
 }
 
-#[derive(Deserialize)]
-struct TestPayload {
-    payload: String,
-}
-async fn test(Json(body): Json<TestPayload>) -> (StatusCode, String) {
-    let secret_key = env::var("RIDI_ROUTER_SECRET_KEY").expect("Missing router signature key");
-    let decoded = decode_verify(
-        body.payload.as_bytes(),
-        &HmacVerifier::new(secret_key.as_bytes()),
-    );
-    match decoded {
-        Err(error) => (StatusCode::INTERNAL_SERVER_ERROR, error.to_string()),
-        Ok(decoded) => {
-            let message = std::str::from_utf8(&decoded.payload);
-            match message {
-                Ok(mes) => (StatusCode::OK, mes.to_owned()),
-                Err(error) => (StatusCode::INTERNAL_SERVER_ERROR, error.to_string()),
-            }
-        }
-    }
+async fn test(header_map: HeaderMap, body: Bytes) -> (StatusCode, String) {
+    let public_key = env::var("RIDI_API_SIGNING_PUBLIC_KEY").expect("Missing router signature key");
+    let signature = header_map
+        .get("x-ridi-signature")
+        .expect("missing signature header");
+    let signature = signature.as_bytes();
+    let public_key = public_key.as_str();
+    // let decoded_public_key = DecodePublicKey::from_public_key_pem(public_key);
+    // let decoded_public_key:
+
+    let verifying_key = VerifyingKey::<Sha256>::from_public_key_pem(public_key)
+        .expect("cant create verify key from decoded pem");
+    let signature = Signature::try_from(signature)
+        .expect("could not construct signature from header signature");
+    verifying_key
+        .verify(&body, &signature)
+        .expect("failed to verify");
+
+    (StatusCode::OK, "omgomg".to_string())
+    // match decoded {
+    //     Err(error) => {
+    //         println!("{}", error.to_string());
+    //         return (StatusCode::INTERNAL_SERVER_ERROR, error.to_string());
+    //     }
+    //     Ok((payload, headers)) => {
+    //         let message = std::str::from_utf8(&payload);
+    //         payload.set_jwt_id(…)
+    //         match message {
+    //             Ok(mes) => (StatusCode::OK, mes.to_owned()),
+    //             Err(error) => {
+    //                 println!("{}", error.to_string());
+    //                 return (StatusCode::INTERNAL_SERVER_ERROR, error.to_string());
+    //             }
+    //         }
+    //     }
+    // }
 }

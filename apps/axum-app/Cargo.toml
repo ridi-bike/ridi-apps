@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 axum = "0.7.6"
 dotenvy = "0.15.7"
-jws = "0.2.9"
+rsa = { version = "0.9.6", features = ["sha2"] }
 serde = { version = "1.0.210", features = ["derive"] }
 tokio = { version = "1.40.0", features = ["macros", "rt-multi-thread"] }
 tracing-subscriber = "0.3.18"
