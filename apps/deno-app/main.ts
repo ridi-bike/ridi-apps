@@ -26,3 +26,8 @@ const channel = supabase
 globalThis.addEventListener("unload", () => {
 	channel.unsubscribe();
 });
+
+Deno.serve(
+	{ port: 2727, hostname: "0.0.0.0" },
+	(_req) => new Response("Hello, world"),
+);
