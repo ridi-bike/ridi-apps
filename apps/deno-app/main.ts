@@ -31,7 +31,7 @@ globalThis.addEventListener("unload", () => {
 
 Deno.serve({ port: 2727, hostname: "0.0.0.0" }, async (_req) => {
 	const tests = await supabase.from("realtime_tests").select("*");
-	console.log({ l: tests.count });
+	console.log({ l: tests.data?.length });
 	if (channel.state !== REALTIME_CHANNEL_STATES.joined) {
 		return new Response(channel.state, {
 			status: 500,
