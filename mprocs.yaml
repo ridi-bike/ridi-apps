@@ -11,9 +11,6 @@ procs:
   expo:
     shell: "pnpm start"
     cwd: "apps/expo-app"
-  axum:
-    shell: "cargo run"
-    cwd: "apps/axum-app"
   deno:
     shell: "deno --env --allow-env --allow-net main.ts"
     cwd: "apps/deno-app"
