@@ -29,7 +29,9 @@ globalThis.addEventListener("unload", () => {
 	channel.unsubscribe();
 });
 
-Deno.serve({ port: 2727, hostname: "0.0.0.0" }, (_req) => {
+Deno.serve({ port: 2727, hostname: "0.0.0.0" }, async (_req) => {
+	const tests = await supabase.from("realtime_tests").select("*");
+	console.log({ tests });
 	if (channel.state !== REALTIME_CHANNEL_STATES.joined) {
 		return new Response(channel.state, {
 			status: 500,
