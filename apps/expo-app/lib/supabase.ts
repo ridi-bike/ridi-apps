@@ -23,7 +23,27 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 });
 
 export const supabaseTrpcClient = createTRPCProxyClient<AppRouter>({
-	links: [loggerLink(), httpBatchLink({ url: supabaseUrl })],
+	links: [
+		loggerLink(),
+		httpBatchLink({
+			url: `${supabaseUrl}/functions/v1/trpc/`,
+			fetch(url, options) {
+				return fetch(url, {
+					...options,
+					credentials: "include",
+				});
+			},
+			headers: async () => {
+				const { data: session } = await supabase.auth.getSession();
+				return {
+					// Authorization: `Bearer ${supabaseAnonKey}`,
+					// "sb-access-token": session.session?.access_token,
+					// "sb-refresh-token": session.session?.refresh_token,
+					Authorization: `Bearer ${session.session?.access_token}`,
+				};
+			},
+		}),
+	],
 });
 // Tells Supabase Auth to continuously refresh the session automatically
 // if the app is in the foreground. When this is added, you will continue

@@ -18,7 +18,10 @@ on "public"."realtime_tests"
 to public
 using (
   ( SELECT auth.uid() AS uid) = user_id
+	AND 
 )
 with check (
   ( SELECT auth.uid() AS uid) = user_id
+	and
+	( 'new' = user_id )
 );

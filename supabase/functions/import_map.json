@@ -1,8 +1,7 @@
 {
-	"name": "@ridi/function-trpc",
-	"exports": "index.ts",
 	"imports": {
 		"@trpc/server": "npm:@trpc/server",
+		"@trpc/server/adapters/fetch": "npm:@trpc/server/adapters/fetch",
 		"valibot": "jsr:@valibot/valibot"
 	}
 }
