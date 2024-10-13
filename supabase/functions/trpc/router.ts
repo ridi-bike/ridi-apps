@@ -1,5 +1,5 @@
-import { initTRPC } from "jsr:@trpc/server";
-import { nullish, object, parser, string } from "jsr:@valibot/valibot";
+import { initTRPC } from "@trpc/server";
+import { nullish, object, parser, string } from "valibot";
 
 let id = 0;
 

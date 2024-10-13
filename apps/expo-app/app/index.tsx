@@ -1,5 +1,4 @@
 import { Text, View } from "react-native";
-
 import Auth from "~/components/Auth";
 import { useEffect, useState } from "react";
 import { supabase, supabaseTrpcClient } from "~/lib/supabase";
@@ -18,10 +17,15 @@ export default function Index() {
 			setSession(session);
 		});
 	}, []);
-	const [posts, setPosts] = useState<{ id: string; title: string }[]>([]);
+	const [posts, setPosts] = useState<{ id: number; title: string }[]>([]);
 	useEffect(() => {
-		supabaseTrpcClient.posts.list().then((posts) => setPosts(posts));
-	}, []);
+		if (session) {
+			supabaseTrpcClient.hello.query().then(console.log);
+			supabaseTrpcClient.post.listPosts
+				.query()
+				.then((posts) => setPosts(posts));
+		}
+	}, [session]);
 	return (
 		<View
 			style={{
@@ -35,28 +39,18 @@ export default function Index() {
 			<Auth />
 			{session?.user && (
 				<>
-					<Text />
+					{posts.map((p) => (
+						<Text key={p.id}>
+							{p.id}:{p.title}
+						</Text>
+					))}
 					<Button
 						className="bg-gray-200"
 						onPress={() => {
 							setApiTest("loading......");
-							// 	supabase.functions
-							// 		.invoke("test-comms", {
-							// 			body: {
-							// 				payload: "omg omg from expo",
-							// 			},
-							// 		})
-							// 		.then((resp) => {
-							// 			return resp.data || resp.error;
-							// 		})
-							// 		.then((j) => setApiTest(JSON.stringify(j)));
-							// }}
-							supabase
-								.from("realtime_tests")
-								.insert({
-									user_id: session.user.id,
-								})
-								.then(() => setApiTest("done"));
+							supabaseTrpcClient.post.createPost.mutate({
+								title: Math.random.toString(),
+							});
 						}}
 					>
 						test apis and router
