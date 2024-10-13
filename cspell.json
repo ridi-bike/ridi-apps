@@ -6,7 +6,8 @@
 		"nativewind",
 		"pressable",
 		"dotenvy",
-		"hmac"
+		"hmac",
+		"valibot"
 	],
 	"version": "0.2",
 	"language": "en"

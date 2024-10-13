@@ -1,4 +1,7 @@
 import { AppState } from "react-native";
+import type { AppRouter } from "../../../supabase/functions/trpc/router";
+
+import { createTRPCProxyClient, httpBatchLink, loggerLink } from "@trpc/client";
 import "react-native-url-polyfill/auto";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
@@ -19,6 +22,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 	},
 });
 
+export const supabaseTrpcClient = createTRPCProxyClient<AppRouter>({
+	links: [loggerLink(), httpBatchLink({ url: supabaseUrl })],
+});
 // Tells Supabase Auth to continuously refresh the session automatically
 // if the app is in the foreground. When this is added, you will continue
 // to receive `onAuthStateChange` events with the `TOKEN_REFRESHED` or

@@ -1,0 +1,15 @@
+{
+  "version": "4",
+  "specifiers": {
+    "jsr:@supabase/functions-js@*": "2.4.3",
+    "jsr:@trpc/server@*": "0.0.5"
+  },
+  "jsr": {
+    "@supabase/functions-js@2.4.3": {
+      "integrity": "010834c9e7d2996b4be8e4004a15ed8f42b326490e4b354683f9c191353b76cc"
+    },
+    "@trpc/server@0.0.5": {
+      "integrity": "d981666c99a70505810f75ac2cdf04afa3e9fe95d507bb0c63374d42adda0c30"
+    }
+  }
+}
