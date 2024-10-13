@@ -21,7 +21,7 @@ const channel = supabase
 		},
 		(payload) => console.log(payload),
 	)
-	.subscribe();
+	.subscribe((args) => console.log({ args }));
 
 console.log(`established connection to ${supabase_url}`);
 
@@ -31,7 +31,7 @@ globalThis.addEventListener("unload", () => {
 
 Deno.serve({ port: 2727, hostname: "0.0.0.0" }, async (_req) => {
 	const tests = await supabase.from("realtime_tests").select("*");
-	console.log({ tests });
+	console.log({ l: tests.count });
 	if (channel.state !== REALTIME_CHANNEL_STATES.joined) {
 		return new Response(channel.state, {
 			status: 500,
