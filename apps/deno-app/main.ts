@@ -21,7 +21,7 @@ const channel = supabase
 		},
 		(payload) => console.log(payload),
 	)
-	.subscribe((args) => console.log({ args }));
+	.subscribe((args, err) => console.log({ args, err }));
 
 console.log(`established connection to ${supabase_url}`);
 
