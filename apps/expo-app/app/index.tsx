@@ -2,7 +2,7 @@ import { Text, View } from "react-native";
 
 import Auth from "~/components/Auth";
 import { useEffect, useState } from "react";
-import { supabase } from "~/lib/supabase";
+import { supabase, supabaseTrpcClient } from "~/lib/supabase";
 import type { Session } from "@supabase/supabase-js";
 import { Button } from "~/components/ui/button";
 
@@ -18,6 +18,10 @@ export default function Index() {
 			setSession(session);
 		});
 	}, []);
+	const [posts, setPosts] = useState<{ id: string; title: string }[]>([]);
+	useEffect(() => {
+		supabaseTrpcClient.posts.list().then((posts) => setPosts(posts));
+	}, []);
 	return (
 		<View
 			style={{
@@ -31,6 +35,7 @@ export default function Index() {
 			<Auth />
 			{session?.user && (
 				<>
+					<Text />
 					<Button
 						className="bg-gray-200"
 						onPress={() => {
@@ -46,9 +51,12 @@ export default function Index() {
 							// 		})
 							// 		.then((j) => setApiTest(JSON.stringify(j)));
 							// }}
-							supabase.from("realtime_tests").insert({
-								user_id: session.user.id
-							}).then(() => setApiTest("done"))
+							supabase
+								.from("realtime_tests")
+								.insert({
+									user_id: session.user.id,
+								})
+								.then(() => setApiTest("done"));
 						}}
 					>
 						test apis and router
