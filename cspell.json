@@ -7,7 +7,9 @@
 		"pressable",
 		"dotenvy",
 		"hmac",
-		"valibot"
+		"valibot",
+		"legendapp",
+		"MMKV"
 	],
 	"version": "0.2",
 	"language": "en"

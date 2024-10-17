@@ -1,3 +1,4 @@
+import type { Database } from "../../supabase/functions/trpc/types.ts";
 import {
 	createClient,
 	REALTIME_CHANNEL_STATES,
@@ -9,7 +10,7 @@ const supabase_key = Deno.env.get("SUPABASE_SECRET_KEY");
 if (!supabase_url || !supabase_key) {
 	throw new Error("missing supabase creds");
 }
-const supabase = createClient(supabase_url, supabase_key);
+const supabase = createClient<Database>(supabase_url, supabase_key);
 
 const channel = supabase
 	.channel("realtime_tests")
@@ -19,7 +20,25 @@ const channel = supabase
 			event: "INSERT",
 			schema: "public",
 		},
-		(payload) => console.log(payload),
+		(payload) => {
+			const newTrRq: Database["public"]["Tables"]["track_requests"]["Row"] =
+				payload.new;
+			console.log("new record", newTrRq.id);
+
+			setTimeout(async () => {
+				console.log("processing", newTrRq.id);
+				await supabase.from("track_requests").update({
+					status: "processing",
+				}).eq("id", newTrRq.id);
+			}, 3000);
+
+			setTimeout(async () => {
+				console.log("done", newTrRq.id);
+				await supabase.from("track_requests").update({
+					status: "done",
+				}).eq("id", newTrRq.id);
+			}, 6000);
+		},
 	)
 	.subscribe((args, err) => console.log({ args, err }));
 
