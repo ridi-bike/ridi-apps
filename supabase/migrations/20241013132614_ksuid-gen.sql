@@ -25,7 +25,7 @@
  *
  * MIT License.
  */
-create or replace function gen_random_ksuid_second() returns text as $$
+create or replace function ksuid() returns text as $$
 declare
 	v_time timestamp with time zone := null;
 	v_seconds numeric(50) := null;
