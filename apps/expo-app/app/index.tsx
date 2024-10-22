@@ -13,6 +13,7 @@ import type { Session } from "@supabase/supabase-js";
 import { Button } from "~/components/ui/button";
 import { TrackRequestsList } from "~/components/TrackRequestsList";
 import { session$ } from "~/lib/stores";
+import { MapsMaps } from "~/components/Map";
 
 export default function Index() {
 	useMount(() => {
@@ -36,6 +37,7 @@ export default function Index() {
 			}}
 		>
 			<Auth />
+			<MapsMaps />
 			<Show if={session$.initialized}>
 				<>
 					<Text>
