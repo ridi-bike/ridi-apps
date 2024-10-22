@@ -29,15 +29,17 @@
 			"favicon": "./assets/images/favicon.png"
 		},
 		"plugins": [
-			"expo-build-properties",
-			{
-				"ios": {
-					"newArchEnabled": true
-				},
-				"android": {
-					"newArchEnabled": true
+			[
+				"expo-build-properties",
+				{
+					"ios": {
+						"newArchEnabled": true
+					},
+					"android": {
+						"newArchEnabled": true
+					}
 				}
-			},
+			],
 			"expo-router",
 			"@maplibre/maplibre-react-native"
 		],
@@ -49,11 +51,6 @@
 				"projectId": "f0835355-433f-4e84-8e65-b628a0f9e080"
 			}
 		},
-		"owner": "tomstomstoms",
-		"doctor": {
-			"reactNativeDirectoryCheck": {
-				"enabled": true
-			}
-		}
+		"owner": "tomstomstoms"
 	}
 }
