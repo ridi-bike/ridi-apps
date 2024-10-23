@@ -1,19 +1,11 @@
 import { Text, View } from "react-native";
-import {
-	Memo,
-	Show,
-	observer,
-	useMount,
-	useObservable,
-} from "@legendapp/state/react";
+import { Memo, Show, useMount, useObservable } from "@legendapp/state/react";
 import Auth from "~/components/Auth";
-import { useEffect, useState } from "react";
-import { supabase, supabaseTrpcClient, trpc } from "~/lib/supabase";
-import type { Session } from "@supabase/supabase-js";
-import { Button } from "~/components/ui/button";
+import { supabase } from "~/lib/supabase";
 import { TrackRequestsList } from "~/components/TrackRequestsList";
 import { session$ } from "~/lib/stores";
-import { MapsMaps } from "~/components/Map";
+import GeoMap from "~/components/geo-map";
+import { Link } from "@react-navigation/native";
 
 export default function Index() {
 	useMount(() => {
@@ -28,23 +20,32 @@ export default function Index() {
 		);
 	});
 
+	const coords$ = useObservable({
+		set: false,
+		coords: {
+			lat: 0,
+			lon: 0,
+		},
+	});
+
 	return (
-		<View
-			style={{
-				flex: 1,
-				justifyContent: "center",
-				alignItems: "center",
-			}}
-		>
-			<Auth />
-			<MapsMaps />
-			<Show if={session$.initialized}>
-				<>
+		<View className="flex-1 h-full w-full">
+			<View className="h-24 w-full justify-between flex-row">
+				<Show if={session$.initialized}>
 					<Text>
 						<Memo>{session$.session.user.id}</Memo>
 					</Text>
-					<TrackRequestsList />
-				</>
+				</Show>
+				<Auth />
+			</View>
+			<Link to={"/track-request/new"}>new new new</Link>
+			<Text>
+				<Memo>
+					{() => `${coords$.coords.lat.get()}, ${coords$.coords.lon.get()}`}
+				</Memo>
+			</Text>
+			<Show if={session$.initialized}>
+				<TrackRequestsList />
 			</Show>
 		</View>
 	);

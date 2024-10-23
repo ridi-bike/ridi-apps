@@ -3,10 +3,9 @@ import { router } from "expo-router";
 import * as QueryParams from "expo-auth-session/build/QueryParams";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
-import { Button } from "react-native";
-import { Platform } from "react-native";
 import { supabase } from "~/lib/supabase";
 import { useEffect } from "react";
+import { Button } from "./ui/button";
 
 const redirectTo = makeRedirectUri();
 
@@ -95,9 +94,12 @@ export default function Auth() {
 
 	return (
 		<>
-			<Button onPress={performOAuth} title="Sign in with Github" />
-			<Button onPress={() => supabase.auth.signOut()} title="sign out" />
-			<Button onPress={sendMagicLink} title="Send Magic Link" />
+			<Button variant="outline" onPress={performOAuth}>
+				Sign in
+			</Button>
+			<Button variant="outline" onPress={() => supabase.auth.signOut()}>
+				Sign out
+			</Button>
 		</>
 	);
 }
