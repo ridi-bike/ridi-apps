@@ -1,10 +1,10 @@
 import type { Observable } from "@legendapp/state";
 
 export type GeoMapProps = {
-	from: Observable<Coords | null>;
-	to: Observable<Coords | null>;
-	points: Observable<MapPoint[]>;
-	findCoords: Observable<FindCoords | null>;
+	from: Coords | null;
+	to: Coords | null;
+	points: MapPoint[];
+	findCoords: FindCoords | null;
 };
 
 export type FindCoords = {

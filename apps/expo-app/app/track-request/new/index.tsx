@@ -20,19 +20,6 @@ export default function TrackRequestNew() {
 	const findCoords$ = useObservable<null | FindCoords>(null);
 	const findCoordsCurrent$ = useObservable<null | Coords>(null);
 
-	const getCoords = useCallback(async () => {
-		const { status } = await Location.requestForegroundPermissionsAsync();
-		if (status !== "granted") {
-			showLocationAlert$.set(true);
-			return;
-		}
-
-		const location = await Location.getCurrentPositionAsync({});
-		return {
-			lat: location.coords.latitude,
-			lon: location.coords.longitude,
-		};
-	}, [showLocationAlert$]);
 	return (
 		<View>
 			<Show if={showLocationAlert$} wrap={AnimatePresence}>
@@ -47,10 +34,20 @@ export default function TrackRequestNew() {
 				<Button
 					variant="outline"
 					onPress={async () => {
-						const coords = await getCoords();
+						const { status } =
+							await Location.requestForegroundPermissionsAsync();
+						if (status !== "granted") {
+							showLocationAlert$.set(true);
+							return;
+						}
 
-						if (coords) {
-							fromCoords$.set(coords);
+						const location = await Location.getCurrentPositionAsync({});
+
+						if (location) {
+							fromCoords$.set({
+								lat: location.coords.latitude,
+								lon: location.coords.longitude,
+							});
 						}
 					}}
 				>
@@ -59,11 +56,27 @@ export default function TrackRequestNew() {
 				<Button
 					variant="outline"
 					onPress={async () => {
-						const coords = await getCoords();
-
-						if (coords) {
+						const { status } =
+							await Location.requestForegroundPermissionsAsync();
+						if (status !== "granted") {
 							findCoords$.set({
-								initialCoords: coords,
+								initialCoords: {
+									lat: 0,
+									lon: 0,
+								},
+								onCoordsChange: (coords) => findCoordsCurrent$.set(coords),
+							});
+							return;
+						}
+
+						const location = await Location.getCurrentPositionAsync({});
+
+						if (location) {
+							findCoords$.set({
+								initialCoords: {
+									lat: location.coords.latitude,
+									lon: location.coords.longitude,
+								},
 								onCoordsChange: (coords) => findCoordsCurrent$.set(coords),
 							});
 						} else {
@@ -98,12 +111,16 @@ export default function TrackRequestNew() {
 				</Button>
 			</View>
 			<View>
-				<GeoMap
-					from={fromCoords$}
-					to={toCoords$}
-					points={searchPoints$}
-					findCoords={findCoords$}
-				/>
+				<Memo>
+					{() => (
+						<GeoMap
+							from={fromCoords$.get()}
+							to={toCoords$.get()}
+							points={searchPoints$.get()}
+							findCoords={findCoords$.get()}
+						/>
+					)}
+				</Memo>
 			</View>
 		</View>
 	);
