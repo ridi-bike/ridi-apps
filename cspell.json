@@ -9,7 +9,8 @@
 		"hmac",
 		"valibot",
 		"legendapp",
-		"MMKV"
+		"MMKV",
+		"maplibre"
 	],
 	"version": "0.2",
 	"language": "en"
