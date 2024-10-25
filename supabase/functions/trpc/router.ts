@@ -30,7 +30,12 @@ const router = t.router;
 
 const tracksRouter = router({
 	list: userProcedure.query(async ({ ctx }) => {
-		const result = await ctx.supabaseClient.from("tracks").select("*");
+		const result = await ctx.supabaseClient
+			.from("tracks")
+			.select("*")
+			.order("created_at", {
+				ascending: false,
+			});
 		if (result.error) {
 			throw result.error;
 		}
@@ -40,7 +45,12 @@ const tracksRouter = router({
 
 const trackRequestsRouter = router({
 	list: userProcedure.query(async ({ ctx }) => {
-		const result = await ctx.supabaseClient.from("track_requests").select("*");
+		const result = await ctx.supabaseClient
+			.from("track_requests")
+			.select("*")
+			.order("created_at", {
+				ascending: false,
+			});
 		if (result.error) {
 			throw result.error;
 		}

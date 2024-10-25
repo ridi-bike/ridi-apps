@@ -7,11 +7,13 @@ import type { Coords, FindCoords, MapPoint } from "~/components/geo-map/types";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
-import { LocationPermsNotGiven } from "./LocationPermsNotGiven";
+import { LocationPermsNotGiven } from "~/components/LocationPermsNotGiven";
 import { tracks$ } from "~/lib/stores";
 import { generate } from "xksuid";
+import { useRouter } from "expo-router";
 
 export default function TrackRequestNew() {
+	const router = useRouter();
 	const showLocationAlert$ = useObservable(false);
 	const startCoords$ = useObservable<null | Coords>(null);
 	const finishCoords$ = useObservable<null | Coords>(null);
@@ -162,6 +164,7 @@ export default function TrackRequestNew() {
 								created_at: "",
 								modified_at: "",
 							});
+							router.replace("/track-requests");
 						}
 					}}
 				>

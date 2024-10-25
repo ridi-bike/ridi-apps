@@ -17,7 +17,9 @@ export const session$ = observable<{
 
 type TrackRequest = Awaited<
 	ReturnType<AppRouter["trackRequests"]["list"]>
->[number];
+>[number] & {
+	tracks: Track[];
+};
 type Track = Awaited<ReturnType<AppRouter["tracks"]["list"]>>[number];
 type Tracks = {
 	addTrackRequest: (trackReq: TrackRequest) => void;
@@ -37,7 +39,10 @@ export const tracks$ = observable<Tracks>(
 			return {
 				addTrackRequest,
 				tracks,
-				trackRequests,
+				trackRequests: trackRequests.map((trackReq) => ({
+					...trackReq,
+					tracks: tracks.filter((t) => t.track_request_id === trackReq.id),
+				})),
 			};
 		},
 		set: async (params) => {
