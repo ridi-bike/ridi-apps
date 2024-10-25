@@ -12,16 +12,10 @@ export const createContext = async ({ req }: ContextCreatorParams) => {
 		Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
 	);
 
-	const authHeader = req.headers.get("Authorization")!;
-	const token = authHeader.replace("Bearer ", "");
+	const authHeader = req.headers.get("Authorization");
+	const token = authHeader?.replace("Bearer ", "") || "";
 	const { data } = await supabaseClient.auth.getUser(token);
 	const user = data.user;
-
-	if (!user) {
-		return new Response("user missing", {
-			status: 500,
-		});
-	}
 
 	return {
 		supabaseClient,

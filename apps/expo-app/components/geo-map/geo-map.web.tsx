@@ -1,15 +1,28 @@
-import { Map as MapLibre, type MapRef, Marker } from "@vis.gl/react-maplibre";
+import { Map as MapLibre, type MapRef } from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import {
-	MapPinCheckIcon,
-	MapPinHouseIcon,
-	MapPinIcon,
+	CircleDotIcon,
+	CircleFadingPlusIcon,
+	CirclePauseIcon,
+	CirclePlayIcon,
+	CircleUserIcon,
 } from "lucide-react-native";
 import maplibre from "maplibre-gl";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Text } from "~/components/ui/text";
+import { Button } from "../ui/button";
+import { MapMarker } from "./marker";
 import type { Coords, GeoMapProps } from "./types";
 
-export default function GeoMap({ from, to, points, findCoords }: GeoMapProps) {
+export default function GeoMap({
+	start,
+	finish,
+	current,
+	points,
+	findCoords,
+	setStart,
+	setFinish,
+}: GeoMapProps) {
 	const mapRef = useRef<MapRef>(null);
 	const [findCoordsCurr, setFindCoordsCurr] = useState<Coords | null>(
 		findCoords
@@ -30,24 +43,40 @@ export default function GeoMap({ from, to, points, findCoords }: GeoMapProps) {
 		}
 	}, [findCoords?.initialCoords.lat, findCoords?.initialCoords.lon]);
 
+	const Actions = useCallback(
+		(coords: Coords) => {
+			return (
+				<>
+					<Button variant="outline" onPress={() => setStart(coords)}>
+						<Text>Start</Text>
+					</Button>
+					<Button variant="outline" onPress={() => setFinish(coords)}>
+						<Text>End</Text>
+					</Button>
+				</>
+			);
+		},
+		[setStart, setFinish],
+	);
+
 	// biome-ignore lint/correctness/useExhaustiveDependencies: only redraw when lat/lon change
 	useEffect(() => {
 		if (mapRef.current) {
 			const filterNumbers = (n: unknown) => Number(n) === n;
 
 			const latValues = [
-				findCoords?.initialCoords.lat,
-				findCoordsCurr?.lat,
-				from?.lat,
-				to?.lat,
+				findCoordsCurr?.lat || findCoords?.initialCoords.lat,
+				start?.lat,
+				finish?.lat,
+				current?.lat,
 				...points.map((p) => p.coords.lat),
 			].filter(filterNumbers) as number[];
 
 			const lonValues = [
-				findCoords?.initialCoords.lon,
-				findCoordsCurr?.lon,
-				from?.lon,
-				to?.lon,
+				findCoordsCurr?.lon || findCoords?.initialCoords.lon,
+				start?.lon,
+				finish?.lon,
+				current?.lon,
 				...points.map((p) => p.coords.lon),
 			].filter(filterNumbers) as number[];
 
@@ -66,10 +95,12 @@ export default function GeoMap({ from, to, points, findCoords }: GeoMapProps) {
 		[
 			findCoords?.initialCoords.lat,
 			findCoords?.initialCoords.lon,
-			from?.lat,
-			from?.lon,
-			to?.lat,
-			to?.lon,
+			start?.lat,
+			start?.lon,
+			finish?.lat,
+			finish?.lon,
+			current?.lat,
+			current?.lon,
 			points.map((p) => [p.coords.lat, p.coords.lon].join(",")).join(","),
 		].join(","),
 	]);
@@ -99,28 +130,60 @@ export default function GeoMap({ from, to, points, findCoords }: GeoMapProps) {
 			}}
 		>
 			{points.map((point) => (
-				<Marker
+				<MapMarker
 					key={`${point.coords.lat},${point.coords.lon}`}
-					latitude={point.coords.lat}
-					longitude={point.coords.lon}
+					lat={point.coords.lat}
+					lon={point.coords.lon}
+					title={point.title}
+					description={point.description}
+					actions={<Actions lat={point.coords.lat} lon={point.coords.lon} />}
 				>
-					<MapPinIcon className="text-blue-300" />
-				</Marker>
+					<CircleFadingPlusIcon className="h-8 w-8 text-blue-500" />
+				</MapMarker>
 			))}
-			{from && (
-				<Marker latitude={from.lat} longitude={from.lon}>
-					<MapPinHouseIcon className="text-green-300" />
-				</Marker>
+			{start && (
+				<MapMarker
+					lat={start.lat}
+					lon={start.lon}
+					title="From"
+					description={`${start.lat}, ${start.lon}`}
+				>
+					<CirclePlayIcon className="h-8 w-8 text-green-500" />
+				</MapMarker>
 			)}
-			{to && (
-				<Marker latitude={to.lat} longitude={to.lon}>
-					<MapPinCheckIcon className="text-red-300" />
-				</Marker>
+			{finish && (
+				<MapMarker
+					lat={finish.lat}
+					lon={finish.lon}
+					title="To"
+					description={`${finish.lat}, ${finish.lon}`}
+				>
+					<CirclePauseIcon className="h-8 w-8 text-red-500" />
+				</MapMarker>
+			)}
+			{current && (
+				<MapMarker
+					lat={current.lat}
+					lon={current.lon}
+					title="To"
+					description={`${current.lat}, ${current.lon}`}
+					actions={<Actions lat={current.lat} lon={current.lon} />}
+				>
+					<CircleUserIcon className="h-8 w-8 text-teal-500" />
+				</MapMarker>
 			)}
 			{findCoordsCurr && (
-				<Marker latitude={findCoordsCurr.lat} longitude={findCoordsCurr.lon}>
-					<MapPinIcon className="text-yellow-300" />
-				</Marker>
+				<MapMarker
+					lat={findCoordsCurr.lat}
+					lon={findCoordsCurr.lon}
+					title="To"
+					description={`${findCoordsCurr.lat}, ${findCoordsCurr.lon}`}
+					actions={
+						<Actions lat={findCoordsCurr.lat} lon={findCoordsCurr.lon} />
+					}
+				>
+					<CircleDotIcon className="h-8 w-8 text-yellow-500" />
+				</MapMarker>
 			)}
 		</MapLibre>
 	);

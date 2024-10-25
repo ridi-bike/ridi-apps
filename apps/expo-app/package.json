@@ -24,6 +24,7 @@
 		"@react-navigation/native": "^6.0.2",
 		"@rn-primitives/alert-dialog": "^1.1.0",
 		"@rn-primitives/label": "^1.0.4",
+		"@rn-primitives/popover": "^1.1.0",
 		"@rn-primitives/slot": "^1.0.4",
 		"@rn-primitives/types": "^1.0.4",
 		"@supabase/supabase-js": "^2.45.4",

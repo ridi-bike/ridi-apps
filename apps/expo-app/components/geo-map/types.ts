@@ -1,10 +1,14 @@
 import type { Observable } from "@legendapp/state";
+import type { PropsWithChildren } from "react";
 
 export type GeoMapProps = {
-	from: Coords | null;
-	to: Coords | null;
+	start: Coords | null;
+	finish: Coords | null;
+	current: Coords | null;
 	points: MapPoint[];
 	findCoords: FindCoords | null;
+	setStart: (coords: Coords) => void;
+	setFinish: (cords: Coords) => void;
 };
 
 export type FindCoords = {
@@ -22,3 +26,8 @@ export type MapPoint = {
 	description: string;
 	coords: Coords;
 };
+
+export type GeoMapMarkerProps = PropsWithChildren<{
+	lat: number;
+	lon: number;
+}>;
