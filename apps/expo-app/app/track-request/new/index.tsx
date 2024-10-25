@@ -15,10 +15,29 @@ export default function TrackRequestNew() {
 	const showLocationAlert$ = useObservable(false);
 	const fromCoords$ = useObservable<null | Coords>(null);
 	const toCoords$ = useObservable<null | Coords>(null);
-	const searchTerms$ = useObservable("");
+	const searchTerm$ = useObservable("");
 	const searchPoints$ = useObservable<MapPoint[]>([]);
 	const findCoords$ = useObservable<null | FindCoords>(null);
 	const findCoordsCurrent$ = useObservable<null | Coords>(null);
+
+	const geoSearch = useCallback(async () => {
+		const points: MapPoint[] = [];
+		const request = `https://nominatim.openstreetmap.org/search?q=${searchTerm$.get()}&format=json`;
+		const response = await fetch(request);
+		const jsonData = await response.json();
+		for (const jsonPoint of jsonData) {
+			const point: MapPoint = {
+				coords: {
+					lat: Number(jsonPoint.lat),
+					lon: Number(jsonPoint.lon),
+				},
+				title: jsonPoint.name,
+				description: jsonPoint.display_name,
+			};
+			points.push(point);
+		}
+		searchPoints$.set(points);
+	}, [searchPoints$, searchTerm$]);
 
 	return (
 		<View>
@@ -105,8 +124,12 @@ export default function TrackRequestNew() {
 			<View className="flex-row">
 				<Text>To:</Text>
 				<Label nativeID="search-terms">Search</Label>
-				<Input $value={searchTerms$} nativeID="search-terms" />
-				<Button variant="outline">
+				<Input
+					$value={searchTerm$}
+					onChangeText={(t) => searchTerm$.set(t)}
+					nativeID="search-terms"
+				/>
+				<Button variant="outline" onPress={geoSearch}>
 					<Text>GO</Text>
 				</Button>
 			</View>
