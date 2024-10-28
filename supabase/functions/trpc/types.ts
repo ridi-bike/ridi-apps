@@ -34,7 +34,7 @@ export type Database = {
 	};
 	public: {
 		Tables: {
-			track_requests: {
+			plans: {
 				Row: {
 					created_at: string;
 					from_lat: number;
@@ -42,7 +42,7 @@ export type Database = {
 					id: string;
 					modified_at: string | null;
 					name: string;
-					status: Database["public"]["Enums"]["track_request_status"];
+					status: Database["public"]["Enums"]["plan_status"];
 					to_lat: number;
 					to_lon: number;
 					user_id: string;
@@ -54,7 +54,7 @@ export type Database = {
 					id?: string;
 					modified_at?: string | null;
 					name: string;
-					status?: Database["public"]["Enums"]["track_request_status"];
+					status?: Database["public"]["Enums"]["plan_status"];
 					to_lat: number;
 					to_lon: number;
 					user_id: string;
@@ -66,14 +66,14 @@ export type Database = {
 					id?: string;
 					modified_at?: string | null;
 					name?: string;
-					status?: Database["public"]["Enums"]["track_request_status"];
+					status?: Database["public"]["Enums"]["plan_status"];
 					to_lat?: number;
 					to_lon?: number;
 					user_id?: string;
 				};
 				Relationships: [
 					{
-						foreignKeyName: "track_requests_user_id_fkey";
+						foreignKeyName: "plans_user_id_fkey";
 						columns: ["user_id"];
 						isOneToOne: false;
 						referencedRelation: "users";
@@ -81,38 +81,38 @@ export type Database = {
 					},
 				];
 			};
-			tracks: {
+			routes: {
 				Row: {
 					created_at: string;
 					id: string;
 					name: string;
-					track_request_id: string;
+					plan_id: string;
 					user_id: string;
 				};
 				Insert: {
 					created_at?: string;
 					id?: string;
 					name: string;
-					track_request_id: string;
+					plan_id: string;
 					user_id: string;
 				};
 				Update: {
 					created_at?: string;
 					id?: string;
 					name?: string;
-					track_request_id?: string;
+					plan_id?: string;
 					user_id?: string;
 				};
 				Relationships: [
 					{
-						foreignKeyName: "tracks_track_request_id_fkey";
-						columns: ["track_request_id"];
+						foreignKeyName: "routes_plan_id_fkey";
+						columns: ["plan_id"];
 						isOneToOne: false;
-						referencedRelation: "track_requests";
+						referencedRelation: "plans";
 						referencedColumns: ["id"];
 					},
 					{
-						foreignKeyName: "tracks_user_id_fkey";
+						foreignKeyName: "routes_user_id_fkey";
 						columns: ["user_id"];
 						isOneToOne: false;
 						referencedRelation: "users";
@@ -131,7 +131,7 @@ export type Database = {
 			};
 		};
 		Enums: {
-			track_request_status: "new" | "processing" | "done";
+			plan_status: "new" | "planning" | "created";
 		};
 		CompositeTypes: {
 			[_ in never]: never;

@@ -1,4 +1,4 @@
-import { type Observable, observable } from "@legendapp/state";
+import { observable } from "@legendapp/state";
 import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
 import { ObservablePersistMMKV } from "@legendapp/state/persist-plugins/mmkv";
 import { supabase, trpcClient } from "./supabase";
@@ -6,6 +6,7 @@ import type { AppRouter } from "../../../supabase/functions/trpc/router";
 import { synced } from "@legendapp/state/sync";
 import { Platform } from "react-native";
 import type { Session } from "@supabase/supabase-js";
+import { generate } from "xksuid";
 
 export const session$ = observable<{
 	initialized: boolean;
@@ -15,69 +16,82 @@ export const session$ = observable<{
 	session: null,
 });
 
-type TrackRequest = Awaited<
-	ReturnType<AppRouter["trackRequests"]["list"]>
->[number] & {
-	tracks: Track[];
+type Plan = Awaited<ReturnType<AppRouter["plans"]["list"]>>["data"][number];
+type PlanNew = {
+	from_lat: number;
+	from_lon: number;
+	to_lat: number;
+	to_lon: number;
 };
-type Track = Awaited<ReturnType<AppRouter["tracks"]["list"]>>[number];
-type Tracks = {
-	addTrackRequest: (trackReq: TrackRequest) => void;
-	tracks: Track[];
-	trackRequests: TrackRequest[];
+type PlanStore = {
+	plans: Plan[];
 };
 
-function addTrackRequest(trackReq: TrackRequest) {
-	tracks$.trackRequests.set((trs) => [...trs, trackReq]);
+export function addPlan(newPlan: PlanNew) {
+	const plan: Plan = {
+		id: generate(),
+		name: `${newPlan.from_lat},${newPlan.from_lon} - ${newPlan.to_lat}, ${newPlan.to_lon}`,
+		created_at: new Date().toString(),
+		routes: [],
+		...newPlan,
+	};
+	plans$.plans.set((plans) => [...plans, plan]);
+
+	return plan.id;
 }
 
-export const tracks$ = observable<Tracks>(
-	synced<Tracks>({
-		get: async () => {
-			const trackRequests = await trpcClient.trackRequests.list.query();
-			const tracks = await trpcClient.tracks.list.query();
+export const plans$ = observable<PlanStore>(
+	synced<PlanStore>({
+		get: async ({ value }) => {
+			console.log("get value", value);
+			const plans = await trpcClient.plans.list.query({ version: "v1" });
 			return {
-				addTrackRequest,
-				tracks,
-				trackRequests: trackRequests.map((trackReq) => ({
-					...trackReq,
-					tracks: tracks.filter((t) => t.track_request_id === trackReq.id),
-				})),
+				plans,
 			};
 		},
 		set: async (params) => {
-			if (
-				params.changes.some(
-					(change) =>
-						change.path.length !== 1 || change.path[0] !== "trackRequests",
-				)
-			) {
-				throw new Error("unsupported changes");
-			}
-			for (const change of params.changes) {
-				const newTrackReq = (change.valueAtPath as TrackRequest[]).find(
-					(trRq) =>
-						!(change.prevAtPath as TrackRequest[]).find(
-							(trReqPrev) => trReqPrev.id === trRq.id,
-						),
-				);
+			// if (
+			// 	params.changes.some(
+			// 		(change) =>
+			// 			change.path.length !== 1 || change.path[0] !== "trackRequests",
+			// 	)
+			// ) {
+			// 	throw new Error("unsupported changes");
+			// }
+			// for (const change of params.changes) {
+			// 	const newPlan = (change.valueAtPath as TrackRequest[]).find(
+			// 		(trRq) =>
+			// 			!(change.prevAtPath as TrackRequest[]).find(
+			// 				(trReqPrev) => trReqPrev.id === trRq.id,
+			// 			),
+			// 	);
+			console.log(params);
+			const newPlan = {};
 
-				if (!newTrackReq) {
-					throw new Error("wut cant be missing");
-				}
-				const trackRequest = await trpcClient.trackRequests.create.mutate({
-					from_lat: newTrackReq.from_lat,
-					from_lon: newTrackReq.from_lon,
-					to_lat: newTrackReq.to_lat,
-					to_lon: newTrackReq.to_lon,
-					name: newTrackReq.name,
-					// TODO created at from local or from db??
-				});
+			if (!newPlan) {
+				throw new Error("wut cant be missing");
 			}
+			const plans = await trpcClient.plans.create.mutate({
+				...newPlan,
+			});
 		},
 		subscribe: ({ refresh }) => {
-			const channel = supabase.realtime
-				.channel("track_requests")
+			const plansChannel = supabase.realtime
+				.channel("plans")
+				.on(
+					"postgres_changes",
+					{
+						event: "*",
+						schema: "public",
+					},
+					(_payload) => {
+						console.log("changes", { _payload });
+						refresh();
+					},
+				)
+				.subscribe();
+			const routesChannel = supabase.realtime
+				.channel("routes")
 				.on(
 					"postgres_changes",
 					{
@@ -91,8 +105,11 @@ export const tracks$ = observable<Tracks>(
 				)
 				.subscribe();
 
-			console.log("subscribe to changes", channel.state);
-			return () => channel.unsubscribe();
+			console.log("subscribe to changes", plansChannel.state, routesChannel);
+			return () => {
+				plansChannel.unsubscribe();
+				routesChannel.unsubscribe();
+			};
 		},
 		mode: "merge",
 		retry: {
@@ -100,9 +117,7 @@ export const tracks$ = observable<Tracks>(
 		},
 		waitFor: session$.initialized,
 		initial: {
-			addTrackRequest,
-			tracks: [],
-			trackRequests: [],
+			plans: [],
 		},
 		persist: {
 			name: "tracks",
@@ -113,3 +128,7 @@ export const tracks$ = observable<Tracks>(
 		},
 	}),
 );
+
+// const routes$ = observable<Route[]>(synced<Route[]>({
+// 	get
+// }));
