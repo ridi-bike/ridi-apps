@@ -1,6 +1,7 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import {
 	array,
+	isoDateTime,
 	literal,
 	maxValue,
 	minValue,
@@ -31,42 +32,91 @@ const userProcedure = anonProcedure.use(({ ctx, next }) => {
 
 const router = t.router;
 
-const tracksRouter = router({
-	list: userProcedure
-		.input(parser(variant("version", [object({ version: literal("v1") })])))
+const routeRouter = router({
+	get: userProcedure
+		.input(
+			parser(
+				variant("version", [
+					object({
+						version: literal("v1"),
+						data: object({ routeId: string() }),
+					}),
+				]),
+			),
+		)
 		.output(
 			parser(
 				variant("version", [
 					object({
 						version: literal("v1"),
-						data: array(
-							object({
+						data: object({
+							id: string(),
+							name: string(),
+							created_at: pipe(string(), isoDateTime()),
+							plan: object({
 								id: string(),
+								name: string(),
+								from_lat: number(),
+								from_lon: number(),
+								to_lat: number(),
+								to_lon: number(),
+								created_at: pipe(string(), isoDateTime()),
 							}),
-						),
+						}),
 					}),
 				]),
 			),
 		)
-		.query(async ({ ctx, input: { version } }) => {
-			if (version !== "v1") {
-				throw new Error("wrong version");
-			}
-			const result = await ctx.supabaseClient
-				.from("tracks")
-				.select("*")
-				.filter("user_id", "eq", ctx.user.id)
-				.order("created_at", {
-					ascending: false,
-				});
-			if (result.error) {
-				throw result.error;
-			}
-			return { version: "v1", data: result.data };
-		}),
+		.query(
+			async ({
+				ctx,
+				input: {
+					version,
+					data: { routeId },
+				},
+			}) => {
+				if (version !== "v1") {
+					throw new Error("wrong version");
+				}
+				const routeRes = await ctx.supabaseClient
+					.from("routes")
+					.select(`
+						id,
+						name,
+						created_at,
+						plans (
+							id,
+							name,
+							from_lat,
+							from_lon,
+							to_lat,
+							to_lon,
+							created_at	
+						)
+					`)
+					.filter("routes.user_id", "eq", ctx.user.id)
+					.filter("routes.id", "eq", routeId)
+					.order("created_at", {
+						ascending: false,
+					})
+					.single();
+				if (routeRes.error) {
+					throw routeRes.error;
+				}
+				const route = routeRes.data;
+				if (!route.plans) {
+					throw new Error("missing plan");
+				}
+				const plan = route.plans;
+				return {
+					version: "v1",
+					data: { ...route, plan },
+				};
+			},
+		),
 });
 
-const trackRequestsRouter = router({
+const planRouter = router({
 	list: userProcedure
 		.input(parser(variant("version", [object({ version: literal("v1") })])))
 		.output(
@@ -77,6 +127,19 @@ const trackRequestsRouter = router({
 						data: array(
 							object({
 								id: string(),
+								name: string(),
+								from_lat: number(),
+								from_lon: number(),
+								to_lat: number(),
+								to_lon: number(),
+								created_at: pipe(string(), isoDateTime()),
+								routes: array(
+									object({
+										id: string(),
+										name: string(),
+										created_at: pipe(string(), isoDateTime()),
+									}),
+								),
 							}),
 						),
 					}),
@@ -87,19 +150,32 @@ const trackRequestsRouter = router({
 			if (version !== "v1") {
 				throw new Error("wrong version");
 			}
-			const result = await ctx.supabaseClient
-				.from("track_requests")
-				.select("*")
+			const plans = await ctx.supabaseClient
+				.from("plans")
+				.select(`
+					id,
+					name,
+					from_lat,
+					from_lon,
+					to_lat,
+					to_lon,
+					created_at,
+					routes (
+						id,
+						name,
+						created_at	
+					)
+				`)
 				.filter("user_id", "eq", ctx.user.id)
 				.order("created_at", {
 					ascending: false,
 				});
-			if (result.error) {
-				throw result.error;
+			if (plans.error) {
+				throw plans.error;
 			}
 			return {
 				version: "v1",
-				data: result.data,
+				data: plans.data,
 			};
 		}),
 	create: userProcedure
@@ -143,7 +219,7 @@ const trackRequestsRouter = router({
 					throw new Error("wrong version");
 				}
 				const result = await ctx.supabaseClient
-					.from("track_requests")
+					.from("plans")
 					.insert({
 						user_id: ctx.user.id,
 						from_lat,
@@ -170,8 +246,8 @@ const trackRequestsRouter = router({
 });
 
 export const appRouter = router({
-	tracks: tracksRouter,
-	trackRequests: trackRequestsRouter,
+	plans: planRouter,
+	routes: routeRouter,
 });
 
 export type AppRouter = typeof appRouter;

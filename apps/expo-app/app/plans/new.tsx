@@ -8,8 +8,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
 import { LocationPermsNotGiven } from "~/components/LocationPermsNotGiven";
-import { tracks$ } from "~/lib/stores";
-import { generate } from "xksuid";
+import { plans$ } from "~/lib/stores";
 import { useRouter } from "expo-router";
 
 export default function TrackRequestNew() {
@@ -152,19 +151,13 @@ export default function TrackRequestNew() {
 						const start = startCoords$.get();
 						const finish = finishCoords$.get();
 						if (start && finish) {
-							tracks$.addTrackRequest({
-								id: generate(),
-								name: "",
-								status: "new",
+							const planId = plans$.addPlan({
 								from_lat: start.lat,
 								from_lon: start.lon,
 								to_lat: finish.lat,
 								to_lon: finish.lon,
-								user_id: "",
-								created_at: "",
-								modified_at: "",
 							});
-							router.replace("/track-requests");
+							router.replace(`/plans/${planId}`);
 						}
 					}}
 				>

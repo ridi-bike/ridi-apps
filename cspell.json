@@ -10,7 +10,9 @@
 		"valibot",
 		"legendapp",
 		"MMKV",
-		"maplibre"
+		"maplibre",
+		"ksuid",
+		"xksuid"
 	],
 	"version": "0.2",
 	"language": "en"
