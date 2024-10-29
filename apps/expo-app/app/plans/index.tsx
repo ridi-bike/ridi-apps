@@ -30,9 +30,9 @@ export default function Plans() {
 						<Memo>
 							{() => (
 								<Text>
-									{plan$.id.get()}: {plan$.name.get()}; {plan$.from_lat.get()},
-									{plan$.from_lon.get()} - {plan$.to_lat.get()},
-									{plan$.to_lon.get()}`
+									{plan$.status.get()}: {plan$.id.get()}: {plan$.name.get()};{" "}
+									{plan$.from_lat.get()},{plan$.from_lon.get()} -{" "}
+									{plan$.to_lat.get()},{plan$.to_lon.get()}`
 								</Text>
 							)}
 						</Memo>

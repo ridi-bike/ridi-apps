@@ -35,7 +35,7 @@ export default function PlanRoutes() {
 							},
 						}}
 					>
-						<Text>{`${route$.created_at}: ${route$.name}`}</Text>
+						<Text>{`${route$.created_at.get()}: ${route$.name.get()}`}</Text>
 					</Link>
 				)}
 			</For>

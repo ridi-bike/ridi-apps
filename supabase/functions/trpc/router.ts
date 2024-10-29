@@ -12,6 +12,7 @@ import {
 	pipe,
 	string,
 	transform,
+	union,
 	variant,
 } from "valibot";
 import type { Context } from "./context.ts";
@@ -65,6 +66,11 @@ const routeRouter = router({
 								from_lon: number(),
 								to_lat: number(),
 								to_lon: number(),
+								status: union([
+									literal("new"),
+									literal("planning"),
+									literal("created"),
+								]),
 								created_at: pipe(
 									string(),
 									transform((v) => `${v}Z`),
@@ -100,6 +106,7 @@ const routeRouter = router({
 							from_lon,
 							to_lat,
 							to_lon,
+							status,
 							created_at	
 						)
 					`)
@@ -141,6 +148,11 @@ const planRouter = router({
 								from_lon: number(),
 								to_lat: number(),
 								to_lon: number(),
+								status: union([
+									literal("new"),
+									literal("planning"),
+									literal("created"),
+								]),
 								created_at: pipe(
 									string(),
 									transform((v) => `${v}Z`),
@@ -176,6 +188,7 @@ const planRouter = router({
 					from_lon,
 					to_lat,
 					to_lon,
+					status,
 					created_at,
 					routes (
 						id,
