@@ -1,6 +1,13 @@
 {
 	"extends": "expo/tsconfig.base",
 	"compilerOptions": {
+		"noImplicitAny": true,
+		"allowJs": false,
+		"strictNullChecks": true,
+		// "noUncheckedIndexedAccess": true,
+		// "strictFunctionTypes": true,
+		// "exactOptionalPropertyTypes": true,
+		"skipLibCheck": true,
 		"strict": true,
 		"baseUrl": ".",
 		"paths": {
@@ -15,5 +22,8 @@
 		".expo/types/**/*.ts",
 		"expo-env.d.ts",
 		"nativewind-env.d.ts"
+	],
+	"exclude": [
+		"**/node_modules/**/*"
 	]
 }

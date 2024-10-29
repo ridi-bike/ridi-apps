@@ -15,7 +15,14 @@ Deno.serve((request) => {
 			endpoint: "/trpc",
 			req: request,
 			router: appRouter,
-			onError: (err) => console.error(err.error),
+			onError: (err) =>
+				console.error(
+					err.path,
+					err.type,
+					err.input,
+					err.error,
+					err.error.cause,
+				),
 			createContext,
 		});
 	} catch (err) {

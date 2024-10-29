@@ -8,7 +8,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
 import { LocationPermsNotGiven } from "~/components/LocationPermsNotGiven";
-import { plans$ } from "~/lib/stores";
+import { plansStoreAdd } from "~/lib/stores";
 import { useRouter } from "expo-router";
 
 export default function TrackRequestNew() {
@@ -151,13 +151,16 @@ export default function TrackRequestNew() {
 						const start = startCoords$.get();
 						const finish = finishCoords$.get();
 						if (start && finish) {
-							const planId = plans$.addPlan({
+							const planId = plansStoreAdd({
 								from_lat: start.lat,
 								from_lon: start.lon,
 								to_lat: finish.lat,
 								to_lon: finish.lon,
 							});
-							router.replace(`/plans/${planId}`);
+							router.replace({
+								pathname: "/plans/[planId]",
+								params: { planId },
+							});
 						}
 					}}
 				>

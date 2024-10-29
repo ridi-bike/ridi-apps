@@ -1,4 +1,4 @@
-import { For } from "@legendapp/state/react";
+import { For, Memo } from "@legendapp/state/react";
 import { Link } from "expo-router";
 import { ScrollView } from "react-native";
 import { buttonVariants } from "~/components/ui/button";
@@ -8,7 +8,9 @@ import { cn } from "~/lib/utils";
 
 export default function Plans() {
 	return (
-		<ScrollView className="flex-col h-full w-full">
+		<ScrollView className="flex-row h-full w-full justify-start items-start">
+			<Link href={"/plans/new"}>new new</Link>
+			<Link href={"/plans"}>list plans</Link>
 			<For each={plans$.plans}>
 				{(plan$) => (
 					<Link
@@ -16,10 +18,24 @@ export default function Plans() {
 							buttonVariants({
 								variant: "link",
 							}),
+							"flex-row items-center justify-start",
 						)}
-						href={`/plans/${plan$.id}`}
+						href={{
+							pathname: "/plans/[planId]",
+							params: {
+								planId: plan$.id.get(),
+							},
+						}}
 					>
-						<Text>{`${plan$.created_at}: ${plan$.name}; ${plan$.from_lat},${plan$.from_lon}-${plan$.to_lat},${plan$.to_lon}`}</Text>
+						<Memo>
+							{() => (
+								<Text>
+									{plan$.id.get()}: {plan$.name.get()}; {plan$.from_lat.get()},
+									{plan$.from_lon.get()} - {plan$.to_lat.get()},
+									{plan$.to_lon.get()}`
+								</Text>
+							)}
+						</Memo>
 					</Link>
 				)}
 			</For>

@@ -6,6 +6,7 @@ import * as WebBrowser from "expo-web-browser";
 import { supabase } from "~/lib/supabase";
 import { useEffect } from "react";
 import { Button } from "./ui/button";
+import { Text } from "./ui/text";
 
 const redirectTo = makeRedirectUri();
 
@@ -41,7 +42,7 @@ const createSessionFromUrl = async (url: string) => {
 };
 
 const performOAuth = async () => {
-	const { data, error } = await supabase.auth.signInWithOAuth({
+	const { data, error } = await supabase.auth.linkIdentity({
 		provider: "github",
 		options: {
 			redirectTo,
@@ -95,10 +96,10 @@ export default function Auth() {
 	return (
 		<>
 			<Button variant="outline" onPress={performOAuth}>
-				Sign in
+				<Text>Sign in</Text>
 			</Button>
 			<Button variant="outline" onPress={() => supabase.auth.signOut()}>
-				Sign out
+				<Text>Sign out</Text>
 			</Button>
 		</>
 	);

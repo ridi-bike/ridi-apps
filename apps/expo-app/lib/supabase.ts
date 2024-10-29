@@ -50,6 +50,7 @@ const links = [
 			return fetch(url, {
 				...options,
 				credentials: "include",
+				signal: null,
 			});
 		},
 		headers: async () => {
@@ -64,17 +65,10 @@ const links = [
 	}),
 ];
 
-export const trpc = createTRPCReact<AppRouter>();
-
-export const supabaseTrpcClient = trpc.createClient({
-	links,
-});
-
 export const trpcClient = createTRPCClient<AppRouter>({
 	links,
 });
 
-export const queryClient = new QueryClient();
 // Tells Supabase Auth to continuously refresh the session automatically
 // if the app is in the foreground. When this is added, you will continue
 // to receive `onAuthStateChange` events with the `TOKEN_REFRESHED` or
