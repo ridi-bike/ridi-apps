@@ -8,7 +8,7 @@ const supabase_url = Deno.env.get("SUPABASE_URL");
 const supabase_key = Deno.env.get("SUPABASE_SECRET_KEY");
 
 if (!supabase_url || !supabase_key) {
-	throw new Error("missing supabase creds");
+	throw new Error("missing supabase credentials");
 }
 const supabase = createClient<Database>(supabase_url, supabase_key);
 
@@ -21,22 +21,27 @@ const channel = supabase
 			schema: "public",
 		},
 		(payload) => {
-			const newTrRq: Database["public"]["Tables"]["track_requests"]["Row"] =
-				payload.new;
-			console.log("new record", newTrRq.id);
+			const newPlan: Database["public"]["Tables"]["plans"]["Row"] = payload.new;
+			console.log("new record", newPlan.id);
 
 			setTimeout(async () => {
-				console.log("processing", newTrRq.id);
-				await supabase.from("track_requests").update({
-					status: "processing",
-				}).eq("id", newTrRq.id);
+				console.log("processing", newPlan.id);
+				await supabase
+					.from("plans")
+					.update({
+						status: "planning",
+					})
+					.eq("id", newPlan.id);
 			}, 3000);
 
 			setTimeout(async () => {
-				console.log("done", newTrRq.id);
-				await supabase.from("track_requests").update({
-					status: "done",
-				}).eq("id", newTrRq.id);
+				console.log("done", newPlan.id);
+				await supabase
+					.from("plans")
+					.update({
+						status: "created",
+					})
+					.eq("id", newPlan.id);
 			}, 6000);
 		},
 	)
@@ -49,7 +54,7 @@ globalThis.addEventListener("unload", () => {
 });
 
 Deno.serve({ port: 2727, hostname: "0.0.0.0" }, async (_req) => {
-	const tests = await supabase.from("realtime_tests").select("*");
+	const tests = await supabase.from("plans").select("*");
 	console.log({ l: tests.data?.length });
 	if (channel.state !== REALTIME_CHANNEL_STATES.joined) {
 		return new Response(channel.state, {
