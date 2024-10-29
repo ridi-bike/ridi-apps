@@ -1,7 +1,7 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import {
 	array,
-	isoDateTime,
+	isoTimestamp,
 	literal,
 	maxValue,
 	minValue,
@@ -11,6 +11,7 @@ import {
 	parser,
 	pipe,
 	string,
+	transform,
 	variant,
 } from "valibot";
 import type { Context } from "./context.ts";
@@ -52,7 +53,11 @@ const routeRouter = router({
 						data: object({
 							id: string(),
 							name: string(),
-							created_at: pipe(string(), isoDateTime()),
+							created_at: pipe(
+								string(),
+								transform((v) => `${v}Z`),
+								isoTimestamp(),
+							),
 							plan: object({
 								id: string(),
 								name: string(),
@@ -60,7 +65,11 @@ const routeRouter = router({
 								from_lon: number(),
 								to_lat: number(),
 								to_lon: number(),
-								created_at: pipe(string(), isoDateTime()),
+								created_at: pipe(
+									string(),
+									transform((v) => `${v}Z`),
+									isoTimestamp(),
+								),
 							}),
 						}),
 					}),
@@ -132,12 +141,20 @@ const planRouter = router({
 								from_lon: number(),
 								to_lat: number(),
 								to_lon: number(),
-								created_at: pipe(string(), isoDateTime()),
+								created_at: pipe(
+									string(),
+									transform((v) => `${v}Z`),
+									isoTimestamp(),
+								),
 								routes: array(
 									object({
 										id: string(),
 										name: string(),
-										created_at: pipe(string(), isoDateTime()),
+										created_at: pipe(
+											string(),
+											transform((v) => `${v}Z`),
+											isoTimestamp(),
+										),
 									}),
 								),
 							}),
@@ -173,6 +190,7 @@ const planRouter = router({
 			if (plans.error) {
 				throw plans.error;
 			}
+			console.log(plans.data);
 			return {
 				version: "v1",
 				data: plans.data,
@@ -190,6 +208,7 @@ const planRouter = router({
 							to_lat: pipe(number(), minValue(-90), maxValue(90)),
 							to_lon: pipe(number(), minValue(-180), maxValue(180)),
 							name: optional(string()),
+							id: string(),
 						}),
 					}),
 				]),
@@ -212,9 +231,10 @@ const planRouter = router({
 				ctx,
 				input: {
 					version,
-					data: { name, from_lat, to_lon, from_lon, to_lat },
+					data: { id, name, from_lat, to_lon, from_lon, to_lat },
 				},
 			}) => {
+				console.log("new plan", name);
 				if (version !== "v1") {
 					throw new Error("wrong version");
 				}
@@ -227,6 +247,7 @@ const planRouter = router({
 						to_lat,
 						to_lon,
 						name: name || `req ${new Date().getTime()}`,
+						id,
 					})
 					.select("*");
 

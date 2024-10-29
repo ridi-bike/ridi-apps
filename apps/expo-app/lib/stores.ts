@@ -8,13 +8,7 @@ import { Platform } from "react-native";
 import type { Session } from "@supabase/supabase-js";
 import { generate } from "xksuid";
 
-export const session$ = observable<{
-	initialized: boolean;
-	session: Session | null;
-}>({
-	initialized: false,
-	session: null,
-});
+export const session$ = observable<Session | null>(null);
 
 type Plan = Awaited<ReturnType<AppRouter["plans"]["list"]>>["data"][number];
 type PlanNew = {
@@ -27,7 +21,7 @@ type PlanStore = {
 	plans: Plan[];
 };
 
-export function addPlan(newPlan: PlanNew) {
+export function plansStoreAdd(newPlan: PlanNew) {
 	const plan: Plan = {
 		id: generate(),
 		name: `${newPlan.from_lat},${newPlan.from_lon} - ${newPlan.to_lat}, ${newPlan.to_lon}`,
@@ -42,38 +36,38 @@ export function addPlan(newPlan: PlanNew) {
 
 export const plans$ = observable<PlanStore>(
 	synced<PlanStore>({
-		get: async ({ value }) => {
-			console.log("get value", value);
-			const plans = await trpcClient.plans.list.query({ version: "v1" });
+		get: async (params): Promise<PlanStore> => {
+			console.log("plans get", params);
+			const plansResult = await trpcClient.plans.list.query({ version: "v1" });
 			return {
-				plans,
+				plans: plansResult.data,
 			};
 		},
 		set: async (params) => {
-			// if (
-			// 	params.changes.some(
-			// 		(change) =>
-			// 			change.path.length !== 1 || change.path[0] !== "trackRequests",
-			// 	)
-			// ) {
-			// 	throw new Error("unsupported changes");
-			// }
-			// for (const change of params.changes) {
-			// 	const newPlan = (change.valueAtPath as TrackRequest[]).find(
-			// 		(trRq) =>
-			// 			!(change.prevAtPath as TrackRequest[]).find(
-			// 				(trReqPrev) => trReqPrev.id === trRq.id,
-			// 			),
-			// 	);
-			console.log(params);
-			const newPlan = {};
-
-			if (!newPlan) {
-				throw new Error("wut cant be missing");
+			if (
+				params.changes.some(
+					(change) => change.path.length !== 1 || change.path[0] !== "plans",
+				)
+			) {
+				throw new Error("unsupported changes");
 			}
-			const plans = await trpcClient.plans.create.mutate({
-				...newPlan,
-			});
+			for (const change of params.changes) {
+				const newPlan = (change.valueAtPath as Plan[]).find(
+					(currPlan) =>
+						!(change.prevAtPath as Plan[]).find(
+							(prevPlan) => prevPlan.id === currPlan.id,
+						),
+				);
+				console.log("plans set", params);
+
+				if (!newPlan) {
+					throw new Error("wut cant be missing");
+				}
+				const plans = await trpcClient.plans.create.mutate({
+					version: "v1",
+					data: newPlan,
+				});
+			}
 		},
 		subscribe: ({ refresh }) => {
 			const plansChannel = supabase.realtime
@@ -115,12 +109,12 @@ export const plans$ = observable<PlanStore>(
 		retry: {
 			infinite: true,
 		},
-		waitFor: session$.initialized,
+		waitFor: session$,
 		initial: {
 			plans: [],
 		},
 		persist: {
-			name: "tracks",
+			name: "plans",
 			plugin:
 				Platform.OS === "web"
 					? ObservablePersistLocalStorage

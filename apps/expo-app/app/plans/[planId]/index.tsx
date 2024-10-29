@@ -1,7 +1,7 @@
-import { For } from "@legendapp/state/react";
+import { For, Memo } from "@legendapp/state/react";
 import { useLocalSearchParams } from "expo-router";
 import { Link } from "expo-router";
-import { ScrollView } from "react-native";
+import { ScrollView, View } from "react-native";
 import { buttonVariants } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { plans$ } from "~/lib/stores";
@@ -11,6 +11,14 @@ export default function PlanRoutes() {
 	const { planId } = useLocalSearchParams<{ planId: string }>();
 	return (
 		<ScrollView className="flex-col h-full w-full">
+			<Text>
+				<Memo>
+					{() =>
+						plans$.plans.find((p) => p.id.get() === planId)?.id.get() ||
+						"not found"
+					}
+				</Memo>
+			</Text>
 			<For each={plans$.plans.find((t) => t.id.get() === planId)?.routes}>
 				{(route$) => (
 					<Link
@@ -19,7 +27,13 @@ export default function PlanRoutes() {
 								variant: "link",
 							}),
 						)}
-						href={`/plans/${planId}/${route$.id}`}
+						href={{
+							pathname: "/plans/[planId]/[routeId]",
+							params: {
+								planId,
+								routeId: route$.id.get(),
+							},
+						}}
 					>
 						<Text>{`${route$.created_at}: ${route$.name}`}</Text>
 					</Link>

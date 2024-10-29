@@ -11,26 +11,31 @@ import {
 import { useMount } from "@legendapp/state/react";
 import { session$ } from "~/lib/stores";
 
-export function App() {
-	useMount(() => {
-		supabase.auth.getSession().then(({ data: { session } }) =>
-			session$.set({
-				initialized: true,
-				session,
-			}),
-		);
-		supabase.auth.onAuthStateChange((_event, session) =>
-			session$.session.set(session),
-		);
+export default function App() {
+	console.log("app running yeah");
+	useMount(async () => {
+		console.log("omg wtf lets mount");
+		supabase.auth.onAuthStateChange((_event, session) => {
+			session$.set(session);
+			console.log("auth changed");
+		});
+
+		const sessionData = await supabase.auth.getSession();
+		const session = sessionData.data.session;
+
+		if (session) {
+			session$.set(session);
+		} else {
+			supabase.auth.signInAnonymously();
+		}
 	});
+
 	return (
-		<trpc.Provider client={supabaseTrpcClient} queryClient={queryClient}>
-			<QueryClientProvider client={queryClient}>
-				<Stack>
-					<Stack.Screen name="index" />
-				</Stack>
-				<PortalHost />
-			</QueryClientProvider>
-		</trpc.Provider>
+		<>
+			<Stack>
+				<Stack.Screen name="index" />
+			</Stack>
+			<PortalHost />
+		</>
 	);
 }
