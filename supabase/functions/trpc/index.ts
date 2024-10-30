@@ -3,7 +3,7 @@ import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { appRouter } from "./router.ts";
 import { createContext } from "./context.ts";
 
-Deno.serve((request) => {
+Deno.serve(async (request) => {
 	// Only used for start-server-and-test package that
 	// expects a 200 OK to start testing the server
 	try {
@@ -11,6 +11,9 @@ Deno.serve((request) => {
 			return new Response("ok", {
 				headers: {
 					"Access-Control-Allow-Origin": "https://app.ridi.bike",
+					"Access-Control-Allow-Credentials": "true",
+					"Access-Control-Allow-Headers": "origin, content-type, accept",
+					"Access-Control-Request-Method": "GET, POST",
 				},
 			});
 		}
@@ -18,7 +21,7 @@ Deno.serve((request) => {
 			return new Response();
 		}
 
-		return fetchRequestHandler({
+		const response = await fetchRequestHandler({
 			endpoint: "/trpc",
 			req: request,
 			router: appRouter,
@@ -32,6 +35,12 @@ Deno.serve((request) => {
 				),
 			createContext,
 		});
+		response.headers.set(
+			"Access-Control-Allow-Origin",
+			"https://app.ridi.bike",
+		);
+		response.headers.set("Access-Control-Allow-Credentials", "true");
+		return response;
 	} catch (err) {
 		console.error(err);
 		return new Response("failed omg", {
