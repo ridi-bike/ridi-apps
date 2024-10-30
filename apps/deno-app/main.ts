@@ -29,7 +29,7 @@ const channel = supabase
 				await supabase
 					.from("plans")
 					.update({
-						status: "planning",
+						state: "planning",
 					})
 					.eq("id", newPlan.id);
 			}, 3000);
@@ -39,7 +39,7 @@ const channel = supabase
 				await supabase
 					.from("plans")
 					.update({
-						status: "created",
+						state: "done",
 					})
 					.eq("id", newPlan.id);
 			}, 6000);
