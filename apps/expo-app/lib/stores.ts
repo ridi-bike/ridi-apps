@@ -115,6 +115,7 @@ export const plans$ = observable<PlanStore>(
 			plans: [],
 		},
 		persist: {
+			retrySync: true,
 			name: "plans",
 			plugin:
 				Platform.OS === "web"
