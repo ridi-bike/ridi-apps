@@ -66,10 +66,10 @@ const routeRouter = router({
 								from_lon: number(),
 								to_lat: number(),
 								to_lon: number(),
-								status: union([
+								state: union([
 									literal("new"),
 									literal("planning"),
-									literal("created"),
+									literal("done"),
 								]),
 								created_at: pipe(
 									string(),
@@ -106,7 +106,7 @@ const routeRouter = router({
 							from_lon,
 							to_lat,
 							to_lon,
-							status,
+							state,
 							created_at	
 						)
 					`)
@@ -148,10 +148,10 @@ const planRouter = router({
 								from_lon: number(),
 								to_lat: number(),
 								to_lon: number(),
-								status: union([
+								state: union([
 									literal("new"),
 									literal("planning"),
-									literal("created"),
+									literal("done"),
 								]),
 								created_at: pipe(
 									string(),
@@ -188,7 +188,7 @@ const planRouter = router({
 					from_lon,
 					to_lat,
 					to_lon,
-					status,
+					state,
 					created_at,
 					routes (
 						id,

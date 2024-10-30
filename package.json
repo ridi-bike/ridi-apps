@@ -4,11 +4,8 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"dev:web": "pnpm -F \"@ridi/web\" dev",
-		"db:push": "env $(cat ./apps/web/.env | xargs) pnpm -F \"@ridi/database\" push",
-		"dev:db": "docker compose -f docker-compose.local.yml up -d",
-		"dev:mobile": "pnpm -F \"@ridi/mobile\" dev",
-		"clean": "rm -rf ./node_modules/ && rm -rf ./apps/web/node_modules/ && rm -rf ./apps/mobile/node_modules/ && rm -rf ./packages/database/node_modules/ && rm -rf pnpm-lock.yaml"
+		"clean": "rm -rf ./node_modules/ && rm -rf ./apps/web/node_modules/ && rm -rf ./apps/mobile/node_modules/ && rm -rf ./packages/database/node_modules/ && rm -rf pnpm-lock.yaml",
+		"db": "supabase db reset && supabase gen types --local > ./supabase/functions/trpc/types.ts"
 	},
 	"keywords": [],
 	"author": "",
