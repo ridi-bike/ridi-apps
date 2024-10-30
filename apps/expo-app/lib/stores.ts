@@ -26,6 +26,7 @@ export function plansStoreAdd(newPlan: PlanNew) {
 		id: generate(),
 		name: `${newPlan.from_lat},${newPlan.from_lon} - ${newPlan.to_lat}, ${newPlan.to_lon}`,
 		created_at: new Date().toString(),
+		status: "new",
 		routes: [],
 		...newPlan,
 	};

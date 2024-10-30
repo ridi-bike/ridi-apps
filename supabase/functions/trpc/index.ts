@@ -7,6 +7,13 @@ Deno.serve((request) => {
 	// Only used for start-server-and-test package that
 	// expects a 200 OK to start testing the server
 	try {
+		if (request.method === "OPTIONS") {
+			return new Response("ok", {
+				headers: {
+					"Access-Control-Allow-Origin": "https://app.ridi.bike",
+				},
+			});
+		}
 		if (request.method === "HEAD") {
 			return new Response();
 		}
