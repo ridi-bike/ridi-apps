@@ -12,7 +12,8 @@ Deno.serve(async (request) => {
 				headers: {
 					"Access-Control-Allow-Origin": "https://app.ridi.bike",
 					"Access-Control-Allow-Credentials": "true",
-					"Access-Control-Allow-Headers": "origin, content-type, accept",
+					"Access-Control-Allow-Headers":
+						"authorization, origin, content-type, accept",
 					"Access-Control-Request-Method": "GET, POST",
 				},
 			});
