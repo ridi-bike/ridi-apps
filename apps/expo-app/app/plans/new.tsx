@@ -152,10 +152,10 @@ export default function TrackRequestNew() {
 						const finish = finishCoords$.get();
 						if (start && finish) {
 							const planId = plansStoreAdd({
-								from_lat: start.lat,
-								from_lon: start.lon,
-								to_lat: finish.lat,
-								to_lon: finish.lon,
+								fromLat: start.lat,
+								fromLon: start.lon,
+								toLat: finish.lat,
+								toLon: finish.lon,
 							});
 							router.replace({
 								pathname: "/plans/[planId]",

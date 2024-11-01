@@ -1,6 +1,7 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import {
 	array,
+	date,
 	isoTimestamp,
 	literal,
 	maxValue,
@@ -16,6 +17,9 @@ import {
 	variant,
 } from "valibot";
 import type { Context } from "./context.ts";
+import { planCreate, planList, routesGet } from "./queries_sql.ts";
+import { type FieldsNotNull, lat, lon } from "./util.ts";
+import * as R from "remeda";
 
 const t = initTRPC.context<Context>().create();
 
@@ -54,29 +58,23 @@ const routeRouter = router({
 						data: object({
 							id: string(),
 							name: string(),
-							created_at: pipe(
-								string(),
-								transform((v) => `${v}Z`),
-								isoTimestamp(),
-							),
+							createdAt: date(),
 							plan: object({
-								id: string(),
-								name: string(),
-								from_lat: number(),
-								from_lon: number(),
-								to_lat: number(),
-								to_lon: number(),
-								state: union([
+								planId: string(),
+								planName: string(),
+								planState: union([
 									literal("new"),
 									literal("planning"),
 									literal("done"),
 								]),
-								created_at: pipe(
-									string(),
-									transform((v) => `${v}Z`),
-									isoTimestamp(),
-								),
 							}),
+							points: array(
+								object({
+									pointLat: lat,
+									pointLon: lon,
+									pointOrder: lon,
+								}),
+							),
 						}),
 					}),
 				]),
@@ -93,40 +91,25 @@ const routeRouter = router({
 				if (version !== "v1") {
 					throw new Error("wrong version");
 				}
-				const routeRes = await ctx.supabaseClient
-					.from("routes")
-					.select(`
-						id,
-						name,
-						created_at,
-						plans (
-							id,
-							name,
-							from_lat,
-							from_lon,
-							to_lat,
-							to_lon,
-							state,
-							created_at	
-						)
-					`)
-					.filter("routes.user_id", "eq", ctx.user.id)
-					.filter("routes.id", "eq", routeId)
-					.order("created_at", {
-						ascending: false,
-					})
-					.single();
-				if (routeRes.error) {
-					throw routeRes.error;
+				const routesFlat = await routesGet(ctx.db, {
+					id: routeId,
+					userId: ctx.user.id,
+				});
+				console.log("routes get", routesFlat);
+				if (!routesFlat.length) {
+					throw new Error("not found");
 				}
-				const route = routeRes.data;
-				if (!route.plans) {
-					throw new Error("missing plan");
-				}
-				const plan = route.plans;
 				return {
 					version: "v1",
-					data: { ...route, plan },
+					data: {
+						...routesFlat[0],
+						plan: {
+							...routesFlat[0],
+						},
+						points: routesFlat[0].pointId
+							? (routesFlat as FieldsNotNull<(typeof routesFlat)[number]>[])
+							: [],
+					},
 				};
 			},
 		),
@@ -144,28 +127,27 @@ const planRouter = router({
 							object({
 								id: string(),
 								name: string(),
-								from_lat: number(),
-								from_lon: number(),
-								to_lat: number(),
-								to_lon: number(),
+								fromLat: lat,
+								fromLon: lon,
+								toLat: lat,
+								toLon: lon,
 								state: union([
 									literal("new"),
 									literal("planning"),
 									literal("done"),
 								]),
-								created_at: pipe(
-									string(),
-									transform((v) => `${v}Z`),
-									isoTimestamp(),
-								),
+								createdAt: date(),
 								routes: array(
 									object({
-										id: string(),
-										name: string(),
-										created_at: pipe(
-											string(),
-											transform((v) => `${v}Z`),
-											isoTimestamp(),
+										routeId: string(),
+										routeName: string(),
+										routeCreatedAt: date(),
+										points: array(
+											object({
+												pointLat: lat,
+												pointLon: lon,
+												pointOrder: lon,
+											}),
 										),
 									}),
 								),
@@ -179,34 +161,32 @@ const planRouter = router({
 			if (version !== "v1") {
 				throw new Error("wrong version");
 			}
-			const plans = await ctx.supabaseClient
-				.from("plans")
-				.select(`
-					id,
-					name,
-					from_lat,
-					from_lon,
-					to_lat,
-					to_lon,
-					state,
-					created_at,
-					routes (
-						id,
-						name,
-						created_at	
-					)
-				`)
-				.filter("user_id", "eq", ctx.user.id)
-				.order("created_at", {
-					ascending: false,
-				});
-			if (plans.error) {
-				throw plans.error;
-			}
-			console.log(plans.data);
+			const plansFlat = await planList(ctx.db, {
+				userId: ctx.user.id,
+			});
+			console.log("plans list", plansFlat);
+			const plans = R.pipe(
+				plansFlat,
+				R.groupBy(R.prop("id")),
+				R.entries(),
+				R.map(([_planId, onePlanFlat]) => ({
+					...R.first(onePlanFlat),
+					routes: R.first(onePlanFlat).routeId
+						? R.pipe(
+							onePlanFlat as FieldsNotNull<(typeof onePlanFlat)[number]>[],
+							R.groupBy(R.prop("routeId")),
+							R.entries(),
+							R.map(([_routeId, oneRouteFlat]) => ({
+								...R.first(oneRouteFlat),
+								points: R.first(onePlanFlat).pointId ? onePlanFlat : [],
+							})),
+						)
+						: [],
+				})),
+			);
 			return {
 				version: "v1",
-				data: plans.data,
+				data: plans,
 			};
 		}),
 	create: userProcedure
@@ -216,10 +196,10 @@ const planRouter = router({
 					object({
 						version: literal("v1"),
 						data: object({
-							from_lat: pipe(number(), minValue(-90), maxValue(90)),
-							from_lon: pipe(number(), minValue(-180), maxValue(180)),
-							to_lat: pipe(number(), minValue(-90), maxValue(90)),
-							to_lon: pipe(number(), minValue(-180), maxValue(180)),
+							fromLat: lat,
+							fromLon: lon,
+							toLat: lat,
+							toLon: lon,
 							name: optional(string()),
 							id: string(),
 						}),
@@ -244,36 +224,28 @@ const planRouter = router({
 				ctx,
 				input: {
 					version,
-					data: { id, name, from_lat, to_lon, from_lon, to_lat },
+					data: { id, name, fromLat, fromLon, toLat, toLon },
 				},
 			}) => {
 				console.log("new plan", name);
 				if (version !== "v1") {
 					throw new Error("wrong version");
 				}
-				const result = await ctx.supabaseClient
-					.from("plans")
-					.insert({
-						user_id: ctx.user.id,
-						from_lat,
-						from_lon,
-						to_lat,
-						to_lon,
-						name: name || `req ${new Date().getTime()}`,
-						id,
-					})
-					.select("*");
-
-				if (result.error) {
-					throw result.error;
-				}
-				const row = result.data[0];
-				if (!row) {
-					throw new Error("omg");
+				const newPlan = await planCreate(ctx.db, {
+					userId: ctx.user.id,
+					id,
+					name: "points",
+					fromLat,
+					fromLon,
+					toLat,
+					toLon,
+				});
+				if (!newPlan) {
+					throw new Error("can't happen");
 				}
 				return {
 					version: "v1",
-					data: row,
+					data: newPlan,
 				};
 			},
 		),

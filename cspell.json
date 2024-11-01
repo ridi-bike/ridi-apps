@@ -12,7 +12,9 @@
 		"MMKV",
 		"maplibre",
 		"ksuid",
-		"xksuid"
+		"xksuid",
+		"sqlc",
+		"remeda"
 	],
 	"version": "0.2",
 	"language": "en"

@@ -37,6 +37,14 @@ const channel = supabase
 			setTimeout(async () => {
 				console.log("done", newPlan.id);
 				await supabase
+					.from("routes")
+					.insert({
+						plan_id: newPlan.id,
+						user_id: newPlan.user_id,
+						name: `planId: ${newPlan.id} route`,
+					})
+					.returns();
+				await supabase
 					.from("plans")
 					.update({
 						state: "done",

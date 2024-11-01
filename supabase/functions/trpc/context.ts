@@ -1,16 +1,23 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types.ts";
 import type { fetchRequestHandler } from "@trpc/server/adapters/fetch";
+import postgres from "postgres";
 
 type ContextCreatorParams = Parameters<
 	NonNullable<Parameters<typeof fetchRequestHandler>[0]["createContext"]>
 >[0];
 
+const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+const supabaseDbUrl = Deno.env.get("SUPABASE_DB_URL") ?? "";
+
 export const createContext = async ({ req }: ContextCreatorParams) => {
 	const supabaseClient = createClient<Database, "public", Database["public"]>(
-		Deno.env.get("SUPABASE_URL") ?? "",
-		Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+		supabaseUrl,
+		supabaseServiceRoleKey,
 	);
+
+	const db = postgres(supabaseDbUrl);
 
 	const authHeader = req.headers.get("Authorization");
 	const token = authHeader?.replace("Bearer ", "") || "";
@@ -20,6 +27,7 @@ export const createContext = async ({ req }: ContextCreatorParams) => {
 	return {
 		supabaseClient,
 		user,
+		db,
 	};
 };
 
