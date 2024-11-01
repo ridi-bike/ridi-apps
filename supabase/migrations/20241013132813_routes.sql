@@ -13,10 +13,10 @@ create table public.plans (
 	name text not null
 );
 
-alter table "public"."plans" enable row level security;
+alter table public.plans enable row level security;
 
 create policy "select only on user_id"
-on "public"."plans"
+on public.plans
 as permissive
 for select
 to public
@@ -35,7 +35,7 @@ create table public.routes (
 alter table public.routes enable row level security;
 
 create policy "select only on user_id"
-on "public"."routes"
+on public.routes
 as permissive
 for select
 to public

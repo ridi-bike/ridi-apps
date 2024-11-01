@@ -31,11 +31,11 @@ export default function PlanRoutes() {
 							pathname: "/plans/[planId]/[routeId]",
 							params: {
 								planId,
-								routeId: route$.id.get(),
+								routeId: route$.routeId.get(),
 							},
 						}}
 					>
-						<Text>{`${route$.created_at.get()}: ${route$.name.get()}`}</Text>
+						<Text>{`${route$.routeCreatedAt.get()}: ${route$.routeName.get()}`}</Text>
 					</Link>
 				)}
 			</For>

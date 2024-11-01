@@ -12,10 +12,10 @@ export const session$ = observable<Session | null>(null);
 
 type Plan = Awaited<ReturnType<AppRouter["plans"]["list"]>>["data"][number];
 type PlanNew = {
-	from_lat: number;
-	from_lon: number;
-	to_lat: number;
-	to_lon: number;
+	fromLat: number;
+	fromLon: number;
+	toLat: number;
+	toLon: number;
 };
 type PlanStore = {
 	plans: Plan[];
@@ -24,11 +24,14 @@ type PlanStore = {
 export function plansStoreAdd(newPlan: PlanNew) {
 	const plan: Plan = {
 		id: generate(),
-		name: `${newPlan.from_lat},${newPlan.from_lon} - ${newPlan.to_lat}, ${newPlan.to_lon}`,
-		created_at: new Date().toString(),
+		name: `${newPlan.fromLat},${newPlan.fromLon} - ${newPlan.toLat}, ${newPlan.toLon}`,
+		createdAt: new Date().toString(),
 		state: "new",
 		routes: [],
-		...newPlan,
+		fromLat: newPlan.fromLat.toString(),
+		fromLon: newPlan.fromLon.toString(),
+		toLat: newPlan.toLat.toString(),
+		toLon: newPlan.toLon.toString(),
 	};
 	plans$.plans.set((plans) => [...plans, plan]);
 
