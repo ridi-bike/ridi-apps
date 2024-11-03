@@ -75,12 +75,13 @@ export const plans$ = observable<PlanStore>(
 		},
 		subscribe: ({ refresh }) => {
 			const plansChannel = supabase.realtime
-				.channel("plans")
+				.channel("plans_routes")
 				.on(
 					"postgres_changes",
 					{
 						event: "*",
 						schema: "public",
+						table: "plans",
 					},
 					(_payload) => {
 						console.log("changes", { _payload });
@@ -89,12 +90,13 @@ export const plans$ = observable<PlanStore>(
 				)
 				.subscribe();
 			const routesChannel = supabase.realtime
-				.channel("routes")
+				.channel("plans_routes")
 				.on(
 					"postgres_changes",
 					{
 						event: "*",
 						schema: "public",
+						table: "routes",
 					},
 					(_payload) => {
 						console.log("changes", { _payload });

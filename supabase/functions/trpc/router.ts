@@ -2,23 +2,17 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import {
 	array,
 	date,
-	isoTimestamp,
 	literal,
-	maxValue,
-	minValue,
-	number,
 	object,
 	optional,
 	parser,
-	pipe,
 	string,
-	transform,
 	union,
 	variant,
 } from "valibot";
 import type { Context } from "./context.ts";
 import { planCreate, planList, routesGet } from "./queries_sql.ts";
-import { type FieldsNotNull, lat, lon } from "./util.ts";
+import { type FieldsNotNull, lat, lon, numberStr } from "./util.ts";
 import * as R from "remeda";
 
 const t = initTRPC.context<Context>().create();
@@ -72,7 +66,7 @@ const routeRouter = router({
 								object({
 									pointLat: lat,
 									pointLon: lon,
-									pointOrder: lon,
+									pointSequence: numberStr,
 								}),
 							),
 						}),
@@ -146,7 +140,7 @@ const planRouter = router({
 											object({
 												pointLat: lat,
 												pointLon: lon,
-												pointOrder: lon,
+												pointSequence: numberStr,
 											}),
 										),
 									}),

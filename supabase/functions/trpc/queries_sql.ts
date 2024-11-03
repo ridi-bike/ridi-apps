@@ -13,7 +13,7 @@ select
 	rp.id as point_id,
 	rp.lat as point_lat,
 	rp.lon as point_lon,
-	rp.order_in_route as point_order
+	rp.sequence as point_sequence
 from routes r
 inner join plans p
 	on p.id = r.plan_id
@@ -23,7 +23,7 @@ where r.user_id = $1
 	and r.id = $2
 order by 
 	r.created_at desc, 
-	rp.order_in_route asc`;
+	rp.sequence asc`;
 
 export interface RoutesGetArgs {
     userId: string;
@@ -40,7 +40,7 @@ export interface RoutesGetRow {
     pointId: string | null;
     pointLat: string | null;
     pointLon: string | null;
-    pointOrder: string | null;
+    pointSequence: string | null;
 }
 
 export async function routesGet(sql: Sql, args: RoutesGetArgs): Promise<RoutesGetRow[]> {
@@ -54,7 +54,7 @@ export async function routesGet(sql: Sql, args: RoutesGetArgs): Promise<RoutesGe
         pointId: row[6],
         pointLat: row[7],
         pointLon: row[8],
-        pointOrder: row[9]
+        pointSequence: row[9]
     }));
 }
 
@@ -74,17 +74,17 @@ select
 	rp.id as point_id,
 	rp.lat as point_lat,
 	rp.lon as point_lon,
-	rp.order_in_route as point_order
+	rp.sequence as point_sequence
 from plans p
 left join routes r 
 	on r.plan_id = p.id
 left join route_points rp
 	on rp.route_id = r.id
-		and mod(round(rp.order_in_route, 0), 100) = 0
+		and mod(round(rp.sequence, 0), 100) = 0
 where p.user_id = $1
 order by
 	p.created_at desc,
-	rp.order_in_route asc`;
+	rp.sequence asc`;
 
 export interface PlanListArgs {
     userId: string;
@@ -105,7 +105,7 @@ export interface PlanListRow {
     pointId: string | null;
     pointLat: string | null;
     pointLon: string | null;
-    pointOrder: string | null;
+    pointSequence: string | null;
 }
 
 export async function planList(sql: Sql, args: PlanListArgs): Promise<PlanListRow[]> {
@@ -124,7 +124,7 @@ export async function planList(sql: Sql, args: PlanListArgs): Promise<PlanListRo
         pointId: row[11],
         pointLat: row[12],
         pointLon: row[13],
-        pointOrder: row[14]
+        pointSequence: row[14]
     }));
 }
 
