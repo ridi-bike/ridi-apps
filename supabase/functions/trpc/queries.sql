@@ -9,7 +9,7 @@ select
 	rp.id as point_id,
 	rp.lat as point_lat,
 	rp.lon as point_lon,
-	rp.order_in_route as point_order
+	rp.sequence as point_sequence
 from routes r
 inner join plans p
 	on p.id = r.plan_id
@@ -19,7 +19,7 @@ where r.user_id = $1
 	and r.id = $2
 order by 
 	r.created_at desc, 
-	rp.order_in_route asc;
+	rp.sequence asc;
 
 -- name: PlanList :many
 select 
@@ -37,17 +37,17 @@ select
 	rp.id as point_id,
 	rp.lat as point_lat,
 	rp.lon as point_lon,
-	rp.order_in_route as point_order
+	rp.sequence as point_sequence
 from plans p
 left join routes r 
 	on r.plan_id = p.id
 left join route_points rp
 	on rp.route_id = r.id
-		and mod(round(rp.order_in_route, 0), 100) = 0
+		and mod(round(rp.sequence, 0), 100) = 0
 where p.user_id = $1
 order by
 	p.created_at desc,
-	rp.order_in_route asc;
+	rp.sequence asc;
 
 -- name: PlanCreate :one
 insert into plans (user_id, id, name, from_lat, from_lon, to_lat, to_lon)

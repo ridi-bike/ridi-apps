@@ -78,24 +78,24 @@ export type Database = {
           id: string
           lat: number
           lon: number
-          order_in_route: number
           route_id: string
+          sequence: number
           user_id: string
         }
         Insert: {
           id?: string
           lat: number
           lon: number
-          order_in_route: number
           route_id: string
+          sequence: number
           user_id: string
         }
         Update: {
           id?: string
           lat?: number
           lon?: number
-          order_in_route?: number
           route_id?: string
+          sequence?: number
           user_id?: string
         }
         Relationships: [
