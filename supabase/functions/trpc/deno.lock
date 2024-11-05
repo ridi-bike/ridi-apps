@@ -13,7 +13,8 @@
     "npm:@supabase/storage-js@2.7.0": "2.7.0",
     "npm:@trpc/server@*": "10.45.2",
     "npm:postgres@*": "3.4.5",
-    "npm:remeda@*": "2.16.0"
+    "npm:remeda@*": "2.16.0",
+    "npm:superjson@*": "2.2.1"
   },
   "jsr": {
     "@supabase/functions-js@2.4.3": {
@@ -95,6 +96,15 @@
         "@types/node"
       ]
     },
+    "copy-anything@3.0.5": {
+      "integrity": "sha512-yCEafptTtb4bk7GLEQoM8KVJpxAfdBJYaXyzQEgQQQgYrZiDp8SJmGKlYza6CYjEDNstAdNdKA3UuoULlEbS6w==",
+      "dependencies": [
+        "is-what"
+      ]
+    },
+    "is-what@4.1.16": {
+      "integrity": "sha512-ZhMwEosbFJkA0YhFnNDgTM4ZxDRsS6HqTo7qsZM08fehyRYIYa0yHu5R6mgo1n/8MgaPBXiPimPD77baVFYg+A=="
+    },
     "postgres@3.4.5": {
       "integrity": "sha512-cDWgoah1Gez9rN3H4165peY9qfpEo+SA61oQv65O3cRUE1pOEoJWwddwcqKE8XZYjbblOJlYDlLV4h67HrEVDg=="
     },
@@ -102,6 +112,12 @@
       "integrity": "sha512-HOymkGg58HW4LT8MBEabQEdW76YsqcRNNFPXPrOrnYm+/9Pmk0b9fm8PKgQxoRPa6WDLnRM/LxTXkHdXf9Ab0w==",
       "dependencies": [
         "type-fest"
+      ]
+    },
+    "superjson@2.2.1": {
+      "integrity": "sha512-8iGv75BYOa0xRJHK5vRLEjE2H/i4lulTjzpUXic3Eg8akftYjkmQDa8JARQ42rlczXyFR3IeRoeFCc7RxHsYZA==",
+      "dependencies": [
+        "copy-anything"
       ]
     },
     "tr46@0.0.3": {
@@ -133,7 +149,8 @@
       "jsr:@valibot/valibot@*",
       "npm:@trpc/server@*",
       "npm:postgres@*",
-      "npm:remeda@*"
+      "npm:remeda@*",
+      "npm:superjson@*"
     ]
   }
 }

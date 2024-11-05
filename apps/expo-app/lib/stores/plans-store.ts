@@ -1,14 +1,11 @@
 import { observable } from "@legendapp/state";
 import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
 import { ObservablePersistMMKV } from "@legendapp/state/persist-plugins/mmkv";
-import { supabase, trpcClient } from "./supabase";
-import type { AppRouter } from "../../../supabase/functions/trpc/router";
+import { supabase, trpcClient } from "../supabase";
+import type { AppRouter } from "../../../../supabase/functions/trpc/router";
 import { synced } from "@legendapp/state/sync";
 import { Platform } from "react-native";
-import type { Session } from "@supabase/supabase-js";
 import { generate } from "xksuid";
-
-export const session$ = observable<Session | null>(null);
 
 type Plan = Awaited<ReturnType<AppRouter["plans"]["list"]>>["data"][number];
 type PlanNew = {
@@ -17,7 +14,7 @@ type PlanNew = {
 	toLat: number;
 	toLon: number;
 };
-type PlanStore = {
+type PlansStore = {
 	plans: Plan[];
 };
 
@@ -25,7 +22,7 @@ export function plansStoreAdd(newPlan: PlanNew) {
 	const plan: Plan = {
 		id: generate(),
 		name: `${newPlan.fromLat},${newPlan.fromLon} - ${newPlan.toLat}, ${newPlan.toLon}`,
-		createdAt: new Date().toString(),
+		createdAt: new Date(),
 		state: "new",
 		routes: [],
 		fromLat: newPlan.fromLat.toString(),
@@ -38,9 +35,9 @@ export function plansStoreAdd(newPlan: PlanNew) {
 	return plan.id;
 }
 
-export const plans$ = observable<PlanStore>(
-	synced<PlanStore>({
-		get: async (params): Promise<PlanStore> => {
+export const plans$ = observable<PlansStore>(
+	synced<PlansStore>({
+		get: async (params): Promise<PlansStore> => {
 			console.log("plans get", params);
 			const plansResult = await trpcClient.plans.list.query({ version: "v1" });
 			return {
