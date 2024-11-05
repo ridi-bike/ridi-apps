@@ -1,10 +1,10 @@
 import { For, Memo } from "@legendapp/state/react";
 import { useLocalSearchParams } from "expo-router";
 import { Link } from "expo-router";
-import { ScrollView, View } from "react-native";
+import { ScrollView } from "react-native";
 import { buttonVariants } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
-import { plans$ } from "~/lib/stores";
+import { plans$ } from "~/lib/stores/plans-store";
 import { cn } from "~/lib/utils";
 
 export default function PlanRoutes() {

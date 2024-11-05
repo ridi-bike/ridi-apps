@@ -1,14 +1,11 @@
 import { AppState, Platform } from "react-native";
 import type { AppRouter } from "../../../supabase/functions/trpc/router";
-
-import { createTRPCReact } from "@trpc/react-query";
-
+import superjson from "superjson";
 import { createTRPCClient, httpBatchLink, loggerLink } from "@trpc/client";
 
 import "react-native-url-polyfill/auto";
 import { MMKV } from "react-native-mmkv";
 import { type SupportedStorage, createClient } from "@supabase/supabase-js";
-import { QueryClient } from "@tanstack/react-query";
 import type { Database } from "../../../supabase/functions/trpc/types";
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
@@ -46,6 +43,7 @@ const links = [
 	loggerLink(),
 	httpBatchLink({
 		url: `${supabaseUrl}/functions/v1/trpc/`,
+		transformer: superjson,
 		fetch(url, options) {
 			return fetch(url, {
 				...options,

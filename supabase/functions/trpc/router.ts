@@ -14,8 +14,11 @@ import type { Context } from "./context.ts";
 import { planCreate, planList, routesGet } from "./queries_sql.ts";
 import { type FieldsNotNull, lat, lon, numberStr } from "./util.ts";
 import * as R from "remeda";
+import superjson from "superjson";
 
-const t = initTRPC.context<Context>().create();
+const t = initTRPC.context<Context>().create({
+	transformer: superjson,
+});
 
 const anonProcedure = t.procedure;
 const userProcedure = anonProcedure.use(({ ctx, next }) => {
@@ -172,7 +175,11 @@ const planRouter = router({
 							R.entries(),
 							R.map(([_routeId, oneRouteFlat]) => ({
 								...R.first(oneRouteFlat),
-								points: R.first(onePlanFlat).pointId ? onePlanFlat : [],
+								points: R.first(onePlanFlat)?.pointId
+									? (onePlanFlat as FieldsNotNull<
+										(typeof onePlanFlat)[number]
+									>[])
+									: ([] as FieldsNotNull<(typeof onePlanFlat)[number]>[]),
 							})),
 						)
 						: [],

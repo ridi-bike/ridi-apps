@@ -1,7 +1,7 @@
 import { Text, View } from "react-native";
-import { Memo, Show } from "@legendapp/state/react";
+import { Show } from "@legendapp/state/react";
 import Auth from "~/components/Auth";
-import { session$ } from "~/lib/stores";
+import { session$ } from "~/lib/stores/session-store";
 import { Link } from "expo-router";
 
 export default function Index() {

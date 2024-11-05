@@ -7,6 +7,7 @@
 		"@trpc/server/adapters/fetch": "npm:@trpc/server/adapters/fetch",
 		"valibot": "jsr:@valibot/valibot",
 		"postgres": "npm:postgres",
-		"remeda": "npm:remeda"
+		"remeda": "npm:remeda",
+		"superjson": "npm:superjson"
 	}
 }

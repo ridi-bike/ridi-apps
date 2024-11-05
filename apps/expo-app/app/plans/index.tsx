@@ -3,7 +3,7 @@ import { Link } from "expo-router";
 import { ScrollView } from "react-native";
 import { buttonVariants } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
-import { plans$ } from "~/lib/stores";
+import { plans$ } from "~/lib/stores/plans-store";
 import { cn } from "~/lib/utils";
 
 export default function Plans() {
