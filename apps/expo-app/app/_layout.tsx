@@ -3,6 +3,7 @@ import { PortalHost } from "@rn-primitives/portal";
 import { supabase } from "~/lib/supabase";
 import { $session } from "~/lib/stores/session-store";
 import { useEffectOnce } from "~/lib/utils";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 async function syncSession() {
 	console.log("omg wtf lets mount");
@@ -21,6 +22,8 @@ async function syncSession() {
 	}
 }
 
+const queryClient = new QueryClient();
+
 export default function App() {
 	console.log("app running yeah");
 
@@ -29,11 +32,11 @@ export default function App() {
 	});
 
 	return (
-		<>
+		<QueryClientProvider client={queryClient}>
 			<Stack>
 				<Stack.Screen name="index" />
 			</Stack>
 			<PortalHost />
-		</>
+		</QueryClientProvider>
 	);
 }
