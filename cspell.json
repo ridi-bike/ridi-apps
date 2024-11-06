@@ -14,7 +14,8 @@
 		"ksuid",
 		"xksuid",
 		"sqlc",
-		"remeda"
+		"remeda",
+		"nanostores"
 	],
 	"version": "0.2",
 	"language": "en"

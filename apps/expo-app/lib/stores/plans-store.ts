@@ -1,132 +1,37 @@
-import { observable } from "@legendapp/state";
-import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
-import { ObservablePersistMMKV } from "@legendapp/state/persist-plugins/mmkv";
-import { supabase, trpcClient } from "../supabase";
-import type { AppRouter } from "../../../../supabase/functions/trpc/router";
-import { synced } from "@legendapp/state/sync";
-import { Platform } from "react-native";
-import { generate } from "xksuid";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { trpcClient } from "../supabase";
+import { useEffect } from "react";
+import { Storage } from "../storage";
 
-type Plan = Awaited<ReturnType<AppRouter["plans"]["list"]>>["data"][number];
-type PlanNew = {
-	fromLat: number;
-	fromLon: number;
-	toLat: number;
-	toLon: number;
-};
-type PlansStore = {
-	plans: Plan[];
-};
+type Plan = Awaited<
+	ReturnType<typeof trpcClient.plans.list.query>
+>["data"][number];
+// type PlanNew = Parameters<typeof trpcClient.plans.create.mutate>[0]["data"];
 
-export function plansStoreAdd(newPlan: PlanNew) {
-	const plan: Plan = {
-		id: generate(),
-		name: `${newPlan.fromLat},${newPlan.fromLon} - ${newPlan.toLat}, ${newPlan.toLon}`,
-		createdAt: new Date(),
-		state: "new",
-		routes: [],
-		fromLat: newPlan.fromLat.toString(),
-		fromLon: newPlan.fromLon.toString(),
-		toLat: newPlan.toLat.toString(),
-		toLon: newPlan.toLon.toString(),
-	};
-	plans$.plans.set((plans) => [...plans, plan]);
+const dataKey = "plans";
+const plansStorage = new Storage<Plan[], "v1">(dataKey, "v1");
 
-	return plan.id;
+export function useStorePlans() {
+	const { data, error, status } = useQuery({
+		queryKey: ["plans"],
+		queryFn: async () =>
+			trpcClient.plans.list.query({ version: plansStorage.dataVersion }),
+		initialData: () => {
+			const storedData = plansStorage.get();
+			if (storedData) {
+				return {
+					data: storedData,
+					version: plansStorage.dataVersion,
+				};
+			}
+		},
+	});
+
+	useEffect(() => {
+		if (data) {
+			plansStorage.set(data);
+		}
+	}, [data]);
+
+	return { data, error, status };
 }
-
-export const plans$ = observable<PlansStore>(
-	synced<PlansStore>({
-		get: async (params): Promise<PlansStore> => {
-			console.log("plans get", params);
-			const plansResult = await trpcClient.plans.list.query({ version: "v1" });
-			return {
-				plans: plansResult.data,
-			};
-		},
-		set: async (params) => {
-			if (
-				params.changes.some(
-					(change) => change.path.length !== 1 || change.path[0] !== "plans",
-				)
-			) {
-				throw new Error("unsupported changes");
-			}
-			for (const change of params.changes) {
-				const newPlan = (change.valueAtPath as Plan[]).find(
-					(currPlan) =>
-						!(change.prevAtPath as Plan[]).find(
-							(prevPlan) => prevPlan.id === currPlan.id,
-						),
-				);
-				console.log("plans set", params);
-
-				if (!newPlan) {
-					throw new Error("wut cant be missing");
-				}
-				const plans = await trpcClient.plans.create.mutate({
-					version: "v1",
-					data: newPlan,
-				});
-			}
-		},
-		subscribe: ({ refresh }) => {
-			const plansChannel = supabase.realtime
-				.channel("plans_routes")
-				.on(
-					"postgres_changes",
-					{
-						event: "*",
-						schema: "public",
-						table: "plans",
-					},
-					(_payload) => {
-						console.log("changes", { _payload });
-						refresh();
-					},
-				)
-				.subscribe();
-			const routesChannel = supabase.realtime
-				.channel("plans_routes")
-				.on(
-					"postgres_changes",
-					{
-						event: "*",
-						schema: "public",
-						table: "routes",
-					},
-					(_payload) => {
-						console.log("changes", { _payload });
-						refresh();
-					},
-				)
-				.subscribe();
-
-			console.log("subscribe to changes", plansChannel.state, routesChannel);
-			return () => {
-				plansChannel.unsubscribe();
-				routesChannel.unsubscribe();
-			};
-		},
-		mode: "merge",
-		retry: {
-			infinite: true,
-		},
-		waitFor: session$,
-		initial: {
-			plans: [],
-		},
-		persist: {
-			retrySync: true,
-			name: "plans",
-			plugin:
-				Platform.OS === "web"
-					? ObservablePersistLocalStorage
-					: ObservablePersistMMKV,
-		},
-	}),
-);
-
-// const routes$ = observable<Route[]>(synced<Route[]>({
-// 	get
-// }));

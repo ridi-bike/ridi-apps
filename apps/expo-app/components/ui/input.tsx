@@ -1,9 +1,8 @@
-import { reactive } from "@legendapp/state/react";
 import * as React from "react";
 import { TextInput } from "react-native";
 import { cn } from "~/lib/utils";
 
-const InputInner = React.forwardRef<
+const Input = React.forwardRef<
 	React.ElementRef<typeof TextInput>,
 	React.ComponentPropsWithoutRef<typeof TextInput>
 >(({ className, placeholderClassName, ...props }, ref) => {
@@ -21,6 +20,6 @@ const InputInner = React.forwardRef<
 	);
 });
 
-InputInner.displayName = "Input";
+Input.displayName = "Input";
 
-export const Input = reactive(InputInner);
+export { Input };

@@ -1,17 +1,16 @@
 import { Text, View } from "react-native";
-import { Show } from "@legendapp/state/react";
+import { useStore } from "@nanostores/react";
 import Auth from "~/components/Auth";
-import { session$ } from "~/lib/stores/session-store";
+import { $session } from "~/lib/stores/session-store";
 import { Link } from "expo-router";
 
 export default function Index() {
-	console.log("index ");
+	const session = useStore($session);
+	console.log("index ", { session });
 	return (
 		<View className="flex-1 h-full w-full">
 			<View className="h-24 w-full justify-between flex-row">
-				<Show if={session$}>
-					<Text>{session$.user.id.get()}</Text>
-				</Show>
+				{session && <Text>{session.user.id}</Text>}
 				<Auth />
 			</View>
 			<Link href={"/plans/new"}>new new</Link>
