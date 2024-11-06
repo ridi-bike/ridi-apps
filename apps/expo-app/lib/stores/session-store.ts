@@ -1,4 +1,3 @@
-import { observable } from "@legendapp/state";
-import type { Session } from "@supabase/supabase-js";
+import { atom } from "nanostores";
 
-export const session$ = observable<Session | null>(null);
+export const $session = atom<Session | null>(null);

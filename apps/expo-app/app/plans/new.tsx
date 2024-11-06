@@ -1,6 +1,5 @@
-import { Memo, Show, useObservable } from "@legendapp/state/react";
 import * as Location from "expo-location";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { View } from "react-native";
 import GeoMap from "~/components/geo-map";
 import type { Coords, FindCoords, MapPoint } from "~/components/geo-map/types";
@@ -8,23 +7,24 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
 import { LocationPermsNotGiven } from "~/components/LocationPermsNotGiven";
-import { plansStoreAdd } from "~/lib/stores/plans-store";
 import { useRouter } from "expo-router";
 
 export default function TrackRequestNew() {
 	const router = useRouter();
-	const showLocationAlert$ = useObservable(false);
-	const startCoords$ = useObservable<null | Coords>(null);
-	const finishCoords$ = useObservable<null | Coords>(null);
-	const currentCoords$ = useObservable<null | Coords>(null);
-	const searchTerm$ = useObservable("");
-	const searchPoints$ = useObservable<MapPoint[]>([]);
-	const findCoords$ = useObservable<null | FindCoords>(null);
-	const findCoordsCurrent$ = useObservable<null | Coords>(null);
+	const [showLocationAlert, setShowLocationAlert] = useState(false);
+	const [startCoords, setStartCoords] = useState<null | Coords>(null);
+	const [finishCoords, setFinishCoords] = useState<null | Coords>(null);
+	const [currentCoords, setCurrentCoords] = useState<null | Coords>(null);
+	const [searchTerm, setSearchTerm] = useState("");
+	const [searchPoints, setSearchPoints] = useState<MapPoint[]>([]);
+	const [findCoords, setFindCoords] = useState<null | FindCoords>(null);
+	const [findCoordsCurrent, setFindCoordsCurrent] = useState<null | Coords>(
+		null,
+	);
 
 	const geoSearch = useCallback(async () => {
 		const points: MapPoint[] = [];
-		const request = `https://nominatim.openstreetmap.org/search?q=${searchTerm$.get()}&format=json`;
+		const request = `https://nominatim.openstreetmap.org/search?q=${searchTerm}&format=json`;
 		const response = await fetch(request);
 		const jsonData = await response.json();
 		for (const jsonPoint of jsonData) {
@@ -38,18 +38,18 @@ export default function TrackRequestNew() {
 			};
 			points.push(point);
 		}
-		searchPoints$.set(points);
-	}, [searchPoints$, searchTerm$]);
+		setSearchPoints(points);
+	}, [searchTerm]);
 
 	return (
 		<View>
-			<Show if={showLocationAlert$}>
+			{showLocationAlert && (
 				<LocationPermsNotGiven
 					close={() => {
-						showLocationAlert$.set(false);
+						setShowLocationAlert(false);
 					}}
 				/>
-			</Show>
+			)}
 			<View className="flex-col">
 				<Text>Show on map:</Text>
 				<View className="flex-row">
@@ -59,14 +59,14 @@ export default function TrackRequestNew() {
 							const { status } =
 								await Location.requestForegroundPermissionsAsync();
 							if (status !== "granted") {
-								showLocationAlert$.set(true);
+								setShowLocationAlert(true);
 								return;
 							}
 
 							const location = await Location.getCurrentPositionAsync({});
 
 							if (location) {
-								currentCoords$.set({
+								setCurrentCoords({
 									lat: location.coords.latitude,
 									lon: location.coords.longitude,
 								});
@@ -81,12 +81,12 @@ export default function TrackRequestNew() {
 							const { status } =
 								await Location.requestForegroundPermissionsAsync();
 							if (status !== "granted") {
-								findCoords$.set({
+								setFindCoords({
 									initialCoords: {
 										lat: 0,
 										lon: 0,
 									},
-									onCoordsChange: (coords) => findCoordsCurrent$.set(coords),
+									onCoordsChange: setFindCoordsCurrent,
 								});
 								return;
 							}
@@ -94,20 +94,20 @@ export default function TrackRequestNew() {
 							const location = await Location.getCurrentPositionAsync({});
 
 							if (location) {
-								findCoords$.set({
+								setFindCoords({
 									initialCoords: {
 										lat: location.coords.latitude,
 										lon: location.coords.longitude,
 									},
-									onCoordsChange: (coords) => findCoordsCurrent$.set(coords),
+									onCoordsChange: setFindCoordsCurrent,
 								});
 							} else {
-								findCoords$.set({
+								setFindCoords({
 									initialCoords: {
 										lat: 0,
 										lon: 0,
 									},
-									onCoordsChange: (coords) => findCoordsCurrent$.set(coords),
+									onCoordsChange: setFindCoordsCurrent,
 								});
 							}
 						}}
@@ -118,8 +118,8 @@ export default function TrackRequestNew() {
 				<View className="flex-row">
 					<Input
 						placeholder="Search"
-						$value={searchTerm$}
-						onChangeText={(t) => searchTerm$.set(t)}
+						value={searchTerm}
+						onChangeText={setSearchTerm}
 					/>
 					<Button variant="outline" onPress={geoSearch}>
 						<Text>GO</Text>
@@ -130,17 +130,13 @@ export default function TrackRequestNew() {
 				<View className="flex-row">
 					<Text className="font-bold">Start:</Text>
 					<Text>
-						<Memo>
-							{() => `${startCoords$.lat.get()}, ${startCoords$.lon.get()}`}
-						</Memo>
+						{startCoords ? `${startCoords.lat}, ${startCoords.lon}` : "None"}
 					</Text>
 				</View>
 				<View className="flex-row">
 					<Text className="font-bold">Finish:</Text>
 					<Text>
-						<Memo>
-							{() => `${finishCoords$.lat.get()}, ${finishCoords$.lon.get()}`}
-						</Memo>
+						{finishCoords ? `${finishCoords.lat}, ${finishCoords.lon}` : "None"}
 					</Text>
 				</View>
 			</View>
@@ -148,14 +144,12 @@ export default function TrackRequestNew() {
 				<Button
 					variant="outline"
 					onPress={() => {
-						const start = startCoords$.get();
-						const finish = finishCoords$.get();
-						if (start && finish) {
+						if (startCoords && finishCoords) {
 							const planId = plansStoreAdd({
-								fromLat: start.lat,
-								fromLon: start.lon,
-								toLat: finish.lat,
-								toLon: finish.lon,
+								fromLat: startCoords.lat,
+								fromLon: startCoords.lon,
+								toLat: finishCoords.lat,
+								toLon: finishCoords.lon,
 							});
 							router.replace({
 								pathname: "/plans/[planId]",
@@ -168,19 +162,15 @@ export default function TrackRequestNew() {
 				</Button>
 			</View>
 			<View>
-				<Memo>
-					{() => (
-						<GeoMap
-							start={startCoords$.get()}
-							finish={finishCoords$.get()}
-							current={currentCoords$.get()}
-							points={searchPoints$.get()}
-							findCoords={findCoords$.get() as FindCoords}
-							setStart={(coords) => startCoords$.set(coords)}
-							setFinish={(coords) => finishCoords$.set(coords)}
-						/>
-					)}
-				</Memo>
+				<GeoMap
+					start={startCoords}
+					finish={finishCoords}
+					current={currentCoords}
+					points={searchPoints}
+					findCoords={findCoords}
+					setStart={setStartCoords}
+					setFinish={setFinishCoords}
+				/>
 			</View>
 		</View>
 	);
