@@ -5,22 +5,22 @@ export type FieldsNotNull<T extends object> = {
 };
 
 export const numberStr = pipe(
-	custom((v) => Number(v).toString() === v),
 	string(),
+	custom((v) => Number(v).toString() === v),
 );
 
 export const lon = pipe(
+	string(),
 	custom((v) => {
 		const n = Number(v);
 		return n >= -180 && n <= 180 && n.toString() === v;
 	}),
-	string(),
 );
 
 export const lat = pipe(
+	string(),
 	custom((v) => {
 		const n = Number(v);
 		return n >= -90 && n <= 90 && n.toString() === v;
 	}),
-	string(),
 );

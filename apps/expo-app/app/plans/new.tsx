@@ -8,6 +8,7 @@ import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
 import { LocationPermsNotGiven } from "~/components/LocationPermsNotGiven";
 import { useRouter } from "expo-router";
+import { useStorePlans } from "~/lib/stores/plans-store";
 
 export default function TrackRequestNew() {
 	const router = useRouter();
@@ -21,6 +22,8 @@ export default function TrackRequestNew() {
 	const [findCoordsCurrent, setFindCoordsCurrent] = useState<null | Coords>(
 		null,
 	);
+
+	const { planAdd } = useStorePlans();
 
 	const geoSearch = useCallback(async () => {
 		const points: MapPoint[] = [];
@@ -145,7 +148,7 @@ export default function TrackRequestNew() {
 					variant="outline"
 					onPress={() => {
 						if (startCoords && finishCoords) {
-							const planId = plansStoreAdd({
+							const planId = planAdd({
 								fromLat: startCoords.lat,
 								fromLon: startCoords.lon,
 								toLat: finishCoords.lat,

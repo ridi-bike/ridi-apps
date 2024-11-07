@@ -4,6 +4,9 @@ import { supabase } from "~/lib/supabase";
 import { $session } from "~/lib/stores/session-store";
 import { useEffectOnce } from "~/lib/utils";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { registerBackgroundFetchAsync } from "~/lib/background";
+
+registerBackgroundFetchAsync();
 
 async function syncSession() {
 	console.log("omg wtf lets mount");
