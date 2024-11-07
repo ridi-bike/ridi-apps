@@ -13,7 +13,7 @@ export default function Plans() {
 			<Link href={"/plans"}>list plans</Link>
 			<Text>{status}</Text>
 			<Text>{error?.name}</Text>
-			{(data?.data || []).map((plan) => (
+			{data.map((plan) => (
 				<Link
 					key={plan.id}
 					className={cn(

@@ -11,10 +11,7 @@ export default function PlanRoutes() {
 	const { planId } = useLocalSearchParams<{ planId: string }>();
 	const { data, error, status } = useStorePlans();
 
-	const plan = useMemo(
-		() => data?.data.find((p) => p.id === planId),
-		[data, planId],
-	);
+	const plan = useMemo(() => data.find((p) => p.id === planId), [data, planId]);
 
 	return (
 		<ScrollView className="flex-col h-full w-full">

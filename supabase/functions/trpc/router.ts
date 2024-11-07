@@ -4,7 +4,6 @@ import {
 	date,
 	literal,
 	object,
-	optional,
 	parser,
 	string,
 	union,
@@ -201,8 +200,9 @@ const planRouter = router({
 							fromLon: lon,
 							toLat: lat,
 							toLon: lon,
-							name: optional(string()),
+							name: string(),
 							id: string(),
+							createdAt: date(),
 						}),
 					}),
 				]),
@@ -220,36 +220,23 @@ const planRouter = router({
 				]),
 			),
 		)
-		.mutation(
-			async ({
-				ctx,
-				input: {
-					version,
-					data: { id, name, fromLat, fromLon, toLat, toLon },
-				},
-			}) => {
-				console.log("new plan", name);
-				if (version !== "v1") {
-					throw new Error("wrong version");
-				}
-				const newPlan = await planCreate(ctx.db, {
-					userId: ctx.user.id,
-					id,
-					name: "points",
-					fromLat,
-					fromLon,
-					toLat,
-					toLon,
-				});
-				if (!newPlan) {
-					throw new Error("can't happen");
-				}
-				return {
-					version: "v1",
-					data: newPlan,
-				};
-			},
-		),
+		.mutation(async ({ ctx, input: { version, data } }) => {
+			console.log("new plan", data);
+			if (version !== "v1") {
+				throw new Error("wrong version");
+			}
+			const newPlan = await planCreate(ctx.db, {
+				...data,
+				userId: ctx.user.id,
+			});
+			if (!newPlan) {
+				throw new Error("can't happen");
+			}
+			return {
+				version: "v1",
+				data: newPlan,
+			};
+		}),
 });
 
 export const appRouter = router({

@@ -1,21 +1,18 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { trpcClient } from "../supabase";
 import { useEffect, useMemo } from "react";
-import { Storage } from "../storage";
+import { getRouteStorage } from "../storage";
 
-type Route = Awaited<ReturnType<typeof trpcClient.routes.get.query>>["data"];
-
-const dataKey = "routes";
+export type Route = Awaited<
+	ReturnType<typeof trpcClient.routes.get.query>
+>["data"];
 
 export function useStoreRoute(routeId: string) {
-	const routeStore = useMemo(
-		() => new Storage<Route, "v1">(`${dataKey}:${routeId}`, "v1"),
-		[routeId],
-	);
+	const routeStore = useMemo(() => getRouteStorage(routeId), [routeId]);
 
 	const { data, error, status } = useQuery({
 		queryKey: ["route", routeId],
-		queryFn: async () =>
+		queryFn: () =>
 			trpcClient.routes.get.query({
 				version: routeStore.dataVersion,
 				data: { routeId },
@@ -33,7 +30,7 @@ export function useStoreRoute(routeId: string) {
 
 	useEffect(() => {
 		if (data) {
-			routeStore.set(data);
+			routeStore.set(data.data);
 		}
 	}, [data, routeStore]);
 
