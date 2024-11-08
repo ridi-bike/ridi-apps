@@ -49,34 +49,46 @@ const channel = supabase
 
 				if (!newRoute) throw new Error("Failed to create route");
 
+				let prevPoint = {
+					lat: newPlan.from_lat,
+					lon: newPlan.from_lon,
+				};
+
 				// Generate route points
-				const points: { lat: number; lon: number }[] = [];
-				const steps = 3000;
+				const points: { lat: number; lon: number }[] = [prevPoint];
 
-				const latDiff = newPlan.to_lat - newPlan.from_lat;
-				const lonDiff = newPlan.to_lon - newPlan.from_lon;
+				const stepSize = 0.0001;
 
-				let currentLat = newPlan.from_lat;
-				let currentLon = newPlan.from_lon;
+				const isCloseEnough = (n1: number, n2: number) => {
+					return Math.abs(n1 - n2) < stepSize;
+				};
 
-				for (let i = 0; i < steps; i++) {
-					points.push({ lat: currentLat, lon: currentLon });
+				const getNextVal = (prevVal: number, add: boolean) => {
+					const nextStep = Math.random() * stepSize * 10;
+					const nextAddFlip = Math.random() < 0.3;
+					const nextAdd = nextAddFlip ? !add : add;
+					return nextAdd ? prevVal + nextStep : prevVal - nextStep;
+				};
 
-					// Random step size between 0 and 0.01
-					const stepSize = Math.random() * 0.01;
+				while (
+					!isCloseEnough(prevPoint.lat, newPlan.to_lat) ||
+					!isCloseEnough(prevPoint.lon, newPlan.to_lon)
+				) {
+					const latAdd = prevPoint.lat < newPlan.to_lat;
+					const lonAdd = prevPoint.lon < newPlan.to_lon;
+					prevPoint = {
+						lat: getNextVal(prevPoint.lat, latAdd),
+						lon: getNextVal(prevPoint.lon, lonAdd),
+					};
 
-					// Progress towards destination
-					const progress = i / steps;
-					const targetLat = newPlan.from_lat + latDiff * progress;
-					const targetLon = newPlan.from_lon + lonDiff * progress;
-
-					// Move towards target with some randomness
-					currentLat += (targetLat - currentLat) * stepSize;
-					currentLon += (targetLon - currentLon) * stepSize;
+					points.push(prevPoint);
 				}
+				points.push({
+					lat: newPlan.to_lat,
+					lon: newPlan.to_lon,
+				});
 
-				// Add final destination point
-				points.push({ lat: newPlan.to_lat, lon: newPlan.to_lon });
+				console.log("points count", points.length);
 
 				// Insert points into route_points table
 				await supabase.from("route_points").insert(

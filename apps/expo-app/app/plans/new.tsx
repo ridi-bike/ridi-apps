@@ -2,7 +2,7 @@ import * as Location from "expo-location";
 import { useCallback, useState } from "react";
 import { View } from "react-native";
 import GeoMap from "~/components/geo-map";
-import type { Coords, FindCoords, MapPoint } from "~/components/geo-map/types";
+import type { Coords, MapPoint } from "~/components/geo-map/types";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
@@ -18,8 +18,7 @@ export default function TrackRequestNew() {
 	const [currentCoords, setCurrentCoords] = useState<null | Coords>(null);
 	const [searchTerm, setSearchTerm] = useState("");
 	const [searchPoints, setSearchPoints] = useState<MapPoint[]>([]);
-	const [findCoords, setFindCoords] = useState<null | FindCoords>(null);
-	const [findCoordsCurrent, setFindCoordsCurrent] = useState<null | Coords>(
+	const [initialFindCoords, setInitialFindCoords] = useState<null | Coords>(
 		null,
 	);
 
@@ -84,12 +83,9 @@ export default function TrackRequestNew() {
 							const { status } =
 								await Location.requestForegroundPermissionsAsync();
 							if (status !== "granted") {
-								setFindCoords({
-									initialCoords: {
-										lat: 0,
-										lon: 0,
-									},
-									onCoordsChange: setFindCoordsCurrent,
+								setInitialFindCoords({
+									lat: 0,
+									lon: 0,
 								});
 								return;
 							}
@@ -97,20 +93,14 @@ export default function TrackRequestNew() {
 							const location = await Location.getCurrentPositionAsync({});
 
 							if (location) {
-								setFindCoords({
-									initialCoords: {
-										lat: location.coords.latitude,
-										lon: location.coords.longitude,
-									},
-									onCoordsChange: setFindCoordsCurrent,
+								setInitialFindCoords({
+									lat: location.coords.latitude,
+									lon: location.coords.longitude,
 								});
 							} else {
-								setFindCoords({
-									initialCoords: {
-										lat: 0,
-										lon: 0,
-									},
-									onCoordsChange: setFindCoordsCurrent,
+								setInitialFindCoords({
+									lat: 0,
+									lon: 0,
 								});
 							}
 						}}
@@ -170,7 +160,7 @@ export default function TrackRequestNew() {
 					finish={finishCoords}
 					current={currentCoords}
 					points={searchPoints}
-					findCoords={findCoords}
+					initialFindCoords={initialFindCoords}
 					setStart={setStartCoords}
 					setFinish={setFinishCoords}
 				/>
