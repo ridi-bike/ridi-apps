@@ -17,5 +17,5 @@ procs:
     shell: "pnpm tsc"
     cwd: "apps/expo-app"
   deno:
-    shell: "deno --env --allow-env --allow-net main.ts"
+    shell: "deno --watch --env --allow-env --allow-net main.ts"
     cwd: "apps/deno-app"

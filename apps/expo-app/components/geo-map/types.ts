@@ -1,19 +1,14 @@
-import type { Observable } from "@legendapp/state";
 import type { PropsWithChildren } from "react";
 
 export type GeoMapProps = {
-	start: Coords | null;
-	finish: Coords | null;
-	current: Coords | null;
-	points: MapPoint[];
-	findCoords: FindCoords | null;
-	setStart: (coords: Coords) => void;
-	setFinish: (cords: Coords) => void;
-};
-
-export type FindCoords = {
-	initialCoords: Coords;
-	onCoordsChange: (coords: Coords) => void;
+	start?: Coords | null;
+	finish?: Coords | null;
+	current?: Coords | null;
+	points?: MapPoint[];
+	initialFindCoords?: Coords | null;
+	setStart?: (coords: Coords) => void;
+	setFinish?: (cords: Coords) => void;
+	route?: Coords[];
 };
 
 export type Coords = {

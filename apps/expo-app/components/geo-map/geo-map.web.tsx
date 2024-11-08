@@ -1,4 +1,10 @@
-import { Map as MapLibre, type MapRef } from "@vis.gl/react-maplibre";
+import {
+	type LineLayer,
+	Layer,
+	Map as MapLibre,
+	Source,
+	type MapRef,
+} from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import {
 	CircleDotIcon,
@@ -8,49 +14,51 @@ import {
 	CircleUserIcon,
 } from "lucide-react-native";
 import maplibre from "maplibre-gl";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Text } from "~/components/ui/text";
 import { Button } from "../ui/button";
 import { MapMarker } from "./marker";
 import type { Coords, GeoMapProps } from "./types";
+import type { FeatureCollection } from "geojson";
 
 export default function GeoMap({
 	start,
 	finish,
 	current,
 	points,
-	findCoords,
+	initialFindCoords,
 	setStart,
 	setFinish,
+	route,
 }: GeoMapProps) {
 	const mapRef = useRef<MapRef>(null);
 	const [findCoordsCurr, setFindCoordsCurr] = useState<Coords | null>(
-		findCoords
+		initialFindCoords
 			? {
-				lat: findCoords.initialCoords.lat,
-				lon: findCoords.initialCoords.lon,
+				lat: initialFindCoords.lat,
+				lon: initialFindCoords.lon,
 			}
 			: null,
 	);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: because we only care about coords
 	useEffect(() => {
-		if (findCoords) {
+		if (initialFindCoords) {
 			setFindCoordsCurr({
-				lat: findCoords.initialCoords.lat,
-				lon: findCoords.initialCoords.lon,
+				lat: initialFindCoords.lat,
+				lon: initialFindCoords.lon,
 			});
 		}
-	}, [findCoords?.initialCoords.lat, findCoords?.initialCoords.lon]);
+	}, [initialFindCoords?.lat, initialFindCoords?.lon]);
 
 	const Actions = useCallback(
 		(coords: Coords) => {
 			return (
 				<>
-					<Button variant="outline" onPress={() => setStart(coords)}>
+					<Button variant="outline" onPress={() => setStart?.(coords)}>
 						<Text>Start</Text>
 					</Button>
-					<Button variant="outline" onPress={() => setFinish(coords)}>
+					<Button variant="outline" onPress={() => setFinish?.(coords)}>
 						<Text>End</Text>
 					</Button>
 				</>
@@ -60,76 +68,125 @@ export default function GeoMap({
 	);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: only redraw when lat/lon change
-	useEffect(() => {
-		if (mapRef.current) {
-			const filterNumbers = (n: unknown) => Number(n) === n;
+	const mapBounds = useMemo(() => {
+		const filterNumbers = (n: unknown) => Number(n) === n;
 
-			const latValues = [
-				findCoordsCurr?.lat || findCoords?.initialCoords.lat,
-				start?.lat,
-				finish?.lat,
-				current?.lat,
-				...points.map((p) => p.coords.lat),
-			].filter(filterNumbers) as number[];
+		const latValues = [
+			findCoordsCurr?.lat || initialFindCoords?.lat,
+			start?.lat,
+			finish?.lat,
+			current?.lat,
+			...(points || []).map((p) => p.coords.lat),
+			...(route || []).map((p) => p.lat),
+		].filter(filterNumbers) as number[];
 
-			const lonValues = [
-				findCoordsCurr?.lon || findCoords?.initialCoords.lon,
-				start?.lon,
-				finish?.lon,
-				current?.lon,
-				...points.map((p) => p.coords.lon),
-			].filter(filterNumbers) as number[];
+		const lonValues = [
+			findCoordsCurr?.lon || initialFindCoords?.lon,
+			start?.lon,
+			finish?.lon,
+			current?.lon,
+			...(points || []).map((p) => p.coords.lon),
+			...(route || []).map((p) => p.lon),
+		].filter(filterNumbers) as number[];
 
-			if (latValues.length && lonValues.length) {
-				const minLat = Math.min(...latValues);
-				const maxLat = Math.max(...latValues);
-				const minLon = Math.min(...lonValues);
-				const maxLon = Math.max(...lonValues);
-				mapRef.current.fitBounds([
-					[minLon - (maxLon - minLon) * 0.2, maxLat + (maxLat - minLat) * 0.2],
-					[maxLon + (maxLon - minLon) * 0.2, minLat - (maxLat - minLat) * 0.2],
-				]);
-			}
+		if (latValues.length && lonValues.length) {
+			const minLat = Math.min(...latValues);
+			const maxLat = Math.max(...latValues);
+			const minLon = Math.min(...lonValues);
+			const maxLon = Math.max(...lonValues);
+			return [
+				minLon - (maxLon - minLon) * 0.2,
+				maxLat + (maxLat - minLat) * 0.2,
+				maxLon + (maxLon - minLon) * 0.2,
+				minLat - (maxLat - minLat) * 0.2,
+			] as const;
 		}
+		return null;
 	}, [
 		[
-			findCoords?.initialCoords.lat,
-			findCoords?.initialCoords.lon,
+			initialFindCoords?.lat,
+			initialFindCoords?.lon,
 			start?.lat,
 			start?.lon,
 			finish?.lat,
 			finish?.lon,
 			current?.lat,
 			current?.lon,
-			points.map((p) => [p.coords.lat, p.coords.lon].join(",")).join(","),
+			(points || [])
+				.map((p) => [p.coords.lat, p.coords.lon].join(","))
+				.join(","),
+			(route || []).map((p) => [p.lat, p.lon].join(",")),
 		].join(","),
 	]);
+
+	useEffect(() => {
+		if (mapRef.current && mapBounds) {
+			mapRef.current.fitBounds(mapBounds);
+		}
+	}, [mapBounds]);
+
+	const routeLayer = useMemo(() => {
+		if (!route) {
+			return null;
+		}
+		const routeLayerId = "route-layer";
+		const layerStyle: LineLayer = {
+			id: "route-layer",
+			type: "line",
+			source: routeLayerId,
+			paint: {
+				"line-color": "#FF0000",
+				"line-width": 3,
+			},
+		};
+		const geojson: FeatureCollection = {
+			type: "FeatureCollection",
+			features: [
+				{
+					type: "Feature",
+					properties: {},
+					geometry: {
+						type: "LineString",
+						coordinates: route.map((routePoint) => [
+							routePoint.lon,
+							routePoint.lat,
+						]),
+					},
+				},
+			],
+		};
+		return (
+			<Source id={routeLayerId} type="geojson" data={geojson}>
+				<Layer {...layerStyle} />
+			</Source>
+		);
+	}, [route]);
 
 	return (
 		<MapLibre
 			ref={mapRef}
 			mapLib={maplibre}
-			initialViewState={{
-				longitude: -100,
-				latitude: 40,
-				zoom: 3.5,
-			}}
+			initialViewState={
+				mapBounds
+					? { bounds: [...mapBounds] }
+					: {
+						longitude: 0,
+						latitude: 0,
+						zoom: 0.5,
+					}
+			}
 			style={{ width: 600, height: 400 }}
 			mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
 			onDrag={(event) => {
-				if (findCoords) {
+				if (initialFindCoords) {
 					setFindCoordsCurr({
-						lat: event.viewState.latitude,
-						lon: event.viewState.longitude,
-					});
-					findCoords.onCoordsChange({
 						lat: event.viewState.latitude,
 						lon: event.viewState.longitude,
 					});
 				}
 			}}
 		>
-			{points.map((point) => (
+			{(points || []).map((point) => (
 				<MapMarker
 					key={`${point.coords.lat},${point.coords.lon}`}
 					lat={point.coords.lat}
@@ -185,6 +242,7 @@ export default function GeoMap({
 					<CircleDotIcon className="h-8 w-8 text-yellow-500" />
 				</MapMarker>
 			)}
+			{routeLayer}
 		</MapLibre>
 	);
 }
