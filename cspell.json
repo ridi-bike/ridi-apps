@@ -15,7 +15,8 @@
 		"xksuid",
 		"sqlc",
 		"remeda",
-		"nanostores"
+		"nanostores",
+		"healthcheck"
 	],
 	"version": "0.2",
 	"language": "en"
