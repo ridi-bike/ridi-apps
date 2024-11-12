@@ -1,7 +1,7 @@
 FROM alpine:3.18
 
 # Install required packages
-RUN apk add --no-cache curl coreutils
+RUN apk add --no-cache wget coreutils
 
 # Set working directory
 WORKDIR /app
