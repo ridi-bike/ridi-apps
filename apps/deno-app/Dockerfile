@@ -5,9 +5,8 @@ WORKDIR /app
 # Install required packages and clean up
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
-# Environment variables for ridi-router
-ENV RIDI_ROUTER_VERSION=""
-ENV RIDI_ROUTER_REGION=""
+# Build arguments for ridi-router
+ARG RIDI_ROUTER_VERSION=""
 
 # Create a startup script
 COPY startup.sh .
