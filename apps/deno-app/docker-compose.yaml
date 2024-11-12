@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - RIDI_ROUTER_VERSION=${RIDI_ROUTER_VERSION}
     environment:
       - RIDI_ROUTER_REGION=${RIDI_ROUTER_REGION}
     volumes:
