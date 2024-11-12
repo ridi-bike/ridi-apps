@@ -23,13 +23,13 @@ while true; do
         LOCAL_MD5=$(md5sum "$LATEST_FILE" | cut -d' ' -f1)
         
         # Download and extract remote MD5
-        REMOTE_MD5=$(curl -L -s "$MD5_URL" | cut -d' ' -f1)
+        REMOTE_MD5=$(wget -qO- "$MD5_URL" | cut -d' ' -f1)
         
         if [ "$LOCAL_MD5" != "$REMOTE_MD5" ]; then
             echo "MD5 checksums differ, downloading new data"
             
             # Download new data
-            if curl -L -o "$NEXT_FILE" "$REMOTE_URL"; then
+            if wget -O "$NEXT_FILE" "$REMOTE_URL"; then
                 # Remove old file and rename new one
                 rm "$LATEST_FILE"
                 mv "$NEXT_FILE" "$LATEST_FILE"
@@ -45,7 +45,7 @@ while true; do
         echo "No existing OSM data file found, downloading..."
         
         # Download initial data
-        if curl -L -o "$NEXT_FILE" "$REMOTE_URL"; then
+        if wget -O "$NEXT_FILE" "$REMOTE_URL"; then
             mv "$NEXT_FILE" "$LATEST_FILE"
             echo "Initial download completed successfully"
         else
