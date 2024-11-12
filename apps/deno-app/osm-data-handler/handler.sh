@@ -12,7 +12,7 @@ while true; do
     LATEST_FILE="/osm-data/${RIDI_ROUTER_REGION}_latest.osm.pbf"
     NEXT_FILE="/osm-data/${RIDI_ROUTER_REGION}_next.osm.pbf"
     REMOTE_URL="https://download.geofabrik.de/${RIDI_ROUTER_REGION}-latest.osm.pbf"
-    MD5_URL="https://download.geofabrik.de/${RIDI_ROUTER_REGION}-latest.osm.md5"
+    MD5_URL="https://download.geofabrik.de/${RIDI_ROUTER_REGION}-latest.osm.pbf.md5"
     
     echo "Remote file URL: $REMOTE_URL"
 
@@ -21,15 +21,18 @@ while true; do
         
         # Calculate local MD5
         LOCAL_MD5=$(md5sum "$LATEST_FILE" | cut -d' ' -f1)
+				echo "Local file md5 $LOCAL_MD5"
         
         # Download and extract remote MD5
-        REMOTE_MD5=$(wget -qO- "$MD5_URL" | cut -d' ' -f1)
+        REMOTE_MD5=$(curl -s "$MD5_URL" | cut -d' ' -f1)
+				echo "Remote file md5 $REMOTE_MD5"
+				echo "Remote md5 url $MD5_URL"
         
         if [ "$LOCAL_MD5" != "$REMOTE_MD5" ]; then
             echo "MD5 checksums differ, downloading new data"
             
             # Download new data
-            if wget -O "$NEXT_FILE" "$REMOTE_URL"; then
+            if curl -# -L -o "$NEXT_FILE" "$REMOTE_URL"; then
                 # Remove old file and rename new one
                 rm "$LATEST_FILE"
                 mv "$NEXT_FILE" "$LATEST_FILE"
@@ -45,7 +48,7 @@ while true; do
         echo "No existing OSM data file found, downloading..."
         
         # Download initial data
-        if wget -O "$NEXT_FILE" "$REMOTE_URL"; then
+        if curl -# -L -o "$NEXT_FILE" "$REMOTE_URL"; then
             mv "$NEXT_FILE" "$LATEST_FILE"
             echo "Initial download completed successfully"
         else

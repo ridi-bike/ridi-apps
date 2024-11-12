@@ -21,4 +21,4 @@ RUN deno install --lock deno.lock --frozen=true --entrypoint main.ts
 
 USER deno
 
-CMD ["./startup.sh"]
+CMD ["/bin/sh", "./startup.sh"]
