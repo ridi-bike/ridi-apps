@@ -11,4 +11,4 @@ COPY handler.sh .
 RUN chmod +x handler.sh
 
 # Set the entry point to run handler.sh
-ENTRYPOINT ["./handler.sh"]
+ENTRYPOINT ["/bin/sh", "./handler.sh"]
