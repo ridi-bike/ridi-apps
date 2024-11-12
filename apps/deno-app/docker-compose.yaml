@@ -1,0 +1,32 @@
+version: "3"
+name: ridi-router
+services:
+  ridi-router-handler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - RIDI_ROUTER_REGION=${RIDI_ROUTER_REGION}
+    volumes:
+      - osm-data:/osm-data
+    depends_on:
+      osm-data-handler:
+        condition: service_healthy
+
+  osm-data-handler:
+    build:
+      context: ./osm-data-handler
+      dockerfile: Dockerfile
+    environment:
+      - RIDI_ROUTER_REGION=${RIDI_ROUTER_REGION}
+    volumes:
+      - osm-data:/osm-data
+    healthcheck:
+      test: ["CMD", "/bin/sh", "./healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 60
+      start_period: 0s
+
+volumes:
+  osm-data: {}

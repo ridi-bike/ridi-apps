@@ -1,0 +1,14 @@
+FROM alpine:3.18
+
+# Install required packages
+RUN apk add --no-cache curl coreutils
+
+# Set working directory
+WORKDIR /app
+
+# Copy handler script and other necessary files
+COPY handler.sh .
+RUN chmod +x handler.sh
+
+# Set the entry point to run handler.sh
+ENTRYPOINT ["./handler.sh"]
