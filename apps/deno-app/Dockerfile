@@ -16,8 +16,8 @@ COPY . .
 RUN deno install --lock deno.lock --frozen=true --entrypoint main.ts
 
 # Download ridi-router binary
-# RUN curl -L "https://github.com/tomsjansons/ridi-router/releases/download/${RIDI_ROUTER_VERSION}/ridi_router_${RIDI_ROUTER_VERSION}" -o ridi_router \
-    # && chmod +x ridi_router
+RUN curl -L "https://github.com/tomsjansons/ridi-router/releases/download/${RIDI_ROUTER_VERSION}/ridi-router" -o ridi-router \
+    && chmod +x ridi-router
 
 USER deno
 
