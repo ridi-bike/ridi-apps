@@ -9,8 +9,10 @@ RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 ARG RIDI_ROUTER_VERSION=""
 
 # Create a startup script
-COPY startup.sh .
+COPY ./startup.sh .
 RUN chmod +x startup.sh
+
+COPY ./region-list.json .
 
 COPY . .
 RUN deno install --lock deno.lock --frozen=true --entrypoint main.ts
