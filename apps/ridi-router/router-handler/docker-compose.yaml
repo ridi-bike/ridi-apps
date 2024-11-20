@@ -1,0 +1,12 @@
+name: router-handler
+services:
+  router-handler:
+    extends:
+      file: ../deno-base-docker-compose.yaml
+      service: deno-service
+    build:
+      context: .
+      dockerfile: ../Dockerfile
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SECRET_KEY=${SUPABASE_SECRET_KEY}
