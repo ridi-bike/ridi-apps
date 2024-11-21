@@ -3,6 +3,7 @@
 		"dev": "deno run --env-file=../.env --watch main.ts"
 	},
 	"imports": {
-		"sqlite": "jsr:@db/sqlite@0.12"
+		"valibot": "jsr:@valibot/valibot@0.42.1",
+		"p-queue": "npm:p-queue@8"
 	}
 }
