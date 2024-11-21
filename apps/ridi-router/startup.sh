@@ -1,4 +1,4 @@
 #!/bin/bash
 
-deno run --allow-env --allow-net main.ts
+deno run --allow-all --unstable-ffi main.ts
 

@@ -1,0 +1,8 @@
+{
+	"workspace": [
+		"./deploy-handler",
+		"./map-data-handler",
+		"./router-handler",
+		"./lib"
+	]
+}

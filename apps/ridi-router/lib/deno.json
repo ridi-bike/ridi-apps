@@ -1,0 +1,9 @@
+{
+	"name": "@ridi-router/lib",
+	"version": "0.1.0",
+	"exports": "./main.ts",
+	"imports": {
+		"sqlite": "jsr:@db/sqlite@0.12",
+		"valibot": "jsr:@valibot/valibot@0.42.1"
+	}
+}
