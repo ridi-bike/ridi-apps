@@ -3,6 +3,7 @@ import {
 	type InferInput,
 	integer,
 	literal,
+	nullable,
 	number,
 	object,
 	parse,
@@ -31,7 +32,7 @@ const mapDataRecordSchema = object({
 	pbf_md5: string(),
 	cache_location: string(),
 	router_version: string(),
-	error: string(),
+	error: nullable(string()),
 });
 export type MapDataRecord = InferInput<typeof mapDataRecordSchema>;
 
@@ -48,18 +49,21 @@ function toMapDataRow(row: Record<string, unknown>) {
 	return parsedRow;
 }
 export function getDb(dbLocation: string) {
-	const db = new Database(`${dbLocation}/sqlite.db`);
+	console.debug(dbLocation, "");
+	const db = new Database(dbLocation, { create: true });
+	// const db = new Database(":memory:", { create: true });
+	console.debug(db);
 
 	db.prepare(`
 		create table if not exists map_data (
 			id integer primary key autoincrement,
 			region text not null,
 			version text not null check(version in ('current', 'previous', 'next', 'discarded')),
-			status text not null check(status in ('new', 'downloaded', 'processing', 'ready', 'error'))
+			status text not null check(status in ('new', 'downloaded', 'processing', 'ready', 'error')),
 			pbf_location text not null,
 			pbf_md5 text not null,
 			cache_location text not null,
-			router_version text not null
+			router_version text not null,
 			error text
 		);
 		`).run();

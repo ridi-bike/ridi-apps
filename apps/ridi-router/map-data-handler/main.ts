@@ -6,6 +6,11 @@ const cacheProcessorQueue = new PQueue({ concurrency: 1 });
 
 const db = getDb(locations.getDbFileLoc());
 
+const routerBin = parse(
+	string("RIDI_ROUTER_BIN env variable"),
+	Deno.env.get("RIDI_ROUTER_BIN"),
+);
+
 const routerVersion = parse(
 	string("RIDI_ROUTER_VERSION env variable"),
 	Deno.env.get("RIDI_ROUTER_VERSION"),
@@ -18,9 +23,13 @@ const regions = parse(
 	JSON.parse(Deno.readTextFileSync(locations.getRegionListFileLoc())),
 );
 
+console.log({
+	regions,
+});
+
 async function generateCache(mapDataRecord: MapDataRecord) {
 	db.mapData.updateRecordProcessing(mapDataRecord.id);
-	const cmd = new Deno.Command("ridi-router", {
+	const cmd = new Deno.Command(routerBin, {
 		args: [
 			"cache",
 			"-i",
@@ -48,10 +57,11 @@ async function generateCache(mapDataRecord: MapDataRecord) {
 async function processRegionList() {
 	db.handlers.updateRecordProcessing("map-data");
 
-	for (const region in regions) {
+	for (const region of regions) {
 		const remoteMd5Url =
 			`https://download.geofabrik.de/${region}-latest.osm.pbf.md5`;
-		const remoteMd5File = await fetch(remoteMd5Url);
+		console.log({ remoteMd5Url });
+		const remoteMd5File = await fetch(remoteMd5Url, { redirect: "follow" });
 		const remoteMd5 = (await remoteMd5File.text()).split(" ")[0];
 
 		const nextMapData = db.mapData.getNextRecord(region);
@@ -96,9 +106,9 @@ async function downloadRegion(
 		routerVersion,
 		await locations.getCacheDirLoc(region, routerVersion),
 	);
-
+	console.log({ remoteFileUrl });
 	try {
-		const fileResponse = await fetch(remoteFileUrl);
+		const fileResponse = await fetch(remoteFileUrl, { redirect: "follow" });
 
 		if (fileResponse.body) {
 			const file = await Deno.open(fileLocation, {
@@ -135,7 +145,7 @@ processRegionList();
 
 setInterval(checkForHandlerStatus, 10 * 60 * 1000); // every 10 min
 
-Deno.serve({ port: 2727, hostname: "0.0.0.0" }, (_req) => {
+Deno.serve({ port: 2727, hostname: "0.0.0.0" }, async (_req) => {
 	const handlerRec = db.handlers.get("map-data");
 	if (handlerRec) {
 		return new Response("ok");
