@@ -11,10 +11,15 @@ import {
 	union,
 } from "valibot";
 
-const mapDataRowSchema = object({
+const mapDataRecordSchema = object({
 	id: pipe(number(), integer()),
 	region: string(),
-	version: union([literal("current"), literal("previous"), literal("next")]),
+	version: union([
+		literal("current"),
+		literal("previous"),
+		literal("next"),
+		literal("discarded"),
+	]),
 	status: union([
 		literal("new"),
 		literal("downloaded"),
@@ -22,15 +27,24 @@ const mapDataRowSchema = object({
 		literal("ready"),
 		literal("error"),
 	]),
-	pbfLocation: string(),
-	pbfMd5: string(),
-	cacheLocation: string(),
-	cacheRouterVersion: string(),
+	pbf_location: string(),
+	pbf_md5: string(),
+	cache_location: string(),
+	router_version: string(),
+	error: string(),
 });
-export type MapDataRecord = InferInput<typeof mapDataRowSchema>;
+export type MapDataRecord = InferInput<typeof mapDataRecordSchema>;
+
+const handlersRecordSchema = object({
+	name: union([literal("map-data"), literal("router"), literal("deploy")]),
+	router_version: string(),
+	status: union([literal("idle"), literal("processing")]),
+	updated_at: pipe(number(), integer()),
+});
+export type HandlersRecord = InferInput<typeof handlersRecordSchema>;
 
 function toMapDataRow(row: Record<string, unknown>) {
-	const parsedRow = parse(mapDataRowSchema, row);
+	const parsedRow = parse(mapDataRecordSchema, row);
 	return parsedRow;
 }
 export function getDb(dbLocation: string) {
@@ -40,16 +54,69 @@ export function getDb(dbLocation: string) {
 		create table if not exists map_data (
 			id integer primary key autoincrement,
 			region text not null,
-			version text not null check(version in ('current', 'previous', 'next')),
+			version text not null check(version in ('current', 'previous', 'next', 'discarded')),
 			status text not null check(status in ('new', 'downloaded', 'processing', 'ready', 'error'))
 			pbf_location text not null,
-			pbf_mdf text not null,
+			pbf_md5 text not null,
 			cache_location text not null,
 			router_version text not null
+			error text
+		);
+		`).run();
+
+	db.prepare(`
+		create table if not exists handlers (
+			name text check(name in ('map-data', 'router', 'deploy')) primary key,
+			router_version text not null,
+			status text not null check(status in ('idle', 'processing')),
+			updated_at integer not null
 		);
 		`).run();
 
 	return {
+		handlers: {
+			get(name: HandlersRecord["name"]) {
+				const handlerData = db.sql`select * from handlers 
+																		where name = ${name}`;
+				if (handlerData.length > 1) {
+					throw new Error("encountered more than one row");
+				}
+				return handlerData[0]
+					? parse(handlersRecordSchema, handlerData[0])
+					: null;
+			},
+			createUpdate(name: HandlersRecord["name"], routerVersion: string) {
+				const handlerRecord = db.sql`select * from handlers 
+									where name = ${name}`[0];
+				if (handlerRecord) {
+					db.sql`update handlers
+									set 
+										router_version = ${routerVersion}, 
+										updated_at = ${new Date().getTime()}
+									where name = ${name}`;
+				} else {
+					db.sql`insert into handlers (name, router_version, status, updated_at)
+									values (${name}, ${routerVersion}, 'idle', ${
+						new Date().getTime()
+					})`;
+				}
+			},
+			updateRecordProcessing(name: HandlersRecord["name"]) {
+				db.sql`update handlers
+								set status = 'processing', updated_at = ${new Date().getTime()}
+								where name = ${name}`;
+			},
+			updateRecordUpdatedAt(name: HandlersRecord["name"]) {
+				db.sql`update handlers
+								set updated_at = ${new Date().getTime()}
+								where name = ${name}`;
+			},
+			updateRecordIdle(name: HandlersRecord["name"]) {
+				db.sql`update handlers
+								set status = 'idle', updated_at = ${new Date().getTime()}
+								where name = ${name}`;
+			},
+		},
 		mapData: {
 			createNextRecord(
 				region: string,
@@ -85,18 +152,41 @@ export function getDb(dbLocation: string) {
 								set status = 'ready'
 								where id = ${id}`;
 			},
-			updateRecordError(id: number) {
+			updateRecordError(id: number, error: string) {
 				db.sql`update map_data
-								set status = 'ready'
+								set status = 'error', error = ${error}
 								where id = ${id}`;
 			},
-			getCurrentRecord(region: string): MapDataRecord | null {
+			updateRecordDiscarded(id: number) {
+				db.sql`update map_data
+								set version = 'discarded'
+								where id = ${id}`;
+			},
+			getNextRecord(region: string): MapDataRecord | null {
 				const mapData = db
-					.sql`select * from map_data where region = ${region} and version = 'current'`;
+					.sql`select * from map_data 
+								where region = ${region} 
+									and version = 'next'`;
 				if (mapData.length > 1) {
 					throw new Error("encountered more than one row");
 				}
 				return mapData[0] ? toMapDataRow(mapData[0]) : null;
+			},
+			getCurrentRecord(region: string): MapDataRecord | null {
+				const mapData = db
+					.sql`select * from map_data 
+								where region = ${region} 
+									and version = 'current'`;
+				if (mapData.length > 1) {
+					throw new Error("encountered more than one row");
+				}
+				return mapData[0] ? toMapDataRow(mapData[0]) : null;
+			},
+			getAllNextRecords(): MapDataRecord[] {
+				const mapData = db
+					.sql`select * from map_data 
+								where version = 'next'`;
+				return mapData.map((row) => toMapDataRow(row));
 			},
 		},
 		close() {
