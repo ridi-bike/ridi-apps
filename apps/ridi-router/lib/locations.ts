@@ -15,7 +15,9 @@ export const locations = {
 		return regionListLoc;
 	},
 	getDbFileLoc() {
-		return `${dataDir}/db/sqlite.db`;
+		const loc = `${dataDir}/db`;
+		Deno.mkdirSync(loc, { recursive: true });
+		return `${loc}/sqlite.db`;
 	},
 	async getCacheDirLoc(region: string, routerVersion: string) {
 		const loc = `${dataDir}/cache/${routerVersion}/${region}`;
