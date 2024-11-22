@@ -9,15 +9,9 @@ RUN apt-get update && apt-get install -y curl coreutils && rm -rf /var/lib/apt/l
 ARG RIDI_ROUTER_VERSION
 ENV RIDI_ROUTER_VERSION=${RIDI_ROUTER_VERSION}
 
-# Create a startup script
-COPY ../startup.sh .
-RUN chmod +x startup.sh
-
-ENV REGION_LIST=./region-list-prod.json
-COPY ../region-list-prod.json .
-COPY ../lib ../lib
-
 COPY . .
+ENV REGION_LIST=./region-list-prod.json
+RUN chmod +x startup.sh
 RUN deno install --lock deno.lock --frozen=true --entrypoint main.ts
 
 ENV RIDI_ROUTER_BIN=./ridi-router
