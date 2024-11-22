@@ -6,7 +6,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y curl coreutils && rm -rf /var/lib/apt/lists/*
 
 # Build arguments for ridi-router
-ARG RIDI_ROUTER_VERSION=""
+ARG RIDI_ROUTER_VERSION
 ENV RIDI_ROUTER_VERSION=${RIDI_ROUTER_VERSION}
 
 # Create a startup script

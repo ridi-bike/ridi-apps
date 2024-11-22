@@ -7,12 +7,7 @@ services:
     volumes:
       - ${RIDI_DATA_DIR}:/ridi-data
     environment:
-      - RIDI_ROUTER_VERSION:${RIDI_ROUTER_VERSION}
       - RIDI_DATA_DIR:${RIDI_DATA_DIR}
-      - COOLIFY_API_URL:${COOLIFY_API_URL}
-      - COOLIFY_TOKEN:${COOLIFY_TOKEN}
-      - COOLIFY_DEPLOYMENT_ID_ROUTER_HANDLER:${COOLIFY_DEPLOYMENT_ID_ROUTER_HANDLER}
-      - COOLIFY_DEPLOYMENT_ID_MAP_DATA_HANDLER:${COOLIFY_DEPLOYMENT_ID_MAP_DATA_HANDLER}
     healthcheck:
       test: curl --fail http://localhost:2727 || exit 1
       interval: 60s
