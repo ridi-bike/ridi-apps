@@ -11,8 +11,8 @@ await configure({
     console: getConsoleSink({
       formatter: (record) =>
         ansiColorFormatter(record) +
-        (Object.keys(record.properties).length > 0
-          ? stringify(record.properties) + "\n"
+        (record.properties && Object.keys(record.properties).length > 0
+          ? stringify(record.properties, { sortKeys: true }) + "\n"
           : ""),
     }),
   },

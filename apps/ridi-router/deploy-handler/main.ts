@@ -41,7 +41,8 @@ async function checkDeploy() {
 
   if (
     !deployed.routerHandler &&
-    mapDataHandler?.router_version === routerHandler?.router_version &&
+    deployed.mapDataHandler &&
+    mapDataHandler?.router_version === routerVersion &&
     mapDataHandler?.status === "done"
   ) {
     await coolify.deployRouterHandler();
@@ -58,10 +59,15 @@ async function checkDeploy() {
   }
 }
 
-checkInterval = setInterval(checkDeploy, 10 * 60 * 1000);
+checkInterval = setInterval(checkDeploy, 60 * 1000);
 
 checkDeploy();
 
-Deno.serve({ port: 2727, hostname: "0.0.0.0" }, async (_req) => {
-  return new Response("Hello, world");
+Deno.serve({ port: 2727, hostname: "0.0.0.0" }, (_req) => {
+  const handlerRec = db.handlers.get("deploy");
+  if (handlerRec) {
+    return new Response("ok");
+  } else {
+    return new Response("nok", { status: 400 });
+  }
 });

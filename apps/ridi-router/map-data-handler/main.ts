@@ -204,7 +204,7 @@ function checkForHandlerStatus() {
     )
   ) {
     ridiLogger.debug("All regions processed, setting handler to idle");
-    db.handlers.updateRecordIdle("map-data");
+    db.handlers.updateRecordDone("map-data");
   } else {
     db.handlers.updateRecordUpdatedAt("map-data");
   }

@@ -108,7 +108,7 @@ export function getDb(dbLocation: string) {
 									where name = ${name}`;
           ridiLogger.debug("Update completed");
         } else {
-          db.sql`insert into handler
+          db.sql`insert into handlers
 									(name, router_version, status, updated_at)
 									values 
 									(${name}, ${routerVersion}, 'triggered', ${
@@ -221,5 +221,6 @@ export function getDb(dbLocation: string) {
     close() {
       db.close();
     },
+    db,
   };
 }
