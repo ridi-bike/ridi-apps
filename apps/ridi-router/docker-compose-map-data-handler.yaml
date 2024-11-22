@@ -2,6 +2,6 @@ name: map-data-handler
 services:
   map-data-handler:
     extends:
-      file: ../deno-base-docker-compose.yaml
+      file: ./docker-compose-base.yaml
       service: deno-service
     command: deno run -A --unstable-ffi ./map-data-handler/main.ts
