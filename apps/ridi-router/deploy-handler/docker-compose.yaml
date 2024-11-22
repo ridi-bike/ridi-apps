@@ -4,9 +4,7 @@ services:
     extends:
       file: ../deno-base-docker-compose.yaml
       service: deno-service
-    build:
-      context: .
-      dockerfile: ../Dockerfile
+    command: deno run -A --unstable-ffi ./deploy-handler/main.ts
     environment:
       - COOLIFY_API_URL:${COOLIFY_API_URL}
       - COOLIFY_TOKEN:${COOLIFY_TOKEN}
