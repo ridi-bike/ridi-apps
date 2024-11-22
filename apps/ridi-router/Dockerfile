@@ -12,7 +12,9 @@ ENV RIDI_ROUTER_VERSION=${RIDI_ROUTER_VERSION}
 COPY . .
 ENV REGION_LIST=./region-list-prod.json
 RUN chmod +x startup.sh
-RUN deno install --lock deno.lock --frozen=true --entrypoint main.ts
+RUN cd deploy-handler && deno install --lock deno.lock --frozen=true --entrypoint main.ts
+RUN cd map-data-handler && deno install --lock deno.lock --frozen=true --entrypoint main.ts
+RUN cd router-handler && deno install --lock deno.lock --frozen=true --entrypoint main.ts
 
 ENV RIDI_ROUTER_BIN=./ridi-router
 RUN curl -L "https://github.com/tomsjansons/ridi-router/releases/download/${RIDI_ROUTER_VERSION}/ridi-router" -o ridi-router \

@@ -109,8 +109,31 @@
     }
   },
   "workspace": {
-    "dependencies": [
-      "jsr:@std/assert@1"
-    ]
+    "members": {
+      "deploy-handler": {
+        "dependencies": [
+          "jsr:@valibot/valibot@0.42.1"
+        ]
+      },
+      "lib": {
+        "dependencies": [
+          "jsr:@db/sqlite@0.12",
+          "jsr:@logtape/logtape@0.8.0",
+          "jsr:@std/yaml@1.0.5",
+          "jsr:@valibot/valibot@0.42.1"
+        ]
+      },
+      "map-data-handler": {
+        "dependencies": [
+          "jsr:@valibot/valibot@0.42.1",
+          "npm:p-queue@8"
+        ]
+      },
+      "router-handler": {
+        "dependencies": [
+          "jsr:@std/assert@1"
+        ]
+      }
+    }
   }
 }
