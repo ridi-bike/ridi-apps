@@ -40,7 +40,7 @@ export type MapDataRecord = InferInput<typeof mapDataRecordSchema>;
 const handlersRecordSchema = object({
   name: union([literal("map-data"), literal("router"), literal("deploy")]),
   router_version: string(),
-  status: union([literal("idle"), literal("processing")]),
+  status: union([literal("triggered"), literal("processing"), literal("done")]),
   updated_at: pipe(number(), integer()),
 });
 export type HandlersRecord = InferInput<typeof handlersRecordSchema>;
@@ -72,7 +72,7 @@ export function getDb(dbLocation: string) {
 		create table if not exists handlers (
 			name text check(name in ('map-data', 'router', 'deploy')) primary key,
 			router_version text not null,
-			status text not null check(status in ('idle', 'processing')),
+			status text not null check(status in ('triggered', 'processing', 'done')),
 			updated_at integer not null
 		);
 		`).run();
@@ -103,17 +103,15 @@ export function getDb(dbLocation: string) {
           db.sql`update handlers
 									set 
 										router_version = ${routerVersion}, 
-										updated_at = ${new Date().getTime()}
+										updated_at = ${new Date().getTime()},
+										status = 'triggered'
 									where name = ${name}`;
           ridiLogger.debug("Update completed");
         } else {
-          const insertSql =
-            `insert into handlers (name, router_version, status, updated_at) values ('${name}', '${routerVersion}', 'idle', ${
-              new Date().getTime()
-            })`;
-          ridiLogger.debug("Executing SQL", { sql: insertSql });
-          db.sql`insert into handlers (name, router_version, status, updated_at)
-									values (${name}, ${routerVersion}, 'idle', ${
+          db.sql`insert into handler
+									(name, router_version, status, updated_at)
+									values 
+									(${name}, ${routerVersion}, 'triggered', ${
             new Date().getTime()
           })`;
           ridiLogger.debug("Insert completed");
@@ -133,10 +131,10 @@ export function getDb(dbLocation: string) {
 								where name = ${name}`;
         ridiLogger.debug("Update completed");
       },
-      updateRecordIdle(name: HandlersRecord["name"]) {
+      updateRecordDone(name: HandlersRecord["name"]) {
         ridiLogger.debug("handlers.updateRecordIdle called", { name });
         db.sql`update handlers
-								set status = 'idle', updated_at = ${new Date().getTime()}
+								set status = 'done', updated_at = ${new Date().getTime()}
 								where name = ${name}`;
         ridiLogger.debug("Update completed");
       },

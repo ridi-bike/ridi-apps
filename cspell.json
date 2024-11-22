@@ -16,7 +16,8 @@
 		"sqlc",
 		"remeda",
 		"nanostores",
-		"healthcheck"
+		"healthcheck",
+		"coolify"
 	],
 	"version": "0.2",
 	"language": "en"
