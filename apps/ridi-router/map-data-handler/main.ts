@@ -75,40 +75,59 @@ async function generateCache(mapDataRecord: MapDataRecord) {
 }
 async function processRegionList() {
   ridiLogger.debug("Starting region list processing");
+
   db.handlers.updateRecordProcessing("map-data");
 
   for (const region of regions) {
     ridiLogger.debug("Processing region", { region });
+
     const remoteMd5Url =
       `https://download.geofabrik.de/${region}-latest.osm.pbf.md5`;
+
     ridiLogger.debug("Fetching MD5 for region", { region, remoteMd5Url });
+
     const remoteMd5File = await fetch(remoteMd5Url, { redirect: "follow" });
     const remoteMd5 = (await remoteMd5File.text()).split(" ")[0];
 
+    ridiLogger.debug("Remote MD5", { remoteMd5 });
+
     const nextMapData = db.mapData.getNextRecord(region);
+
+    ridiLogger.debug("Next Map Data Record", { ...nextMapData });
+
     if (nextMapData) {
       if (remoteMd5 !== nextMapData.pbf_md5 || nextMapData.status === "error") {
+        ridiLogger.debug("Error, discarding and downloading region");
         db.mapData.updateRecordDiscarded(nextMapData.id);
         await downloadRegion(region, remoteMd5, null);
       } else if (nextMapData.status === "new") {
+        ridiLogger.debug("Status new, downloading region");
         await downloadRegion(region, remoteMd5, nextMapData);
       } else if (
         nextMapData.status === "downloaded" ||
         nextMapData.status === "processing"
       ) {
-        await generateCache(nextMapData);
+        ridiLogger.debug("Status {status}, processing", {
+          status: nextMapData.status,
+        });
+        cacheProcessorQueue.add(() => generateCache(nextMapData));
       }
     } else {
       const currentMapData = db.mapData.getCurrentRecord(region);
+      ridiLogger.debug("Current Map Data Record", { ...currentMapData });
       if (currentMapData) {
         if (remoteMd5 !== currentMapData.pbf_md5) {
+          ridiLogger.debug("MD5 differs, downloading");
           await downloadRegion(region, remoteMd5, null);
         }
       } else {
+        ridiLogger.debug("no current record, downloading");
         await downloadRegion(region, remoteMd5, null);
       }
     }
   }
+
+  ridiLogger.debug("All regions processed");
 }
 
 async function downloadRegion(
@@ -117,6 +136,7 @@ async function downloadRegion(
   nextMapDataRecord: MapDataRecord | null,
 ) {
   ridiLogger.debug("Starting region download", { region, md5 });
+
   const remoteFileUrl =
     `https://download.geofabrik.de/${region}-latest.osm.pbf`;
 
@@ -128,11 +148,13 @@ async function downloadRegion(
     routerVersion,
     await locations.getCacheDirLoc(region, routerVersion),
   );
+
   ridiLogger.debug("Downloading PBF file", {
     region,
     remoteFileUrl,
     fileLocation,
   });
+
   try {
     const fileResponse = await fetch(remoteFileUrl, { redirect: "follow" });
 
@@ -145,6 +167,10 @@ async function downloadRegion(
       await fileResponse.body.pipeTo(file.writable);
       db.mapData.updateRecordDownloaded(mapDataRecord.id);
       cacheProcessorQueue.add(() => generateCache(mapDataRecord));
+    } else {
+      ridiLogger.error("no body in download", {
+        headers: fileResponse.headers,
+      });
     }
   } catch (err) {
     ridiLogger.error("Region download failed", {
