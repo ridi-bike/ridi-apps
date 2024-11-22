@@ -72,6 +72,8 @@ async function generateCache(mapDataRecord: MapDataRecord) {
       `stdout: ${stdoutOutput}\n\nstderr: ${stderrOutput}`,
     );
   }
+
+  checkForHandlerStatus();
 }
 async function processRegionList() {
   ridiLogger.debug("Starting region list processing");
@@ -96,8 +98,14 @@ async function processRegionList() {
     ridiLogger.debug("Next Map Data Record", { ...nextMapData });
 
     if (nextMapData) {
-      if (remoteMd5 !== nextMapData.pbf_md5 || nextMapData.status === "error") {
-        ridiLogger.debug("Error, discarding and downloading region");
+      if (
+        remoteMd5 !== nextMapData.pbf_md5 || nextMapData.status === "error" ||
+        nextMapData.router_version !== routerVersion
+      ) {
+        ridiLogger.debug("discarding and downloading region", {
+          remoteMd5,
+          routerVersion,
+        });
         db.mapData.updateRecordDiscarded(nextMapData.id);
         await downloadRegion(region, remoteMd5, null);
       } else if (nextMapData.status === "new") {
@@ -116,7 +124,10 @@ async function processRegionList() {
       const currentMapData = db.mapData.getCurrentRecord(region);
       ridiLogger.debug("Current Map Data Record", { ...currentMapData });
       if (currentMapData) {
-        if (remoteMd5 !== currentMapData.pbf_md5) {
+        if (
+          remoteMd5 !== currentMapData.pbf_md5 ||
+          currentMapData.router_version !== routerVersion
+        ) {
           ridiLogger.debug("MD5 differs, downloading");
           await downloadRegion(region, remoteMd5, null);
         }
@@ -127,7 +138,8 @@ async function processRegionList() {
     }
   }
 
-  ridiLogger.debug("All regions processed");
+  ridiLogger.debug("All regions checked");
+  checkForHandlerStatus();
 }
 
 async function downloadRegion(
@@ -200,9 +212,9 @@ function checkForHandlerStatus() {
 
 processRegionList();
 
-setInterval(checkForHandlerStatus, 10 * 60 * 1000); // every 10 min
+setInterval(processRegionList, 24 * 60 * 60 * 1000); // every 24h
 
-Deno.serve({ port: 2727, hostname: "0.0.0.0" }, async (_req) => {
+Deno.serve({ port: 2727, hostname: "0.0.0.0" }, (_req) => {
   const handlerRec = db.handlers.get("map-data");
   if (handlerRec) {
     return new Response("ok");
