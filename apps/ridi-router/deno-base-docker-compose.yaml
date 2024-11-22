@@ -4,8 +4,8 @@ services:
     build:
       args:
         RIDI_ROUTER_VERSION: v0.4.0
-      context: ..
-      dockerfile: ../Dockerfile
+      context: .
+      dockerfile: ./Dockerfile
     volumes:
       - ${RIDI_DATA_DIR}:/ridi-data
     environment:
