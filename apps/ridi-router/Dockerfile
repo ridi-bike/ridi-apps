@@ -20,7 +20,6 @@ ENV RIDI_ROUTER_BIN=./ridi-router
 RUN curl -L "https://github.com/tomsjansons/ridi-router/releases/download/${RIDI_ROUTER_VERSION}/ridi-router" -o ridi-router \
     && chmod +x ridi-router
 
-RUN useradd -ms /bin/bash ridi
-USER ridi
+USER deno
 
 CMD ["/bin/sh", "./startup.sh"]
