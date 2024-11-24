@@ -1,5 +1,5 @@
 {
-  "name": "astro-app",
+  "name": "",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
@@ -10,8 +10,12 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^4.15.9",
     "@astrojs/check": "^0.9.3",
+    "@astrojs/tailwind": "^5.1.0",
+    "astro": "^4.15.5",
+    "astro-navbar": "^2.3.3",
+    "swiper": "^11.1.14",
+    "tailwindcss": "^3.4.11",
     "typescript": "^5.6.2"
   }
 }
