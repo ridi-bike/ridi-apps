@@ -120,13 +120,17 @@
           "jsr:@db/sqlite@0.12",
           "jsr:@logtape/logtape@0.8.0",
           "jsr:@std/yaml@1.0.5",
-          "jsr:@valibot/valibot@0.42.1"
+          "jsr:@valibot/valibot@0.42.1",
+          "npm:postgres@*"
         ]
       },
       "map-data-handler": {
         "dependencies": [
           "jsr:@valibot/valibot@0.42.1",
-          "npm:p-queue@8"
+          "npm:@tmcw/togeojson@*",
+          "npm:p-queue@8",
+          "npm:postgres@*",
+          "npm:xmldom@*"
         ]
       },
       "router-handler": {
