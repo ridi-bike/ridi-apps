@@ -7,13 +7,24 @@ plugins:
     url: "https://api.ridi.bike/storage/v1/object/public/dev-ci-cd-assets/sqlc-gen-typescript-with-enums-plugin-0.1.3.wasm"
     sha256: 94b6d0ee9c11a1c7dd2e87218443c770f1904632396a9675a0afbcc9dbb536a0
 sql:
-- schema: "migrations"
-  queries: "functions/trpc/queries.sql"
+- schema: "supabase/migrations"
+  queries: "supabase/functions/trpc/queries.sql"
   engine: postgresql
   database:
     uri: "postgres://postgres:postgres@localhost:54322/postgres"
   codegen:
-  - out: functions/trpc/
+  - out: "supabase/functions/trpc/"
+    plugin: ts
+    options:
+      runtime: node
+      driver: postgres
+- schema: "supabase/migrations"
+  queries: "apps/ridi-router/lib/queries.sql"
+  engine: postgresql
+  database:
+    uri: "postgres://postgres:postgres@localhost:54322/postgres"
+  codegen:
+  - out: "apps/ridi-router/lib/"
     plugin: ts
     options:
       runtime: node

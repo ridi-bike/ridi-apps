@@ -26,7 +26,24 @@ export const locations = {
   },
   async getPbfFileLoc(region: string, md5: string) {
     const loc = `${dataDir}/pbf/${region}/${md5}`;
-    await Deno.mkdir(loc, { recursive: true });
+    try {
+      await Deno.mkdir(loc, { recursive: true });
+    } catch (err) {
+      if (!(err instanceof Deno.errors.AlreadyExists)) {
+        throw err;
+      }
+    }
     return `${loc}/osm.pbf`;
+  },
+  async getKmlLocation(region: string, md5: string) {
+    const loc = `${dataDir}/pbf/${region}/${md5}`;
+    try {
+      await Deno.mkdir(loc, { recursive: true });
+    } catch (err) {
+      if (!(err instanceof Deno.errors.AlreadyExists)) {
+        throw err;
+      }
+    }
+    return `${loc}/osm.kml`;
   },
 };

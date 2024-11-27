@@ -6,7 +6,7 @@
 	"scripts": {
 		"clean": "rm -rf ./node_modules/ && rm -rf ./apps/web/node_modules/ && rm -rf ./apps/mobile/node_modules/ && rm -rf ./packages/database/node_modules/ && rm -rf pnpm-lock.yaml",
 		"db": "supabase db reset && supabase gen types --local > ./supabase/functions/trpc/types.ts && pnpm db:sqlc",
-		"db:sqlc": "cd supabase/ && sqlc generate && cd .."
+		"db:sqlc": "sqlc generate"
 	},
 	"keywords": [],
 	"author": "",

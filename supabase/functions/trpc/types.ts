@@ -73,6 +73,33 @@ export type Database = {
         }
         Relationships: []
       }
+      regions: {
+        Row: {
+          geojson: Json
+          id: string
+          pbf_md5: string
+          polygon: unknown
+          region: string
+          version: Database["public"]["Enums"]["regions_version"]
+        }
+        Insert: {
+          geojson: Json
+          id?: string
+          pbf_md5: string
+          polygon: unknown
+          region: string
+          version: Database["public"]["Enums"]["regions_version"]
+        }
+        Update: {
+          geojson?: Json
+          id?: string
+          pbf_md5?: string
+          polygon?: unknown
+          region?: string
+          version?: Database["public"]["Enums"]["regions_version"]
+        }
+        Relationships: []
+      }
       route_points: {
         Row: {
           id: string
@@ -152,6 +179,7 @@ export type Database = {
     }
     Enums: {
       plan_state: "new" | "planning" | "done"
+      regions_version: "previous" | "current" | "next" | "discarded"
     }
     CompositeTypes: {
       [_ in never]: never
