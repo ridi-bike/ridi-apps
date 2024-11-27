@@ -93,7 +93,7 @@ async function processRegionList() {
 
     ridiLogger.debug("Remote MD5", { remoteMd5 });
 
-    const nextMapData = db.mapData.getNextRecord(region);
+    const nextMapData = db.mapData.getRecordNext(region);
 
     ridiLogger.debug("Next Map Data Record", { ...nextMapData });
 
@@ -121,7 +121,7 @@ async function processRegionList() {
         cacheProcessorQueue.add(() => generateCache(nextMapData));
       }
     } else {
-      const currentMapData = db.mapData.getCurrentRecord(region);
+      const currentMapData = db.mapData.getRecordCurrent(region);
       ridiLogger.debug("Current Map Data Record", { ...currentMapData });
       if (currentMapData) {
         if (
@@ -158,7 +158,7 @@ async function downloadRegion(
     md5,
     fileLocation,
     routerVersion,
-    await locations.getCacheDirLoc(region, routerVersion),
+    await locations.getCacheDirLoc(region, routerVersion, md5),
   );
 
   ridiLogger.debug("Downloading PBF file", {
@@ -195,7 +195,7 @@ async function downloadRegion(
 
 function checkForHandlerStatus() {
   ridiLogger.debug("Checking handler status");
-  const nextRecords = db.mapData.getAllNextRecords();
+  const nextRecords = db.mapData.getRecordsAllNext();
   if (
     regions.every((r) =>
       nextRecords.find((nr) =>
@@ -209,6 +209,27 @@ function checkForHandlerStatus() {
     db.handlers.updateRecordUpdatedAt("map-data");
   }
 }
+
+async function processCleanup() {
+  const cleanupRecords = db.mapData.getRecordsDiscardedAndPrevious();
+  for (const record of cleanupRecords) {
+    if (db.mapData.isCacheDirInUse(record.cache_location)) {
+      try {
+        await Deno.remove(record.cache_location, { recursive: true });
+      } catch (err) {
+        ridiLogger.warn("Cache delete failed with error", { err });
+      }
+    }
+    if (db.mapData.isPbfInUse(record.pbf_location)) {
+      try {
+        await Deno.remove(record.pbf_location, { recursive: true });
+      } catch (err) {
+        ridiLogger.warn("Pbf delete failed with error", { err });
+      }
+    }
+  }
+}
+processCleanup();
 
 processRegionList();
 

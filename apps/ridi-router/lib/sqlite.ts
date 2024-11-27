@@ -191,7 +191,25 @@ export function getDb(dbLocation: string) {
 								set version = 'discarded'
 								where id = ${id}`;
       },
-      getNextRecord(region: string): MapDataRecord | null {
+      getRecordsDiscardedAndPrevious() {
+        return db.sql`select * from map_data
+								where version = 'discarded' or version = 'previous'`.map((r) =>
+          parse(mapDataRecordSchema, r)
+        );
+      },
+      isPbfInUse(pbfFile: string) {
+        const inUseRecs = db.sql`select * from map_data
+								where pbf_location = ${pbfFile}
+									and (version = 'current' or version = 'next')`;
+        return inUseRecs.length > 0;
+      },
+      isCacheDirInUse(cacheDir: string) {
+        const inUseRecs = db.sql`select * from map_data
+								where cache_location = ${cacheDir}
+									and (version = 'current' or version = 'next')`;
+        return inUseRecs.length > 0;
+      },
+      getRecordNext(region: string): MapDataRecord | null {
         const mapData = db
           .sql`select * from map_data 
 								where region = ${region} 
@@ -201,7 +219,7 @@ export function getDb(dbLocation: string) {
         }
         return mapData[0] ? toMapDataRow(mapData[0]) : null;
       },
-      getCurrentRecord(region: string): MapDataRecord | null {
+      getRecordCurrent(region: string): MapDataRecord | null {
         const mapData = db
           .sql`select * from map_data 
 								where region = ${region} 
@@ -211,7 +229,7 @@ export function getDb(dbLocation: string) {
         }
         return mapData[0] ? toMapDataRow(mapData[0]) : null;
       },
-      getAllNextRecords(): MapDataRecord[] {
+      getRecordsAllNext(): MapDataRecord[] {
         const mapData = db
           .sql`select * from map_data 
 								where version = 'next'`;

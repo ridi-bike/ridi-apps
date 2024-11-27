@@ -1,32 +1,32 @@
 import { parse, string } from "valibot";
 
 function getEnvVariable(name: string): string {
-	const maybeVal = Deno.env.get(name);
+  const maybeVal = Deno.env.get(name);
 
-	const val = parse(string(`missing ${name} env var`), maybeVal);
+  const val = parse(string(`missing ${name} env var`), maybeVal);
 
-	return val;
+  return val;
 }
 
 const regionListLoc = getEnvVariable("REGION_LIST");
 const dataDir = getEnvVariable("RIDI_DATA_DIR");
 export const locations = {
-	getRegionListFileLoc() {
-		return regionListLoc;
-	},
-	getDbFileLoc() {
-		const loc = `${dataDir}/db`;
-		Deno.mkdirSync(loc, { recursive: true });
-		return `${loc}/sqlite.db`;
-	},
-	async getCacheDirLoc(region: string, routerVersion: string) {
-		const loc = `${dataDir}/cache/${routerVersion}/${region}`;
-		await Deno.mkdir(loc, { recursive: true });
-		return loc;
-	},
-	async getPbfFileLoc(region: string, md5: string) {
-		const loc = `${dataDir}/pbf/${region}/${md5}`;
-		await Deno.mkdir(loc, { recursive: true });
-		return `${loc}/osm.pbf`;
-	},
+  getRegionListFileLoc() {
+    return regionListLoc;
+  },
+  getDbFileLoc() {
+    const loc = `${dataDir}/db`;
+    Deno.mkdirSync(loc, { recursive: true });
+    return `${loc}/sqlite.db`;
+  },
+  async getCacheDirLoc(region: string, routerVersion: string, pbfMd5: string) {
+    const loc = `${dataDir}/cache/${routerVersion}/${region}/${pbfMd5}`;
+    await Deno.mkdir(loc, { recursive: true });
+    return loc;
+  },
+  async getPbfFileLoc(region: string, md5: string) {
+    const loc = `${dataDir}/pbf/${region}/${md5}`;
+    await Deno.mkdir(loc, { recursive: true });
+    return `${loc}/osm.pbf`;
+  },
 };
