@@ -4,6 +4,8 @@
 	},
 	"imports": {
 		"valibot": "jsr:@valibot/valibot@0.42.1",
-		"p-queue": "npm:p-queue@8"
+		"p-queue": "npm:p-queue@8",
+		"to-geo-json": "npm:@tmcw/togeojson",
+		"xmldom": "npm:xmldom"
 	}
 }

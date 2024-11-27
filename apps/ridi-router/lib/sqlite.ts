@@ -33,6 +33,7 @@ const mapDataRecordSchema = object({
   pbf_md5: string(),
   cache_location: string(),
   router_version: string(),
+  kml_location: string(),
   error: nullable(string()),
 });
 export type MapDataRecord = InferInput<typeof mapDataRecordSchema>;
@@ -49,10 +50,20 @@ function toMapDataRow(row: Record<string, unknown>) {
   const parsedRow = parse(mapDataRecordSchema, row);
   return parsedRow;
 }
-export function getDb(dbLocation: string) {
+let db: Database | null = null;
+
+export function initDb(dbLocation: string) {
   ridiLogger.debug("Opening database", { dbLocation });
-  const db = new Database(dbLocation, { create: true });
+  db = new Database(dbLocation, { create: true });
   ridiLogger.debug("Database instance created", { db });
+}
+function dbIsOk(db: Database | null): asserts db is Database {
+  if (!db) {
+    throw Error("db not initialized");
+  }
+}
+export function getDb() {
+  dbIsOk(db);
 
   db.prepare(`
 		create table if not exists map_data (
@@ -64,6 +75,7 @@ export function getDb(dbLocation: string) {
 			pbf_md5 text not null,
 			cache_location text not null,
 			router_version text not null,
+			kml_location text not null,
 			error text
 		);
 		`).run();
@@ -80,6 +92,7 @@ export function getDb(dbLocation: string) {
   return {
     handlers: {
       get(name: HandlersRecord["name"]) {
+        dbIsOk(db);
         ridiLogger.debug("handlers.get called", { name });
         const handlerData = db.sql`select * from handlers 
 																		where name = ${name}`;
@@ -92,6 +105,7 @@ export function getDb(dbLocation: string) {
           : null;
       },
       createUpdate(name: HandlersRecord["name"], routerVersion: string) {
+        dbIsOk(db);
         ridiLogger.debug("handlers.createUpdate called", {
           name,
           routerVersion,
@@ -118,6 +132,7 @@ export function getDb(dbLocation: string) {
         }
       },
       updateRecordProcessing(name: HandlersRecord["name"]) {
+        dbIsOk(db);
         ridiLogger.debug("handlers.updateRecordProcessing called", { name });
         db.sql`update handlers
 								set status = 'processing', updated_at = ${new Date().getTime()}
@@ -125,6 +140,7 @@ export function getDb(dbLocation: string) {
         ridiLogger.debug("Update completed");
       },
       updateRecordUpdatedAt(name: HandlersRecord["name"]) {
+        dbIsOk(db);
         ridiLogger.debug("handlers.updateRecordUpdatedAt called", { name });
         db.sql`update handlers
 								set updated_at = ${new Date().getTime()}
@@ -132,6 +148,7 @@ export function getDb(dbLocation: string) {
         ridiLogger.debug("Update completed");
       },
       updateRecordDone(name: HandlersRecord["name"]) {
+        dbIsOk(db);
         ridiLogger.debug("handlers.updateRecordIdle called", { name });
         db.sql`update handlers
 								set status = 'done', updated_at = ${new Date().getTime()}
@@ -146,7 +163,9 @@ export function getDb(dbLocation: string) {
         pbfLocation: string,
         routerVersion: string,
         cacheLocation: string,
+        kmlLocation: string,
       ) {
+        dbIsOk(db);
         ridiLogger.debug("mapData.createNextRecord called", {
           region,
           md5,
@@ -156,9 +175,27 @@ export function getDb(dbLocation: string) {
         });
         const mapData = db
           .sql`insert into map_data 
-								(region, version, status, pbf_location, pbf_md5, cache_location, router_version)
+								(
+									region, 
+									version, 
+									status, 
+									pbf_location, 
+									pbf_md5, 
+									cache_location, 
+									router_version, 
+									kml_location
+								)
 								values 
-								(${region}, 'next', 'new', ${pbfLocation}, ${md5}, ${cacheLocation}, ${routerVersion})
+								(
+									${region}, 
+									'next', 
+									'new', 
+									${pbfLocation}, 
+									${md5}, 
+									${cacheLocation}, 
+									${routerVersion}, 
+									${kmlLocation}
+								)
 								returning *`;
 
         if (mapData.length > 1) {
@@ -166,50 +203,64 @@ export function getDb(dbLocation: string) {
         }
         return toMapDataRow(mapData[0]);
       },
+      deleteRecord(id: number) {
+        dbIsOk(db);
+        db.sql`delete from map_data
+								where id = ${id}`;
+      },
       updateRecordDownloaded(id: number) {
+        dbIsOk(db);
         db.sql`update map_data
 								set status = 'downloaded'
 								where id = ${id}`;
       },
       updateRecordProcessing(id: number) {
+        dbIsOk(db);
         db.sql`update map_data
 								set status = 'processing'
 								where id = ${id}`;
       },
       updateRecordReady(id: number) {
+        dbIsOk(db);
         db.sql`update map_data
 								set status = 'ready'
 								where id = ${id}`;
       },
       updateRecordError(id: number, error: string) {
+        dbIsOk(db);
         db.sql`update map_data
 								set status = 'error', error = ${error}
 								where id = ${id}`;
       },
       updateRecordDiscarded(id: number) {
+        dbIsOk(db);
         db.sql`update map_data
 								set version = 'discarded'
 								where id = ${id}`;
       },
       getRecordsDiscardedAndPrevious() {
+        dbIsOk(db);
         return db.sql`select * from map_data
 								where version = 'discarded' or version = 'previous'`.map((r) =>
           parse(mapDataRecordSchema, r)
         );
       },
       isPbfInUse(pbfFile: string) {
+        dbIsOk(db);
         const inUseRecs = db.sql`select * from map_data
 								where pbf_location = ${pbfFile}
 									and (version = 'current' or version = 'next')`;
         return inUseRecs.length > 0;
       },
       isCacheDirInUse(cacheDir: string) {
+        dbIsOk(db);
         const inUseRecs = db.sql`select * from map_data
 								where cache_location = ${cacheDir}
 									and (version = 'current' or version = 'next')`;
         return inUseRecs.length > 0;
       },
       getRecordNext(region: string): MapDataRecord | null {
+        dbIsOk(db);
         const mapData = db
           .sql`select * from map_data 
 								where region = ${region} 
@@ -220,6 +271,7 @@ export function getDb(dbLocation: string) {
         return mapData[0] ? toMapDataRow(mapData[0]) : null;
       },
       getRecordCurrent(region: string): MapDataRecord | null {
+        dbIsOk(db);
         const mapData = db
           .sql`select * from map_data 
 								where region = ${region} 
@@ -230,6 +282,7 @@ export function getDb(dbLocation: string) {
         return mapData[0] ? toMapDataRow(mapData[0]) : null;
       },
       getRecordsAllNext(): MapDataRecord[] {
+        dbIsOk(db);
         const mapData = db
           .sql`select * from map_data 
 								where version = 'next'`;
@@ -237,6 +290,7 @@ export function getDb(dbLocation: string) {
       },
     },
     close() {
+      dbIsOk(db);
       db.close();
     },
     db,
