@@ -212,15 +212,21 @@ function checkForHandlerStatus() {
 
 async function processCleanup() {
   const cleanupRecords = db.mapData.getRecordsDiscardedAndPrevious();
+  ridiLogger.debug("{count} Records for cleanup found", {
+    count: cleanupRecords.length,
+  });
   for (const record of cleanupRecords) {
-    if (db.mapData.isCacheDirInUse(record.cache_location)) {
+    ridiLogger.debug("Record cleanup", { ...record });
+    if (!db.mapData.isCacheDirInUse(record.cache_location)) {
+      ridiLogger.debug("Cache can be removed");
       try {
         await Deno.remove(record.cache_location, { recursive: true });
       } catch (err) {
         ridiLogger.warn("Cache delete failed with error", { err });
       }
     }
-    if (db.mapData.isPbfInUse(record.pbf_location)) {
+    if (!db.mapData.isPbfInUse(record.pbf_location)) {
+      ridiLogger.debug("Pbf can be removed");
       try {
         await Deno.remove(record.pbf_location, { recursive: true });
       } catch (err) {
