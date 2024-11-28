@@ -40,11 +40,20 @@ exporters:
     endpoint: https://api.openobserve.ai/api/${env:OPEN_OBSERVE_ORG}
     headers:
       Authorization: "Basic ${env:OPEN_OBSERVE_TOKEN}"
-  otlphttp/openobserve_ridi:
-    endpoint: https://api.openobserve.ai/api/${env:OPEN_OBSERVE_ORG}
-    headers:
-      Authorization: "Basic ${env:OPEN_OBSERVE_TOKEN}"
-      stream-name: ridi_${env:RIDI_ENV_NAME}
+  # otlphttp/openobserve_ridi:
+  #   endpoint: https://api.openobserve.ai/api/${env:OPEN_OBSERVE_ORG}
+  #   headers:
+  #     Authorization: "Basic ${env:OPEN_OBSERVE_TOKEN}"
+  #     stream-name: ridi_${env:RIDI_ENV_NAME}
+  exporters:
+    otlp/openobserve_ridi:
+      endpoint: api.openobserve.ai:5081
+      headers:
+        Authorization: "Basic ${env:OPEN_OBSERVE_TOKEN}"
+        organization: ${env:OPEN_OBSERVE_ORG}
+        stream-name: ridi_${env:RIDI_ENV_NAME}
+      tls:
+        insecure: true
 
 service:
   extensions: [zpages]
@@ -56,7 +65,7 @@ service:
     logs/ridi:
       receivers: [otlp]
       processors: [resourcedetection/system, memory_limiter, batch]
-      exporters: [otlphttp/openobserve_ridi]
+      exporters: [otlp/openobserve_ridi]
     logs:
       receivers: [filelog/std]
       processors: [resourcedetection/system, memory_limiter, batch]
