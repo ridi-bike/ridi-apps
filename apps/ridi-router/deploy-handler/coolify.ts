@@ -1,4 +1,5 @@
 import { parse, string } from "valibot";
+import { env } from "@ridi-router/lib";
 
 const coolifyUrl = parse(
   string("COOLIFY_API_URL env variable"),
@@ -16,19 +17,31 @@ const coolifyIdMapDataHandler = parse(
   string("COOLIFY_DEPLOYMENT_ID_MAP_DATA_HANDLER env variable"),
   Deno.env.get("COOLIFY_DEPLOYMENT_ID_MAP_DATA_HANDLER"),
 );
+
+async function runRealOrFake<T>(fn: () => Promise<T>): Promise<T | null> {
+  if (env.ridiEnv === "local") {
+    return null;
+  }
+  return await fn();
+}
+
 export const coolify = {
   async deployRouterHandler() {
-    await fetch(`${coolifyUrl}/deploy?uuid=${coolifyIdRouterHandler}`, {
-      headers: {
-        Authorization: `Bearer ${coolifyToken}`,
-      },
-    });
+    await runRealOrFake(() =>
+      fetch(`${coolifyUrl}/deploy?uuid=${coolifyIdRouterHandler}`, {
+        headers: {
+          Authorization: `Bearer ${coolifyToken}`,
+        },
+      })
+    );
   },
   async deployMapDataHandler() {
-    await fetch(`${coolifyUrl}/deploy?uuid=${coolifyIdMapDataHandler}`, {
-      headers: {
-        Authorization: `Bearer ${coolifyToken}`,
-      },
-    });
+    await runRealOrFake(() =>
+      fetch(`${coolifyUrl}/deploy?uuid=${coolifyIdMapDataHandler}`, {
+        headers: {
+          Authorization: `Bearer ${coolifyToken}`,
+        },
+      })
+    );
   },
 };
