@@ -44,7 +44,7 @@ exporters:
     endpoint: https://api.openobserve.ai/api/${env:OPEN_OBSERVE_ORG}
     headers:
       Authorization: "Basic ${env:OPEN_OBSERVE_TOKEN}"
-      stream-name: ridi_${env.RIDI_ENV_NAME}
+      stream-name: ridi_${env:RIDI_ENV_NAME}
 
 service:
   extensions: [zpages]
