@@ -6,6 +6,6 @@ services:
       service: deno-service
     command: ./startup.sh ./router-handler/main.ts
     environment:
-      - SUPABASE_URL: ${SUPABASE_URL}
-      - SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY}
-      - RIDI_ENV_NAME: router-handler
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY}
+      RIDI_ENV_NAME: router-handler
