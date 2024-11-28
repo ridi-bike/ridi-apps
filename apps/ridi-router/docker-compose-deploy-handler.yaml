@@ -3,7 +3,7 @@ services:
   deploy_handler:
     extends:
       file: ./docker-compose-base.yaml
-      service: deno-service
+      service: deno_service
     command: ./startup.sh ./deploy-handler/main.ts
     environment:
       COOLIFY_API_URL: ${COOLIFY_API_URL}

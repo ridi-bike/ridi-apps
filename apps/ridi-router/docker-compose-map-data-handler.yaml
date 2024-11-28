@@ -3,7 +3,7 @@ services:
   map_data_handler:
     extends:
       file: ./docker-compose-base.yaml
-      service: deno-service
+      service: deno_service
     command: ./startup.sh ./map-data-handler/main.ts
     environment:
       SUPABASE_DB_URL: ${SUPABASE_DB_URL}
