@@ -9,7 +9,7 @@ services:
     volumes:
       - ${RIDI_DATA_DIR}:/ridi-data
     environment:
-      - RIDI_DATA_DIR: ${RIDI_DATA_DIR}
+      RIDI_DATA_DIR: ${RIDI_DATA_DIR}
     healthcheck:
       test: curl --fail http://localhost:2727 || exit 1
       interval: 60s
