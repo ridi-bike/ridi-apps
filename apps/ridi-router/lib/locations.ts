@@ -16,12 +16,24 @@ export const locations = {
   },
   getDbFileLoc() {
     const loc = `${dataDir}/db`;
-    Deno.mkdirSync(loc, { recursive: true });
+    try {
+      Deno.mkdirSync(loc, { recursive: true });
+    } catch (err) {
+      if (!(err instanceof Deno.errors.AlreadyExists)) {
+        throw err;
+      }
+    }
     return `${loc}/sqlite.db`;
   },
   async getCacheDirLoc(region: string, routerVersion: string, pbfMd5: string) {
     const loc = `${dataDir}/cache/${routerVersion}/${region}/${pbfMd5}`;
-    await Deno.mkdir(loc, { recursive: true });
+    try {
+      await Deno.mkdir(loc, { recursive: true });
+    } catch (err) {
+      if (!(err instanceof Deno.errors.AlreadyExists)) {
+        throw err;
+      }
+    }
     return loc;
   },
   async getPbfFileLoc(region: string, md5: string) {
