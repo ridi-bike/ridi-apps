@@ -10,6 +10,8 @@ ARG OPEN_OBSERVE_TOKEN
 
 RUN curl -O "https://raw.githubusercontent.com/openobserve/agents/main/linux/install.sh" && chmod +x install.sh && ./install.sh "https://api.openobserve.ai/api/${OPEN_OBSERVE_ORG}" "${OPEN_OBSERVE_TOKEN}"
 
+COPY ./otel-config.yaml /etc/otel-config.yaml
+
 # Build arguments for ridi-router
 ARG RIDI_ROUTER_VERSION
 ENV RIDI_ROUTER_VERSION=${RIDI_ROUTER_VERSION}

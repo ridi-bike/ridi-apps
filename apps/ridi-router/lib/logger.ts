@@ -31,7 +31,7 @@ await configure({
           ? stringify(record.properties, { sortKeys: true }) + "\n"
           : ""),
     }),
-    otel: getOpenTelemetrySink(),
+    otel: getOpenTelemetrySink({ diagnostics: true }),
   },
   loggers: [{
     category: "logtape",
