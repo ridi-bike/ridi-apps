@@ -6,5 +6,6 @@ services:
       service: deno-service
     command: deno run -A --unstable-ffi ./router-handler/main.ts
     environment:
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_SECRET_KEY=${SUPABASE_SECRET_KEY}
+      - SUPABASE_URL: ${SUPABASE_URL}
+      - SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY}
+      - RIDI_ENV_NAME: router-handler
