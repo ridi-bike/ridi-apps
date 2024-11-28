@@ -5,6 +5,7 @@ import {
   getConsoleSink,
   getLogger,
 } from "logger";
+import { getOpenTelemetrySink } from "otel";
 import { stringify } from "yaml";
 
 const ridiEnv = parse(
@@ -12,21 +13,33 @@ const ridiEnv = parse(
   Deno.env.get("RIDI_ENV"),
 );
 
+const ridiEnvName = parse(
+  union([
+    literal("deploy-handler"),
+    literal("map-data-handler"),
+    literal("router-handler"),
+  ]),
+  Deno.env.get("RIDI_ENV_NAME"),
+);
+
 await configure({
   sinks: {
     console: getConsoleSink({
-      formatter: ridiEnv === "local"
-        ? (record) =>
-          ansiColorFormatter(record) +
-          (record.properties && Object.keys(record.properties).length > 0
-            ? stringify(record.properties, { sortKeys: true }) + "\n"
-            : "")
-        : (record) => JSON.stringify(record),
+      formatter: (record) =>
+        ansiColorFormatter(record) +
+        (record.properties && Object.keys(record.properties).length > 0
+          ? stringify(record.properties, { sortKeys: true }) + "\n"
+          : ""),
     }),
+    otel: getOpenTelemetrySink(),
   },
   loggers: [
-    { category: "ridi", lowestLevel: "debug", sinks: ["console"] },
+    {
+      category: ridiEnvName,
+      lowestLevel: "debug",
+      sinks: ridiEnv === "local" ? ["console"] : ["otel"],
+    },
   ],
 });
 
-export const ridiLogger = getLogger("ridi");
+export const ridiLogger = getLogger(ridiEnvName);

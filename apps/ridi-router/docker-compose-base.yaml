@@ -4,6 +4,8 @@ services:
     build:
       args:
         RIDI_ROUTER_VERSION: v0.4.0
+        OPEN_OBSERVE_ORG: ${OPEN_OBSERVE_ORG}
+        OPEN_OBSERVE_TOKEN: ${OPEN_OBSERVE_TOKEN}
       context: .
       dockerfile: ./Dockerfile
     volumes:
