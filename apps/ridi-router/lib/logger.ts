@@ -33,13 +33,19 @@ await configure({
     }),
     otel: getOpenTelemetrySink(),
   },
-  loggers: [
-    {
-      category: ridiEnvName,
-      lowestLevel: "debug",
-      sinks: ridiEnv === "local" ? ["console"] : ["otel"],
-    },
-  ],
+  loggers: [{
+    category: "logtape",
+    lowestLevel: "debug",
+    sinks: ridiEnv === "local" ? ["console"] : ["otel", "console"],
+  }, {
+    category: "meta",
+    lowestLevel: "debug",
+    sinks: ridiEnv === "local" ? ["console"] : ["otel", "console"],
+  }, {
+    category: ridiEnvName,
+    lowestLevel: "debug",
+    sinks: ridiEnv === "local" ? ["console"] : ["otel", "console"],
+  }],
 });
 
 export const ridiLogger = getLogger(ridiEnvName);
