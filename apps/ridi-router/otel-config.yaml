@@ -45,15 +45,14 @@ exporters:
   #   headers:
   #     Authorization: "Basic ${env:OPEN_OBSERVE_TOKEN}"
   #     stream-name: ridi_${env:RIDI_ENV_NAME}
-  exporters:
-    otlp/openobserve_ridi:
-      endpoint: api.openobserve.ai:5081
-      headers:
-        Authorization: "Basic ${env:OPEN_OBSERVE_TOKEN}"
-        organization: ${env:OPEN_OBSERVE_ORG}
-        stream-name: ridi_${env:RIDI_ENV_NAME}
-      tls:
-        insecure: true
+  otlp/openobserve_ridi:
+    endpoint: api.openobserve.ai:5081
+    headers:
+      Authorization: "Basic ${env:OPEN_OBSERVE_TOKEN}"
+      organization: ${env:OPEN_OBSERVE_ORG}
+      stream-name: ridi_${env:RIDI_ENV_NAME}
+    tls:
+      insecure: true
 
 service:
   extensions: [zpages]
