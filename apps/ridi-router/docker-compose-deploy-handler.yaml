@@ -1,6 +1,6 @@
 name: deploy-handler
 services:
-  deploy-handler:
+  deploy-handler/:
     extends:
       file: ./docker-compose-base.yaml
       service: deno-service
