@@ -39,13 +39,13 @@ extensions:
 
 exporters:
   otlphttp/openobserve:
-    endpoint: $URL
+    endpoint: https://api.openobserve.ai/api/${env:OPEN_OBSERVE_ORG}/
     headers:
-      Authorization: "Basic $AUTH_KEY"
+      Authorization: "Basic ${env:OPEN_OBSERVE_TOKEN}"
   otlphttp/openobserve_journald:
-    endpoint: $URL
+    endpoint: https://api.openobserve.ai/api/${env:OPEN_OBSERVE_ORG}/
     headers:
-      Authorization: "Basic $AUTH_KEY"
+      Authorization: "Basic ${env:OPEN_OBSERVE_TOKEN}"
       stream-name: journald
 
 service:
