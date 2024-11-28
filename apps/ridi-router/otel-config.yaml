@@ -40,11 +40,6 @@ exporters:
     endpoint: https://api.openobserve.ai/api/${env:OPEN_OBSERVE_ORG}/
     headers:
       Authorization: "Basic ${env:OPEN_OBSERVE_TOKEN}"
-  otlphttp/openobserve_journald:
-    endpoint: https://api.openobserve.ai/api/${env:OPEN_OBSERVE_ORG}/
-    headers:
-      Authorization: "Basic ${env:OPEN_OBSERVE_TOKEN}"
-      stream-name: journald
 
 service:
   extensions: [zpages]
@@ -57,7 +52,3 @@ service:
       receivers: [filelog/std]
       processors: [resourcedetection/system, memory_limiter, batch]
       exporters: [otlphttp/openobserve]
-    logs/journald:
-      receivers: [journald]
-      processors: [resourcedetection/system, memory_limiter, batch]
-      exporters: [otlphttp/openobserve_journald]
