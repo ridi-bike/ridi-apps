@@ -3,14 +3,16 @@ FROM denoland/deno:2.0.0
 WORKDIR /app
 
 # Install required packages and clean up
-RUN apt-get update && apt-get install -y curl coreutils && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+	&& apt-get install -y curl coreutils \
+	&& rm -rf /var/lib/apt/lists/*
 
 ARG OPEN_OBSERVE_ORG
 ARG OPEN_OBSERVE_TOKEN
 
-RUN curl -O "https://raw.githubusercontent.com/openobserve/agents/main/linux/install.sh" && chmod +x install.sh && ./install.sh "https://api.openobserve.ai/api/${OPEN_OBSERVE_ORG}" "${OPEN_OBSERVE_TOKEN}"
-
+COPY ./otel-install.sh ./otel-install.sh
 COPY ./otel-config.yaml /etc/otel-config.yaml
+RUN ./otel-install.sh
 
 # Build arguments for ridi-router
 ARG RIDI_ROUTER_VERSION
