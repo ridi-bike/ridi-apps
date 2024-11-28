@@ -1,6 +1,6 @@
 name: map-data-handler
 services:
-  map-data-handler/:
+  map_data_handler:
     extends:
       file: ./docker-compose-base.yaml
       service: deno-service

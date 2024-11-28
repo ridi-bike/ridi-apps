@@ -1,5 +1,5 @@
 services:
-  deno-service:
+  deno_service:
     restart: on-failure
     build:
       args:
