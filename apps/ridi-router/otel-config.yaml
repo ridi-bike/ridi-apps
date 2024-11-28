@@ -37,9 +37,14 @@ extensions:
 
 exporters:
   otlphttp/openobserve:
-    endpoint: https://api.openobserve.ai/api/${env:OPEN_OBSERVE_ORG}/
+    endpoint: https://api.openobserve.ai/api/${env:OPEN_OBSERVE_ORG}
     headers:
       Authorization: "Basic ${env:OPEN_OBSERVE_TOKEN}"
+  otlphttp/openobserve_ridi:
+    endpoint: https://api.openobserve.ai/api/${env:OPEN_OBSERVE_ORG}
+    headers:
+      Authorization: "Basic ${env:OPEN_OBSERVE_TOKEN}"
+      stream-name: ridi_${env.RIDI_ENV_NAME}
 
 service:
   extensions: [zpages]
@@ -48,7 +53,11 @@ service:
       receivers: [hostmetrics]
       processors: [resourcedetection/system, memory_limiter, batch]
       exporters: [otlphttp/openobserve]
+    logs/ridi:
+      receivers: [otlp]
+      processors: [resourcedetection/system, memory_limiter, batch]
+      exporters: [otlphttp/openobserve_ridi]
     logs:
-      receivers: [filelog/std, otlp]
+      receivers: [filelog/std]
       processors: [resourcedetection/system, memory_limiter, batch]
       exporters: [otlphttp/openobserve]
