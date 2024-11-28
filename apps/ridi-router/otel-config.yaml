@@ -43,7 +43,7 @@ exporters:
   otlphttp/openobserve_ridi:
     endpoint: https://api.openobserve.ai/api/${env:OPEN_OBSERVE_ORG}
     headers:
-      Authorization: "Basic ${env.OPEN_OBSERVE_TOKEN}"
+      Authorization: "Basic ${env:OPEN_OBSERVE_TOKEN}"
       stream-name: ridi_${env:RIDI_ENV_NAME}
 
 service:
