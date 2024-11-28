@@ -31,7 +31,12 @@ await configure({
           ? stringify(record.properties, { sortKeys: true }) + "\n"
           : ""),
     }),
-    otel: getOpenTelemetrySink(),
+    otel: getOpenTelemetrySink({
+      serviceName: ridiEnvName,
+      otlpExporterConfig: {
+        url: "http://0.0.0.0:4317",
+      },
+    }),
   },
   loggers: [{
     category: "logtape",
@@ -49,3 +54,5 @@ await configure({
 });
 
 export const ridiLogger = getLogger(ridiEnvName);
+
+ridiLogger.info("Logging set for environment", { ridiEnv, ridiEnvName });
