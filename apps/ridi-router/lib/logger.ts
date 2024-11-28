@@ -4,7 +4,7 @@ import {
   getConsoleSink,
   getLogger,
 } from "logger";
-import { getOpenTelemetrySink } from "otel";
+import { flatten } from "flat";
 import { stringify } from "yaml";
 import {
   openObserveOrg,
@@ -38,7 +38,7 @@ await configure({
         {
           method: "post",
           headers: { "Authorization": `Basic ${openObserveToken}` },
-          body: JSON.stringify([rec]),
+          body: JSON.stringify([flatten(rec)]),
         },
       );
     },
