@@ -3,7 +3,7 @@ services:
   router_handler:
     extends:
       file: ./docker-compose-base.yaml
-      service: deno-service
+      service: deno_service
     command: ./startup.sh ./router-handler/main.ts
     environment:
       SUPABASE_URL: ${SUPABASE_URL}
