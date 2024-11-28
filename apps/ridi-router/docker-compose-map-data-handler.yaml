@@ -4,7 +4,7 @@ services:
     extends:
       file: ./docker-compose-base.yaml
       service: deno-service
-    command: deno run -A --unstable-ffi ./map-data-handler/main.ts
+    command: ./startup.sh ./map-data-handler/main.ts
     environment:
       - SUPABASE_DB_URL: ${SUPABASE_DB_URL}
       - RIDI_ENV_NAME: map-data-handler

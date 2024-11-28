@@ -4,7 +4,7 @@ services:
     extends:
       file: ./docker-compose-base.yaml
       service: deno-service
-    command: deno run -A --unstable-ffi ./router-handler/main.ts
+    command: ./startup.sh ./router-handler/main.ts
     environment:
       - SUPABASE_URL: ${SUPABASE_URL}
       - SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY}
