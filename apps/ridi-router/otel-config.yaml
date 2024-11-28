@@ -3,8 +3,6 @@ receivers:
     protocols:
       grpc:
         endpoint: 0.0.0.0:4317
-  journald:
-    directory: /var/log/journal
   filelog/std:
     include: [ /var/log/**log ]
     # start_at: beginning
