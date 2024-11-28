@@ -1,6 +1,6 @@
 name: router-handler
 services:
-  router-handler:
+  router-handler/:
     extends:
       file: ./docker-compose-base.yaml
       service: deno-service
