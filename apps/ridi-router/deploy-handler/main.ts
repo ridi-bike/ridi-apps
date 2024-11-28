@@ -1,4 +1,4 @@
-import { getDb, locations, ridiLogger } from "@ridi-router/lib";
+import { getDb, initDb, locations, ridiLogger } from "@ridi-router/lib";
 
 import { parse, string } from "valibot";
 import { coolify } from "./coolify.ts";
@@ -8,7 +8,8 @@ const routerVersion = parse(
   Deno.env.get("RIDI_ROUTER_VERSION"),
 );
 
-const db = getDb(locations.getDbFileLoc());
+initDb(locations.getDbFileLoc());
+const db = getDb();
 
 db.handlers.createUpdate("deploy", routerVersion);
 
