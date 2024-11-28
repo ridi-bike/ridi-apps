@@ -24,8 +24,10 @@ await configure({
     }),
     otel: getOpenTelemetrySink({
       diagnostics: true,
+      messageType: "array",
+      objectRenderer: "json",
       otlpExporterConfig: {
-        url: `https://api.openobserve.ai/api/${openObserveOrg}`,
+        url: `https://api.openobserve.ai/api/${openObserveOrg}/v1/logs`,
         headers: {
           "Authorization": `Basic ${openObserveToken}`,
           "stream-name": `ridi_${ridiEnvName}`,
