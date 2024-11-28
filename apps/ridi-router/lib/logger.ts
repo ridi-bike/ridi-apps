@@ -1,4 +1,3 @@
-import { literal, parse, union } from "valibot";
 import {
   ansiColorFormatter,
   configure,
@@ -7,20 +6,7 @@ import {
 } from "logger";
 import { getOpenTelemetrySink } from "otel";
 import { stringify } from "yaml";
-
-const ridiEnv = parse(
-  union([literal("local"), literal("prod")]),
-  Deno.env.get("RIDI_ENV"),
-);
-
-const ridiEnvName = parse(
-  union([
-    literal("deploy-handler"),
-    literal("map-data-handler"),
-    literal("router-handler"),
-  ]),
-  Deno.env.get("RIDI_ENV_NAME"),
-);
+import { ridiEnv, ridiEnvName } from "./env.ts";
 
 await configure({
   sinks: {
@@ -32,24 +18,13 @@ await configure({
           : ""),
     }),
     otel: getOpenTelemetrySink({
-      serviceName: "otlp",
-      otlpExporterConfig: {
-        url: "http://0.0.0.0:4317",
-      },
+      diagnostics: true,
     }),
   },
   loggers: [{
-    category: "logtape",
+    category: [],
     lowestLevel: "debug",
-    sinks: ridiEnv === "local" ? ["console"] : ["otel", "console"],
-  }, {
-    category: "meta",
-    lowestLevel: "debug",
-    sinks: ridiEnv === "local" ? ["console"] : ["otel", "console"],
-  }, {
-    category: ridiEnvName,
-    lowestLevel: "debug",
-    sinks: ridiEnv === "local" ? ["console"] : ["otel", "console"],
+    sinks: ["otel", "console"],
   }],
 });
 

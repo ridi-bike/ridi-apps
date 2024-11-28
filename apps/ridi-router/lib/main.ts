@@ -6,3 +6,7 @@ import * as queries from "./queries_sql.ts";
 export const pg = {
   ...queries,
 };
+import * as vars from "./env.ts";
+export const env = {
+  ...vars,
+};
