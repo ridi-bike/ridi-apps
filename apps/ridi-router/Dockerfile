@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y curl coreutils && rm -rf /var/lib/apt/l
 ARG OPEN_OBSERVE_ORG
 ARG OPEN_OBSERVE_TOKEN
 
-RUN curl -O https://raw.githubusercontent.com/openobserve/agents/main/linux/install.sh && chmod +x install.sh && sudo ./install.sh https://api.openobserve.ai/api/${OPEN_OBSERVE_ORG} ${OPEN_OBSERVE_TOKEN}
+RUN curl -O "https://raw.githubusercontent.com/openobserve/agents/main/linux/install.sh && chmod" +x install.sh && sudo ./install.sh "https://api.openobserve.ai/api/${OPEN_OBSERVE_ORG}" "${OPEN_OBSERVE_TOKEN}"
 
 # Build arguments for ridi-router
 ARG RIDI_ROUTER_VERSION
