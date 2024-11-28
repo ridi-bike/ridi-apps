@@ -7,12 +7,12 @@ RUN apt-get update \
 	&& apt-get install -y curl coreutils \
 	&& rm -rf /var/lib/apt/lists/*
 
-ARG OPEN_OBSERVE_ORG
-ARG OPEN_OBSERVE_TOKEN
-
-COPY ./otel-install.sh ./otel-install.sh
-COPY ./otel-config.yaml /etc/otel-config.yaml
-RUN ./otel-install.sh
+# ARG OPEN_OBSERVE_ORG
+# ARG OPEN_OBSERVE_TOKEN
+#
+# COPY ./otel-install.sh ./otel-install.sh
+# COPY ./otel-config.yaml /etc/otel-config.yaml
+# RUN ./otel-install.sh
 
 # Build arguments for ridi-router
 ARG RIDI_ROUTER_VERSION

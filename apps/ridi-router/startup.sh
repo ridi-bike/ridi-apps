@@ -6,7 +6,7 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-/usr/local/bin/otelcol-contrib --config /etc/otel-config.yaml &
+# /usr/local/bin/otelcol-contrib --config /etc/otel-config.yaml &
 deno run --allow-all --unstable-ffi "$1" &
 
 # Wait for any process to exit

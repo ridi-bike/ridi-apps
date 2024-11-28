@@ -6,7 +6,12 @@ import {
 } from "logger";
 import { getOpenTelemetrySink } from "otel";
 import { stringify } from "yaml";
-import { ridiEnv, ridiEnvName } from "./env.ts";
+import {
+  openObserveOrg,
+  openObserveToken,
+  ridiEnv,
+  ridiEnvName,
+} from "./env.ts";
 
 await configure({
   sinks: {
@@ -19,6 +24,13 @@ await configure({
     }),
     otel: getOpenTelemetrySink({
       diagnostics: true,
+      otlpExporterConfig: {
+        url: `https://api.openobserve.ai/api/${openObserveOrg}`,
+        headers: {
+          "Authorization": `Basic ${openObserveToken}`,
+          "stream-name": `ridi_${ridiEnvName}`,
+        },
+      },
     }),
   },
   loggers: [{
