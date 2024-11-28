@@ -22,23 +22,31 @@ await configure({
           ? stringify(record.properties, { sortKeys: true }) + "\n"
           : ""),
     }),
-    otel: getOpenTelemetrySink({
-      diagnostics: true,
-      messageType: "array",
-      objectRenderer: "json",
-      otlpExporterConfig: {
-        url: `https://api.openobserve.ai/api/${openObserveOrg}/v1/logs`,
-        headers: {
-          "Authorization": `Basic ${openObserveToken}`,
-          "stream-name": `ridi_${ridiEnvName}`,
+    // otel: getOpenTelemetrySink({
+    //   diagnostics: true,
+    //   otlpExporterConfig: {
+    //     url: `https://api.openobserve.ai/api/${openObserveOrg}/v1/logs`,
+    //     headers: {
+    //       "Authorization": `Basic ${openObserveToken}`,
+    //       "stream-name": `ridi_${ridiEnvName}`,
+    //     },
+    //   },
+    // }),
+    openObserve: (rec) => {
+      fetch(
+        `https://api.openobserve.ai/api/${openObserveOrg}/ridi_${ridiEnvName}/_json`,
+        {
+          method: "post",
+          headers: { "Authorization": `Basic ${openObserveToken}` },
+          body: JSON.stringify([rec]),
         },
-      },
-    }),
+      );
+    },
   },
   loggers: [{
     category: [],
     lowestLevel: "debug",
-    sinks: ["otel", "console"],
+    sinks: ["openObserve", "console"],
   }],
 });
 
