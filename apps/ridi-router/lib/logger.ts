@@ -32,7 +32,7 @@ await configure({
           : ""),
     }),
     otel: getOpenTelemetrySink({
-      serviceName: ridiEnvName,
+      serviceName: "otlp",
       otlpExporterConfig: {
         url: "http://0.0.0.0:4317",
       },
