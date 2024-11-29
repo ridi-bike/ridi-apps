@@ -1,59 +1,60 @@
-import { getDb, initDb, locations, ridiLogger } from "@ridi-router/lib";
+import { getDb, RidiLogger } from "@ridi-router/lib";
+import { CoolifyClient } from "./coolify.ts";
+import { EnvVariables } from "./env.ts";
 
-import { coolify } from "./coolify.ts";
-import { routerVersion } from "./env.ts";
+export class DeployChecker {
+  private deployed = {
+    mapDataHandler: false,
+    routerHandler: false,
+  };
+  private checkInterval: number | null = null;
 
-export const deployed = {
-  mapDataHandler: false,
-  routerHandler: false,
-};
+  constructor(
+    private readonly db: ReturnType<typeof getDb>,
+    private readonly coolify: CoolifyClient,
+    private readonly envVariables: EnvVariables,
+    private readonly logger: RidiLogger,
+  ) {
+  }
 
-export let checkInterval: number | null = null;
+  async checkDeploy() {
+    this.db.handlers.updateRecordProcessing("deploy");
 
-export function resetDeployed() {
-  deployed.mapDataHandler = false;
-  deployed.routerHandler = false;
-  if (checkInterval !== null) {
-    clearInterval(checkInterval);
-    checkInterval = null;
+    const mapDataHandler = this.db.handlers.get("map-data");
+    const routerHandler = this.db.handlers.get("router");
+
+    this.logger.debug("Checking map data handler", { ...mapDataHandler });
+
+    if (!this.deployed.mapDataHandler && mapDataHandler?.status === "done") {
+      await this.coolify.deployMapDataHandler();
+      this.deployed.mapDataHandler = true;
+      this.logger.debug("Map data handler deployment triggered");
+    }
+
+    this.logger.debug("Checking router handler", { ...routerHandler });
+
+    if (
+      !this.deployed.routerHandler &&
+      this.deployed.mapDataHandler &&
+      mapDataHandler?.router_version === this.envVariables.routerVersion &&
+      mapDataHandler?.status === "done"
+    ) {
+      await this.coolify.deployRouterHandler();
+      this.deployed.routerHandler = true;
+      this.logger.debug("Router handler deployment triggered");
+    }
+
+    if (
+      this.deployed.routerHandler && this.deployed.mapDataHandler &&
+      this.checkInterval !== null
+    ) {
+      this.logger.debug("Deployments done, clearing check interval");
+      clearInterval(this.checkInterval);
+      this.db.handlers.updateRecordDone("deploy");
+    }
+  }
+
+  start() {
+    this.checkInterval = setInterval(() => this.checkDeploy(), 60 * 1000);
   }
 }
-
-export async function checkDeploy() {
-  const db = getDb();
-  db.handlers.updateRecordProcessing("deploy");
-
-  const mapDataHandler = db.handlers.get("map-data");
-  const routerHandler = db.handlers.get("router");
-
-  ridiLogger.debug("Checking map data handler", { ...mapDataHandler });
-
-  if (!deployed.mapDataHandler && mapDataHandler?.status === "done") {
-    await coolify.deployMapDataHandler();
-    deployed.mapDataHandler = true;
-    ridiLogger.debug("Map data handler deployment triggered");
-  }
-
-  ridiLogger.debug("Checking router handler", { ...routerHandler });
-
-  if (
-    !deployed.routerHandler &&
-    deployed.mapDataHandler &&
-    mapDataHandler?.router_version === routerVersion &&
-    mapDataHandler?.status === "done"
-  ) {
-    await coolify.deployRouterHandler();
-    deployed.routerHandler = true;
-    ridiLogger.debug("Router handler deployment triggered");
-  }
-
-  if (
-    deployed.routerHandler && deployed.mapDataHandler && checkInterval !== null
-  ) {
-    ridiLogger.debug("Deployments done, clearing check interval");
-    clearInterval(checkInterval);
-    db.handlers.updateRecordDone("deploy");
-  }
-}
-
-checkInterval = setInterval(checkDeploy, 60 * 1000);
