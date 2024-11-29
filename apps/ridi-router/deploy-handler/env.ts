@@ -1,6 +1,29 @@
 import { parse, string } from "valibot";
+import { BaseEnvVariables } from "@ridi-router/lib";
 
-export const routerVersion = parse(
-  string("RIDI_ROUTER_VERSION env variable"),
-  Deno.env.get("RIDI_ROUTER_VERSION"),
-);
+export class EnvVariables extends BaseEnvVariables {
+  readonly routerVersion: string = parse(
+    string("RIDI_ROUTER_VERSION env variable"),
+    Deno.env.get("RIDI_ROUTER_VERSION"),
+  );
+
+  readonly coolifyUrl: string = parse(
+    string("COOLIFY_API_URL env variable"),
+    Deno.env.get("COOLIFY_API_URL"),
+  );
+
+  readonly coolifyToken: string = parse(
+    string("COOLIFY_TOKEN env variable"),
+    Deno.env.get("COOLIFY_TOKEN"),
+  );
+
+  readonly coolifyIdRouterHandler: string = parse(
+    string("COOLIFY_DEPLOYMENT_ID_ROUTER_HANDLER env variable"),
+    Deno.env.get("COOLIFY_DEPLOYMENT_ID_ROUTER_HANDLER"),
+  );
+
+  readonly coolifyIdMapDataHandler: string = parse(
+    string("COOLIFY_DEPLOYMENT_ID_MAP_DATA_HANDLER env variable"),
+    Deno.env.get("COOLIFY_DEPLOYMENT_ID_MAP_DATA_HANDLER"),
+  );
+}

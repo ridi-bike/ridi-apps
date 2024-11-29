@@ -3,53 +3,73 @@ import {
   configure,
   getConsoleSink,
   getLogger,
+  type Logger,
 } from "logger";
 import { flatten } from "flat";
 import { stringify } from "yaml";
-import {
-  openObserveOrg,
-  openObserveToken,
-  ridiEnv,
-  ridiEnvName,
-} from "./env.ts";
+import { BaseEnvVariables } from "./env.ts";
 
-await configure({
-  sinks: {
-    console: getConsoleSink({
-      formatter: (record) =>
-        ansiColorFormatter(record) +
-        (record.properties && Object.keys(record.properties).length > 0
-          ? stringify(record.properties, { sortKeys: true }) + "\n"
-          : ""),
-    }),
-    // otel: getOpenTelemetrySink({
-    //   diagnostics: true,
-    //   otlpExporterConfig: {
-    //     url: `https://api.openobserve.ai/api/${openObserveOrg}/v1/logs`,
-    //     headers: {
-    //       "Authorization": `Basic ${openObserveToken}`,
-    //       "stream-name": `ridi_${ridiEnvName}`,
-    //     },
-    //   },
-    // }),
-    openObserve: (rec) => {
-      fetch(
-        `https://api.openobserve.ai/api/${openObserveOrg}/ridi_${ridiEnvName}/_json`,
-        {
-          method: "post",
-          headers: { "Authorization": `Basic ${openObserveToken}` },
-          body: JSON.stringify([flatten(rec)]),
+export class RidiLogger {
+  private logger: Logger;
+
+  constructor(private readonly env: BaseEnvVariables) {
+    this.initializeLogger(env.ridiEnvName);
+    this.logger = getLogger(env.ridiEnvName);
+  }
+
+  private async initializeLogger(envName: string) {
+    await configure({
+      sinks: {
+        console: getConsoleSink({
+          formatter: (record) =>
+            ansiColorFormatter(record) +
+            (record.properties && Object.keys(record.properties).length > 0
+              ? stringify(record.properties, { sortKeys: true }) + "\n"
+              : ""),
+        }),
+        openObserve: (rec) => {
+          fetch(
+            `https://api.openobserve.ai/api/${this.env.openObserveOrg}/ridi_${envName}/_json`,
+            {
+              method: "post",
+              headers: {
+                "Authorization": `Basic ${this.env.openObserveToken}`,
+              },
+              body: JSON.stringify([flatten(rec)]),
+            },
+          );
         },
-      );
-    },
-  },
-  loggers: [{
-    category: [],
-    lowestLevel: "debug",
-    sinks: ["openObserve", "console"],
-  }],
+      },
+      loggers: [{
+        category: [],
+        lowestLevel: "debug",
+        sinks: ["openObserve", "console"],
+      }],
+    });
+  }
+
+  public debug(message: string, properties?: Record<string, unknown>) {
+    this.logger.debug(message, properties);
+  }
+
+  public info(message: string, properties?: Record<string, unknown>) {
+    this.logger.info(message, properties);
+  }
+
+  public warn(message: string, properties?: Record<string, unknown>) {
+    this.logger.warn(message, properties);
+  }
+
+  public error(message: string, properties?: Record<string, unknown>) {
+    this.logger.error(message, properties);
+  }
+}
+const env = new BaseEnvVariables();
+export const ridiLogger = new RidiLogger(
+  env,
+);
+
+ridiLogger.info("Logging set for environment", {
+  ridiEnv: env.ridiEnv,
+  ridiEnvName: env.ridiEnvName,
 });
-
-export const ridiLogger = getLogger(ridiEnvName);
-
-ridiLogger.info("Logging set for environment", { ridiEnv, ridiEnvName });
