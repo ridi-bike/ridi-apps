@@ -1,10 +1,4 @@
-import {
-  getDb,
-  initDb,
-  locations,
-  type MapDataRecord,
-  ridiLogger,
-} from "@ridi-router/lib";
+import { getDb, initDb, locations, ridiLogger } from "@ridi-router/lib";
 
 import { processRegionList } from "./process-region-list.ts";
 import { regions, routerBin, routerVersion } from "./env-variables.ts";
