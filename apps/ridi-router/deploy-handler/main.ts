@@ -17,6 +17,7 @@ const deployChecker = new DeployChecker(
   db,
   new CoolifyClient(envVariables),
   envVariables,
+  ridiLogger,
 );
 deployChecker.start();
 deployChecker.checkDeploy();
