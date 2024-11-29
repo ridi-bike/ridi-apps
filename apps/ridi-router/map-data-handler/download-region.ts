@@ -1,12 +1,13 @@
 import {
+  BaseEnvVariables,
   getDb,
-  locations,
+  Locations,
   type MapDataRecord,
   ridiLogger,
 } from "@ridi-router/lib";
 import { parse, string } from "valibot";
 
-import { cacheProcessorQueue, generateCache } from "./generate-cache.ts";
+const locations = new Locations(new BaseEnvVariables());
 
 const routerVersion = parse(
   string("RIDI_ROUTER_VERSION env variable"),
