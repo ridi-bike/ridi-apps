@@ -1,10 +1,14 @@
-import { getDb, locations, ridiLogger } from "@ridi-router/lib";
+import { baseEnvVariables, getDb, ridiLogger } from "@ridi-router/lib";
 
 import { array, parse, string } from "valibot";
 
 const regions = parse(
   array(string()),
-  JSON.parse(Deno.readTextFileSync(locations.getRegionListFileLoc())),
+  JSON.parse(
+    Deno.readTextFileSync(
+      baseEnvVariables.regionListLoc,
+    ),
+  ),
 );
 
 export function checkForHandlerStatus() {

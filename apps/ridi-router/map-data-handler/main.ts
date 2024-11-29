@@ -1,17 +1,23 @@
-import { getDb, initDb, locations, ridiLogger } from "@ridi-router/lib";
+import {
+  baseEnvVariables,
+  getDb,
+  initDb,
+  Locations,
+  ridiLogger,
+} from "@ridi-router/lib";
 
 import { processRegionList } from "./process-region-list.ts";
-import { regions, routerBin, routerVersion } from "./env-variables.ts";
+import { envVariables } from "./env-variables.ts";
 
-initDb(locations.getDbFileLoc());
+initDb(new Locations(baseEnvVariables).getDbFileLoc());
 const db = getDb();
 
-db.handlers.createUpdate("map-data", routerVersion);
+db.handlers.createUpdate("map-data", envVariables.routerVersion);
 
 ridiLogger.debug("Initialized with configuration", {
-  regions,
-  routerBin,
-  routerVersion,
+  regions: envVariables.regions,
+  routerBin: envVariables.routerBin,
+  routerVersion: envVariables.routerVersion,
 });
 
 processRegionList();

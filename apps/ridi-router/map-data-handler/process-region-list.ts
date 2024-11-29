@@ -5,7 +5,7 @@ import { regions, routerVersion } from "./env-variables.ts";
 import { downloadRegion } from "./download-region.ts";
 import { cacheProcessorQueue, generateCache } from "./generate-cache.ts";
 import { checkForHandlerStatus } from "./check-for-handler-status.ts";
-import { processCleanup } from "./process-cleanup.ts";
+import { Cleaner, DenoRemove } from "./process-cleanup.ts";
 
 export async function processRegionList() {
   const db = getDb();
@@ -77,6 +77,9 @@ export async function processRegionList() {
   }
 
   ridiLogger.debug("All regions checked");
-  await processCleanup();
+
+  await new Cleaner(db, pg, pgClient, ridiLogger, new DenoRemove())
+    .processCleanup();
+
   checkForHandlerStatus();
 }

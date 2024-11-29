@@ -24,4 +24,16 @@ export class BaseEnvVariables {
     string(),
     Deno.env.get("OPEN_OBSERVE_TOKEN"),
   );
+
+  readonly regionListLoc = parse(
+    string(),
+    Deno.env.get("REGION_LIST"),
+  );
+
+  readonly dataDir = parse(
+    string(),
+    Deno.env.get("RIDI_DATA_DIR"),
+  );
 }
+
+export const baseEnvVariables = new BaseEnvVariables();
