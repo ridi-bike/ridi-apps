@@ -1,85 +1,95 @@
-import { getDb, pg, ridiLogger } from "@ridi-router/lib";
+import { getDb, pg, RidiLogger } from "@ridi-router/lib";
 
-import { pgClient } from "./pg.ts";
-import { regions, routerVersion } from "./env-variables.ts";
+import { pgClient as pgCl } from "./pg.ts";
 import { downloadRegion } from "./download-region.ts";
-import { cacheProcessorQueue, generateCache } from "./generate-cache.ts";
-import { checkForHandlerStatus } from "./check-for-handler-status.ts";
-import { Cleaner, DenoRemove } from "./process-cleanup.ts";
+import { Cleaner } from "./process-cleanup.ts";
+import { EnvVariables } from "./env-variables.ts";
+import { CacheGenerator } from "./generate-cache.ts";
+import { Handler } from "./check-for-handler-status.ts";
 
-export async function processRegionList() {
-  const db = getDb();
+export class RegionListProcessor {
+  constructor(
+    private readonly db: ReturnType<typeof getDb>,
+    private readonly logger: RidiLogger,
+    private readonly env: EnvVariables,
+    private readonly cacheGenerator: CacheGenerator,
+    private readonly handler: Handler,
+    private readonly cleaner: Cleaner,
+    private readonly pgQueries: typeof pg,
+    private readonly pgClient: typeof pgCl,
+  ) {
+  }
+  async process() {
+    this.logger.debug("Starting region list processing");
 
-  ridiLogger.debug("Starting region list processing");
+    this.db.handlers.updateRecordProcessing("map-data");
 
-  db.handlers.updateRecordProcessing("map-data");
+    for (const region of this.env.regions) {
+      this.logger.debug("Processing region", { region });
 
-  for (const region of regions) {
-    ridiLogger.debug("Processing region", { region });
+      const remoteMd5Url =
+        `https://download.geofabrik.de/${region}-latest.osm.pbf.md5`;
 
-    const remoteMd5Url =
-      `https://download.geofabrik.de/${region}-latest.osm.pbf.md5`;
+      this.logger.debug("Fetching MD5 for region", { region, remoteMd5Url });
 
-    ridiLogger.debug("Fetching MD5 for region", { region, remoteMd5Url });
+      const remoteMd5File = await fetch(remoteMd5Url, { redirect: "follow" });
+      const remoteMd5 = (await remoteMd5File.text()).split(" ")[0];
 
-    const remoteMd5File = await fetch(remoteMd5Url, { redirect: "follow" });
-    const remoteMd5 = (await remoteMd5File.text()).split(" ")[0];
+      this.logger.debug("Remote MD5", { remoteMd5 });
 
-    ridiLogger.debug("Remote MD5", { remoteMd5 });
+      const nextMapData = this.db.mapData.getRecordNext(region);
 
-    const nextMapData = db.mapData.getRecordNext(region);
+      this.logger.debug("Next Map Data Record", { ...nextMapData });
 
-    ridiLogger.debug("Next Map Data Record", { ...nextMapData });
-
-    if (nextMapData) {
-      if (
-        remoteMd5 !== nextMapData.pbf_md5 || nextMapData.status === "error" ||
-        nextMapData.router_version !== routerVersion
-      ) {
-        ridiLogger.debug("discarding and downloading region", {
-          remoteMd5,
-          routerVersion,
-        });
-        db.mapData.updateRecordDiscarded(nextMapData.id);
-        await pg.regionSetDiscarded(pgClient, {
-          region: nextMapData.region,
-          pbfMd5: nextMapData.pbf_md5,
-        });
-        await downloadRegion(region, remoteMd5, null);
-      } else if (nextMapData.status === "new") {
-        ridiLogger.debug("Status new, downloading region");
-        await downloadRegion(region, remoteMd5, nextMapData);
-      } else if (
-        nextMapData.status === "downloaded" ||
-        nextMapData.status === "processing"
-      ) {
-        ridiLogger.debug("Status {status}, processing", {
-          status: nextMapData.status,
-        });
-        cacheProcessorQueue.add(() => generateCache(nextMapData));
-      }
-    } else {
-      const currentMapData = db.mapData.getRecordCurrent(region);
-      ridiLogger.debug("Current Map Data Record", { ...currentMapData });
-      if (currentMapData) {
+      if (nextMapData) {
         if (
-          remoteMd5 !== currentMapData.pbf_md5 ||
-          currentMapData.router_version !== routerVersion
+          remoteMd5 !== nextMapData.pbf_md5 || nextMapData.status === "error" ||
+          nextMapData.router_version !== this.env.routerVersion
         ) {
-          ridiLogger.debug("MD5 differs, downloading");
+          this.logger.debug("discarding and downloading region", {
+            remoteMd5,
+            routerVersion: this.env.routerVersion,
+          });
+          this.db.mapData.updateRecordDiscarded(nextMapData.id);
+          await this.pgQueries.regionSetDiscarded(this.pgClient, {
+            region: nextMapData.region,
+            pbfMd5: nextMapData.pbf_md5,
+          });
           await downloadRegion(region, remoteMd5, null);
+        } else if (nextMapData.status === "new") {
+          this.logger.debug("Status new, downloading region");
+          await downloadRegion(region, remoteMd5, nextMapData);
+        } else if (
+          nextMapData.status === "downloaded" ||
+          nextMapData.status === "processing"
+        ) {
+          this.logger.debug("Status {status}, processing", {
+            status: nextMapData.status,
+          });
+          this.cacheGenerator.schedule(nextMapData);
         }
       } else {
-        ridiLogger.debug("no current record, downloading");
-        await downloadRegion(region, remoteMd5, null);
+        const currentMapData = this.db.mapData.getRecordCurrent(region);
+        this.logger.debug("Current Map Data Record", { ...currentMapData });
+        if (currentMapData) {
+          if (
+            remoteMd5 !== currentMapData.pbf_md5 ||
+            currentMapData.router_version !== this.env.routerVersion
+          ) {
+            this.logger.debug("MD5 differs, downloading");
+            await downloadRegion(region, remoteMd5, null);
+          }
+        } else {
+          this.logger.debug("no current record, downloading");
+          await downloadRegion(region, remoteMd5, null);
+        }
       }
     }
+
+    this.logger.debug("All regions checked");
+
+    await this.cleaner.processCleanup();
+
+    this.handler.checkStatus();
   }
-
-  ridiLogger.debug("All regions checked");
-
-  await new Cleaner(db, pg, pgClient, ridiLogger, new DenoRemove())
-    .processCleanup();
-
-  checkForHandlerStatus();
 }

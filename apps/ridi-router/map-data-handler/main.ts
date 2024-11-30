@@ -1,15 +1,23 @@
 import {
-  baseEnvVariables,
+  BaseEnvVariables,
   getDb,
   initDb,
   Locations,
-  ridiLogger,
+  pg,
+  RidiLogger,
 } from "@ridi-router/lib";
 
-import { processRegionList } from "./process-region-list.ts";
-import { envVariables } from "./env-variables.ts";
+import { EnvVariables, envVariables } from "./env-variables.ts";
+import { RegionListProcessor } from "./process-region-list.ts";
+import { CacheGenerator, DenoCommand } from "./generate-cache.ts";
+import { Handler } from "./check-for-handler-status.ts";
+import { Cleaner, DenoRemove } from "./process-cleanup.ts";
+import { pgClient } from "./pg.ts";
+import { DenoFileReader, KmlConverter, KmlProcessor } from "./process-kml.ts";
 
-initDb(new Locations(baseEnvVariables).getDbFileLoc());
+const ridiLogger = RidiLogger.get(BaseEnvVariables.get());
+
+initDb(new Locations(BaseEnvVariables.get()).getDbFileLoc());
 const db = getDb();
 
 db.handlers.createUpdate("map-data", envVariables.routerVersion);
@@ -20,9 +28,37 @@ ridiLogger.debug("Initialized with configuration", {
   routerVersion: envVariables.routerVersion,
 });
 
-processRegionList();
+const handler = new Handler(
+  db,
+  EnvVariables.get(),
+  ridiLogger,
+);
+const regionProcessor = new RegionListProcessor(
+  db,
+  ridiLogger,
+  EnvVariables.get(),
+  new CacheGenerator(
+    db,
+    new DenoCommand(),
+    ridiLogger,
+    EnvVariables.get(),
+    new KmlProcessor(pg, pgClient, new DenoFileReader(), new KmlConverter()),
+    handler,
+  ),
+  handler,
+  new Cleaner(
+    db,
+    pg,
+    pgClient,
+    ridiLogger,
+    new DenoRemove(),
+  ),
+  pg,
+  pgClient,
+);
+regionProcessor.process();
 
-setInterval(processRegionList, 24 * 60 * 60 * 1000); // every 24h
+setInterval(() => regionProcessor.process(), 24 * 60 * 60 * 1000); // every 24h
 
 Deno.serve({ port: 2727, hostname: "0.0.0.0" }, (_req) => {
   const handlerRec = db.handlers.get("map-data");
