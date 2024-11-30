@@ -10,11 +10,22 @@ import { stringify } from "yaml";
 import { BaseEnvVariables } from "./env.ts";
 
 export class RidiLogger {
-  private logger: Logger;
+  private static instance: RidiLogger;
 
-  constructor(private readonly env: BaseEnvVariables) {
+  private logger: Logger;
+  private readonly env: BaseEnvVariables;
+
+  private constructor(env: BaseEnvVariables) {
+    this.env = env;
     this.initializeLogger(env.ridiEnvName);
     this.logger = getLogger(env.ridiEnvName);
+  }
+
+  public static get(env: BaseEnvVariables): RidiLogger {
+    if (!RidiLogger.instance) {
+      RidiLogger.instance = new RidiLogger(env);
+    }
+    return RidiLogger.instance;
   }
 
   private async initializeLogger(envName: string) {
@@ -64,12 +75,9 @@ export class RidiLogger {
     this.logger.error(message, properties);
   }
 }
-const env = new BaseEnvVariables();
-export const ridiLogger = new RidiLogger(
-  env,
-);
+const ridiLogger = RidiLogger.get(BaseEnvVariables.get());
 
 ridiLogger.info("Logging set for environment", {
-  ridiEnv: env.ridiEnv,
-  ridiEnvName: env.ridiEnvName,
+  ridiEnv: ridiLogger["env"].ridiEnv,
+  ridiEnvName: ridiLogger["env"].ridiEnvName,
 });

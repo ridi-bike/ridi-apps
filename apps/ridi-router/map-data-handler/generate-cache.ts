@@ -1,8 +1,8 @@
 import { getDb, type MapDataRecord, type RidiLogger } from "@ridi-router/lib";
-
-import { checkForHandlerStatus } from "./check-for-handler-status.ts";
+import PQueue from "p-queue";
 import { EnvVariables } from "./env-variables.ts";
-import { processKml } from "./process-kml.ts";
+import { KmlProcessor } from "./process-kml.ts";
+import { Handler } from "./check-for-handler-status.ts";
 
 export class DenoCommand {
   async execute(command: string, args: string[]) {
@@ -17,15 +17,23 @@ export class DenoCommand {
   }
 }
 export class CacheGenerator {
+  private queue = new PQueue({ concurrency: 1 });
+
   constructor(
     private readonly db: ReturnType<typeof getDb>,
     private readonly denoCommand: DenoCommand,
     private readonly logger: RidiLogger,
     private readonly env: EnvVariables,
+    private readonly kml: KmlProcessor,
+    private readonly handler: Handler,
   ) {
   }
 
-  async generateCache(mapDataRecord: MapDataRecord) {
+  public schedule(mapDataRecord: MapDataRecord) {
+    this.queue.add(() => this.generateCache.bind(this)(mapDataRecord));
+  }
+
+  private async generateCache(mapDataRecord: MapDataRecord) {
     this.logger.debug("Starting cache generation for record", {
       id: mapDataRecord.id,
       region: mapDataRecord.region,
@@ -47,7 +55,7 @@ export class CacheGenerator {
       stdout: stdoutOutput,
       stderr: stderrOutput,
     });
-    await processKml(mapDataRecord);
+    await this.kml.processKml(mapDataRecord);
     this.db.mapData.updateRecordReady(mapDataRecord.id);
     if (code !== 0) {
       this.logger.error("Cache generation failed", {
@@ -61,6 +69,6 @@ export class CacheGenerator {
       );
     }
 
-    checkForHandlerStatus();
+    this.handler.checkStatus();
   }
 }

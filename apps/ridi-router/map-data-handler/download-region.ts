@@ -3,11 +3,10 @@ import {
   getDb,
   Locations,
   type MapDataRecord,
-  ridiLogger,
 } from "@ridi-router/lib";
 import { parse, string } from "valibot";
 
-const locations = new Locations(new BaseEnvVariables());
+const locations = new Locations(BaseEnvVariables.get());
 
 const routerVersion = parse(
   string("RIDI_ROUTER_VERSION env variable"),

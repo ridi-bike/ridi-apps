@@ -1,31 +1,32 @@
-import { baseEnvVariables, getDb, ridiLogger } from "@ridi-router/lib";
+import { getDb, MapDataRecord, RidiLogger } from "@ridi-router/lib";
 
-import { array, parse, string } from "valibot";
+import { EnvVariables } from "./env-variables.ts";
 
-const regions = parse(
-  array(string()),
-  JSON.parse(
-    Deno.readTextFileSync(
-      baseEnvVariables.regionListLoc,
-    ),
-  ),
-);
+export class Handler {
+  constructor(
+    private readonly db: ReturnType<typeof getDb>,
+    private readonly env: EnvVariables,
+    private readonly logger: RidiLogger,
+  ) {
+  }
 
-export function checkForHandlerStatus() {
-  const db = getDb();
-
-  ridiLogger.debug("Checking handler status");
-  const nextRecords = db.mapData.getRecordsAllNext();
-  if (
-    regions.every((r) =>
+  private areAllRegionsProcessed(nextRecords: MapDataRecord[]): boolean {
+    return this.env.regions.every((r) =>
       nextRecords.find((nr) =>
         nr.region === r && (nr.status === "ready" || nr.status === "error")
       )
-    )
-  ) {
-    ridiLogger.debug("All regions processed, setting handler to idle");
-    db.handlers.updateRecordDone("map-data");
-  } else {
-    db.handlers.updateRecordUpdatedAt("map-data");
+    );
+  }
+
+  public checkStatus(): void {
+    this.logger.debug("Checking handler status");
+    const nextRecords = this.db.mapData.getRecordsAllNext();
+
+    if (this.areAllRegionsProcessed(nextRecords)) {
+      this.logger.debug("All regions processed, setting handler to idle");
+      this.db.handlers.updateRecordDone("map-data");
+    } else {
+      this.db.handlers.updateRecordUpdatedAt("map-data");
+    }
   }
 }
