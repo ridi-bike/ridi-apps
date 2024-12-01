@@ -6,9 +6,9 @@ import { KmlProcessor } from "./kml-processor.ts";
 import { Handler } from "./handler.ts";
 
 const mockLogger = {
-  debug: () => {},
-  error: () => {},
-} as unknown as RidiLogger;
+  debug: (..._args: unknown[]) => undefined,
+  error: (..._args: unknown[]) => undefined,
+} as RidiLogger;
 
 const mockDb = {
   mapData: {
