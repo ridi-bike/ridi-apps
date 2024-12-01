@@ -1,5 +1,5 @@
 import { Database } from "sqlite";
-import { ridiLogger } from "./logger.ts";
+import { RidiLogger } from "./logger.ts";
 import {
   type InferInput,
   integer,
@@ -12,6 +12,9 @@ import {
   string,
   union,
 } from "valibot";
+import { BaseEnvVariables } from "./env.ts";
+
+const ridiLogger = RidiLogger.get(BaseEnvVariables.get());
 
 const mapDataRecordSchema = object({
   id: pipe(number(), integer()),

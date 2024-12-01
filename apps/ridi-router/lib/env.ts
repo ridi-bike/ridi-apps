@@ -1,7 +1,7 @@
 import { literal, parse, string, union } from "valibot";
 
 export class BaseEnvVariables {
-  private static instance: BaseEnvVariables;
+  private static baseInstance: BaseEnvVariables;
 
   readonly ridiEnv = parse(
     union([literal("local"), literal("prod")]),
@@ -36,12 +36,12 @@ export class BaseEnvVariables {
     string(),
     Deno.env.get("RIDI_DATA_DIR"),
   );
-  private constructor() {}
+  protected constructor() {}
 
   public static get(): BaseEnvVariables {
-    if (!BaseEnvVariables.instance) {
-      BaseEnvVariables.instance = new BaseEnvVariables();
+    if (!BaseEnvVariables.baseInstance) {
+      BaseEnvVariables.baseInstance = new BaseEnvVariables();
     }
-    return BaseEnvVariables.instance;
+    return BaseEnvVariables.baseInstance;
   }
 }
