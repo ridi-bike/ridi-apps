@@ -1,7 +1,7 @@
 import { assertSpyCall, assertSpyCalls, spy } from "jsr:@std/testing/mock";
-import { Cleaner, DenoRemove } from "./process-cleanup.ts";
+import { Cleaner, DenoRemove } from "./cleaner.ts";
 import { getDb, pg, RidiLogger } from "@ridi-router/lib";
-import { pgClient } from "./pg.ts";
+import { pgClient } from "./pg-client.ts";
 
 const mockRecord = {
   id: 1,

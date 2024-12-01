@@ -1,5 +1,5 @@
 import { MapDataRecord, pg } from "@ridi-router/lib";
-import { pgClient as pgCl } from "./pg.ts";
+import { pgClient as pgCl } from "./pg-client.ts";
 import { kml } from "to-geo-json";
 import { DOMParser } from "xmldom";
 
