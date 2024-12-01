@@ -8,13 +8,13 @@ import {
 } from "@ridi-router/lib";
 
 import { EnvVariables } from "./env-variables.ts";
-import { RegionListProcessor } from "./process-region-list.ts";
-import { CacheGenerator, DenoCommand } from "./generate-cache.ts";
-import { Handler } from "./check-for-handler-status.ts";
-import { Cleaner, DenoRemove } from "./process-cleanup.ts";
-import { pgClient } from "./pg.ts";
-import { DenoFileReader, KmlConverter, KmlProcessor } from "./process-kml.ts";
-import { RegionDownloader } from "./download-region.ts";
+import { RegionListProcessor } from "./region-list-processor.ts";
+import { CacheGenerator, DenoCommand } from "./cache-generator.ts";
+import { Handler } from "./handler.ts";
+import { Cleaner, DenoRemove } from "./cleaner.ts";
+import { pgClient } from "./pg-client.ts";
+import { DenoFileReader, KmlConverter, KmlProcessor } from "./kml-processor.ts";
+import { RegionDownloader } from "./region-downloader.ts";
 
 const ridiLogger = RidiLogger.get(BaseEnvVariables.get());
 const locations = new Locations(BaseEnvVariables.get());

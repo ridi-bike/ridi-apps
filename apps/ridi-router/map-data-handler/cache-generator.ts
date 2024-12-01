@@ -1,8 +1,8 @@
 import { getDb, type MapDataRecord, type RidiLogger } from "@ridi-router/lib";
 import PQueue from "p-queue";
 import { EnvVariables } from "./env-variables.ts";
-import { KmlProcessor } from "./process-kml.ts";
-import { Handler } from "./check-for-handler-status.ts";
+import { KmlProcessor } from "./kml-processor.ts";
+import { Handler } from "./handler.ts";
 
 export class DenoCommand {
   async execute(command: string, args: string[]) {

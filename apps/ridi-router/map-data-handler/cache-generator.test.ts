@@ -1,10 +1,9 @@
 import { assertSpyCall, spy } from "jsr:@std/testing/mock";
-import { assertEquals } from "jsr:@std/assert";
 import { getDb, type MapDataRecord, type RidiLogger } from "@ridi-router/lib";
-import { CacheGenerator, DenoCommand } from "./generate-cache.ts";
+import { CacheGenerator, DenoCommand } from "./cache-generator.ts";
 import { EnvVariables } from "./env-variables.ts";
-import { KmlProcessor } from "./process-kml.ts";
-import { Handler } from "./check-for-handler-status.ts";
+import { KmlProcessor } from "./kml-processor.ts";
+import { Handler } from "./handler.ts";
 
 const mockLogger = {
   debug: () => {},

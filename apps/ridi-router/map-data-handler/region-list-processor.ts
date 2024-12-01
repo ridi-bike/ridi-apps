@@ -1,11 +1,11 @@
 import { getDb, pg, RidiLogger } from "@ridi-router/lib";
 
-import { pgClient as pgCl } from "./pg.ts";
-import { Cleaner } from "./process-cleanup.ts";
+import { pgClient as pgCl } from "./pg-client.ts";
+import { Cleaner } from "./cleaner.ts";
 import { EnvVariables } from "./env-variables.ts";
-import { CacheGenerator } from "./generate-cache.ts";
-import { Handler } from "./check-for-handler-status.ts";
-import { RegionDownloader } from "./download-region.ts";
+import { CacheGenerator } from "./cache-generator.ts";
+import { Handler } from "./handler.ts";
+import { RegionDownloader } from "./region-downloader.ts";
 
 export class RegionListProcessor {
   constructor(
