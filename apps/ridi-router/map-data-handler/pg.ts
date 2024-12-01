@@ -1,3 +1,3 @@
-import { envVariables } from "./env-variables.ts";
+import { EnvVariables } from "./env-variables.ts";
 import postgres from "postgres";
-export const pgClient = postgres(envVariables.supabaseDbUrl);
+export const pgClient = postgres(EnvVariables.get().supabaseDbUrl);

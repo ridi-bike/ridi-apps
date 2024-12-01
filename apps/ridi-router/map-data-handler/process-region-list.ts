@@ -1,11 +1,11 @@
 import { getDb, pg, RidiLogger } from "@ridi-router/lib";
 
 import { pgClient as pgCl } from "./pg.ts";
-import { downloadRegion } from "./download-region.ts";
 import { Cleaner } from "./process-cleanup.ts";
 import { EnvVariables } from "./env-variables.ts";
 import { CacheGenerator } from "./generate-cache.ts";
 import { Handler } from "./check-for-handler-status.ts";
+import { RegionDownloader } from "./download-region.ts";
 
 export class RegionListProcessor {
   constructor(
@@ -15,6 +15,7 @@ export class RegionListProcessor {
     private readonly cacheGenerator: CacheGenerator,
     private readonly handler: Handler,
     private readonly cleaner: Cleaner,
+    private readonly downloader: RegionDownloader,
     private readonly pgQueries: typeof pg,
     private readonly pgClient: typeof pgCl,
   ) {
@@ -55,10 +56,10 @@ export class RegionListProcessor {
             region: nextMapData.region,
             pbfMd5: nextMapData.pbf_md5,
           });
-          await downloadRegion(region, remoteMd5, null);
+          await this.downloader.downloadRegion(region, remoteMd5, null);
         } else if (nextMapData.status === "new") {
           this.logger.debug("Status new, downloading region");
-          await downloadRegion(region, remoteMd5, nextMapData);
+          await this.downloader.downloadRegion(region, remoteMd5, nextMapData);
         } else if (
           nextMapData.status === "downloaded" ||
           nextMapData.status === "processing"
@@ -77,11 +78,11 @@ export class RegionListProcessor {
             currentMapData.router_version !== this.env.routerVersion
           ) {
             this.logger.debug("MD5 differs, downloading");
-            await downloadRegion(region, remoteMd5, null);
+            await this.downloader.downloadRegion(region, remoteMd5, null);
           }
         } else {
           this.logger.debug("no current record, downloading");
-          await downloadRegion(region, remoteMd5, null);
+          await this.downloader.downloadRegion(region, remoteMd5, null);
         }
       }
     }

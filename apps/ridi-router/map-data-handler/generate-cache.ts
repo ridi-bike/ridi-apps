@@ -30,10 +30,10 @@ export class CacheGenerator {
   }
 
   public schedule(mapDataRecord: MapDataRecord) {
-    this.queue.add(() => this.generateCache.bind(this)(mapDataRecord));
+    this.queue.add(() => this.generateCache(mapDataRecord));
   }
 
-  private async generateCache(mapDataRecord: MapDataRecord) {
+  async generateCache(mapDataRecord: MapDataRecord) {
     this.logger.debug("Starting cache generation for record", {
       id: mapDataRecord.id,
       region: mapDataRecord.region,

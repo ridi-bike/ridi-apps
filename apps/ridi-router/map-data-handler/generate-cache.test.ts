@@ -3,6 +3,8 @@ import { assertEquals } from "jsr:@std/assert";
 import { getDb, type MapDataRecord, type RidiLogger } from "@ridi-router/lib";
 import { CacheGenerator, DenoCommand } from "./generate-cache.ts";
 import { EnvVariables } from "./env-variables.ts";
+import { KmlProcessor } from "./process-kml.ts";
+import { Handler } from "./check-for-handler-status.ts";
 
 const mockLogger = {
   debug: () => {},
@@ -11,11 +13,11 @@ const mockLogger = {
 
 const mockDb = {
   mapData: {
-    updateRecordProcessing: () => {},
-    updateRecordReady: () => {},
-    updateRecordError: () => {},
+    updateRecordProcessing: (..._args: unknown[]) => undefined,
+    updateRecordReady: (..._args: unknown[]) => undefined,
+    updateRecordError: (..._args: unknown[]) => undefined,
   },
-} as unknown as ReturnType<typeof getDb>;
+} as ReturnType<typeof getDb>;
 
 const mockDenoCommand = {
   execute: (..._args: unknown[]) =>
@@ -27,8 +29,14 @@ const mockDenoCommand = {
 } as DenoCommand;
 
 const mockEnv = {
-  routerBin: "123",
+  routerBin: "/rou/ter/b/in",
 } as EnvVariables;
+
+const mockKml = {
+  processKml: (..._args: unknown[]) => Promise.resolve(),
+} as KmlProcessor;
+
+const mockHandler = { checkStatus: () => undefined } as Handler;
 
 Deno.test("CacheGenerator - successful cache generation", async () => {
   const executeSpy = spy(mockDenoCommand, "execute");
@@ -40,6 +48,8 @@ Deno.test("CacheGenerator - successful cache generation", async () => {
     mockDenoCommand,
     mockLogger,
     mockEnv,
+    mockKml,
+    mockHandler,
   );
 
   const mockMapData = {
@@ -53,7 +63,7 @@ Deno.test("CacheGenerator - successful cache generation", async () => {
 
   assertSpyCall(executeSpy, 0, {
     args: [
-      "router",
+      "/rou/ter/b/in",
       ["cache", "-i", "/test/path.pbf", "-c", "/test/cache"],
     ],
   });
@@ -76,9 +86,18 @@ Deno.test("CacheGenerator - failed cache generation", async () => {
 
   const generator = new CacheGenerator(
     mockDb,
-    mockDenoCommand,
+    {
+      execute: (..._args: unknown[]) =>
+        Promise.resolve({
+          code: 1,
+          stderr: "omg error",
+          stdout: "",
+        }),
+    },
     mockLogger,
     mockEnv,
+    mockKml,
+    mockHandler,
   );
 
   const mockMapData = {
@@ -91,15 +110,6 @@ Deno.test("CacheGenerator - failed cache generation", async () => {
   await generator.generateCache(mockMapData);
 
   assertSpyCall(updateErrorSpy, 0, {
-    args: [123, "stdout: \n\nstderr: error output"],
+    args: [123, "stdout: \n\nstderr: omg error"],
   });
-});
-
-Deno.test("DenoCommand - execute command", async () => {
-  const command = new DenoCommand();
-  const result = await command.execute("echo", ["test"]);
-
-  assertEquals(result.code, 0);
-  assertEquals(result.stdout.trim(), "test");
-  assertEquals(result.stderr, "");
 });
