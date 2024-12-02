@@ -38,7 +38,13 @@ export class CacheGenerator {
       id: mapDataRecord.id,
       region: mapDataRecord.region,
     });
+
     this.db.mapData.updateRecordProcessing(mapDataRecord.id);
+    const beat = setInterval(
+      () => this.db.mapData.updateRecordProcessing(mapDataRecord.id),
+      60 * 1000,
+    );
+
     const { code, stdout: stdoutOutput, stderr: stderrOutput } = await this
       .denoCommand.execute(
         this.env.routerBin,
@@ -50,12 +56,17 @@ export class CacheGenerator {
           mapDataRecord.cache_location,
         ],
       );
+
+    clearInterval(beat);
+
     this.logger.debug("Cache generation process output", {
       id: mapDataRecord.id,
       stdout: stdoutOutput,
       stderr: stderrOutput,
     });
+
     await this.kml.processKml(mapDataRecord);
+
     this.db.mapData.updateRecordReady(mapDataRecord.id);
     if (code !== 0) {
       this.logger.error("Cache generation failed", {
