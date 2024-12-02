@@ -8,7 +8,7 @@ import {
 } from "@ridi-router/lib";
 
 import { EnvVariables } from "./env-variables.ts";
-import { RegionListProcessor } from "./region-list-processor.ts";
+import { Md5Downloader, RegionListProcessor } from "./region-list-processor.ts";
 import { CacheGenerator, DenoCommand } from "./cache-generator.ts";
 import { Handler } from "./handler.ts";
 import { Cleaner, DenoRemove } from "./cleaner.ts";
@@ -72,6 +72,7 @@ const regionProcessor = new RegionListProcessor(
   ),
   pg,
   getPgClient(),
+  new Md5Downloader(ridiLogger),
 );
 regionProcessor.process();
 
