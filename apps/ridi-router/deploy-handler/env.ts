@@ -2,6 +2,8 @@ import { parse, string } from "valibot";
 import { BaseEnvVariables } from "@ridi-router/lib";
 
 export class EnvVariables extends BaseEnvVariables {
+  private static instance: EnvVariables;
+
   readonly routerVersion: string = parse(
     string("RIDI_ROUTER_VERSION env variable"),
     Deno.env.get("RIDI_ROUTER_VERSION"),
@@ -26,4 +28,15 @@ export class EnvVariables extends BaseEnvVariables {
     string("COOLIFY_DEPLOYMENT_ID_MAP_DATA_HANDLER env variable"),
     Deno.env.get("COOLIFY_DEPLOYMENT_ID_MAP_DATA_HANDLER"),
   );
+
+  private constructor() {
+    super();
+  }
+
+  public static override get(): EnvVariables {
+    if (!EnvVariables.instance) {
+      EnvVariables.instance = new EnvVariables();
+    }
+    return EnvVariables.instance;
+  }
 }

@@ -14,7 +14,7 @@ import { Handler } from "./handler.ts";
 import { Cleaner, DenoRemove } from "./cleaner.ts";
 import { pgClient } from "./pg-client.ts";
 import { DenoFileReader, KmlConverter, KmlProcessor } from "./kml-processor.ts";
-import { RegionDownloader } from "./region-downloader.ts";
+import { FileDownloader, RegionDownloader } from "./region-downloader.ts";
 
 const ridiLogger = RidiLogger.get(BaseEnvVariables.get());
 const locations = new Locations(BaseEnvVariables.get());
@@ -56,7 +56,13 @@ const regionProcessor = new RegionListProcessor(
     ridiLogger,
     new DenoRemove(),
   ),
-  new RegionDownloader(locations, EnvVariables.get(), db, ridiLogger),
+  new RegionDownloader(
+    locations,
+    EnvVariables.get(),
+    db,
+    ridiLogger,
+    new FileDownloader(ridiLogger),
+  ),
   pg,
   pgClient,
 );

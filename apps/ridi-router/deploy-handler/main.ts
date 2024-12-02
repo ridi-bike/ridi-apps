@@ -1,9 +1,18 @@
-import { getDb, initDb, locations, ridiLogger } from "@ridi-router/lib";
+import {
+  BaseEnvVariables,
+  getDb,
+  initDb,
+  Locations,
+  RidiLogger,
+} from "@ridi-router/lib";
 import { EnvVariables } from "./env.ts";
 import { DeployChecker } from "./check-deploy.ts";
 import { CoolifyClient } from "./coolify.ts";
 
-const envVariables = new EnvVariables();
+const envVariables = EnvVariables.get();
+const locations = new Locations(BaseEnvVariables.get());
+const ridiLogger = RidiLogger.get(envVariables);
+
 initDb(locations.getDbFileLoc());
 
 const db = getDb();

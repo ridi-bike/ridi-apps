@@ -6,17 +6,49 @@ import {
 } from "@ridi-router/lib";
 import { EnvVariables } from "./env-variables.ts";
 
-export class FileDownloader {
-  constructor(private readonly logger: RidiLogger) {}
+class ProgressTrack extends TransformStream {
+  constructor(private readonly logChunkSize: (chunkSize: number) => void) {
+    super({
+      transform: (chunk, controller) => {
+        this.logChunkSize(chunk.length);
+        controller.enqueue(chunk);
+      },
+    });
+  }
+}
 
-  async downloadFile(url: string, dest: string): Promise<void> {
+export class FileDownloader {
+  constructor(
+    private readonly logger: RidiLogger,
+  ) {}
+
+  async downloadFile(
+    url: string,
+    dest: string,
+    logTotalSize?: (size: number) => void,
+    logChunkSize?: (chunkSize: number) => void,
+  ): Promise<void> {
     const fileResponse = await fetch(url, { redirect: "follow" });
 
     if (fileResponse.body) {
+      if (logTotalSize) {
+        const size = fileResponse.headers.get("Content-Length");
+        if (size && Number(size).toString() === size) {
+          logTotalSize(Number(size));
+        }
+      }
       const file = await Deno.open(dest, {
         write: true,
         create: true,
       });
+
+      if (logChunkSize) {
+        fileResponse.body.pipeThrough(
+          new ProgressTrack((chunkSize) =>
+            logChunkSize && logChunkSize(chunkSize)
+          ),
+        );
+      }
 
       await fileResponse.body.pipeTo(file.writable);
     } else {
@@ -68,7 +100,16 @@ export class RegionDownloader {
 
     try {
       await this.fileDownloader.downloadFile(remoteKmlUrl, kmlLocation);
-      await this.fileDownloader.downloadFile(remotePbfUrl, pbfLocation);
+      await this.fileDownloader.downloadFile(
+        remotePbfUrl,
+        pbfLocation,
+        (size) => this.db.mapData.updateRecordSize(mapDataRecord.id, size),
+        (chunkSize) =>
+          this.db.mapData.updateRecordDownloadedSize(
+            mapDataRecord.id,
+            chunkSize,
+          ),
+      );
     } catch (err) {
       this.logger.error("Region download failed", {
         region,

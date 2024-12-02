@@ -38,6 +38,9 @@ const mapDataRecordSchema = object({
   router_version: string(),
   kml_location: string(),
   error: nullable(string()),
+  updated_at: pipe(number(), integer()),
+  pbf_size: nullable(pipe(number(), integer())),
+  pbf_downloaded_size: nullable(pipe(number(), integer())),
 });
 export type MapDataRecord = InferInput<typeof mapDataRecordSchema>;
 
@@ -59,38 +62,80 @@ export function initDb(dbLocation: string) {
   ridiLogger.debug("Opening database", { dbLocation });
   db = new Database(dbLocation, { create: true });
   ridiLogger.debug("Database instance created", { db });
+  migrate((db) =>
+    db.prepare(`
+			create table if not exists db_version (
+				version integer primary key
+			);
+		`).run(), 1);
+
+  migrate((db) =>
+    db.prepare(`
+			create table if not exists map_data (
+				id integer primary key autoincrement,
+				region text not null,
+				version text not null check(version in ('current', 'previous', 'next', 'discarded')),
+				status text not null check(status in ('new', 'downloaded', 'processing', 'ready', 'error')),
+				pbf_location text not null,
+				pbf_md5 text not null,
+				cache_location text not null,
+				router_version text not null,
+				kml_location text not null,
+				error text
+			);
+		`).run(), 1);
+
+  migrate((db) =>
+    db.prepare(`
+			create table if not exists handlers (
+				name text check(name in ('map-data', 'router', 'deploy')) primary key,
+				router_version text not null,
+				status text not null check(status in ('triggered', 'processing', 'done')),
+				updated_at integer not null
+			);
+		`).run(), 1);
+
+  migrate(
+    (db) =>
+      db.prepare(`
+				alter table map_data 
+					add column updated_at integer;
+
+				update map_data
+				set updated_at = 0;
+
+				alter table map_data
+					alter column updated_at not null;
+
+				alter table map_data
+					add column pbf_size integer;
+
+				alter table map_data
+					add column pbf_downloaded_size integer;
+			`).run(),
+    2,
+  );
+
+  ridiLogger.debug("Migrations done");
 }
 function dbIsOk(db: Database | null): asserts db is Database {
   if (!db) {
     throw Error("db not initialized");
   }
 }
+function migrate(fn: (db: Database) => void, expectedVersion: number) {
+  dbIsOk(db);
+  const currentVersion: number | undefined = db
+    .sql`select max(version) from db_version`[0]
+    ?.version;
+
+  if (currentVersion !== expectedVersion) {
+    fn(db);
+    db.sql`insert into db_version (version) values (${expectedVersion});`;
+  }
+}
 export function getDb() {
   dbIsOk(db);
-
-  db.prepare(`
-		create table if not exists map_data (
-			id integer primary key autoincrement,
-			region text not null,
-			version text not null check(version in ('current', 'previous', 'next', 'discarded')),
-			status text not null check(status in ('new', 'downloaded', 'processing', 'ready', 'error')),
-			pbf_location text not null,
-			pbf_md5 text not null,
-			cache_location text not null,
-			router_version text not null,
-			kml_location text not null,
-			error text
-		);
-		`).run();
-
-  db.prepare(`
-		create table if not exists handlers (
-			name text check(name in ('map-data', 'router', 'deploy')) primary key,
-			router_version text not null,
-			status text not null check(status in ('triggered', 'processing', 'done')),
-			updated_at integer not null
-		);
-		`).run();
 
   return {
     handlers: {
@@ -187,6 +232,7 @@ export function getDb() {
 									cache_location, 
 									router_version, 
 									kml_location
+									updated_at
 								)
 								values 
 								(
@@ -198,6 +244,7 @@ export function getDb() {
 									${cacheLocation}, 
 									${routerVersion}, 
 									${kmlLocation}
+									${new Date().getTime()}
 								)
 								returning *`;
 
@@ -211,34 +258,64 @@ export function getDb() {
         db.sql`delete from map_data
 								where id = ${id}`;
       },
+      updateRecordSize(id: number, size: number) {
+        dbIsOk(db);
+        db.sql`
+					update map_data
+					set
+						pbf_size = ${size},
+						pbf_downloaded_size = 0,
+						updated_at = ${new Date().getTime()}
+					where id = ${id}`;
+      },
+      updateRecordDownloadedSize(id: number, addedSize: number) {
+        dbIsOk(db);
+        db.sql`
+					update map_data
+					set
+						pbf_downloaded_size = pbf_downloaded_size + ${addedSize},
+						updated_at = ${new Date().getTime()}
+					where id = ${id}`;
+      },
       updateRecordDownloaded(id: number) {
         dbIsOk(db);
         db.sql`update map_data
-								set status = 'downloaded'
+								set 
+									status = 'downloaded', 
+									updated_at = ${new Date().getTime()}
 								where id = ${id}`;
       },
       updateRecordProcessing(id: number) {
         dbIsOk(db);
         db.sql`update map_data
-								set status = 'processing'
+								set 
+									status = 'processing', 
+									updated_at = ${new Date().getTime()}
 								where id = ${id}`;
       },
       updateRecordReady(id: number) {
         dbIsOk(db);
         db.sql`update map_data
-								set status = 'ready'
+								set 
+									status = 'ready', 
+									updated_at = ${new Date().getTime()}
 								where id = ${id}`;
       },
       updateRecordError(id: number, error: string) {
         dbIsOk(db);
         db.sql`update map_data
-								set status = 'error', error = ${error}
+								set 
+									status = 'error', 
+									error = ${error}, 
+									updated_at = ${new Date().getTime()}
 								where id = ${id}`;
       },
       updateRecordDiscarded(id: number) {
         dbIsOk(db);
         db.sql`update map_data
-								set version = 'discarded'
+								set 
+									version = 'discarded',
+									updated_at = ${new Date().getTime()}
 								where id = ${id}`;
       },
       getRecordsDiscardedAndPrevious() {

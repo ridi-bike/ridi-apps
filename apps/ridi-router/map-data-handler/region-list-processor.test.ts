@@ -1,4 +1,10 @@
-import { assertSpyCall, assertSpyCalls, spy } from "jsr:@std/testing/mock";
+import {
+  assertSpyCall,
+  assertSpyCalls,
+  spy,
+  stub,
+} from "jsr:@std/testing/mock";
+import { fn } from "jsr:@std/expect";
 import { getDb, MapDataRecord, pg, RidiLogger } from "@ridi-router/lib";
 import { RegionListProcessor } from "./region-list-processor.ts";
 import { EnvVariables } from "./env-variables.ts";
@@ -66,11 +72,11 @@ Deno.test("should download region when no current record exists", async () => {
   );
 
   // Mock fetch response
-  globalThis.fetch = async () => {
-    return {
-      text: async () => "abc123 filename",
-    } as Response;
-  };
+  const fetchStub = stub(
+    globalThis,
+    "fetch",
+    () => Promise.resolve(new Response("abc123 filename")),
+  );
 
   await processor.process();
 
@@ -83,9 +89,10 @@ Deno.test("should download region when no current record exists", async () => {
   // Verify logs were written
   assertSpyCalls(loggerSpy, 8);
 
-  // Restore spies
+  // Restore spies and stubs
   downloadSpy.restore();
   loggerSpy.restore();
+  fetchStub.restore();
 });
 
 Deno.test("should handle next record with different MD5", async () => {
@@ -118,11 +125,11 @@ Deno.test("should handle next record with different MD5", async () => {
   );
 
   // Mock fetch response
-  globalThis.fetch = async (..._args: unknown[]) => {
-    return {
-      text: () => Promise.resolve("abc123 filename"),
-    } as Response;
-  };
+  const fetchStub = stub(
+    globalThis,
+    "fetch",
+    () => Promise.resolve(new Response("abc123 filename")),
+  );
 
   await processor.process();
 
@@ -141,10 +148,11 @@ Deno.test("should handle next record with different MD5", async () => {
     args: ["region1", "abc123", null],
   });
 
-  // Restore spies
+  // Restore spies and stubs
   discardSpy.restore();
   pgDiscardSpy.restore();
   downloadSpy.restore();
+  fetchStub.restore();
 });
 
 Deno.test("should schedule cache generation for downloaded status", async () => {
@@ -162,6 +170,9 @@ Deno.test("should schedule cache generation for downloaded status", async () => 
     kml_location: "/11/1",
     pbf_location: "/22/2",
     cache_location: "/33/3",
+    pbf_size: null,
+    updated_at: 0,
+    pbf_downloaded_size: null,
   } as MapDataRecord);
 
   // Create spies
@@ -180,11 +191,11 @@ Deno.test("should schedule cache generation for downloaded status", async () => 
   );
 
   // Mock fetch response
-  globalThis.fetch = async () => {
-    return {
-      text: () => Promise.resolve("abc123 filename"),
-    } as Response;
-  };
+  const fetchStub = stub(
+    globalThis,
+    "fetch",
+    () => Promise.resolve(new Response("abc123 filename")),
+  );
 
   await processor.process();
 
@@ -202,9 +213,13 @@ Deno.test("should schedule cache generation for downloaded status", async () => 
       kml_location: "/11/1",
       pbf_location: "/22/2",
       cache_location: "/33/3",
+      pbf_size: null,
+      updated_at: 0,
+      pbf_downloaded_size: null,
     }],
   });
 
-  // Restore spy
+  // Restore spy and stub
   scheduleSpy.restore();
+  fetchStub.restore();
 });
