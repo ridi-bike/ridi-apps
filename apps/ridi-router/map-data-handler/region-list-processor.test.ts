@@ -5,7 +5,7 @@ import {
   stub,
 } from "jsr:@std/testing/mock";
 import { getDb, MapDataRecord, pg, RidiLogger } from "@ridi-router/lib";
-import { RegionListProcessor } from "./region-list-processor.ts";
+import { Md5Downloader, RegionListProcessor } from "./region-list-processor.ts";
 import { EnvVariables } from "./env-variables.ts";
 import { CacheGenerator } from "./cache-generator.ts";
 import { Handler } from "./handler.ts";
@@ -48,6 +48,9 @@ const createMocks = () => {
       regionSetDiscarded: (..._args: unknown[]) => Promise.resolve(null),
     } as typeof pg,
     pgClient: {} as PgClient,
+    md5Downloader: {
+      getRemoteMd5: (..._args: unknown[]) => Promise.resolve("omg"),
+    } as Md5Downloader,
   };
 };
 
@@ -68,13 +71,7 @@ Deno.test("should download region when no current record exists", async () => {
     mocks.downloader,
     mocks.pgQueries,
     mocks.pgClient,
-  );
-
-  // Mock fetch response
-  const fetchStub = stub(
-    globalThis,
-    "fetch",
-    () => Promise.resolve(new Response("abc123 filename")),
+    mocks.md5Downloader,
   );
 
   await processor.process();
@@ -82,16 +79,15 @@ Deno.test("should download region when no current record exists", async () => {
   // Verify download was called
   assertSpyCalls(downloadSpy, 1);
   assertSpyCall(downloadSpy, 0, {
-    args: ["region1", "abc123", null],
+    args: ["region1", "omg", null],
   });
 
   // Verify logs were written
-  assertSpyCalls(loggerSpy, 8);
+  assertSpyCalls(loggerSpy, 6);
 
   // Restore spies and stubs
   downloadSpy.restore();
   loggerSpy.restore();
-  fetchStub.restore();
 });
 
 Deno.test("should handle next record with different MD5", async () => {
@@ -121,13 +117,7 @@ Deno.test("should handle next record with different MD5", async () => {
     mocks.downloader,
     mocks.pgQueries,
     mocks.pgClient,
-  );
-
-  // Mock fetch response
-  const fetchStub = stub(
-    globalThis,
-    "fetch",
-    () => Promise.resolve(new Response("abc123 filename")),
+    mocks.md5Downloader,
   );
 
   await processor.process();
@@ -144,14 +134,13 @@ Deno.test("should handle next record with different MD5", async () => {
   // Verify download was called
   assertSpyCalls(downloadSpy, 1);
   assertSpyCall(downloadSpy, 0, {
-    args: ["region1", "abc123", null],
+    args: ["region1", "omg", null],
   });
 
   // Restore spies and stubs
   discardSpy.restore();
   pgDiscardSpy.restore();
   downloadSpy.restore();
-  fetchStub.restore();
 });
 
 Deno.test("should schedule cache generation for downloaded status", async () => {
@@ -161,7 +150,7 @@ Deno.test("should schedule cache generation for downloaded status", async () => 
   mocks.db.mapData.getRecordNext = () => ({
     id: 1,
     region: "region1",
-    pbf_md5: "abc123",
+    pbf_md5: "omg",
     status: "downloaded",
     router_version: "1.0.0",
     error: null,
@@ -187,13 +176,7 @@ Deno.test("should schedule cache generation for downloaded status", async () => 
     mocks.downloader,
     mocks.pgQueries,
     mocks.pgClient,
-  );
-
-  // Mock fetch response
-  const fetchStub = stub(
-    globalThis,
-    "fetch",
-    () => Promise.resolve(new Response("abc123 filename")),
+    mocks.md5Downloader,
   );
 
   await processor.process();
@@ -204,7 +187,7 @@ Deno.test("should schedule cache generation for downloaded status", async () => 
     args: [{
       id: 1,
       region: "region1",
-      pbf_md5: "abc123",
+      pbf_md5: "omg",
       status: "downloaded",
       router_version: "1.0.0",
       error: null,
@@ -220,5 +203,4 @@ Deno.test("should schedule cache generation for downloaded status", async () => 
 
   // Restore spy and stub
   scheduleSpy.restore();
-  fetchStub.restore();
 });

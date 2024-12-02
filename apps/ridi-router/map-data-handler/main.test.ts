@@ -8,7 +8,7 @@ import {
 } from "@ridi-router/lib";
 
 import { EnvVariables } from "./env-variables.ts";
-import { RegionListProcessor } from "./region-list-processor.ts";
+import { Md5Downloader, RegionListProcessor } from "./region-list-processor.ts";
 import { CacheGenerator, DenoCommand } from "./cache-generator.ts";
 import { Handler } from "./handler.ts";
 import { Cleaner, DenoRemove } from "./cleaner.ts";
@@ -29,7 +29,7 @@ Deno.env.set("RIDI_DATA_DIR", "../.ridi-data");
 Deno.env.set("OPEN_OBSERVE_TOKEN", "ssss");
 Deno.env.set("OPEN_OBSERVE_ORG", "ooo");
 
-const initProcessor = () => {
+const runProcessor = async () => {
   const ridiLogger = RidiLogger.get(BaseEnvVariables.get());
   const locations = new Locations(BaseEnvVariables.get());
   const envVariables = EnvVariables.get();
@@ -86,9 +86,12 @@ const initProcessor = () => {
     ),
     pg,
     getPgClient(),
+    new Md5Downloader(ridiLogger),
   );
 
-  return regionProcessor;
+  await regionProcessor.process();
+
+  getPgClient().end();
 };
 
 function maybeRemove(path: string) {
@@ -106,8 +109,7 @@ Deno.test("should download three regions and process them", async () => {
   maybeRemove("../.ridi-data/pbf");
 
   try {
-    const processor = initProcessor();
-    await processor.process();
+    runProcessor();
   } catch (err) {
     console.log(JSON.stringify(err));
     console.error(err);

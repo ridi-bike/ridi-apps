@@ -7,6 +7,25 @@ import { CacheGenerator } from "./cache-generator.ts";
 import { Handler } from "./handler.ts";
 import { RegionDownloader } from "./region-downloader.ts";
 
+export class Md5Downloader {
+  constructor(private readonly logger: RidiLogger) {
+  }
+
+  async getRemoteMd5(region: string) {
+    const remoteMd5Url =
+      `https://download.geofabrik.de/${region}-latest.osm.pbf.md5`;
+
+    this.logger.debug("Fetching MD5 for region", { region, remoteMd5Url });
+
+    const remoteMd5File = await fetch(remoteMd5Url, { redirect: "follow" });
+    const body = await remoteMd5File.text();
+    const remoteMd5 = body.split(" ")[0];
+
+    this.logger.debug("Remote MD5", { remoteMd5 });
+
+    return remoteMd5;
+  }
+}
 export class RegionListProcessor {
   constructor(
     private readonly db: ReturnType<typeof getDb>,
@@ -18,6 +37,7 @@ export class RegionListProcessor {
     private readonly downloader: RegionDownloader,
     private readonly pgQueries: typeof pg,
     private readonly pgClient: PgClient,
+    private readonly mdfDownloader: Md5Downloader,
   ) {
   }
   private async handleNextRecord(
@@ -80,15 +100,7 @@ export class RegionListProcessor {
     for (const region of this.env.regions) {
       this.logger.debug("Processing region", { region });
 
-      const remoteMd5Url =
-        `https://download.geofabrik.de/${region}-latest.osm.pbf.md5`;
-
-      this.logger.debug("Fetching MD5 for region", { region, remoteMd5Url });
-
-      const remoteMd5File = await fetch(remoteMd5Url, { redirect: "follow" });
-      const remoteMd5 = (await remoteMd5File.text()).split(" ")[0];
-
-      this.logger.debug("Remote MD5", { remoteMd5 });
+      const remoteMd5 = await this.mdfDownloader.getRemoteMd5(region);
 
       const nextMapData = this.db.mapData.getRecordNext(region);
 
