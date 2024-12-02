@@ -1,6 +1,6 @@
 import { getDb, pg } from "@ridi-router/lib";
 import type { RidiLogger } from "@ridi-router/lib";
-import { pgClient as pgCl } from "./pg-client.ts";
+import { PgClient } from "./pg-client.ts";
 
 export class DenoRemove {
   async remove(path: string, options?: Deno.RemoveOptions): Promise<void> {
@@ -18,7 +18,7 @@ export class Cleaner {
   constructor(
     private readonly db: ReturnType<typeof getDb>,
     private readonly pgQueries: typeof pg,
-    private readonly pgClient: typeof pgCl,
+    private readonly pgClient: PgClient,
     private readonly logger: RidiLogger,
     private readonly denoRemove: DenoRemove,
   ) {

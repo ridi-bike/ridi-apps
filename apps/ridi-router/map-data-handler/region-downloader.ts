@@ -5,12 +5,13 @@ import {
   RidiLogger,
 } from "@ridi-router/lib";
 import { EnvVariables } from "./env-variables.ts";
+import { CacheGenerator } from "./cache-generator.ts";
 
 class ProgressTrack extends TransformStream {
-  constructor(private readonly logChunkSize: (chunkSize: number) => void) {
+  constructor(logChunkSize: (chunkSize: number) => void) {
     super({
       transform: (chunk, controller) => {
-        this.logChunkSize(chunk.length);
+        logChunkSize(chunk.length);
         controller.enqueue(chunk);
       },
     });
@@ -43,14 +44,14 @@ export class FileDownloader {
       });
 
       if (logChunkSize) {
-        fileResponse.body.pipeThrough(
+        await fileResponse.body.pipeThrough(
           new ProgressTrack((chunkSize) =>
             logChunkSize && logChunkSize(chunkSize)
           ),
-        );
+        ).pipeTo(file.writable);
+      } else {
+        await fileResponse.body.pipeTo(file.writable);
       }
-
-      await fileResponse.body.pipeTo(file.writable);
     } else {
       this.logger.error("no body in download", {
         headers: fileResponse.headers,
@@ -66,6 +67,7 @@ export class RegionDownloader {
     private readonly db: ReturnType<typeof getDb>,
     private readonly logger: RidiLogger,
     private readonly fileDownloader: FileDownloader,
+    private readonly cacheGenerator: CacheGenerator,
   ) {
   }
 
@@ -113,9 +115,11 @@ export class RegionDownloader {
     } catch (err) {
       this.logger.error("Region download failed", {
         region,
-        error: err,
+        error: String(err),
       });
       this.db.mapData.updateRecordError(mapDataRecord.id, JSON.stringify(err));
     }
+
+    this.cacheGenerator.schedule(mapDataRecord);
   }
 }

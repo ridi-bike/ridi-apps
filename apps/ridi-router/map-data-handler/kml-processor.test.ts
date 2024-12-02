@@ -2,14 +2,14 @@ import { assertSpyCall, assertSpyCalls, spy } from "jsr:@std/testing/mock";
 import { assertRejects } from "jsr:@std/assert";
 import { MapDataRecord, pg } from "@ridi-router/lib";
 import { DenoFileReader, KmlConverter, KmlProcessor } from "./kml-processor.ts";
-import { pgClient } from "./pg-client.ts";
+import { PgClient } from "./pg-client.ts";
 
 const createMocks = () => {
   return {
     pgQueries: {
       regionInsert: (..._args: unknown[]) => Promise.resolve(null),
     } as typeof pg,
-    pgClient: {} as typeof pgClient,
+    pgClient: {} as PgClient,
     fileReader: {
       readTextFile: (..._args: unknown[]) => Promise.resolve(""),
     } as DenoFileReader,
