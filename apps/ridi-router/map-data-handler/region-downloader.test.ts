@@ -2,6 +2,8 @@ import { assertSpyCall, assertSpyCalls, spy } from "jsr:@std/testing/mock";
 import { getDb, Locations, RidiLogger } from "@ridi-router/lib";
 import { FileDownloader, RegionDownloader } from "./region-downloader.ts";
 import { EnvVariables } from "./env-variables.ts";
+import { expect } from "jsr:@std/expect/expect";
+import { fn } from "jsr:@std/expect";
 
 const createMocks = () => {
   return {
@@ -23,6 +25,8 @@ const createMocks = () => {
           error: null,
         }),
         updateRecordError: (..._args: unknown[]) => undefined,
+        updateRecordSize: (..._args: unknown[]) => undefined,
+        updateRecordDownloadedSize: (..._args: unknown[]) => undefined,
       },
     } as unknown as ReturnType<typeof getDb>,
     logger: {
@@ -30,7 +34,7 @@ const createMocks = () => {
       error: (..._args: unknown[]) => {},
     } as RidiLogger,
     fileDownloader: {
-      downloadFile: (..._args: unknown[]) => Promise.resolve(),
+      downloadFile: fn((..._args: unknown[]) => Promise.resolve()),
     } as FileDownloader,
   };
 };
@@ -41,8 +45,13 @@ Deno.test("RegionDownloader - should download files successfully", async () => {
   // Create spies
   const getPbfFileLocSpy = spy(mocks.locations, "getPbfFileLoc");
   const getKmlLocationSpy = spy(mocks.locations, "getKmlLocation");
-  const downloadFileSpy = spy(mocks.fileDownloader, "downloadFile");
+  // const downloadFileSpy = spy(mocks.fileDownloader, "downloadFile");
   const loggerDebugSpy = spy(mocks.logger, "debug");
+  const updateRecordSizeSpy = spy(mocks.db.mapData, "updateRecordSize");
+  const updateRecordDownloadedSizeSpy = spy(
+    mocks.db.mapData,
+    "updateRecordDownloadedSize",
+  );
 
   const downloader = new RegionDownloader(
     mocks.locations,
@@ -65,29 +74,33 @@ Deno.test("RegionDownloader - should download files successfully", async () => {
     args: ["test-region", "test-md5"],
   });
 
-  // Verify download calls
-  assertSpyCalls(downloadFileSpy, 2);
-  assertSpyCall(downloadFileSpy, 0, {
-    args: [
-      "https://download.geofabrik.de/test-region.kml",
-      "/path/to/kml",
-    ],
-  });
-  assertSpyCall(downloadFileSpy, 1, {
-    args: [
-      "https://download.geofabrik.de/test-region-latest.osm.pbf",
-      "/path/to/pbf",
-    ],
-  });
-
   // Verify logging
   assertSpyCalls(loggerDebugSpy, 2);
+
+  // Verify size tracking calls
+  expect(mocks.fileDownloader.downloadFile).toHaveBeenCalledTimes(2);
+  // First call is KML download without size tracking
+  expect(mocks.fileDownloader.downloadFile).toHaveBeenNthCalledWith(
+    1,
+    "https://download.geofabrik.de/test-region.kml",
+    "/path/to/kml",
+  );
+  // Second call is PBF download with size tracking
+  expect(mocks.fileDownloader.downloadFile).toHaveBeenNthCalledWith(
+    2,
+    "https://download.geofabrik.de/test-region-latest.osm.pbf",
+    "/path/to/pbf",
+    expect.objectContaining({}), // function
+    expect.objectContaining({}), // function
+  );
 
   // Restore spies
   getPbfFileLocSpy.restore();
   getKmlLocationSpy.restore();
-  downloadFileSpy.restore();
+  // downloadFileSpy.restore();
   loggerDebugSpy.restore();
+  updateRecordSizeSpy.restore();
+  updateRecordDownloadedSizeSpy.restore();
 });
 
 Deno.test("RegionDownloader - should handle download errors", async () => {
