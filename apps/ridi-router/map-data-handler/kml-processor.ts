@@ -1,5 +1,5 @@
 import { MapDataRecord, pg } from "@ridi-router/lib";
-import { pgClient as pgCl } from "./pg-client.ts";
+import { PgClient } from "./pg-client.ts";
 import { kml } from "to-geo-json";
 import { DOMParser } from "xmldom";
 
@@ -20,7 +20,7 @@ export class DenoFileReader {
 export class KmlProcessor {
   constructor(
     private readonly pgQueries: typeof pg,
-    private readonly pgClient: typeof pgCl,
+    private readonly pgClient: PgClient,
     private readonly fileReader: DenoFileReader,
     private readonly kmlConverter: KmlConverter,
   ) {}

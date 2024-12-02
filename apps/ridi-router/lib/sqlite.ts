@@ -14,8 +14,6 @@ import {
 } from "valibot";
 import { BaseEnvVariables } from "./env.ts";
 
-const ridiLogger = RidiLogger.get(BaseEnvVariables.get());
-
 const mapDataRecordSchema = object({
   id: pipe(number(), integer()),
   region: string(),
@@ -58,7 +56,29 @@ function toMapDataRow(row: Record<string, unknown>) {
 }
 let db: Database | null = null;
 
+function migrate(fn: (db: Database) => void, expectedVersion: number) {
+  dbIsOk(db);
+  let currentVersion: number | undefined = undefined;
+  try {
+    currentVersion = db
+      .sql`select max(version) as version from db_version`[0]
+      ?.version;
+  } catch (err) {
+    const errText = JSON.stringify(err);
+    if (errText.search("no such table: db_version") !== -1) {
+      throw err;
+    }
+  }
+  console.log({ expectedVersion, currentVersion });
+  if (currentVersion !== expectedVersion) {
+    fn(db);
+    db.sql`insert into db_version (version) values (${expectedVersion});`;
+  }
+}
+
 export function initDb(dbLocation: string) {
+  const ridiLogger = RidiLogger.get(BaseEnvVariables.get());
+
   ridiLogger.debug("Opening database", { dbLocation });
   db = new Database(dbLocation, { create: true });
   ridiLogger.debug("Database instance created", { db });
@@ -83,7 +103,7 @@ export function initDb(dbLocation: string) {
 				kml_location text not null,
 				error text
 			);
-		`).run(), 1);
+		`).run(), 2);
 
   migrate((db) =>
     db.prepare(`
@@ -93,27 +113,33 @@ export function initDb(dbLocation: string) {
 				status text not null check(status in ('triggered', 'processing', 'done')),
 				updated_at integer not null
 			);
-		`).run(), 1);
+		`).run(), 3);
 
   migrate(
     (db) =>
       db.prepare(`
 				alter table map_data 
-					add column updated_at integer;
+					add column updated_at integer not null default 0;
+			`).run(),
+    4,
+  );
 
-				update map_data
-				set updated_at = 0;
-
-				alter table map_data
-					alter column updated_at not null;
-
+  migrate(
+    (db) =>
+      db.prepare(`
 				alter table map_data
 					add column pbf_size integer;
+			`).run(),
+    5,
+  );
 
+  migrate(
+    (db) =>
+      db.prepare(`
 				alter table map_data
 					add column pbf_downloaded_size integer;
 			`).run(),
-    2,
+    6,
   );
 
   ridiLogger.debug("Migrations done");
@@ -123,19 +149,10 @@ function dbIsOk(db: Database | null): asserts db is Database {
     throw Error("db not initialized");
   }
 }
-function migrate(fn: (db: Database) => void, expectedVersion: number) {
-  dbIsOk(db);
-  const currentVersion: number | undefined = db
-    .sql`select max(version) from db_version`[0]
-    ?.version;
-
-  if (currentVersion !== expectedVersion) {
-    fn(db);
-    db.sql`insert into db_version (version) values (${expectedVersion});`;
-  }
-}
 export function getDb() {
   dbIsOk(db);
+
+  const ridiLogger = RidiLogger.get(BaseEnvVariables.get());
 
   return {
     handlers: {
@@ -231,7 +248,7 @@ export function getDb() {
 									pbf_md5, 
 									cache_location, 
 									router_version, 
-									kml_location
+									kml_location,
 									updated_at
 								)
 								values 
@@ -243,7 +260,7 @@ export function getDb() {
 									${md5}, 
 									${cacheLocation}, 
 									${routerVersion}, 
-									${kmlLocation}
+									${kmlLocation},
 									${new Date().getTime()}
 								)
 								returning *`;

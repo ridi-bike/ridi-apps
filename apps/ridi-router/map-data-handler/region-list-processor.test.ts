@@ -4,7 +4,6 @@ import {
   spy,
   stub,
 } from "jsr:@std/testing/mock";
-import { fn } from "jsr:@std/expect";
 import { getDb, MapDataRecord, pg, RidiLogger } from "@ridi-router/lib";
 import { RegionListProcessor } from "./region-list-processor.ts";
 import { EnvVariables } from "./env-variables.ts";
@@ -12,7 +11,7 @@ import { CacheGenerator } from "./cache-generator.ts";
 import { Handler } from "./handler.ts";
 import { Cleaner } from "./cleaner.ts";
 import { RegionDownloader } from "./region-downloader.ts";
-import { pgClient } from "./pg-client.ts";
+import { PgClient } from "./pg-client.ts";
 
 const createMocks = () => {
   return {
@@ -48,7 +47,7 @@ const createMocks = () => {
     pgQueries: {
       regionSetDiscarded: (..._args: unknown[]) => Promise.resolve(null),
     } as typeof pg,
-    pgClient: {} as typeof pgClient,
+    pgClient: {} as PgClient,
   };
 };
 

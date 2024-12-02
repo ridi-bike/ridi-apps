@@ -4,6 +4,7 @@ import { FileDownloader, RegionDownloader } from "./region-downloader.ts";
 import { EnvVariables } from "./env-variables.ts";
 import { expect } from "jsr:@std/expect/expect";
 import { fn } from "jsr:@std/expect";
+import { CacheGenerator } from "./cache-generator.ts";
 
 const createMocks = () => {
   return {
@@ -36,6 +37,9 @@ const createMocks = () => {
     fileDownloader: {
       downloadFile: fn((..._args: unknown[]) => Promise.resolve()),
     } as FileDownloader,
+    cacheGenerator: {
+      schedule: (..._args: unknown[]) => undefined,
+    } as CacheGenerator,
   };
 };
 
@@ -52,6 +56,7 @@ Deno.test("RegionDownloader - should download files successfully", async () => {
     mocks.db.mapData,
     "updateRecordDownloadedSize",
   );
+  const scheduleSpy = spy(mocks.cacheGenerator, "schedule");
 
   const downloader = new RegionDownloader(
     mocks.locations,
@@ -59,6 +64,7 @@ Deno.test("RegionDownloader - should download files successfully", async () => {
     mocks.db,
     mocks.logger,
     mocks.fileDownloader,
+    mocks.cacheGenerator,
   );
 
   await downloader.downloadRegion("test-region", "test-md5", null);
@@ -94,6 +100,8 @@ Deno.test("RegionDownloader - should download files successfully", async () => {
     expect.objectContaining({}), // function
   );
 
+  assertSpyCalls(scheduleSpy, 1);
+
   // Restore spies
   getPbfFileLocSpy.restore();
   getKmlLocationSpy.restore();
@@ -121,6 +129,7 @@ Deno.test("RegionDownloader - should handle download errors", async () => {
     mocks.db,
     mocks.logger,
     mocks.fileDownloader,
+    mocks.cacheGenerator,
   );
 
   await downloader.downloadRegion("test-region", "test-md5", null);

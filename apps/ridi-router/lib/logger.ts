@@ -75,9 +75,3 @@ export class RidiLogger {
     this.logger.error(message, properties);
   }
 }
-const ridiLogger = RidiLogger.get(BaseEnvVariables.get());
-
-ridiLogger.info("Logging set for environment", {
-  ridiEnv: ridiLogger["env"].ridiEnv,
-  ridiEnvName: ridiLogger["env"].ridiEnvName,
-});

@@ -12,7 +12,7 @@ import { RegionListProcessor } from "./region-list-processor.ts";
 import { CacheGenerator, DenoCommand } from "./cache-generator.ts";
 import { Handler } from "./handler.ts";
 import { Cleaner, DenoRemove } from "./cleaner.ts";
-import { pgClient } from "./pg-client.ts";
+import { getPgClient } from "./pg-client.ts";
 import { DenoFileReader, KmlConverter, KmlProcessor } from "./kml-processor.ts";
 import { FileDownloader, RegionDownloader } from "./region-downloader.ts";
 
@@ -36,23 +36,29 @@ const handler = new Handler(
   EnvVariables.get(),
   ridiLogger,
 );
+const cacheGenerator = new CacheGenerator(
+  db,
+  new DenoCommand(),
+  ridiLogger,
+  EnvVariables.get(),
+  new KmlProcessor(
+    pg,
+    getPgClient(),
+    new DenoFileReader(),
+    new KmlConverter(),
+  ),
+  handler,
+);
 const regionProcessor = new RegionListProcessor(
   db,
   ridiLogger,
   EnvVariables.get(),
-  new CacheGenerator(
-    db,
-    new DenoCommand(),
-    ridiLogger,
-    EnvVariables.get(),
-    new KmlProcessor(pg, pgClient, new DenoFileReader(), new KmlConverter()),
-    handler,
-  ),
+  cacheGenerator,
   handler,
   new Cleaner(
     db,
     pg,
-    pgClient,
+    getPgClient(),
     ridiLogger,
     new DenoRemove(),
   ),
@@ -62,9 +68,10 @@ const regionProcessor = new RegionListProcessor(
     db,
     ridiLogger,
     new FileDownloader(ridiLogger),
+    cacheGenerator,
   ),
   pg,
-  pgClient,
+  getPgClient(),
 );
 regionProcessor.process();
 

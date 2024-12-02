@@ -1,7 +1,7 @@
 import { assertSpyCall, assertSpyCalls, spy } from "jsr:@std/testing/mock";
 import { Cleaner, DenoRemove } from "./cleaner.ts";
 import { getDb, pg, RidiLogger } from "@ridi-router/lib";
-import { pgClient } from "./pg-client.ts";
+import { PgClient } from "./pg-client.ts";
 
 const mockRecord = {
   id: 1,
@@ -27,7 +27,7 @@ const createMocks = () => {
     logger: {
       debug: () => {},
     } as unknown as RidiLogger,
-    pgClient: {} as typeof pgClient,
+    pgClient: {} as PgClient,
     denoRemove: {
       remove: (..._args: unknown[]) => undefined,
     } as unknown as DenoRemove,

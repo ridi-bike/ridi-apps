@@ -1,6 +1,6 @@
 import { getDb, MapDataRecord, pg, RidiLogger } from "@ridi-router/lib";
 
-import { pgClient as pgCl } from "./pg-client.ts";
+import { PgClient } from "./pg-client.ts";
 import { Cleaner } from "./cleaner.ts";
 import { EnvVariables } from "./env-variables.ts";
 import { CacheGenerator } from "./cache-generator.ts";
@@ -17,7 +17,7 @@ export class RegionListProcessor {
     private readonly cleaner: Cleaner,
     private readonly downloader: RegionDownloader,
     private readonly pgQueries: typeof pg,
-    private readonly pgClient: typeof pgCl,
+    private readonly pgClient: PgClient,
   ) {
   }
   private async handleNextRecord(
@@ -95,10 +95,10 @@ export class RegionListProcessor {
       this.logger.debug("Next Map Data Record", { ...nextMapData });
 
       if (nextMapData) {
-        this.handleNextRecord(region, remoteMd5, nextMapData);
+        await this.handleNextRecord(region, remoteMd5, nextMapData);
       } else {
         const currentMapData = this.db.mapData.getRecordCurrent(region);
-        this.handleCurrentRecord(region, remoteMd5, currentMapData);
+        await this.handleCurrentRecord(region, remoteMd5, currentMapData);
       }
     }
 
