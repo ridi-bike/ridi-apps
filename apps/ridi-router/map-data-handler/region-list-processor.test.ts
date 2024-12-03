@@ -33,7 +33,7 @@ const createMocks = () => {
       debug: (..._args: unknown[]) => undefined,
     } as RidiLogger,
     cacheGenerator: {
-      schedule: (..._args: unknown[]) => undefined,
+      schedule: (..._args: unknown[]) => Promise.resolve(),
     } as CacheGenerator,
     handler: {
       checkStatus: () => {},

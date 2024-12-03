@@ -20,6 +20,11 @@ export class EnvVariables extends BaseEnvVariables {
     Deno.env.get("SUPABASE_DB_URL"),
   );
 
+  readonly osmDataBaseUrl = parse(
+    string(),
+    Deno.env.get("OSM_DATA_BASE_URL"),
+  );
+
   readonly regions: string[];
 
   private constructor() {

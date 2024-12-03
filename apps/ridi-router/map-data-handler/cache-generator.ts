@@ -29,8 +29,8 @@ export class CacheGenerator {
   ) {
   }
 
-  public schedule(mapDataRecord: MapDataRecord) {
-    this.queue.add(() => this.generateCache(mapDataRecord));
+  public async schedule(mapDataRecord: MapDataRecord) {
+    await this.queue.add(() => this.generateCache(mapDataRecord));
   }
 
   async generateCache(mapDataRecord: MapDataRecord) {
