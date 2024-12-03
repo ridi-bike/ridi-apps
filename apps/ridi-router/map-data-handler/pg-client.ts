@@ -17,6 +17,6 @@ export function getPgClient() {
 }
 
 export async function closePgClient() {
-  await pgInstance.pgClient?.end({ timeout: 1 });
+  await pgInstance.pgClient?.end();
   pgInstance.pgClient = null;
 }
