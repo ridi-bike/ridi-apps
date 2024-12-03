@@ -2,7 +2,7 @@ import { literal, parse, string, union } from "valibot";
 
 export class BaseEnvVariables {
   readonly ridiEnv = parse(
-    union([literal("local"), literal("prod")]),
+    union([literal("test"), literal("local"), literal("prod")]),
     Deno.env.get("RIDI_ENV"),
   );
 

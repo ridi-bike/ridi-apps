@@ -69,7 +69,6 @@ function migrate(fn: (db: Database) => void, expectedVersion: number) {
       throw err;
     }
   }
-  console.log({ expectedVersion, currentVersion });
   if (!currentVersion || currentVersion < expectedVersion) {
     fn(db);
     db.sql`insert into db_version (version) values (${expectedVersion});`;

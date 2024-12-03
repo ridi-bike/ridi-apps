@@ -25,7 +25,7 @@ const resetEnvValues = () => {
     "SUPABASE_DB_URL",
     "postgresql://postgres:postgres@127.0.0.1:54322/postgres",
   );
-  Deno.env.set("RIDI_ENV", "local");
+  Deno.env.set("RIDI_ENV", "test");
   Deno.env.set("RIDI_ENV_NAME", "map-data-handler");
   Deno.env.set("REGION_LIST", "./test-fixtures/region-list-test.json");
   Deno.env.set("RIDI_DATA_DIR", "../.ridi-data");
