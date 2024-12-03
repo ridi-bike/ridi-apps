@@ -43,6 +43,11 @@ export class Cleaner {
         await this.denoRemove.remove(record.pbf_location);
       }
 
+      if (!this.db.mapData.isKmlInUse(record.kml_location)) {
+        this.logger.debug("Kml can be removed");
+        await this.denoRemove.remove(record.kml_location);
+      }
+
       this.db.mapData.deleteRecord(record.id);
       await this.pgQueries.regionDeleteDiscardedAndPrevious(this.pgClient, {
         region: record.region,

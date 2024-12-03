@@ -18,6 +18,7 @@ const createMocks = () => {
         getRecordsDiscardedAndPrevious: () => [mockRecord],
         isCacheDirInUse: () => false,
         isPbfInUse: () => false,
+        isKmlInUse: () => false,
         deleteRecord: () => {},
       },
     } as unknown as ReturnType<typeof getDb>,
@@ -58,7 +59,7 @@ Deno.test("should clean up records that are not in use", async () => {
   await cleaner.processCleanup();
 
   // Verify file removals were called
-  assertSpyCalls(removeSpy, 2);
+  assertSpyCalls(removeSpy, 3);
 
   // Verify record was deleted from DB
   assertSpyCalls(deleteRecordSpy, 1);
@@ -76,7 +77,7 @@ Deno.test("should clean up records that are not in use", async () => {
   });
 
   // Verify logs were written
-  assertSpyCalls(loggerSpy, 4);
+  assertSpyCalls(loggerSpy, 5);
 
   // Restore all spies and mocks
   deleteRecordSpy.restore();
@@ -120,6 +121,7 @@ Deno.test("should not remove files that are still in use", async () => {
   // Override the in-use checks to return true
   mocks.db.mapData.isCacheDirInUse = () => true;
   mocks.db.mapData.isPbfInUse = () => true;
+  mocks.db.mapData.isKmlInUse = () => true;
 
   const cleaner = new Cleaner(
     mocks.db,

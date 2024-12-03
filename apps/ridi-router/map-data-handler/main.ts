@@ -15,10 +15,11 @@ import { Cleaner, DenoRemove } from "./cleaner.ts";
 import { getPgClient } from "./pg-client.ts";
 import { DenoFileReader, KmlConverter, KmlProcessor } from "./kml-processor.ts";
 import { FileDownloader, RegionDownloader } from "./region-downloader.ts";
-
-const ridiLogger = RidiLogger.get(BaseEnvVariables.get());
-const locations = new Locations(BaseEnvVariables.get());
-const envVariables = EnvVariables.get();
+import { OsmLocations } from "./osm-locations.ts";
+const baseEnv = new BaseEnvVariables();
+const envVariables = new EnvVariables();
+const ridiLogger = RidiLogger.get(baseEnv);
+const locations = new Locations(baseEnv);
 
 initDb(locations.getDbFileLoc());
 const db = getDb();
@@ -33,14 +34,14 @@ ridiLogger.debug("Initialized with configuration", {
 
 const handler = new Handler(
   db,
-  EnvVariables.get(),
+  envVariables,
   ridiLogger,
 );
 const cacheGenerator = new CacheGenerator(
   db,
   new DenoCommand(),
   ridiLogger,
-  EnvVariables.get(),
+  envVariables,
   new KmlProcessor(
     pg,
     getPgClient(),
@@ -52,7 +53,7 @@ const cacheGenerator = new CacheGenerator(
 const regionProcessor = new RegionListProcessor(
   db,
   ridiLogger,
-  EnvVariables.get(),
+  envVariables,
   cacheGenerator,
   handler,
   new Cleaner(
@@ -64,15 +65,16 @@ const regionProcessor = new RegionListProcessor(
   ),
   new RegionDownloader(
     locations,
-    EnvVariables.get(),
+    envVariables,
     db,
     ridiLogger,
     new FileDownloader(ridiLogger),
     cacheGenerator,
+    new OsmLocations(envVariables),
   ),
   pg,
   getPgClient(),
-  new Md5Downloader(ridiLogger),
+  new Md5Downloader(ridiLogger, new OsmLocations(envVariables)),
 );
 regionProcessor.process();
 

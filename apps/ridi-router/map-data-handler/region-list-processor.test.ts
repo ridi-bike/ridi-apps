@@ -1,9 +1,4 @@
-import {
-  assertSpyCall,
-  assertSpyCalls,
-  spy,
-  stub,
-} from "jsr:@std/testing/mock";
+import { assertSpyCall, assertSpyCalls, spy } from "jsr:@std/testing/mock";
 import { getDb, MapDataRecord, pg, RidiLogger } from "@ridi-router/lib";
 import { Md5Downloader, RegionListProcessor } from "./region-list-processor.ts";
 import { EnvVariables } from "./env-variables.ts";

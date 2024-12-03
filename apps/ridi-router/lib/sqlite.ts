@@ -70,14 +70,14 @@ function migrate(fn: (db: Database) => void, expectedVersion: number) {
     }
   }
   console.log({ expectedVersion, currentVersion });
-  if (currentVersion !== expectedVersion) {
+  if (!currentVersion || currentVersion < expectedVersion) {
     fn(db);
     db.sql`insert into db_version (version) values (${expectedVersion});`;
   }
 }
 
 export function initDb(dbLocation: string) {
-  const ridiLogger = RidiLogger.get(BaseEnvVariables.get());
+  const ridiLogger = RidiLogger.get(new BaseEnvVariables());
 
   ridiLogger.debug("Opening database", { dbLocation });
   db = new Database(dbLocation, { create: true });
@@ -152,7 +152,7 @@ function dbIsOk(db: Database | null): asserts db is Database {
 export function getDb() {
   dbIsOk(db);
 
-  const ridiLogger = RidiLogger.get(BaseEnvVariables.get());
+  const ridiLogger = RidiLogger.get(new BaseEnvVariables());
 
   return {
     handlers: {
@@ -341,6 +341,13 @@ export function getDb() {
 								where version = 'discarded' or version = 'previous'`.map((r) =>
           parse(mapDataRecordSchema, r)
         );
+      },
+      isKmlInUse(kmlFile: string) {
+        dbIsOk(db);
+        const inUseRecs = db.sql`select * from map_data
+								where kml_location = ${kmlFile}
+									and (version = 'current' or version = 'next')`;
+        return inUseRecs.length > 0;
       },
       isPbfInUse(pbfFile: string) {
         dbIsOk(db);
