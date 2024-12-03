@@ -5,6 +5,7 @@ import { EnvVariables } from "./env-variables.ts";
 import { expect } from "jsr:@std/expect/expect";
 import { fn } from "jsr:@std/expect";
 import { CacheGenerator } from "./cache-generator.ts";
+import { OsmLocations } from "./osm-locations.ts";
 
 const createMocks = () => {
   return {
@@ -38,8 +39,16 @@ const createMocks = () => {
       downloadFile: fn((..._args: unknown[]) => Promise.resolve()),
     } as FileDownloader,
     cacheGenerator: {
-      schedule: (..._args: unknown[]) => undefined,
+      schedule: (..._args: unknown[]) => Promise.resolve(),
     } as CacheGenerator,
+    osmLocations: {
+      getPbfFileLocRemote: (..._args: unknown[]) =>
+        "https://download.geofabrik.de/test-region-latest.osm.pbf",
+      getMd5FileLocRemote: (..._args: unknown[]) =>
+        "https://download.geofabrik.de/test-region-latest.osm.pbf.md5",
+      getKmlFileLocRemote: (..._args: unknown[]) =>
+        "https://download.geofabrik.de/test-region.kml",
+    } as OsmLocations,
   };
 };
 
@@ -65,6 +74,7 @@ Deno.test("RegionDownloader - should download files successfully", async () => {
     mocks.logger,
     mocks.fileDownloader,
     mocks.cacheGenerator,
+    mocks.osmLocations,
   );
 
   await downloader.downloadRegion("test-region", "test-md5", null);
@@ -130,6 +140,7 @@ Deno.test("RegionDownloader - should handle download errors", async () => {
     mocks.logger,
     mocks.fileDownloader,
     mocks.cacheGenerator,
+    mocks.osmLocations,
   );
 
   await downloader.downloadRegion("test-region", "test-md5", null);

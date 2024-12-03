@@ -6,6 +6,7 @@ import {
 } from "@ridi-router/lib";
 import { EnvVariables } from "./env-variables.ts";
 import { CacheGenerator } from "./cache-generator.ts";
+import { OsmLocations } from "./osm-locations.ts";
 
 class ProgressTrack extends TransformStream {
   constructor(logChunkSize: (chunkSize: number) => void) {
@@ -68,6 +69,7 @@ export class RegionDownloader {
     private readonly logger: RidiLogger,
     private readonly fileDownloader: FileDownloader,
     private readonly cacheGenerator: CacheGenerator,
+    private readonly osmLocations: OsmLocations,
   ) {
   }
 
@@ -78,9 +80,10 @@ export class RegionDownloader {
   ): Promise<void> {
     this.logger.debug("Starting region download", { region, md5 });
 
-    const remotePbfUrl =
-      `https://download.geofabrik.de/${region}-latest.osm.pbf`;
-    const remoteKmlUrl = `https://download.geofabrik.de/${region}.kml`;
+    const remotePbfUrl = this.osmLocations.getPbfFileLocRemote(
+      region,
+    );
+    const remoteKmlUrl = this.osmLocations.getKmlFileLocRemote(region);
 
     const pbfLocation = await this.locations.getPbfFileLoc(region, md5);
     const kmlLocation = await this.locations.getKmlLocation(region, md5);
@@ -120,6 +123,6 @@ export class RegionDownloader {
       this.db.mapData.updateRecordError(mapDataRecord.id, JSON.stringify(err));
     }
 
-    this.cacheGenerator.schedule(mapDataRecord);
+    await this.cacheGenerator.schedule(mapDataRecord);
   }
 }

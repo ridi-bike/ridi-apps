@@ -1,4 +1,4 @@
-import { BaseEnvVariables } from "./env.ts";
+import type { BaseEnvVariables } from "./env.ts";
 
 export class Locations {
   constructor(private readonly baseEnvVariables: BaseEnvVariables) {}

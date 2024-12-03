@@ -6,14 +6,17 @@ import { EnvVariables } from "./env-variables.ts";
 import { CacheGenerator } from "./cache-generator.ts";
 import { Handler } from "./handler.ts";
 import { RegionDownloader } from "./region-downloader.ts";
+import { OsmLocations } from "./osm-locations.ts";
 
 export class Md5Downloader {
-  constructor(private readonly logger: RidiLogger) {
+  constructor(
+    private readonly logger: RidiLogger,
+    private readonly osmLocations: OsmLocations,
+  ) {
   }
 
   async getRemoteMd5(region: string) {
-    const remoteMd5Url =
-      `https://download.geofabrik.de/${region}-latest.osm.pbf.md5`;
+    const remoteMd5Url = this.osmLocations.getMd5FileLocRemote(region);
 
     this.logger.debug("Fetching MD5 for region", { region, remoteMd5Url });
 
@@ -69,7 +72,7 @@ export class RegionListProcessor {
       this.logger.debug("Status {status}, processing", {
         status: nextMapData.status,
       });
-      this.cacheGenerator.schedule(nextMapData);
+      await this.cacheGenerator.schedule(nextMapData);
     }
   }
 

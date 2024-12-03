@@ -8,3 +8,4 @@ services:
     environment:
       SUPABASE_DB_URL: ${SUPABASE_DB_URL}
       RIDI_ENV_NAME: map-data-handler
+      OSM_DATA_BASE_URL: ${OSM_DATA_BASE_URL}
