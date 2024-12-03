@@ -1,13 +1,24 @@
 import { EnvVariables } from "./env-variables.ts";
 import postgres from "postgres";
 
-let pgClient: ReturnType<typeof postgres> | null = null;
+const pgInstance = {
+  pgClient: null,
+  closed: true,
+} as {
+  pgClient: ReturnType<typeof postgres> | null;
+  closed: boolean;
+};
 
 export type PgClient = ReturnType<typeof postgres>;
 
-export const getPgClient = () => {
-  if (!pgClient) {
-    pgClient = postgres(EnvVariables.get().supabaseDbUrl);
+export function getPgClient() {
+  if (pgInstance.closed || !pgInstance.pgClient) {
+    pgInstance.pgClient = postgres(new EnvVariables().supabaseDbUrl);
   }
-  return pgClient;
-};
+  return pgInstance.pgClient;
+}
+
+export async function closePgClient() {
+  await pgInstance.pgClient?.end({ timeout: 1 });
+  pgInstance.closed = true;
+}

@@ -54,7 +54,7 @@ export class RidiLogger {
       loggers: [{
         category: [],
         lowestLevel: "debug",
-        sinks: BaseEnvVariables.get().ridiEnv === "prod"
+        sinks: new BaseEnvVariables().ridiEnv === "prod"
           ? ["openObserve", "console"]
           : ["console"],
       }],
