@@ -82,4 +82,8 @@ export class CacheGenerator {
 
     this.handler.checkStatus();
   }
+
+  public waitTillDone() {
+    return this.queue.onIdle();
+  }
 }

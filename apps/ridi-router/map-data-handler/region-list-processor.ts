@@ -119,6 +119,8 @@ export class RegionListProcessor {
 
     this.logger.debug("All regions checked");
 
+    await this.cacheGenerator.waitTillDone();
+
     await this.cleaner.processCleanup();
 
     this.handler.checkStatus();
