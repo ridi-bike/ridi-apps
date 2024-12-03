@@ -3,16 +3,14 @@ import postgres from "postgres";
 
 const pgInstance = {
   pgClient: null,
-  closed: true,
 } as {
   pgClient: ReturnType<typeof postgres> | null;
-  closed: boolean;
 };
 
 export type PgClient = ReturnType<typeof postgres>;
 
 export function getPgClient() {
-  if (pgInstance.closed || !pgInstance.pgClient) {
+  if (!pgInstance.pgClient) {
     pgInstance.pgClient = postgres(new EnvVariables().supabaseDbUrl);
   }
   return pgInstance.pgClient;
@@ -20,5 +18,5 @@ export function getPgClient() {
 
 export async function closePgClient() {
   await pgInstance.pgClient?.end({ timeout: 1 });
-  pgInstance.closed = true;
+  pgInstance.pgClient = null;
 }
