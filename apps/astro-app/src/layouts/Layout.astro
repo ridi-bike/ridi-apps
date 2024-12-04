@@ -1,8 +1,8 @@
 ---
 import "../styles/global.css";
-import Navbar from '../components/Navbar.astro';
-import Footer from '../components/Footer.astro';
-import { ViewTransitions } from 'astro:transitions';
+import Navbar from "../components/Navbar.astro";
+import Footer from "../components/Footer.astro";
+import { ViewTransitions } from "astro:transitions";
 ---
 
 <!doctype html>
@@ -18,12 +18,15 @@ import { ViewTransitions } from 'astro:transitions';
       name="description"
       content="Ridi is the ultimate motorcycle navigation app that puts you in control of your ride. Whether you crave curvy highways, serene green lanes, or rugged mountain tracks, Ridi crafts personalized routes tailored to your preferences. No more hours wasted poring over maps—just hop on your bike and let Ridi guide you to the perfect adventure."
     />
-	<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
-  <ViewTransitions />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap"
+      rel="stylesheet"
+    />
+    <ViewTransitions />
   </head>
   <body class="bg-white font-SpaceGrotesk">
     <Navbar />
     <slot />
-    <Footer/>
+    <Footer />
   </body>
 </html>

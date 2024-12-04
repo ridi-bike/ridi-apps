@@ -2,9 +2,11 @@
 import Container from "./Container.astro"
 import Topic from "./Topic.astro";
 import servicesData from './Data/services.json';
+import {Waitlist} from  '../components/Waitlist.tsx'
+import {cn} from '../utils.ts'
 ---
 <Container>
-<div class="relative flex flex-col items-center md:flex-row" id="services">
+<div class="relative flex flex-col items-center md:flex-row" id="features">
     <Topic title="How it works" description="Ridi is a motorcycle navigation app that creates personalized routes based on rider preferences. Users can specify the type of roads they want, such as curvy highways, green lanes, or mountain and forest tracks, and Ridi generates optimized routes tailored to these choices. Designed to eliminate the need for extensive route planning, the app allows motorcyclists to start their rides quickly while ensuring a more enjoyable and adventurous journey.">
 </div>
 
@@ -13,8 +15,8 @@ import servicesData from './Data/services.json';
 
         <!-- card start-->
         {
-        servicesData.map(({ background, name1, name2, arrow, link, image} ) => (
-        <div class={background}>
+			servicesData.map(({ name1, name2, image}, idx ) => (
+			<div class={cn("h-[310px] p-12 bg-zinc-100 rounded-[45px] shadow-card border border-black justify-between items-center flex text-black", {"bg-zinc-100":[0, 3].includes(idx), "bg-ridiorange":[1, 4].includes(idx), "bg-black text-white":[2,5].includes(idx), "md:col-span-2": idx===4})}>
             <div class="flex-col justify-center p-6 items-start gap-[93px] inline-flex">
                 <div class="flex-col justify-start items-start flex">
 						<div class="px-[7px] rounded-[7px] flex-col justify-start items-start gap-2.5 flex">
@@ -24,12 +26,6 @@ import servicesData from './Data/services.json';
                         <div class="text-3xl font-medium">{name2}</div>
                     </div>
                 </div>
-                <a class="justify-start items-center gap-[15px] inline-flex" href={link}>
-                    <div class="w-[41px] h-[41px] relative">
-                        <img class="w-[41px] h-[41px] left-0 top-0 absolute" src={arrow} />
-                    </div>
-                    <div class="text-xl font-normal leading-7">Learn more</div>
-                </a>
             </div>
             <div class="w-[210px] h-[170px] pt-0.5 pb-[1.95px] justify-center items-center flex">
                 <img class="hidden md:block" src={image} />
@@ -45,11 +41,9 @@ import servicesData from './Data/services.json';
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="justify-start items-center gap-[275px] flex">
             <div class="flex-col justify-start items-start gap-[26px] inline-flex text-black">
-                <div class="text-3xl font-medium">Let’s make things happen</div>
-                <div class="text-lg font-normal">Contact us today to learn more about how our digital marketing services can help your business grow and succeed online.</div>
-                <a href="/" class="px-[35px] py-5 bg-zinc-900 hover:bg-white text-white hover:text-black border rounded-[14px] justify-start items-start gap-2.5 inline-flex">
-                    <div class="text-center text-xl font-normal leading-7">Get your free proposal</div>
-                </a>
+                <div class="text-3xl font-medium">Get notified</div>
+                <div class="text-lg font-normal">Get notified when we release the app for testing</div>
+								<Waitlist client:visible />
             </div>
         </div>
         <div class="hidden md:grid justify-items-center -m-20">
