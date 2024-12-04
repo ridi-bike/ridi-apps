@@ -11,15 +11,17 @@ export class Handler {
   }
 
   private areAllRegionsProcessed(nextRecords: MapDataRecord[]): boolean {
-    return this.env.regions.every((r) =>
-      nextRecords.find((nr) =>
-        nr.region === r && (nr.status === "ready" || nr.status === "error")
-      )
-    );
+    return !nextRecords.length ||
+      this.env.regions.every((r) =>
+        nextRecords.find((nr) =>
+          nr.region === r && (nr.status === "ready" || nr.status === "error")
+        )
+      );
   }
 
   public checkStatus(): void {
     this.logger.debug("Checking handler status");
+
     const nextRecords = this.db.mapData.getRecordsAllNext();
 
     if (this.areAllRegionsProcessed(nextRecords)) {
