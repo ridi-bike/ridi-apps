@@ -5,7 +5,7 @@ import servicesData from './Data/services.json';
 ---
 <Container>
 <div class="relative flex flex-col items-center md:flex-row" id="services">
-    <Topic title="Our Services" description="Our digital marketing agency helps businesses grow and succeed online through a range of services including SEO, PPC, social media marketing, and content creation">
+    <Topic title="How it works" description="Ridi is a motorcycle navigation app that creates personalized routes based on rider preferences. Users can specify the type of roads they want, such as curvy highways, green lanes, or mountain and forest tracks, and Ridi generates optimized routes tailored to these choices. Designed to eliminate the need for extensive route planning, the app allows motorcyclists to start their rides quickly while ensuring a more enjoyable and adventurous journey.">
 </div>
 
 <div class="flex-row items-center py-5">
@@ -15,12 +15,12 @@ import servicesData from './Data/services.json';
         {
         servicesData.map(({ background, name1, name2, arrow, link, image} ) => (
         <div class={background}>
-            <div class="flex-col justify-center items-start gap-[93px] inline-flex">
+            <div class="flex-col justify-center p-6 items-start gap-[93px] inline-flex">
                 <div class="flex-col justify-start items-start flex">
-                    <div class="px-[7px] bg-lime-300 rounded-[7px] flex-col justify-start items-start gap-2.5 flex">
+						<div class="px-[7px] rounded-[7px] flex-col justify-start items-start gap-2.5 flex">
                         <div class=" text-3xl font-medium">{name1}</div>
                     </div>
-                    <div class="px-[7px] bg-lime-300 rounded-[7px] flex-col justify-start items-start gap-2.5 flex">
+						<div class="px-[7px] rounded-[7px] flex-col justify-start items-start gap-2.5 flex">
                         <div class="text-3xl font-medium">{name2}</div>
                     </div>
                 </div>

@@ -15,7 +15,7 @@ export default {
 		white: "#FFFFFF",
 		gray: "#0D0C22",
 		stone: "#231F20",
-		lime: "#B9FF66",
+		ridiorange: "#f75835",
 		zinc: {
 		  100: "#F3F3F3",
 		  200: "#F0F0F0",
