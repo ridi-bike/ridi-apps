@@ -233,10 +233,10 @@ Deno.test("should download three regions and process them", async () => {
     kml_location: "../.ridi-data/pbf/europe/malta/some-md5-value/osm.kml",
   }));
 });
-const notDownloadTest = (
-  updateBetweenRuns: (db: ReturnType<typeof getDb>) => void,
-) => {
-  return async () => {
+
+Deno.test(
+  "should not download or process anything if md5 or router version the same for next",
+  async () => {
     maybeRemove("../.ridi-data/db");
     maybeRemove("../.ridi-data/cache");
     maybeRemove("../.ridi-data/pbf");
@@ -251,7 +251,6 @@ const notDownloadTest = (
 
     try {
       await runProcessor();
-      updateBetweenRuns(db);
       Deno.env.set("RIDI_ROUTER_BIN", "wrong value");
       await runProcessor();
     } catch (err) {
@@ -261,8 +260,6 @@ const notDownloadTest = (
     }
 
     await server.shutdown();
-
-    const handlerRec = db.handlers.get("map-data");
 
     expect(
       fileServerCalls.filter((url) => url.endsWith("malta-latest.osm.pbf"))
@@ -284,6 +281,7 @@ const notDownloadTest = (
     )
       .toEqual(1);
 
+    const handlerRec = db.handlers.get("map-data");
     expect(handlerRec).toEqual(expect.objectContaining({
       status: "done",
       router_version: "v0.1.0",
@@ -355,15 +353,129 @@ const notDownloadTest = (
       router_version: "v0.1.0",
       kml_location: "../.ridi-data/pbf/europe/malta/some-md5-value/osm.kml",
     }));
-  };
-};
-Deno.test(
-  "should not download or process anything if md5 or router version the same for next",
-  notDownloadTest(() => undefined),
+  },
 );
 Deno.test(
   "should not download or process anything if md5 or router version the same for current",
-  notDownloadTest((db) => db.db.sql`update map_data set version = 'current'`),
+  async () => {
+    maybeRemove("../.ridi-data/db");
+    maybeRemove("../.ridi-data/cache");
+    maybeRemove("../.ridi-data/pbf");
+
+    resetEnvValues();
+
+    testValues.md5 = "some-md5-value";
+
+    const fileServerCalls: string[] = [];
+    const server = startOsmFileServer(fileServerCalls);
+    const db = getSqlite();
+
+    try {
+      await runProcessor();
+      db.db.sql`update map_data set version = 'current'`;
+      Deno.env.set("RIDI_ROUTER_BIN", "wrong value");
+      await runProcessor();
+    } catch (err) {
+      console.log(JSON.stringify(err));
+      console.error(err);
+      throw err;
+    }
+
+    await server.shutdown();
+
+    expect(
+      fileServerCalls.filter((url) => url.endsWith("malta-latest.osm.pbf"))
+        .length,
+    )
+      .toEqual(1);
+
+    expect(
+      fileServerCalls.filter((url) => url.endsWith("andorra-latest.osm.pbf"))
+        .length,
+    )
+      .toEqual(1);
+
+    expect(
+      fileServerCalls.filter((url) =>
+        url.endsWith("isle-of-man-latest.osm.pbf")
+      )
+        .length,
+    )
+      .toEqual(1);
+
+    const handlerRec = db.handlers.get("map-data");
+    expect(handlerRec).toEqual(expect.objectContaining({
+      status: "done",
+      router_version: "v0.1.0",
+    }));
+
+    Deno.lstatSync(
+      "../.ridi-data/cache/v0.1.0/europe/andorra/some-md5-value",
+    );
+    Deno.lstatSync(
+      "../.ridi-data/pbf/europe/andorra/some-md5-value/osm.kml",
+    );
+    Deno.lstatSync(
+      "../.ridi-data/pbf/europe/andorra/some-md5-value/osm.pbf",
+    );
+    let mapDataRecords = db.mapData.getRecordCurrent("europe/andorra");
+    expect(mapDataRecords).toEqual(expect.objectContaining({
+      region: "europe/andorra",
+      version: "current",
+      status: "ready",
+      pbf_location: "../.ridi-data/pbf/europe/andorra/some-md5-value/osm.pbf",
+      pbf_md5: "some-md5-value",
+      cache_location:
+        "../.ridi-data/cache/v0.1.0/europe/andorra/some-md5-value",
+      router_version: "v0.1.0",
+      kml_location: "../.ridi-data/pbf/europe/andorra/some-md5-value/osm.kml",
+    }));
+
+    Deno.lstatSync(
+      "../.ridi-data/cache/v0.1.0/europe/isle-of-man/some-md5-value",
+    );
+    Deno.lstatSync(
+      "../.ridi-data/pbf/europe/isle-of-man/some-md5-value/osm.kml",
+    );
+    Deno.lstatSync(
+      "../.ridi-data/pbf/europe/isle-of-man/some-md5-value/osm.pbf",
+    );
+    mapDataRecords = db.mapData.getRecordCurrent("europe/isle-of-man");
+    expect(mapDataRecords).toEqual(expect.objectContaining({
+      region: "europe/isle-of-man",
+      version: "current",
+      status: "ready",
+      pbf_location:
+        "../.ridi-data/pbf/europe/isle-of-man/some-md5-value/osm.pbf",
+      pbf_md5: "some-md5-value",
+      cache_location:
+        "../.ridi-data/cache/v0.1.0/europe/isle-of-man/some-md5-value",
+      router_version: "v0.1.0",
+      kml_location:
+        "../.ridi-data/pbf/europe/isle-of-man/some-md5-value/osm.kml",
+    }));
+
+    Deno.lstatSync(
+      "../.ridi-data/cache/v0.1.0/europe/malta/some-md5-value",
+    );
+    Deno.lstatSync(
+      "../.ridi-data/pbf/europe/malta/some-md5-value/osm.kml",
+    );
+    Deno.lstatSync(
+      "../.ridi-data/pbf/europe/malta/some-md5-value/osm.pbf",
+    );
+    mapDataRecords = db.mapData.getRecordCurrent("europe/malta");
+    expect(mapDataRecords).toEqual(expect.objectContaining({
+      region: "europe/malta",
+      version: "current",
+      status: "ready",
+      pbf_location: "../.ridi-data/pbf/europe/malta/some-md5-value/osm.pbf",
+      pbf_md5: "some-md5-value",
+      cache_location: "../.ridi-data/cache/v0.1.0/europe/malta/some-md5-value",
+      router_version: "v0.1.0",
+      kml_location: "../.ridi-data/pbf/europe/malta/some-md5-value/osm.kml",
+    }));
+  },
 );
 
 Deno.test(

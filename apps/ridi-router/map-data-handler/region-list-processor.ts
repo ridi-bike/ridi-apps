@@ -1,12 +1,12 @@
 import { getDb, MapDataRecord, pg, RidiLogger } from "@ridi-router/lib";
 
-import { PgClient } from "./pg-client.ts";
-import { Cleaner } from "./cleaner.ts";
-import { EnvVariables } from "./env-variables.ts";
-import { CacheGenerator } from "./cache-generator.ts";
-import { Handler } from "./handler.ts";
-import { RegionDownloader } from "./region-downloader.ts";
-import { OsmLocations } from "./osm-locations.ts";
+import { type PgClient } from "./pg-client.ts";
+import { type Cleaner } from "./cleaner.ts";
+import { type EnvVariables } from "./env-variables.ts";
+import { type CacheGenerator } from "./cache-generator.ts";
+import { type Handler } from "./handler.ts";
+import { type RegionDownloader } from "./region-downloader.ts";
+import { type OsmLocations } from "./osm-locations.ts";
 
 export class Md5Downloader {
   constructor(
