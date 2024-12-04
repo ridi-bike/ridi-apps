@@ -10,7 +10,7 @@ import { DeployChecker } from "./check-deploy.ts";
 import { CoolifyClient } from "./coolify.ts";
 
 const envVariables = EnvVariables.get();
-const locations = new Locations(BaseEnvVariables.get());
+const locations = new Locations(envVariables);
 const ridiLogger = RidiLogger.get(envVariables);
 
 initDb(locations.getDbFileLoc());
