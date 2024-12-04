@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import { useRef, useState } from "react";
 
 export function Waitlist() {
 	const [submitted, setSubmitted] = useState(false)
+	const emailRef = useRef<HTMLInputElement>(null)
 
 	if (submitted) {
 		<div>Thank you</div>
@@ -12,7 +13,7 @@ export function Waitlist() {
 				setSubmitted(true);
 				e.preventDefault();
 				const formData = new FormData()
-				formData.set("email", e.target.email.value)
+				formData.set("email", emailRef.current?.value || "");
 				formData.set("name", "RIDI_WAITLIST");
 				formData.set("content", "RIDI_WAITLIST");
 				try {
@@ -29,6 +30,7 @@ export function Waitlist() {
       <input
         className="appearance-none bg-transparent rounded-[14px] h-12 w-64 mb-4 text-gray-200 focus:outline-none focus:bg-gray-300 focus:text-gray-800 focus:border-gray-400 mr-3 py-2 px-3"
         type="email"
+				ref={emailRef}
         name="email"
         placeholder="some@example.com"
         aria-label="Email Address"
