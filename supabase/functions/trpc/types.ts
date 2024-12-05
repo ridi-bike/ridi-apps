@@ -37,6 +37,7 @@ export type Database = {
       plans: {
         Row: {
           created_at: string
+          error: string | null
           from_lat: number
           from_lon: number
           id: string
@@ -49,6 +50,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          error?: string | null
           from_lat: number
           from_lon: number
           id?: string
@@ -61,6 +63,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          error?: string | null
           from_lat?: number
           from_lon?: number
           id?: string
@@ -78,7 +81,7 @@ export type Database = {
           geojson: Json
           id: string
           pbf_md5: string
-          polygon: unknown
+          polygon: unknown | null
           region: string
           version: Database["public"]["Enums"]["regions_version"]
         }
@@ -86,7 +89,7 @@ export type Database = {
           geojson: Json
           id?: string
           pbf_md5: string
-          polygon: unknown
+          polygon?: unknown | null
           region: string
           version: Database["public"]["Enums"]["regions_version"]
         }
@@ -94,7 +97,7 @@ export type Database = {
           geojson?: Json
           id?: string
           pbf_md5?: string
-          polygon?: unknown
+          polygon?: unknown | null
           region?: string
           version?: Database["public"]["Enums"]["regions_version"]
         }
@@ -178,7 +181,7 @@ export type Database = {
       }
     }
     Enums: {
-      plan_state: "new" | "planning" | "done"
+      plan_state: "new" | "planning" | "done" | "error"
       regions_version: "previous" | "current" | "next" | "discarded"
     }
     CompositeTypes: {

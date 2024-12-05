@@ -14,22 +14,17 @@ export class EnvVariables extends BaseEnvVariables {
   );
 
   readonly supabaseDbUrl = parse(
-    string("SUPABASE_DB_URL env variable"),
+    string(),
     Deno.env.get("SUPABASE_DB_URL"),
   );
 
-  readonly osmDataBaseUrl = parse(
-    string("OSM_DATA_BASE_URL env variable"),
-    Deno.env.get("OSM_DATA_BASE_URL"),
+  readonly supabaseUrl = parse(
+    string("SUPABASE_URL env variable"),
+    Deno.env.get("SUPABASE_URL"),
   );
 
-  readonly regions: string[];
-
-  constructor() {
-    super();
-    this.regions = parse(
-      array(string("region list file read")),
-      JSON.parse(Deno.readTextFileSync(this.regionListLoc)),
-    );
-  }
+  readonly supabaseSecretKey = parse(
+    string("SUPABASE_SECRET_KEY env variable"),
+    Deno.env.get("SUPABASE_SECRET_KEY"),
+  );
 }

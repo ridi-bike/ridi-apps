@@ -108,9 +108,9 @@ export class RegionDownloader {
       await this.fileDownloader.downloadFile(
         remotePbfUrl,
         pbfLocation,
-        (size) => this.db.mapData.updateRecordSize(mapDataRecord.id, size),
+        (size) => this.db.mapData.updateRecordPbfSize(mapDataRecord.id, size),
         (chunkSize) =>
-          this.db.mapData.updateRecordDownloadedSize(
+          this.db.mapData.updateRecordPbfDownloadedSize(
             mapDataRecord.id,
             chunkSize,
           ),

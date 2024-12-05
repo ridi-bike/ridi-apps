@@ -16,22 +16,22 @@ export class BaseEnvVariables {
   );
 
   readonly openObserveOrg = parse(
-    string(),
+    string("OPEN_OBSERVE_ORG env variable"),
     Deno.env.get("OPEN_OBSERVE_ORG"),
   );
 
   readonly openObserveToken = parse(
-    string(),
+    string("OPEN_OBSERVE_TOKEN env variable"),
     Deno.env.get("OPEN_OBSERVE_TOKEN"),
   );
 
   readonly regionListLoc = parse(
-    string(),
+    string("REGION_LIST env variable"),
     Deno.env.get("REGION_LIST"),
   );
 
   readonly dataDir = parse(
-    string(),
+    string("RIDI_DATA_DIR env variable"),
     Deno.env.get("RIDI_DATA_DIR"),
   );
 }

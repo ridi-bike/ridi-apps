@@ -36,7 +36,7 @@ export interface RoutesGetRow {
     createdAt: Date;
     planId: string;
     planName: string;
-    planState: "new" | "planning" | "done";
+    planState: "new" | "planning" | "done" | "error";
     pointId: string | null;
     pointLat: string | null;
     pointLon: string | null;
@@ -97,7 +97,7 @@ export interface PlanListRow {
     fromLon: string;
     toLat: string;
     toLon: string;
-    state: "new" | "planning" | "done";
+    state: "new" | "planning" | "done" | "error";
     createdAt: Date;
     routeId: string | null;
     routeName: string | null;

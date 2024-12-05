@@ -1,19 +1,22 @@
-import { getDb, type MapDataRecord, type RidiLogger } from "@ridi-router/lib";
+import {
+  DenoCommand,
+  getDb,
+  type MapDataRecord,
+  type RidiLogger,
+} from "@ridi-router/lib";
 import PQueue from "p-queue";
 import { type EnvVariables } from "./env-variables.ts";
 import { type KmlProcessor } from "./kml-processor.ts";
 import { type Handler } from "./handler.ts";
 
-export class DenoCommand {
-  async execute(command: string, args: string[]) {
-    const cmd = new Deno.Command(command, { args });
-    const { code, stdout, stderr } = await cmd.output();
-
-    return {
-      code,
-      stdout: new TextDecoder().decode(stdout),
-      stderr: new TextDecoder().decode(stderr),
-    };
+export class DenoDirStat {
+  async getDirSize(dir: string) {
+    let totSize = 0;
+    for await (const dirEntry of Deno.readDir(dir)) {
+      const fileInfo = await Deno.lstat(`${dir}/${dirEntry.name}`);
+      totSize += fileInfo.size;
+    }
+    return totSize;
   }
 }
 export class CacheGenerator {
@@ -26,6 +29,7 @@ export class CacheGenerator {
     private readonly env: EnvVariables,
     private readonly kml: KmlProcessor,
     private readonly handler: Handler,
+    private readonly dirStat: DenoDirStat,
   ) {
   }
 
@@ -64,6 +68,11 @@ export class CacheGenerator {
       stdout: stdoutOutput,
       stderr: stderrOutput,
     });
+
+    const cacheSize = await this.dirStat.getDirSize(
+      mapDataRecord.cache_location,
+    );
+    this.db.mapData.updateRecordCacheSize(mapDataRecord.id, cacheSize);
 
     await this.kml.processKml(mapDataRecord);
 

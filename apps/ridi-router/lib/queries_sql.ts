@@ -13,7 +13,7 @@ export interface RegionInsertArgs {
     region: string;
     pbfMd5: string;
     geojson: any;
-    polygon: string;
+    polygon: string | null;
 }
 
 export interface RegionInsertRow {
@@ -22,7 +22,7 @@ export interface RegionInsertRow {
     pbfMd5: string;
     version: "previous" | "current" | "next" | "discarded";
     geojson: any;
-    polygon: string;
+    polygon: string | null;
 }
 
 export async function regionInsert(sql: Sql, args: RegionInsertArgs): Promise<RegionInsertRow | null> {
@@ -61,7 +61,7 @@ export interface RegionSetDiscardedRow {
     pbfMd5: string;
     version: "previous" | "current" | "next" | "discarded";
     geojson: any;
-    polygon: string;
+    polygon: string | null;
 }
 
 export async function regionSetDiscarded(sql: Sql, args: RegionSetDiscardedArgs): Promise<RegionSetDiscardedRow | null> {
@@ -97,5 +97,220 @@ export interface RegionDeleteDiscardedAndPreviousArgs {
 
 export async function regionDeleteDiscardedAndPrevious(sql: Sql, args: RegionDeleteDiscardedAndPreviousArgs): Promise<void> {
     await sql.unsafe(regionDeleteDiscardedAndPreviousQuery, [args.region, args.pbfMd5]);
+}
+
+export const regionSetAllPreviousQuery = `-- name: RegionSetAllPrevious :exec
+update regions
+set version = 'previous'
+where regions.version = 'current'`;
+
+export async function regionSetAllPrevious(sql: Sql): Promise<void> {
+    await sql.unsafe(regionSetAllPreviousQuery, []);
+}
+
+export const regionSetCurrentQuery = `-- name: RegionSetCurrent :exec
+update regions
+set version = 'current'
+where regions.region = $1
+	and regions.pbf_md5 = $2`;
+
+export interface RegionSetCurrentArgs {
+    region: string;
+    pbfMd5: string;
+}
+
+export async function regionSetCurrent(sql: Sql, args: RegionSetCurrentArgs): Promise<void> {
+    await sql.unsafe(regionSetCurrentQuery, [args.region, args.pbfMd5]);
+}
+
+export const regionFindFromCoordsQuery = `-- name: RegionFindFromCoords :many
+select id, region, pbf_md5, version, geojson, polygon from public.regions
+where version = 'current'
+	and postgis.st_within(postgis.st_point($1, $2), regions.polygon)`;
+
+export interface RegionFindFromCoordsArgs {
+    lon: string;
+    lat: string;
+}
+
+export interface RegionFindFromCoordsRow {
+    id: string;
+    region: string;
+    pbfMd5: string;
+    version: "previous" | "current" | "next" | "discarded";
+    geojson: any;
+    polygon: string | null;
+}
+
+export async function regionFindFromCoords(sql: Sql, args: RegionFindFromCoordsArgs): Promise<RegionFindFromCoordsRow[]> {
+    return (await sql.unsafe(regionFindFromCoordsQuery, [args.lon, args.lat]).values()).map(row => ({
+        id: row[0],
+        region: row[1],
+        pbfMd5: row[2],
+        version: row[3],
+        geojson: row[4],
+        polygon: row[5]
+    }));
+}
+
+export const regionGetCountQuery = `-- name: RegionGetCount :one
+select count(*) from regions`;
+
+export interface RegionGetCountRow {
+    count: string;
+}
+
+export async function regionGetCount(sql: Sql): Promise<RegionGetCountRow | null> {
+    const rows = await sql.unsafe(regionGetCountQuery, []).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        count: row[0]
+    };
+}
+
+export const planGetByIdQuery = `-- name: PlanGetById :one
+select id, user_id, created_at, modified_at, from_lat, from_lon, to_lat, to_lon, state, name, error from plans
+where plans.id = $1`;
+
+export interface PlanGetByIdArgs {
+    id: string;
+}
+
+export interface PlanGetByIdRow {
+    id: string;
+    userId: string;
+    createdAt: Date;
+    modifiedAt: Date | null;
+    fromLat: string;
+    fromLon: string;
+    toLat: string;
+    toLon: string;
+    state: "new" | "planning" | "done" | "error";
+    name: string;
+    error: string | null;
+}
+
+export async function planGetById(sql: Sql, args: PlanGetByIdArgs): Promise<PlanGetByIdRow | null> {
+    const rows = await sql.unsafe(planGetByIdQuery, [args.id]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        userId: row[1],
+        createdAt: row[2],
+        modifiedAt: row[3],
+        fromLat: row[4],
+        fromLon: row[5],
+        toLat: row[6],
+        toLon: row[7],
+        state: row[8],
+        name: row[9],
+        error: row[10]
+    };
+}
+
+export const planSetStateQuery = `-- name: PlanSetState :exec
+update plans
+set 
+	state = $1, 
+	modified_at = now()
+where plans.id = $2`;
+
+export interface PlanSetStateArgs {
+    state: "new" | "planning" | "done" | "error";
+    id: string;
+}
+
+export async function planSetState(sql: Sql, args: PlanSetStateArgs): Promise<void> {
+    await sql.unsafe(planSetStateQuery, [args.state, args.id]);
+}
+
+export const routeInsertQuery = `-- name: RouteInsert :one
+insert into routes (name, user_id, plan_id)
+values ($1, $2, $3)
+returning id, user_id, created_at, plan_id, name`;
+
+export interface RouteInsertArgs {
+    name: string;
+    userId: string;
+    planId: string;
+}
+
+export interface RouteInsertRow {
+    id: string;
+    userId: string;
+    createdAt: Date;
+    planId: string;
+    name: string;
+}
+
+export async function routeInsert(sql: Sql, args: RouteInsertArgs): Promise<RouteInsertRow | null> {
+    const rows = await sql.unsafe(routeInsertQuery, [args.name, args.userId, args.planId]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        userId: row[1],
+        createdAt: row[2],
+        planId: row[3],
+        name: row[4]
+    };
+}
+
+export const routePointInsertQuery = `-- name: RoutePointInsert :one
+insert into route_points (user_id, route_id, sequence, lat, lon)
+values ($1, $2, $3, $4, $5)
+returning id, user_id, route_id, sequence, lat, lon`;
+
+export interface RoutePointInsertArgs {
+    userId: string;
+    routeId: string;
+    sequence: string;
+    lat: string;
+    lon: string;
+}
+
+export interface RoutePointInsertRow {
+    id: string;
+    userId: string;
+    routeId: string;
+    sequence: string;
+    lat: string;
+    lon: string;
+}
+
+export async function routePointInsert(sql: Sql, args: RoutePointInsertArgs): Promise<RoutePointInsertRow | null> {
+    const rows = await sql.unsafe(routePointInsertQuery, [args.userId, args.routeId, args.sequence, args.lat, args.lon]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        userId: row[1],
+        routeId: row[2],
+        sequence: row[3],
+        lat: row[4],
+        lon: row[5]
+    };
 }
 
