@@ -39,6 +39,7 @@ const mapDataRecordSchema = object({
   updated_at: pipe(number(), integer()),
   pbf_size: nullable(pipe(number(), integer())),
   pbf_downloaded_size: nullable(pipe(number(), integer())),
+  cache_size: nullable(pipe(number(), integer())),
 });
 export type MapDataRecord = InferInput<typeof mapDataRecordSchema>;
 
@@ -80,6 +81,7 @@ export function initDb(dbLocation: string) {
 
   ridiLogger.debug("Opening database", { dbLocation });
   db = new Database(dbLocation, { create: true });
+  db.sql`PRAGMA journal_mode=WAL;`;
   ridiLogger.debug("Database instance created", { db });
   migrate((db) =>
     db.prepare(`
@@ -139,6 +141,15 @@ export function initDb(dbLocation: string) {
 					add column pbf_downloaded_size integer;
 			`).run(),
     6,
+  );
+
+  migrate(
+    (db) =>
+      db.prepare(`
+				alter table map_data
+					add column cache_size integer;
+			`).run(),
+    7,
   );
 
   ridiLogger.debug("Migrations done");
@@ -274,7 +285,16 @@ export function getDb() {
         db.sql`delete from map_data
 								where id = ${id}`;
       },
-      updateRecordSize(id: number, size: number) {
+      updateRecordCacheSize(id: number, size: number) {
+        dbIsOk(db);
+        db.sql`
+					update map_data
+					set
+						cache_size = ${size},
+						updated_at = ${new Date().getTime()}
+					where id = ${id}`;
+      },
+      updateRecordPbfSize(id: number, size: number) {
         dbIsOk(db);
         db.sql`
 					update map_data
@@ -284,7 +304,7 @@ export function getDb() {
 						updated_at = ${new Date().getTime()}
 					where id = ${id}`;
       },
-      updateRecordDownloadedSize(id: number, addedSize: number) {
+      updateRecordPbfDownloadedSize(id: number, addedSize: number) {
         dbIsOk(db);
         db.sql`
 					update map_data
@@ -390,6 +410,23 @@ export function getDb() {
           .sql`select * from map_data 
 								where version = 'next'`;
         return mapData.map((row) => toMapDataRow(row));
+      },
+      getRecordsAllCurrent(): MapDataRecord[] {
+        dbIsOk(db);
+        const mapData = db
+          .sql`select * from map_data 
+								where version = 'current'`;
+        return mapData.map((row) => toMapDataRow(row));
+      },
+      updateRecordsPromoteNext() {
+        dbIsOk(db);
+        db.sql`update map_data
+								set version = 'previous'
+								where version = 'current';
+
+        			update map_data
+								set version = 'current'
+								where version = 'next'`;
       },
     },
     close() {

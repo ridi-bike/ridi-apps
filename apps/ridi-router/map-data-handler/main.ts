@@ -1,5 +1,6 @@
 import {
   BaseEnvVariables,
+  DenoCommand,
   getDb,
   initDb,
   Locations,
@@ -9,7 +10,7 @@ import {
 
 import { EnvVariables } from "./env-variables.ts";
 import { Md5Downloader, RegionListProcessor } from "./region-list-processor.ts";
-import { CacheGenerator, DenoCommand } from "./cache-generator.ts";
+import { CacheGenerator, DenoDirStat } from "./cache-generator.ts";
 import { Handler } from "./handler.ts";
 import { Cleaner, DenoRemove } from "./cleaner.ts";
 import { getPgClient } from "./pg-client.ts";
@@ -49,6 +50,7 @@ const cacheGenerator = new CacheGenerator(
     new KmlConverter(),
   ),
   handler,
+  new DenoDirStat(),
 );
 const regionProcessor = new RegionListProcessor(
   db,

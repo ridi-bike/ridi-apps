@@ -7,3 +7,4 @@ export const pg = {
   ...queries,
 };
 export * from "./env.ts";
+export * from "./deno-command.ts";
