@@ -220,6 +220,40 @@ export async function planGetById(sql: Sql, args: PlanGetByIdArgs): Promise<Plan
     };
 }
 
+export const plansGetNewQuery = `-- name: PlansGetNew :many
+select id, user_id, created_at, modified_at, from_lat, from_lon, to_lat, to_lon, state, name, error from plans
+where state = 'new'`;
+
+export interface PlansGetNewRow {
+    id: string;
+    userId: string;
+    createdAt: Date;
+    modifiedAt: Date | null;
+    fromLat: string;
+    fromLon: string;
+    toLat: string;
+    toLon: string;
+    state: "new" | "planning" | "done" | "error";
+    name: string;
+    error: string | null;
+}
+
+export async function plansGetNew(sql: Sql): Promise<PlansGetNewRow[]> {
+    return (await sql.unsafe(plansGetNewQuery, []).values()).map(row => ({
+        id: row[0],
+        userId: row[1],
+        createdAt: row[2],
+        modifiedAt: row[3],
+        fromLat: row[4],
+        fromLon: row[5],
+        toLat: row[6],
+        toLon: row[7],
+        state: row[8],
+        name: row[9],
+        error: row[10]
+    }));
+}
+
 export const planSetStateQuery = `-- name: PlanSetState :exec
 update plans
 set 

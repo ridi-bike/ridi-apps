@@ -21,8 +21,6 @@ export class Runner {
 
     const handlerRecord = this.db.handlers.get("router");
 
-    this.logger.debug("Starting", { handlerRecord });
-
     if (handlerRecord?.router_version !== this.env.routerVersion) {
       this.db.handlers.createUpdate("router", this.env.routerVersion);
 
@@ -33,7 +31,9 @@ export class Runner {
     }
     const nextMapData = this.db.mapData.getRecordsAllNext();
     if (nextMapData.length) {
-      this.logger.debug("Next records found", { nextMapData });
+      this.logger.debug("Next records found", {
+        regions: nextMapData.map((r) => r.region),
+      });
       if (
         !nextMapData.every((r) => r.router_version === this.env.routerVersion)
       ) {
@@ -56,7 +56,9 @@ export class Runner {
       }
     } else {
       const currentMapData = this.db.mapData.getRecordsAllCurrent();
-      this.logger.debug("Current records found", { currentMapData });
+      this.logger.debug("Current records found", {
+        regions: currentMapData.map((r) => r.region),
+      });
       if (
         !currentMapData.every((r) =>
           r.router_version === this.env.routerVersion
@@ -74,6 +76,8 @@ export class Runner {
       this.logger.debug("Received plan event", { planId });
       await this.planProcessor.handlePlanNotification(planId);
     });
+
+    this.processExistingPlans(); // TODO not awaiting on purpose
 
     globalThis.addEventListener("unload", () => {
       unsubscribe();
@@ -97,5 +101,14 @@ export class Runner {
         );
       },
     );
+  }
+
+  async processExistingPlans() {
+    const plans = await this.pgQueries.plansGetNew(this.pgClient);
+    for (const plan of plans) {
+      this.logger.debug("Processing plan", { planId: plan.id });
+
+      await this.planProcessor.handlePlanNotification(plan.id);
+    }
   }
 }
