@@ -4,9 +4,9 @@ import {
   RealtimeChannel,
   SupabaseClient,
 } from "jsr:@supabase/supabase-js";
-import { Database } from "../../../supabase/functions/trpc/types.ts";
+import { Database } from "@ridi-router/lib";
 import { EnvVariables } from "./env-variables.ts";
-import { object, parse, string } from "jsr:@valibot/valibot@0.42.1";
+import { object, parse, string } from "valibot";
 import { RidiLogger } from "../lib/logger.ts";
 
 export class Supabase {
