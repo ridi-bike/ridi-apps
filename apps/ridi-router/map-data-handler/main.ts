@@ -17,9 +17,11 @@ import { getPgClient } from "./pg-client.ts";
 import { DenoFileReader, KmlConverter, KmlProcessor } from "./kml-processor.ts";
 import { FileDownloader, RegionDownloader } from "./region-downloader.ts";
 import { OsmLocations } from "./osm-locations.ts";
+
 const baseEnv = new BaseEnvVariables();
+await RidiLogger.init(baseEnv);
 const envVariables = new EnvVariables();
-const ridiLogger = RidiLogger.get(baseEnv);
+const ridiLogger = RidiLogger.get();
 const locations = new Locations(baseEnv);
 
 initDb(locations.getDbFileLoc());
@@ -82,7 +84,7 @@ regionProcessor.process();
 
 setInterval(() => regionProcessor.process(), 24 * 60 * 60 * 1000); // every 24h
 
-Deno.serve({ port: 2727, hostname: "0.0.0.0" }, (_req) => {
+Deno.serve({ port: Number(envVariables.port), hostname: "0.0.0.0" }, (_req) => {
   const handlerRec = db.handlers.get("map-data");
   if (handlerRec) {
     return new Response("ok");

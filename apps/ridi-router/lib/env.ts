@@ -34,4 +34,9 @@ export class BaseEnvVariables {
     string("RIDI_DATA_DIR env variable"),
     Deno.env.get("RIDI_DATA_DIR"),
   );
+
+  readonly port = parse(
+    string("PORT env variable"),
+    Deno.env.get("PORT"),
+  );
 }
