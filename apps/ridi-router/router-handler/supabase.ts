@@ -35,13 +35,16 @@ export class Supabase {
             table: "plans",
           },
           (payload) => {
+            this.logger.debug("Received payload", { payload });
             const row = parse(
               object({
-                id: string(),
+                new: object({
+                  id: string(),
+                }),
               }),
               payload,
             );
-            listenerCallback(row.id);
+            listenerCallback(row.new.id);
           },
         )
         .subscribe((state, err) => {

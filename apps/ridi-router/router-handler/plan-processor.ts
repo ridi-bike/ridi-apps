@@ -2,6 +2,21 @@ import { RouterStore } from "./router-store.ts";
 import { DenoCommand, getDb, pg, RidiLogger } from "@ridi-router/lib";
 import { PgClient } from "./pg-client.ts";
 import { EnvVariables } from "./env-variables.ts";
+type RidiRouterErr = { Err: string };
+type RidiRouterOk = {
+  Ok: {
+    coords: {
+      lat: number;
+      lon: number;
+    }[];
+  }[];
+};
+type RidiRouterOutput = {
+  id: string;
+  result:
+    | RidiRouterErr
+    | RidiRouterOk;
+};
 
 export class PlanProcessor {
   constructor(
@@ -67,8 +82,8 @@ export class PlanProcessor {
         "--start",
         `${planRecord.fromLat},${planRecord.fromLon}`,
         "--finish",
-        `${planRecord.toLat}, ${planRecord.toLon}`,
-        "--socket_name",
+        `${planRecord.toLat},${planRecord.toLon}`,
+        "--socket-name",
         region.region,
       ],
     );
@@ -89,18 +104,10 @@ export class PlanProcessor {
     }
 
     this.logger.debug("router output", { planId, stdout, stderr });
+    Deno.writeTextFileSync("./route.debug", stdout);
+    const routes = JSON.parse(stdout) as RidiRouterOutput;
 
-    const routes = JSON.parse(stdout) as {
-      id: string;
-      result: string | {
-        coords: {
-          lat: number;
-          lon: number;
-        }[];
-      }[];
-    };
-
-    if (typeof routes.result === "string") {
+    if (typeof (routes.result as RidiRouterErr).Err === "string") {
       this.logger.error("Error returned from router when generating routes", {
         region,
         planId,
@@ -112,7 +119,8 @@ export class PlanProcessor {
       });
       return;
     } else {
-      for (const route of routes.result) {
+      const okRoutes = (routes.result as RidiRouterOk).Ok;
+      for (const route of okRoutes) {
         const routeRec = await this.pgQueries.routeInsert(this.pgClient, {
           planId,
           name: "some name",

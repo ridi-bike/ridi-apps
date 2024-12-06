@@ -30,13 +30,14 @@ export class RouterStore {
     }
 
     const process = new Deno.Command(this.env.routerBin, {
+      stderr: "piped",
       args: [
         "server",
         "--input",
         regionData.pbf_location,
-        "--cache_dir",
+        "--cache-dir",
         regionData.cache_location,
-        "--socket_name",
+        "--socket-name",
         region,
       ],
     }).spawn();
@@ -48,12 +49,11 @@ export class RouterStore {
         new WritableStream({
           write: (chunk, controller) => {
             const text = new TextDecoder().decode(chunk);
-            console.log({ chunk, text }, controller);
-
             if (text.split(";").find((t) => t === "READY")) {
               console.log("found READY");
               resolve();
             }
+            setTimeout(resolve, 5000);
           },
         }),
       );

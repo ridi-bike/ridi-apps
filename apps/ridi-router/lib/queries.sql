@@ -41,6 +41,10 @@ select count(*) from regions;
 select * from plans
 where plans.id = $1;
 
+-- name: PlansGetNew :many
+select * from plans
+where state = 'new';
+
 -- name: PlanSetState :exec
 update plans
 set 
