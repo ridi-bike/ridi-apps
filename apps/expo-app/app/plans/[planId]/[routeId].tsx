@@ -13,13 +13,11 @@ export default function RoutePage() {
 			<Text>{status}</Text>
 			<Text>{error?.message}</Text>
 			<GeoMap
-				route={data?.data.points
-					.sort((a, b) => Number(a.pointSequence) - Number(b.pointSequence))
-					.map((p) => ({ lat: Number(p.pointLat), lon: Number(p.pointLon) }))}
+				route={data?.data.latLonArray.map((p) => ({ lat: p[0], lon: p[1] }))}
 			/>
-			{data?.data.points.map((p) => (
-				<Text key={p.pointSequence}>
-					{p.pointLat}, {p.pointLon}
+			{data?.data.latLonArray.map((p) => (
+				<Text key={p.join(",")}>
+					{p[0]}, {p[1]}
 				</Text>
 			))}
 		</ScrollView>

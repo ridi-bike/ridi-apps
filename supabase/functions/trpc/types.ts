@@ -103,45 +103,11 @@ export type Database = {
         }
         Relationships: []
       }
-      route_points: {
-        Row: {
-          id: string
-          lat: number
-          lon: number
-          route_id: string
-          sequence: number
-          user_id: string
-        }
-        Insert: {
-          id?: string
-          lat: number
-          lon: number
-          route_id: string
-          sequence: number
-          user_id: string
-        }
-        Update: {
-          id?: string
-          lat?: number
-          lon?: number
-          route_id?: string
-          sequence?: number
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "route_points_route_id_fkey"
-            columns: ["route_id"]
-            isOneToOne: false
-            referencedRelation: "routes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       routes: {
         Row: {
           created_at: string
           id: string
+          linestring: unknown | null
           name: string
           plan_id: string
           user_id: string
@@ -149,6 +115,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          linestring?: unknown | null
           name: string
           plan_id: string
           user_id: string
@@ -156,6 +123,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          linestring?: unknown | null
           name?: string
           plan_id?: string
           user_id?: string

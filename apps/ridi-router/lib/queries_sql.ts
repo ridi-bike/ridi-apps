@@ -271,14 +271,33 @@ export async function planSetState(sql: Sql, args: PlanSetStateArgs): Promise<vo
 }
 
 export const routeInsertQuery = `-- name: RouteInsert :one
-insert into routes (name, user_id, plan_id)
-values ($1, $2, $3)
-returning id, user_id, created_at, plan_id, name`;
+insert into routes (
+	name, 
+	user_id, 
+	plan_id, 
+	linestring
+)
+values (
+	$1, 
+	$2, 
+	$3, 
+	postgis.st_makeline(
+		array(
+			select 
+				postgis.st_point((p->>'lon')::numeric, (p->>'lat')::numeric)
+			from (
+				select jsonb_array_elements($4::jsonb) p
+			) arrayPoints
+		)
+	)
+)
+returning id, user_id, created_at, plan_id, name, linestring`;
 
 export interface RouteInsertArgs {
     name: string;
     userId: string;
     planId: string;
+    latLonArray: any;
 }
 
 export interface RouteInsertRow {
@@ -287,10 +306,11 @@ export interface RouteInsertRow {
     createdAt: Date;
     planId: string;
     name: string;
+    linestring: string | null;
 }
 
 export async function routeInsert(sql: Sql, args: RouteInsertArgs): Promise<RouteInsertRow | null> {
-    const rows = await sql.unsafe(routeInsertQuery, [args.name, args.userId, args.planId]).values();
+    const rows = await sql.unsafe(routeInsertQuery, [args.name, args.userId, args.planId, args.latLonArray]).values();
     if (rows.length !== 1) {
         return null;
     }
@@ -303,48 +323,8 @@ export async function routeInsert(sql: Sql, args: RouteInsertArgs): Promise<Rout
         userId: row[1],
         createdAt: row[2],
         planId: row[3],
-        name: row[4]
-    };
-}
-
-export const routePointInsertQuery = `-- name: RoutePointInsert :one
-insert into route_points (user_id, route_id, sequence, lat, lon)
-values ($1, $2, $3, $4, $5)
-returning id, user_id, route_id, sequence, lat, lon`;
-
-export interface RoutePointInsertArgs {
-    userId: string;
-    routeId: string;
-    sequence: string;
-    lat: string;
-    lon: string;
-}
-
-export interface RoutePointInsertRow {
-    id: string;
-    userId: string;
-    routeId: string;
-    sequence: string;
-    lat: string;
-    lon: string;
-}
-
-export async function routePointInsert(sql: Sql, args: RoutePointInsertArgs): Promise<RoutePointInsertRow | null> {
-    const rows = await sql.unsafe(routePointInsertQuery, [args.userId, args.routeId, args.sequence, args.lat, args.lon]).values();
-    if (rows.length !== 1) {
-        return null;
-    }
-    const row = rows[0];
-    if (!row) {
-        return null;
-    }
-    return {
-        id: row[0],
-        userId: row[1],
-        routeId: row[2],
-        sequence: row[3],
-        lat: row[4],
-        lon: row[5]
+        name: row[4],
+        linestring: row[5]
     };
 }
 

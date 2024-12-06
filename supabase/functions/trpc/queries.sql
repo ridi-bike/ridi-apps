@@ -1,25 +1,30 @@
 -- name: RoutesGet :many
+with points_array as (
+	select 
+		id, 
+		array_agg(array[postgis.st_y(p.geom), postgis.st_x(p.geom)] order by p.path) as lat_lon_array
+	from routes r, postgis.st_dumppoints(r.linestring) p
+	where r.user_id = $1
+		and r.id = $2
+	group by r.id
+) 
 select 
 	r.id,
 	r.name,
 	r.created_at,
+	pa.lat_lon_array,
 	p.id as plan_id,
 	p.name as plan_name,
-	p.state as plan_state,
-	rp.id as point_id,
-	rp.lat as point_lat,
-	rp.lon as point_lon,
-	rp.sequence as point_sequence
+	p.state as plan_state
 from routes r
 inner join plans p
 	on p.id = r.plan_id
-left join route_points rp
-	on rp.route_id = r.id
+inner join points_array pa
+	on pa.id = r.id
 where r.user_id = $1
 	and r.id = $2
 order by 
-	r.created_at desc, 
-	rp.sequence asc;
+	r.created_at desc;
 
 -- name: PlanList :many
 select 
@@ -33,21 +38,13 @@ select
 	p.created_at,
 	r.id as route_id,
 	r.name as route_name,
-	r.created_at as route_created_at,
-	rp.id as point_id,
-	rp.lat as point_lat,
-	rp.lon as point_lon,
-	rp.sequence as point_sequence
+	r.created_at as route_created_at
 from plans p
 left join routes r 
 	on r.plan_id = p.id
-left join route_points rp
-	on rp.route_id = r.id
-		and mod(round(rp.sequence, 0), 100) = 0
 where p.user_id = $1
 order by
-	p.created_at desc,
-	rp.sequence asc;
+	p.created_at desc;
 
 -- name: PlanCreate :one
 insert into plans (user_id, id, name, from_lat, from_lon, to_lat, to_lon)

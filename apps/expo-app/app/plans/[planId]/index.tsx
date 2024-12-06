@@ -20,7 +20,7 @@ export default function PlanRoutes() {
 			<Text>{plan?.id || "not found"}</Text>
 			{plan?.routes.map((route) => (
 				<Link
-					key={plan.id}
+					key={route.routeId}
 					className={cn(
 						buttonVariants({
 							variant: "link",
