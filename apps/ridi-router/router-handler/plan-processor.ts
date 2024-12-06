@@ -104,7 +104,6 @@ export class PlanProcessor {
     }
 
     this.logger.debug("router output", { planId, stdout, stderr });
-    Deno.writeTextFileSync("./route.debug", stdout);
     const routes = JSON.parse(stdout) as RidiRouterOutput;
 
     if (typeof (routes.result as RidiRouterErr).Err === "string") {
