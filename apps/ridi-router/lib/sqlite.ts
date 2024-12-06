@@ -77,10 +77,10 @@ function migrate(fn: (db: Database) => void, expectedVersion: number) {
 }
 
 export function initDb(dbLocation: string) {
-  const ridiLogger = RidiLogger.get(new BaseEnvVariables());
+  const ridiLogger = RidiLogger.get();
 
   ridiLogger.debug("Opening database", { dbLocation });
-  db = new Database(dbLocation, { create: true });
+  db = new Database(dbLocation, { create: true, int64: true });
   db.sql`PRAGMA journal_mode=WAL;`;
   ridiLogger.debug("Database instance created", { db });
   migrate((db) =>
@@ -421,12 +421,14 @@ export function getDb() {
       updateRecordsPromoteNext() {
         dbIsOk(db);
         db.sql`update map_data
-								set version = 'previous'
-								where version = 'current';
-
-        			update map_data
 								set version = 'current'
-								where version = 'next'`;
+								where version = 'next';`;
+      },
+      updateRecordsDemoteCurrent() {
+        dbIsOk(db);
+        db.sql`update map_data
+								set version = 'previous'
+								where version = 'current';`;
       },
     },
     close() {

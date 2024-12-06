@@ -56,6 +56,8 @@ export class Supabase {
         });
     });
 
+    this.logger.debug("Plans Subscription created");
+
     return () => this.plansChannel?.unsubscribe();
   }
 

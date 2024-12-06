@@ -7,28 +7,31 @@ import {
 } from "logger";
 import { flatten } from "flat";
 import { stringify } from "yaml";
-import { BaseEnvVariables } from "./env.ts";
+import type { BaseEnvVariables } from "./env.ts";
 
 export class RidiLogger {
   private static instance: RidiLogger;
 
-  private logger: Logger;
-  private readonly env: BaseEnvVariables;
-
-  private constructor(env: BaseEnvVariables) {
-    this.env = env;
-    this.initializeLogger(env.ridiEnvName);
-    this.logger = getLogger(env.ridiEnvName);
+  private constructor(
+    private readonly logger: Logger,
+  ) {
   }
 
-  public static get(env: BaseEnvVariables): RidiLogger {
+  static async init(env: BaseEnvVariables) {
+    await RidiLogger.initializeLogger(env);
+    const innerLogger = getLogger(env.ridiEnvName);
+    const logger = new RidiLogger(innerLogger);
+    RidiLogger.instance = logger;
+  }
+
+  public static get(): RidiLogger {
     if (!RidiLogger.instance) {
-      RidiLogger.instance = new RidiLogger(env);
+      throw new Error("need to call init first");
     }
     return RidiLogger.instance;
   }
 
-  private async initializeLogger(envName: string) {
+  private static async initializeLogger(env: BaseEnvVariables) {
     await configure({
       sinks: {
         console: getConsoleSink({
@@ -40,11 +43,11 @@ export class RidiLogger {
         }),
         openObserve: (rec) => {
           fetch(
-            `https://api.openobserve.ai/api/${this.env.openObserveOrg}/ridi_${envName}/_json`,
+            `https://api.openobserve.ai/api/${env.openObserveOrg}/ridi_${env.ridiEnvName}/_json`,
             {
               method: "post",
               headers: {
-                "Authorization": `Basic ${this.env.openObserveToken}`,
+                "Authorization": `Basic ${env.openObserveToken}`,
               },
               body: JSON.stringify([flatten(rec)]),
             },
@@ -54,9 +57,9 @@ export class RidiLogger {
       loggers: [{
         category: [],
         lowestLevel: "debug",
-        sinks: this.env.ridiEnv === "prod"
+        sinks: env.ridiEnv === "prod"
           ? ["openObserve", "console"]
-          : this.env.ridiEnv === "local"
+          : env.ridiEnv === "local"
           ? ["console"]
           : [],
       }],

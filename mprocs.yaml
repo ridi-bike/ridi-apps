@@ -16,6 +16,9 @@ procs:
   expo-tsc:
     shell: "pnpm tsc"
     cwd: "apps/expo-app"
-  deno:
-    shell: "deno --watch --env --allow-env --allow-net main.ts"
-    cwd: "apps/deno-app"
+  router-handler:
+    shell: "deno task dev"
+    cwd: "apps/ridi-router/router-handler"
+  map-data-handler:
+    shell: "deno task dev"
+    cwd: "apps/ridi-router/map-data-handler"

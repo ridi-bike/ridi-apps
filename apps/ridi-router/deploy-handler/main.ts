@@ -1,17 +1,12 @@
-import {
-  BaseEnvVariables,
-  getDb,
-  initDb,
-  Locations,
-  RidiLogger,
-} from "@ridi-router/lib";
+import { getDb, initDb, Locations, RidiLogger } from "@ridi-router/lib";
 import { EnvVariables } from "./env.ts";
 import { DeployChecker } from "./check-deploy.ts";
 import { CoolifyClient } from "./coolify.ts";
 
 const envVariables = EnvVariables.get();
+await RidiLogger.init(envVariables);
 const locations = new Locations(envVariables);
-const ridiLogger = RidiLogger.get(envVariables);
+const ridiLogger = RidiLogger.get();
 
 initDb(locations.getDbFileLoc());
 
@@ -31,7 +26,7 @@ const deployChecker = new DeployChecker(
 deployChecker.start();
 deployChecker.checkDeploy();
 
-Deno.serve({ port: 2727, hostname: "0.0.0.0" }, (_req) => {
+Deno.serve({ port: Number(envVariables.port), hostname: "0.0.0.0" }, (_req) => {
   const handlerRec = db.handlers.get("deploy");
   if (handlerRec) {
     return new Response("ok");

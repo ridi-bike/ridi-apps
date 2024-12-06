@@ -14,7 +14,9 @@ import { PlanProcessor } from "./plan-processor.ts";
 import { RouterStore } from "./router-store.ts";
 
 const env = new EnvVariables();
-const ridiLogger = RidiLogger.get(env);
+await RidiLogger.init(env);
+const ridiLogger = RidiLogger.get();
+ridiLogger.debug("omg test");
 const locations = new Locations(env);
 initDb(locations.getDbFileLoc());
 const db = getDb();
