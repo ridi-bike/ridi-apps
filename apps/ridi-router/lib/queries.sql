@@ -53,11 +53,25 @@ set
 where plans.id = $2;
 
 -- name: RouteInsert :one
-insert into routes (name, user_id, plan_id)
-values ($1, $2, $3)
-returning *;
-
--- name: RoutePointInsert :one
-insert into route_points (user_id, route_id, sequence, lat, lon)
-values ($1, $2, $3, $4, $5)
+-- select postgis.st_point(( el->>'a' )::numeric, ( el->>'b' )::numeric) from (select jsonb_array_elements('[{"a":1,"b":2},{"a":3,"b":4}]'::jsonb) el) arrayEl
+insert into routes (
+	name, 
+	user_id, 
+	plan_id, 
+	linestring
+)
+values (
+	$1, 
+	$2, 
+	$3, 
+	postgis.st_makeline(
+		array(
+			select 
+				postgis.st_point((p->>'lon')::numeric, (p->>'lat')::numeric)
+			from (
+				select jsonb_array_elements(sqlc.arg(lat_lon_array)::jsonb) p
+			) arrayPoints
+		)
+	)
+)
 returning *;

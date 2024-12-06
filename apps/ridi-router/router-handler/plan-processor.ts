@@ -121,24 +121,12 @@ export class PlanProcessor {
     } else {
       const okRoutes = (routes.result as RidiRouterOk).Ok;
       for (const route of okRoutes) {
-        const routeRec = await this.pgQueries.routeInsert(this.pgClient, {
+        await this.pgQueries.routeInsert(this.pgClient, {
           planId,
           name: "some name",
           userId: planRecord.userId,
+          latLonArray: route.coords,
         });
-        if (!routeRec) {
-          this.logger.error("Insert returned no rows", { planId, region });
-          return;
-        }
-        for (const [idx, point] of route.coords.entries()) {
-          await this.pgQueries.routePointInsert(this.pgClient, {
-            userId: routeRec?.userId,
-            routeId: routeRec?.id,
-            lat: point.lat.toString(),
-            lon: point.lon.toString(),
-            sequence: idx.toString(),
-          });
-        }
       }
 
       await this.pgQueries.planSetState(this.pgClient, {

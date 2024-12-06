@@ -3,27 +3,32 @@
 import { Sql } from "postgres";
 
 export const routesGetQuery = `-- name: RoutesGet :many
+with points_array as (
+	select 
+		id, 
+		array_agg(array[postgis.st_y(p.geom), postgis.st_x(p.geom)] order by p.path) as lat_lon_array
+	from routes r, postgis.st_dumppoints(r.linestring) p
+	where r.user_id = $1
+		and r.id = $2
+	group by r.id
+) 
 select 
 	r.id,
 	r.name,
 	r.created_at,
+	pa.lat_lon_array,
 	p.id as plan_id,
 	p.name as plan_name,
-	p.state as plan_state,
-	rp.id as point_id,
-	rp.lat as point_lat,
-	rp.lon as point_lon,
-	rp.sequence as point_sequence
+	p.state as plan_state
 from routes r
 inner join plans p
 	on p.id = r.plan_id
-left join route_points rp
-	on rp.route_id = r.id
+inner join points_array pa
+	on pa.id = r.id
 where r.user_id = $1
 	and r.id = $2
 order by 
-	r.created_at desc, 
-	rp.sequence asc`;
+	r.created_at desc`;
 
 export interface RoutesGetArgs {
     userId: string;
@@ -34,13 +39,10 @@ export interface RoutesGetRow {
     id: string;
     name: string;
     createdAt: Date;
+    latLonArray: string[];
     planId: string;
     planName: string;
     planState: "new" | "planning" | "done" | "error";
-    pointId: string | null;
-    pointLat: string | null;
-    pointLon: string | null;
-    pointSequence: string | null;
 }
 
 export async function routesGet(sql: Sql, args: RoutesGetArgs): Promise<RoutesGetRow[]> {
@@ -48,13 +50,10 @@ export async function routesGet(sql: Sql, args: RoutesGetArgs): Promise<RoutesGe
         id: row[0],
         name: row[1],
         createdAt: row[2],
-        planId: row[3],
-        planName: row[4],
-        planState: row[5],
-        pointId: row[6],
-        pointLat: row[7],
-        pointLon: row[8],
-        pointSequence: row[9]
+        latLonArray: row[3],
+        planId: row[4],
+        planName: row[5],
+        planState: row[6]
     }));
 }
 
@@ -70,21 +69,13 @@ select
 	p.created_at,
 	r.id as route_id,
 	r.name as route_name,
-	r.created_at as route_created_at,
-	rp.id as point_id,
-	rp.lat as point_lat,
-	rp.lon as point_lon,
-	rp.sequence as point_sequence
+	r.created_at as route_created_at
 from plans p
 left join routes r 
 	on r.plan_id = p.id
-left join route_points rp
-	on rp.route_id = r.id
-		and mod(round(rp.sequence, 0), 100) = 0
 where p.user_id = $1
 order by
-	p.created_at desc,
-	rp.sequence asc`;
+	p.created_at desc`;
 
 export interface PlanListArgs {
     userId: string;
@@ -102,10 +93,6 @@ export interface PlanListRow {
     routeId: string | null;
     routeName: string | null;
     routeCreatedAt: Date | null;
-    pointId: string | null;
-    pointLat: string | null;
-    pointLon: string | null;
-    pointSequence: string | null;
 }
 
 export async function planList(sql: Sql, args: PlanListArgs): Promise<PlanListRow[]> {
@@ -120,11 +107,7 @@ export async function planList(sql: Sql, args: PlanListArgs): Promise<PlanListRo
         createdAt: row[7],
         routeId: row[8],
         routeName: row[9],
-        routeCreatedAt: row[10],
-        pointId: row[11],
-        pointLat: row[12],
-        pointLon: row[13],
-        pointSequence: row[14]
+        routeCreatedAt: row[10]
     }));
 }
 
