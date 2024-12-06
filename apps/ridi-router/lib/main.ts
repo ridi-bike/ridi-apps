@@ -8,3 +8,4 @@ export const pg = {
 };
 export * from "./env.ts";
 export * from "./deno-command.ts";
+export * from "./supabase.ts";
