@@ -24,6 +24,8 @@ export class Supabase {
   }
 
   async listen(listenerCallback: (id: string) => void) {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
     await new Promise<void>((resolve, reject) => {
       this.plansChannel = this.supabase
         .channel("plans_routes")
@@ -49,12 +51,14 @@ export class Supabase {
         )
         .subscribe((state, err) => {
           if (err) {
+            this.logger.error("Error from supabase channel", { state, err });
             reject(err);
           }
           if (state === "SUBSCRIBED") {
             resolve();
           } else {
-            reject(new Error(`state ${state}`));
+            this.logger.error("Error from supabase channel", { state, err });
+            reject(new Error(`state ${state}, ${err}`));
           }
         });
     });

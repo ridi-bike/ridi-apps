@@ -14,7 +14,7 @@ export class EnvVariables extends BaseEnvVariables {
   );
 
   readonly supabaseDbUrl = parse(
-    string(),
+    string("SUPABASE_DB_URL env variable"),
     Deno.env.get("SUPABASE_DB_URL"),
   );
 
