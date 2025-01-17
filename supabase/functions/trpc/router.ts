@@ -21,7 +21,14 @@ const t = initTRPC.context<Context>().create({
   transformer: superjson,
 });
 
-const anonProcedure = t.procedure;
+const anonProcedure = t.procedure.use(
+  async ({ ctx, next }) => {
+    await ctx.messaging.send("net-addr-activity", {
+      netAddr: ctx.info.remoteAddr.hostname,
+    });
+    return next();
+  },
+);
 const userProcedure = anonProcedure.use(({ ctx, next }) => {
   if (!ctx.user) {
     throw new TRPCError({ code: "UNAUTHORIZED", message: "User data missing" });
@@ -217,6 +224,9 @@ const planRouter = router({
       if (!newPlan) {
         throw new Error("can't happen");
       }
+
+      await ctx.messaging.send("new-plan", { planId: newPlan.id });
+
       return {
         version: "v1",
         data: newPlan,
@@ -224,9 +234,30 @@ const planRouter = router({
     }),
 });
 
+const coordsRouter = router({
+  selected: userProcedure.input(
+    parser(
+      variant("version", [
+        object({
+          version: literal("v1"),
+          data: object({
+            lat,
+            lon,
+          }),
+        }),
+      ]),
+    ),
+  ).query(async ({ ctx, input: { version, data: { lat, lon } } }) => {
+    if (version === "v1") {
+      await ctx.messaging.send("coords-activty", { lat, lon });
+    }
+  }),
+});
+
 export const appRouter = router({
   plans: planRouter,
   routes: routeRouter,
+  coords: coordsRouter,
 });
 
 export type AppRouter = typeof appRouter;

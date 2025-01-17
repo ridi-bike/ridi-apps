@@ -8,7 +8,9 @@ plugins:
     sha256: 94b6d0ee9c11a1c7dd2e87218443c770f1904632396a9675a0afbcc9dbb536a0
 sql:
 - schema: "supabase/migrations"
-  queries: "supabase/functions/trpc/queries.sql"
+  queries:
+    - "supabase/functions/trpc/queries.sql"
+    - "supabase/functions/trpc/messaging.sql"
   engine: postgresql
   database:
     uri: "postgres://postgres:postgres@localhost:54322/postgres"
