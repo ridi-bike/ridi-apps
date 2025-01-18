@@ -54,9 +54,9 @@ export class CacheGenerator {
         this.env.routerBin,
         [
           "cache",
-          "-i",
+          "--input",
           mapDataRecord.pbf_location,
-          "-c",
+          "--cache-dir",
           mapDataRecord.cache_location,
         ],
       );
@@ -72,7 +72,41 @@ export class CacheGenerator {
     const cacheSize = await this.dirStat.getDirSize(
       mapDataRecord.cache_location,
     );
+
+    const serverStartMoment = Date.now();
+    const process = new Deno.Command(this.env.routerBin, {
+      stderr: "piped",
+      args: [
+        "start-server",
+        "--input",
+        mapDataRecord.pbf_location,
+        "--cache-dir",
+        mapDataRecord.cache_location,
+      ],
+    }).spawn();
+
+    await new Promise<void>((resolve) => {
+      process.stderr.pipeTo(
+        new WritableStream({
+          write: (chunk, _controller) => {
+            const text = new TextDecoder().decode(chunk);
+            if (
+              text.split(";").find((t) => t === "RIDI_ROUTER SERVER READY")
+            ) {
+              console.log("found READY");
+              resolve();
+            }
+          },
+        }),
+      );
+    });
+    const serverStartTime = Math.ceil((Date.now() - serverStartMoment) / 1000);
+
     this.db.mapData.updateRecordCacheSize(mapDataRecord.id, cacheSize);
+    this.db.mapData.updateRecordStartupTime(
+      mapDataRecord.id,
+      serverStartTime,
+    );
 
     await this.kml.processKml(mapDataRecord);
 

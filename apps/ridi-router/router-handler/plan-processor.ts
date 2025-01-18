@@ -97,7 +97,7 @@ export class PlanProcessor {
     const { code, stderr, stdout } = await this.denoCommand.execute(
       this.env.routerBin,
       [
-        "client",
+        "start-client",
         "--start",
         `${planRecord.fromLat},${planRecord.fromLon}`,
         "--finish",

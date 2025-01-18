@@ -32,7 +32,7 @@ export class RouterStore {
     const process = new Deno.Command(this.env.routerBin, {
       stderr: "piped",
       args: [
-        "server",
+        "start-server",
         "--input",
         regionData.pbf_location,
         "--cache-dir",
@@ -47,7 +47,7 @@ export class RouterStore {
     await new Promise<void>((resolve) => {
       process.stderr.pipeTo(
         new WritableStream({
-          write: (chunk, controller) => {
+          write: (chunk, _controller) => {
             const text = new TextDecoder().decode(chunk);
             if (
               text.split(";").find((t) => t === "RIDI_ROUTER SERVER READY")
