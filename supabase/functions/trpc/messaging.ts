@@ -3,21 +3,22 @@ import {
   archiveMessage,
   deleteMessage,
   readMessagesWithLongPoll,
+  type ReadMessagesWithLongPollRow,
   sendMessage,
   updateVisibilityTimeout,
 } from "./messaging_sql.ts";
 
-type MessageHandler<TName extends keyof Messages> = (
-  messageId: string,
-  message: Messages[TName],
+type MessageHandler<TName extends keyof Messages> = (args: {
+  message: ReadMessagesWithLongPollRow;
+  data: Messages[TName];
   actions: {
     deleteMessage: () => Promise<void>;
     archiveMessage: () => Promise<void>;
     setVisibilityTimeout: (
       visibilityTimeoutSecs: number,
-    ) => Promise<void> | void;
-  },
-) => Promise<void>;
+    ) => Promise<void>;
+  };
+}) => Promise<void>;
 
 type Messages = {
   "net-addr-activity": { netAddr: string };
@@ -68,34 +69,41 @@ export class Messaging {
         maxPollSeconds: 60,
       });
       messages.forEach((message) =>
-        messageHandler(message.msgId, message.message, {
-          deleteMessage: async () => {
-            this.logger.info("Message delete called", { message });
-            await deleteMessage(this.db, {
-              queueName,
-              messageId: message.msgId,
-            });
-          },
-          archiveMessage: async () => {
-            this.logger.info("Message archive called", { message });
-            await archiveMessage(this.db, {
-              queueName,
-              messageId: message.msgId,
-            });
-          },
-          setVisibilityTimeout: async (vt) => {
-            this.logger.info("Message visisvility timeout update called", {
-              message,
-            });
-            await updateVisibilityTimeout(this.db, {
-              queueName,
-              messageId: message.msgId,
-              visibilityTimeoutSeconds: vt,
-            });
+        messageHandler({
+          message,
+          data: message.message,
+          actions: {
+            deleteMessage: async () => {
+              this.logger.info("Message delete called", { message });
+              await deleteMessage(this.db, {
+                queueName,
+                messageId: message.msgId,
+              });
+            },
+            archiveMessage: async () => {
+              this.logger.info("Message archive called", { message });
+              await archiveMessage(this.db, {
+                queueName,
+                messageId: message.msgId,
+              });
+            },
+            setVisibilityTimeout: async (vt) => {
+              this.logger.info("Message visisvility timeout update called", {
+                message,
+              });
+              await updateVisibilityTimeout(this.db, {
+                queueName,
+                messageId: message.msgId,
+                visibilityTimeoutSeconds: vt,
+              });
+            },
           },
         }).then(() => this.logger.info("Message processed", { message })).catch(
           (error) =>
-            this.logger.error("Failed to process message", { message, error }),
+            this.logger.error("Failed to process message unexpectedly", {
+              message,
+              error,
+            }),
         )
       );
     }

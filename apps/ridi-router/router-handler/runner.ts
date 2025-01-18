@@ -2,7 +2,6 @@ import { getDb, pg, RidiLogger } from "@ridi-router/lib";
 import { Messaging } from "../../../supabase/functions/trpc/messaging.ts";
 import { EnvVariables } from "./env-variables.ts";
 import { PgClient } from "./pg-client.ts";
-// import { Supabase } from "./supabase.ts";
 import { PlanProcessor } from "./plan-processor.ts";
 
 export class Runner {
@@ -12,7 +11,6 @@ export class Runner {
     private readonly db: ReturnType<typeof getDb>,
     private readonly pgClient: PgClient,
     private readonly pgQueries: typeof pg,
-    // private readonly supabase: Supabase,
     private readonly messaging: Messaging,
     private readonly planProcessor: PlanProcessor,
   ) {
@@ -74,14 +72,35 @@ export class Runner {
       }
     }
 
-    // const unsubscribe = await this.supabase.listen(async (planId) => {
-    //   this.logger.debug("Received plan event", { planId });
-    //   await this.planProcessor.handlePlanNotification(planId);
-    // });
     this.messaging.listen(
       "new-plan",
-      (messageId, message, { deleteMessage, setVisibilityTimeout }) => {
-        // TODO handle message
+      async (
+        { message, data, actions: { deleteMessage, setVisibilityTimeout } },
+      ) => {
+        const result = await this.planProcessor.handlePlanNotification(
+          data.planId,
+        );
+        if (result.result === "error") {
+          if (message.readCt < 5) {
+            const retry = 20;
+            this.logger.error("New Plan message error, retry", {
+              message,
+              data,
+              retry,
+            });
+            await setVisibilityTimeout(20);
+          } else {
+            this.logger.error("New Plan message error", {
+              message,
+              data,
+            });
+            await deleteMessage();
+          }
+        } else if (result.result === "ok") {
+          await deleteMessage();
+        } else {
+          await setVisibilityTimeout(result.seconds);
+        }
       },
     );
 

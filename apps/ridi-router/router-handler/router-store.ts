@@ -49,11 +49,12 @@ export class RouterStore {
         new WritableStream({
           write: (chunk, controller) => {
             const text = new TextDecoder().decode(chunk);
-            if (text.split(";").find((t) => t === "READY")) {
+            if (
+              text.split(";").find((t) => t === "RIDI_ROUTER SERVER READY")
+            ) {
               console.log("found READY");
               resolve();
             }
-            setTimeout(resolve, 5000);
           },
         }),
       );

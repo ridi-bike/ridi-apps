@@ -18,6 +18,15 @@ type RidiRouterOutput = {
     | RidiRouterOk;
 };
 
+type HandePlanNotificationResult = {
+  result: "ok";
+} | {
+  result: "wait";
+  seconds: number;
+} | {
+  result: "error";
+};
+
 export class PlanProcessor {
   constructor(
     private readonly db: ReturnType<typeof getDb>,
@@ -30,13 +39,17 @@ export class PlanProcessor {
   ) {
   }
 
-  async handlePlanNotification(planId: string) {
+  async handlePlanNotification(
+    planId: string,
+  ): Promise<HandePlanNotificationResult> {
     const planRecord = await this.pgQueries.planGetById(this.pgClient, {
       id: planId,
     });
     if (!planRecord) {
       this.logger.error("Plan record not found from id", { planId });
-      return;
+      return {
+        "result": "error",
+      };
     }
 
     const regionsFrom = await this.pgQueries.regionFindFromCoords(
@@ -64,7 +77,9 @@ export class PlanProcessor {
         id: planId,
         state: "error",
       });
-      return;
+      return {
+        "result": "error",
+      };
     }
 
     await this.pgQueries.planSetState(this.pgClient, {
@@ -73,6 +88,10 @@ export class PlanProcessor {
     });
     if (!this.routerStore.isRegionRunning(region.region)) {
       await this.routerStore.startRegion(region.region);
+      return {
+        "result": "wait",
+        "seconds": 10,
+      };
     }
 
     const { code, stderr, stdout } = await this.denoCommand.execute(
@@ -100,7 +119,9 @@ export class PlanProcessor {
         id: planId,
         state: "error",
       });
-      return;
+      return {
+        "result": "error",
+      };
     }
 
     this.logger.debug("router output", { planId, stdout, stderr });
@@ -116,22 +137,28 @@ export class PlanProcessor {
         id: planId,
         state: "error",
       });
-      return;
-    } else {
-      const okRoutes = (routes.result as RidiRouterOk).Ok;
-      for (const route of okRoutes) {
-        await this.pgQueries.routeInsert(this.pgClient, {
-          planId,
-          name: "some name",
-          userId: planRecord.userId,
-          latLonArray: route.coords,
-        });
-      }
+      return {
+        "result": "error",
+      };
+    }
 
-      await this.pgQueries.planSetState(this.pgClient, {
-        id: planId,
-        state: "done",
+    const okRoutes = (routes.result as RidiRouterOk).Ok;
+    for (const route of okRoutes) {
+      await this.pgQueries.routeInsert(this.pgClient, {
+        planId,
+        name: "some name",
+        userId: planRecord.userId,
+        latLonArray: route.coords,
       });
     }
+
+    await this.pgQueries.planSetState(this.pgClient, {
+      id: planId,
+      state: "done",
+    });
+
+    return {
+      "result": "ok",
+    };
   }
 }
