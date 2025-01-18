@@ -12,7 +12,6 @@ import {
   string,
   union,
 } from "valibot";
-import { BaseEnvVariables } from "./env.ts";
 
 const mapDataRecordSchema = object({
   id: pipe(number(), integer()),
@@ -40,6 +39,7 @@ const mapDataRecordSchema = object({
   pbf_size: nullable(pipe(number(), integer())),
   pbf_downloaded_size: nullable(pipe(number(), integer())),
   cache_size: nullable(pipe(number(), integer())),
+  startup_time_s: nullable(pipe(number(), integer())),
 });
 export type MapDataRecord = InferInput<typeof mapDataRecordSchema>;
 
@@ -151,6 +151,14 @@ export function initDb(dbLocation: string) {
 			`).run(),
     7,
   );
+  migrate(
+    (db) =>
+      db.prepare(`
+				alter table map_data
+					add column startup_time_s integer;
+			`).run(),
+    8,
+  );
 
   ridiLogger.debug("Migrations done");
 }
@@ -162,7 +170,7 @@ function dbIsOk(db: Database | null): asserts db is Database {
 export function getDb() {
   dbIsOk(db);
 
-  const ridiLogger = RidiLogger.get(new BaseEnvVariables());
+  const ridiLogger = RidiLogger.get();
 
   return {
     handlers: {
@@ -291,6 +299,15 @@ export function getDb() {
 					update map_data
 					set
 						cache_size = ${size},
+						updated_at = ${new Date().getTime()}
+					where id = ${id}`;
+      },
+      updateRecordStartupTime(id: number, timeSec: number) {
+        dbIsOk(db);
+        db.sql`
+					update map_data
+					set
+						startup_time_s = ${timeSec},
 						updated_at = ${new Date().getTime()}
 					where id = ${id}`;
       },

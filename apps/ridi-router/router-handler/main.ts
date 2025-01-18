@@ -9,7 +9,7 @@ import {
   RidiLogger,
 } from "@ridi-router/lib";
 import { getPgClient } from "./pg-client.ts";
-import { Supabase } from "./supabase.ts";
+// import { Supabase } from "./supabase.ts";
 import { PlanProcessor } from "./plan-processor.ts";
 import { RouterStore } from "./router-store.ts";
 
@@ -26,7 +26,7 @@ const runner = new Runner(
   db,
   getPgClient(),
   pg,
-  new Supabase(env, ridiLogger),
+  // new Supabase(env, ridiLogger),
   new PlanProcessor(
     db,
     ridiLogger,
