@@ -2,9 +2,22 @@ import type postgres from "postgres";
 import {
   archiveMessage,
   deleteMessage,
-  pollMessages,
+  readMessagesWithLongPoll,
   sendMessage,
+  updateVisibilityTimeout,
 } from "./messaging_sql.ts";
+
+type MessageHandler<TName extends keyof Messages> = (
+  messageId: string,
+  message: Messages[TName],
+  actions: {
+    deleteMessage: () => Promise<void>;
+    archiveMessage: () => Promise<void>;
+    setVisibilityTimeout: (
+      visibilityTimeoutSecs: number,
+    ) => Promise<void> | void;
+  },
+) => Promise<void>;
 
 type Messages = {
   "net-addr-activity": { netAddr: string };
@@ -12,10 +25,17 @@ type Messages = {
   "new-plan": { planId: string };
 };
 
+interface Logger {
+  info(message: string, properties?: Record<string, unknown>): void;
+  error(message: string, properties?: Record<string, unknown>): void;
+}
+
 export class Messaging {
-  private readonly pollingIntervals: number[] = [];
+  private stopped = false;
+
   constructor(
     readonly db: ReturnType<typeof postgres>,
+    private readonly logger: Logger,
   ) {
   }
 
@@ -28,39 +48,64 @@ export class Messaging {
 
   listen<TName extends keyof Messages>(
     queueName: TName,
-    visibilityTimeoutSeconds: number,
-    archive: boolean,
-    listener: (messageId: number, message: Messages[TName]) => Promise<void>,
+    messageHandler: MessageHandler<TName>,
   ) {
-    this.pollingIntervals.push(setInterval(async () => {
-      let messages: Awaited<ReturnType<typeof pollMessages>> | null = null;
-      do {
-        messages = await pollMessages(this.db, {
-          queueName,
-          visibilityTimeoutSeconds,
-          qty: 100,
-        });
-        messages.forEach(async (message) => {
-          await listener(message.msgId, message.message);
-          if (archive) {
-            await archiveMessage(this.db, {
-              queueName,
-              messageId: message.msgId,
-            });
-          } else {
+    this.runListener(queueName, messageHandler).catch((error) => {
+      this.stopped = true;
+      this.logger.error("Error in message listener", { error });
+    });
+  }
+  private async runListener<TName extends keyof Messages>(
+    queueName: TName,
+    messageHandler: MessageHandler<TName>,
+  ) {
+    while (!this.stopped) {
+      const messages = await readMessagesWithLongPoll(this.db, {
+        queueName,
+        visibilityTimeoutSeconds: 5,
+        qty: 100,
+        internalPollMs: 200,
+        maxPollSeconds: 60,
+      });
+      messages.forEach((message) =>
+        messageHandler(message.msgId, message.message, {
+          deleteMessage: async () => {
+            this.logger.info("Message delete called", { message });
             await deleteMessage(this.db, {
               queueName,
               messageId: message.msgId,
             });
-          }
-        });
-      } while (messages.length > 0);
-    }, 1000));
+          },
+          archiveMessage: async () => {
+            this.logger.info("Message archive called", { message });
+            await archiveMessage(this.db, {
+              queueName,
+              messageId: message.msgId,
+            });
+          },
+          setVisibilityTimeout: async (vt) => {
+            this.logger.info("Message visisvility timeout update called", {
+              message,
+            });
+            await updateVisibilityTimeout(this.db, {
+              queueName,
+              messageId: message.msgId,
+              visibilityTimeoutSeconds: vt,
+            });
+          },
+        }).then(() => this.logger.info("Message processed", { message })).catch(
+          (error) =>
+            this.logger.error("Failed to process message", { message, error }),
+        )
+      );
+    }
   }
 
-  close() {
-    for (const interval of this.pollingIntervals) {
-      clearInterval(interval);
-    }
+  isRunning() {
+    return !this.stopped;
+  }
+
+  stop() {
+    this.stopped = true;
   }
 }

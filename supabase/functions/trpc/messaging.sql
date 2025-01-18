@@ -4,9 +4,9 @@ SELECT * from pgmq.send(
   msg        => sqlc.arg(message)::jsonb
 );
 
--- name: PollMessages :many
+-- name: ReadMessages :many
 SELECT
-    msg_id::integer,
+    msg_id::bigint,
     read_ct::integer,
     enqueued_at::timestamp,
     vt::timestamp as visibility_timeout,
@@ -20,23 +20,51 @@ FROM pgmq.read(
 -- name: ArchiveMessage :exec
 SELECT pgmq.archive(
   queue_name => sqlc.arg(queue_name)::text,
-  msg_id     => sqlc.arg(message_id)::integer
+  msg_id     => sqlc.arg(message_id)::bigint
 );
 
 -- name: ArchiveMessages :exec
 SELECT pgmq.archive(
   queue_name => sqlc.arg(queue_name)::text,
-  msg_ids    => sqlc.arg(message_ids)::integer[]
+  msg_ids    => sqlc.arg(message_ids)::bigint[]
 );
 
 -- name: DeleteMessage :exec
 SELECT pgmq.delete(
   queue_name => sqlc.arg(queue_name)::text,
-  msg_id     => sqlc.arg(message_id)::integer
+  msg_id     => sqlc.arg(message_id)::bigint
 );
 
 -- name: DeleteMessages :exec
 SELECT pgmq.delete(
   queue_name => sqlc.arg(queue_name)::text,
-  msg_ids    => sqlc.arg(message_id)::integer[]
+  msg_ids    => sqlc.arg(message_id)::bigint[]
+);
+
+-- name: ReadMessagesWithLongPoll :many
+SELECT
+    msg_id::bigint,
+    read_ct::integer,
+    enqueued_at::timestamp,
+    vt::timestamp as visibility_timeout,
+    message:: jsonb
+FROM pgmq.read_with_poll(
+  sqlc.arg(queue_name)::text,
+  sqlc.arg(visibility_timeout_seconds)::integer,
+  sqlc.arg(qty)::integer,
+  sqlc.arg(max_poll_seconds)::integer,
+  sqlc.arg(internal_poll_ms)::integer
+);
+
+-- name: UpdateVisibilityTimeout :one
+SELECT
+    msg_id::bigint,
+    read_ct::integer,
+    enqueued_at::timestamp,
+    vt::timestamp as visibility_timeout,
+    message:: jsonb
+FROM pgmq.set_vt(
+  sqlc.arg(queue_name)::text,
+  sqlc.arg(message_id)::bigint,
+  sqlc.arg(visibility_timeout_seconds)::integer
 );

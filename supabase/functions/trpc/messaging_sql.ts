@@ -17,9 +17,9 @@ export async function sendMessage(sql: Sql, args: SendMessageArgs): Promise<void
     await sql.unsafe(sendMessageQuery, [args.queueName, args.message]);
 }
 
-export const pollMessagesQuery = `-- name: PollMessages :many
+export const readMessagesQuery = `-- name: ReadMessages :many
 SELECT
-    msg_id::integer,
+    msg_id::bigint,
     read_ct::integer,
     enqueued_at::timestamp,
     vt::timestamp as visibility_timeout,
@@ -30,22 +30,22 @@ FROM pgmq.read(
   qty        => $3::integer
 )`;
 
-export interface PollMessagesArgs {
+export interface ReadMessagesArgs {
     queueName: string;
     visibilityTimeoutSeconds: number;
     qty: number;
 }
 
-export interface PollMessagesRow {
-    msgId: number;
+export interface ReadMessagesRow {
+    msgId: string;
     readCt: number;
     enqueuedAt: Date;
     visibilityTimeout: Date;
     message: any;
 }
 
-export async function pollMessages(sql: Sql, args: PollMessagesArgs): Promise<PollMessagesRow[]> {
-    return (await sql.unsafe(pollMessagesQuery, [args.queueName, args.visibilityTimeoutSeconds, args.qty]).values()).map(row => ({
+export async function readMessages(sql: Sql, args: ReadMessagesArgs): Promise<ReadMessagesRow[]> {
+    return (await sql.unsafe(readMessagesQuery, [args.queueName, args.visibilityTimeoutSeconds, args.qty]).values()).map(row => ({
         msgId: row[0],
         readCt: row[1],
         enqueuedAt: row[2],
@@ -57,12 +57,12 @@ export async function pollMessages(sql: Sql, args: PollMessagesArgs): Promise<Po
 export const archiveMessageQuery = `-- name: ArchiveMessage :exec
 SELECT pgmq.archive(
   queue_name => $1::text,
-  msg_id     => $2::integer
+  msg_id     => $2::bigint
 )`;
 
 export interface ArchiveMessageArgs {
     queueName: string;
-    messageId: number;
+    messageId: string;
 }
 
 export interface ArchiveMessageRow {
@@ -76,12 +76,12 @@ export async function archiveMessage(sql: Sql, args: ArchiveMessageArgs): Promis
 export const archiveMessagesQuery = `-- name: ArchiveMessages :exec
 SELECT pgmq.archive(
   queue_name => $1::text,
-  msg_ids    => $2::integer[]
+  msg_ids    => $2::bigint[]
 )`;
 
 export interface ArchiveMessagesArgs {
     queueName: string;
-    messageIds: number[];
+    messageIds: string[];
 }
 
 export interface ArchiveMessagesRow {
@@ -95,12 +95,12 @@ export async function archiveMessages(sql: Sql, args: ArchiveMessagesArgs): Prom
 export const deleteMessageQuery = `-- name: DeleteMessage :exec
 SELECT pgmq.delete(
   queue_name => $1::text,
-  msg_id     => $2::integer
+  msg_id     => $2::bigint
 )`;
 
 export interface DeleteMessageArgs {
     queueName: string;
-    messageId: number;
+    messageId: string;
 }
 
 export interface DeleteMessageRow {
@@ -114,12 +114,12 @@ export async function deleteMessage(sql: Sql, args: DeleteMessageArgs): Promise<
 export const deleteMessagesQuery = `-- name: DeleteMessages :exec
 SELECT pgmq.delete(
   queue_name => $1::text,
-  msg_ids    => $2::integer[]
+  msg_ids    => $2::bigint[]
 )`;
 
 export interface DeleteMessagesArgs {
     queueName: string;
-    messageId: number[];
+    messageId: string[];
 }
 
 export interface DeleteMessagesRow {
@@ -128,5 +128,91 @@ export interface DeleteMessagesRow {
 
 export async function deleteMessages(sql: Sql, args: DeleteMessagesArgs): Promise<void> {
     await sql.unsafe(deleteMessagesQuery, [args.queueName, args.messageId]);
+}
+
+export const readMessagesWithLongPollQuery = `-- name: ReadMessagesWithLongPoll :many
+SELECT
+    msg_id::bigint,
+    read_ct::integer,
+    enqueued_at::timestamp,
+    vt::timestamp as visibility_timeout,
+    message:: jsonb
+FROM pgmq.read_with_poll(
+  $1::text,
+  $2::integer,
+  $3::integer,
+  $4::integer,
+  $5::integer
+)`;
+
+export interface ReadMessagesWithLongPollArgs {
+    queueName: string;
+    visibilityTimeoutSeconds: number;
+    qty: number;
+    maxPollSeconds: number;
+    internalPollMs: number;
+}
+
+export interface ReadMessagesWithLongPollRow {
+    msgId: string;
+    readCt: number;
+    enqueuedAt: Date;
+    visibilityTimeout: Date;
+    message: any;
+}
+
+export async function readMessagesWithLongPoll(sql: Sql, args: ReadMessagesWithLongPollArgs): Promise<ReadMessagesWithLongPollRow[]> {
+    return (await sql.unsafe(readMessagesWithLongPollQuery, [args.queueName, args.visibilityTimeoutSeconds, args.qty, args.maxPollSeconds, args.internalPollMs]).values()).map(row => ({
+        msgId: row[0],
+        readCt: row[1],
+        enqueuedAt: row[2],
+        visibilityTimeout: row[3],
+        message: row[4]
+    }));
+}
+
+export const updateVisibilityTimeoutQuery = `-- name: UpdateVisibilityTimeout :one
+SELECT
+    msg_id::bigint,
+    read_ct::integer,
+    enqueued_at::timestamp,
+    vt::timestamp as visibility_timeout,
+    message:: jsonb
+FROM pgmq.set_vt(
+  $1::text,
+  $2::bigint,
+  $3::integer
+)`;
+
+export interface UpdateVisibilityTimeoutArgs {
+    queueName: string;
+    messageId: string;
+    visibilityTimeoutSeconds: number;
+}
+
+export interface UpdateVisibilityTimeoutRow {
+    msgId: string;
+    readCt: number;
+    enqueuedAt: Date;
+    visibilityTimeout: Date;
+    message: any;
+}
+
+export async function updateVisibilityTimeout(sql: Sql, args: UpdateVisibilityTimeoutArgs): Promise<UpdateVisibilityTimeoutRow | null> {
+    const rows = await sql.unsafe(updateVisibilityTimeoutQuery, [args.queueName, args.messageId, args.visibilityTimeoutSeconds]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        msgId: row[0],
+        readCt: row[1],
+        enqueuedAt: row[2],
+        visibilityTimeout: row[3],
+        message: row[4]
+    };
 }
 
