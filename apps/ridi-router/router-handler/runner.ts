@@ -1,7 +1,8 @@
 import { getDb, pg, RidiLogger } from "@ridi-router/lib";
+import { Messaging } from "../../../supabase/functions/trpc/messaging.ts";
 import { EnvVariables } from "./env-variables.ts";
 import { PgClient } from "./pg-client.ts";
-import { Supabase } from "./supabase.ts";
+// import { Supabase } from "./supabase.ts";
 import { PlanProcessor } from "./plan-processor.ts";
 
 export class Runner {
@@ -11,7 +12,8 @@ export class Runner {
     private readonly db: ReturnType<typeof getDb>,
     private readonly pgClient: PgClient,
     private readonly pgQueries: typeof pg,
-    private readonly supabase: Supabase,
+    // private readonly supabase: Supabase,
+    private readonly messaging: Messaging,
     private readonly planProcessor: PlanProcessor,
   ) {
   }
@@ -72,27 +74,31 @@ export class Runner {
       }
     }
 
-    const unsubscribe = await this.supabase.listen(async (planId) => {
-      this.logger.debug("Received plan event", { planId });
-      await this.planProcessor.handlePlanNotification(planId);
-    });
-
-    this.processExistingPlans(); // TODO not awaiting on purpose
+    // const unsubscribe = await this.supabase.listen(async (planId) => {
+    //   this.logger.debug("Received plan event", { planId });
+    //   await this.planProcessor.handlePlanNotification(planId);
+    // });
+    this.messaging.listen(
+      "new-plan",
+      (messageId, message, { deleteMessage, setVisibilityTimeout }) => {
+        // TODO handle message
+      },
+    );
 
     globalThis.addEventListener("unload", () => {
-      unsubscribe();
+      this.messaging.stop();
     });
 
     Deno.serve(
       { port: Number(this.env.port), hostname: "0.0.0.0" },
       async (_req) => {
         const regionCount = await this.pgQueries.regionGetCount(this.pgClient);
-        if (this.supabase.isListening() && regionCount?.count) {
+        if (this.messaging.isRunning() && regionCount?.count) {
           return new Response("Hello, world");
         }
         return new Response(
           JSON.stringify({
-            listening: this.supabase.isListening(),
+            messagingRunning: this.messaging.isRunning(),
             regionCount: regionCount?.count,
           }),
           {
@@ -101,14 +107,5 @@ export class Runner {
         );
       },
     );
-  }
-
-  async processExistingPlans() {
-    const plans = await this.pgQueries.plansGetNew(this.pgClient);
-    for (const plan of plans) {
-      this.logger.debug("Processing plan", { planId: plan.id });
-
-      await this.planProcessor.handlePlanNotification(plan.id);
-    }
   }
 }
