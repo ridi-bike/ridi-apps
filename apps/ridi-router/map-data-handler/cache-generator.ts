@@ -53,7 +53,7 @@ export class CacheGenerator {
       .denoCommand.execute(
         this.env.routerBin,
         [
-          "cache",
+          "prep-cache",
           "--input",
           mapDataRecord.pbf_location,
           "--cache-dir",
@@ -73,7 +73,7 @@ export class CacheGenerator {
 
     const serverStartMoment = Date.now();
     const process = new Deno.Command(this.env.routerBin, {
-      stderr: "piped",
+      stdout: "piped",
       args: [
         "start-server",
         "--input",
@@ -84,20 +84,23 @@ export class CacheGenerator {
     }).spawn();
 
     await new Promise<void>((resolve) => {
-      process.stderr.pipeTo(
-        new WritableStream({
-          write: (chunk, _controller) => {
-            const text = new TextDecoder().decode(chunk);
-            if (
-              text.split(";").find((t) => t === "RIDI_ROUTER SERVER READY")
-            ) {
-              console.log("found READY");
-              resolve();
-            }
-          },
-        }),
+      const writableStream = new WritableStream({
+        write: (chunk, _controller) => {
+          const text = new TextDecoder().decode(chunk);
+          if (
+            text.split(";").find((t) => t === "RIDI_ROUTER SERVER READY")
+          ) {
+            resolve();
+          }
+        },
+      });
+      process.stdout.pipeTo(
+        writableStream,
       );
     });
+
+    process.kill();
+
     const serverStartTime = Math.ceil((Date.now() - serverStartMoment) / 1000);
 
     this.db.mapData.updateRecordCacheSize(mapDataRecord.id, cacheSize);
