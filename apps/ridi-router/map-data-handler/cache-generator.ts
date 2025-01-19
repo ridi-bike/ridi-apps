@@ -61,8 +61,6 @@ export class CacheGenerator {
         ],
       );
 
-    clearInterval(beat);
-
     this.logger.debug("Cache generation process output", {
       id: mapDataRecord.id,
       stdout: stdoutOutput,
@@ -107,6 +105,8 @@ export class CacheGenerator {
       mapDataRecord.id,
       serverStartTime,
     );
+
+    clearInterval(beat);
 
     await this.kml.processKml(mapDataRecord);
 

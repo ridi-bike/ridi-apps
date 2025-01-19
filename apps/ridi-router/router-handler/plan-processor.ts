@@ -1,4 +1,4 @@
-import { RouterStore } from "./router-store.ts";
+import { RouterServerManager } from "./router-store.ts";
 import { DenoCommand, getDb, pg, RidiLogger } from "@ridi-router/lib";
 import { PgClient } from "./pg-client.ts";
 import { EnvVariables } from "./env-variables.ts";
@@ -33,7 +33,7 @@ export class PlanProcessor {
     private readonly logger: RidiLogger,
     private readonly pgClient: PgClient,
     private readonly pgQueries: typeof pg,
-    private readonly routerStore: RouterStore,
+    private readonly routerStore: RouterServerManager,
     private readonly denoCommand: DenoCommand,
     private readonly env: EnvVariables,
   ) {
@@ -48,7 +48,7 @@ export class PlanProcessor {
     if (!planRecord) {
       this.logger.error("Plan record not found from id", { planId });
       return {
-        "result": "error",
+        result: "error",
       };
     }
 
@@ -78,7 +78,7 @@ export class PlanProcessor {
         state: "error",
       });
       return {
-        "result": "error",
+        result: "error",
       };
     }
 
@@ -89,10 +89,12 @@ export class PlanProcessor {
     if (!this.routerStore.isRegionRunning(region.region)) {
       await this.routerStore.startRegion(region.region);
       return {
-        "result": "wait",
-        "seconds": 10,
+        result: "wait",
+        seconds: 1,
       };
     }
+
+    this.routerStore.startRegionReq(region.region, planId);
 
     const { code, stderr, stdout } = await this.denoCommand.execute(
       this.env.routerBin,
@@ -107,6 +109,8 @@ export class PlanProcessor {
       ],
     );
 
+    this.routerStore.finishRegionReq(region.region, planId);
+
     if (code !== 0) {
       this.logger.error("Error returned from router when generating routes", {
         region,
@@ -120,12 +124,14 @@ export class PlanProcessor {
         state: "error",
       });
       return {
-        "result": "error",
+        result: "error",
       };
     }
 
     this.logger.debug("router output", { planId, stdout, stderr });
     const routes = JSON.parse(stdout) as RidiRouterOutput;
+
+    console.table(routes);
 
     if (typeof (routes.result as RidiRouterErr).Err === "string") {
       this.logger.error("Error returned from router when generating routes", {
@@ -138,7 +144,7 @@ export class PlanProcessor {
         state: "error",
       });
       return {
-        "result": "error",
+        result: "error",
       };
     }
 
@@ -158,7 +164,7 @@ export class PlanProcessor {
     });
 
     return {
-      "result": "ok",
+      result: "ok",
     };
   }
 }

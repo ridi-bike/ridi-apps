@@ -11,7 +11,7 @@ import {
 import { getPgClient } from "./pg-client.ts";
 // import { Supabase } from "./supabase.ts";
 import { PlanProcessor } from "./plan-processor.ts";
-import { RouterStore } from "./router-store.ts";
+import { RouterServerManager } from "./router-store.ts";
 
 const env = new EnvVariables();
 await RidiLogger.init(env);
@@ -32,7 +32,7 @@ const runner = new Runner(
     ridiLogger,
     getPgClient(),
     pg,
-    new RouterStore(env, db, ridiLogger),
+    new RouterServerManager(env, db, ridiLogger),
     new DenoCommand(),
     env,
   ),

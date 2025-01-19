@@ -1,17 +1,140 @@
 import { EnvVariables } from "./env-variables.ts";
 import { getDb, RidiLogger } from "@ridi-router/lib";
 
-export class RouterStore {
-  private routers: Record<string, Deno.ChildProcess> = {};
+type RegionReq = {
+  reqId: string;
+  createdAt: number;
+};
+
+export class RouterServerManager {
+  private regionsRunning: Record<string, Deno.ChildProcess> = {};
+  private regionsStarting: Set<string> = new Set();
+  private currentFreeMemoryMb: number;
+  private regionRequestsRunning: Record<string, RegionReq[]> = {};
+  private regionRequestsWaiting: Record<string, RegionReq[]> = {};
+  private regions: ReturnType<
+    ReturnType<typeof getDb>["mapData"]["getRecordsAllCurrent"]
+  >;
   constructor(
     private readonly env: EnvVariables,
     private readonly db: ReturnType<typeof getDb>,
     private readonly logger: RidiLogger,
   ) {
+    this.currentFreeMemoryMb = env.serverAvailMemoryMb;
+    this.regions = db.mapData.getRecordsAllCurrent();
+
+    setInterval(() =>
+      this.manageRouterServers().catch((error) => {
+        logger.error(
+          "Error while running Router Server Management, unrecoverable",
+          { error },
+        );
+      }), 500);
+  }
+
+  private async manageRouterServers() {
+    const neededRegion: string | undefined = Object
+      .entries(this.regionRequestsWaiting)
+      .filter((w) => !!w[1].length)
+      .sort((r1, r2) => r1[1].at(-1)!.createdAt - r2[1].at(-1)!.createdAt)
+      .map((w) => w[0])
+      .filter((r) => !this.regionsStarting.has(r))[0];
+    const neededRegionData = this.regions.find((r) =>
+      r.region === neededRegion
+    );
+    if (!neededRegionData) {
+      throw new Error("missing region data");
+    }
+    const neededMemory = Math.ceil(
+      (neededRegionData.cache_size || 0) * 2 / 1024 / 1024,
+    );
+
+    while (neededMemory > this.currentFreeMemoryMb) {
+      const canStopRegions = Object
+        .entries(this.regionsRunning)
+        .filter((r) =>
+          !this.regionRequestsRunning[r[0]]?.length &&
+          !this.regionRequestsWaiting[r[0]]?.length
+        ).map((r) => ({
+          region: r[0],
+          regionMemory: Math.ceil(
+            (this.regions.find((rd) => rd.region === r[0])!.cache_size || 0) /
+              1024 / 1024,
+          ),
+        })).sort((r1, r2) => r1.regionMemory - r2.regionMemory);
+
+      const regionToStop = canStopRegions[0];
+      if (!regionToStop) {
+        break;
+      }
+
+      this.stopRegion(regionToStop.region);
+    }
+
+    if (neededMemory <= this.currentFreeMemoryMb) {
+      await this.startRegion(neededRegion).catch((error) =>
+        this.logger.error("Unable to start region", { error })
+      );
+    } else {
+      this.logger.info("All routers busy, can't stop and free memory", {
+        reqWaiting: this.regionRequestsWaiting,
+        reqRunning: this.regionRequestsRunning,
+        regionsRunning: this.regionsRunning,
+      });
+    }
+  }
+
+  registerRegionReq(region: string, reqId: string) {
+    if (!this.regionRequestsWaiting[region]) {
+      this.regionRequestsWaiting[region] = [];
+    }
+
+    if (
+      !this.regionRequestsWaiting[region].find((req) => req.reqId === reqId)
+    ) {
+      this.regionRequestsWaiting[region].push({
+        reqId,
+        createdAt: Date.now(),
+      });
+    }
+  }
+
+  startRegionReq(region: string, reqId: string): void {
+    if (!this.regionRequestsRunning[region]) {
+      this.regionRequestsRunning[region] = [];
+    }
+    const waitingReq = this.regionRequestsWaiting[region].find((req) =>
+      req.reqId === reqId
+    );
+    if (
+      !this.regionRequestsRunning[region].find((req) => req.reqId === reqId)
+    ) {
+      this.regionRequestsRunning[region].push({
+        reqId,
+        createdAt: waitingReq?.createdAt || Date.now(),
+      });
+    }
+    if (waitingReq) {
+      this.regionRequestsWaiting[region] = this.regionRequestsWaiting[region]
+        .filter(
+          (req) => req.reqId !== waitingReq.reqId,
+        );
+    }
+  }
+
+  finishRegionReq(region: string, reqId: string): void {
+    if (!this.regionRequestsRunning[region]) {
+      this.logger.error("Running Region set missing, unrecoverable", {
+        regionRequests: this.regionRequestsRunning,
+      });
+      throw new Error("Unrecoverable");
+    }
+    this.regionRequestsRunning[region] = this.regionRequestsRunning[region]
+      .filter((req) => req.reqId !== reqId);
   }
 
   async startRegion(region: string) {
-    if (this.routers[region]) {
+    if (this.regionsRunning[region]) {
       this.logger.error(
         `region "{region}" already running`,
         { region },
@@ -19,9 +142,9 @@ export class RouterStore {
       return;
     }
 
-    const regionData = this.db.mapData.getRecordCurrent(region);
+    const mapData = this.db.mapData.getRecordCurrent(region);
 
-    if (!regionData) {
+    if (!mapData) {
       this.logger.error(
         `missing prepared 'current' record for region "{region}"`,
         { region },
@@ -29,20 +152,24 @@ export class RouterStore {
       return;
     }
 
+    this.regionsStarting.add(region);
+
+    const cacheSizeMb = (mapData.cache_size || 0) / 1024 / 1024;
+
+    this.currentFreeMemoryMb -= cacheSizeMb + cacheSizeMb; // double the size for startup as it needs to read and parse the cache to load in memory
+
     const process = new Deno.Command(this.env.routerBin, {
       stderr: "piped",
       args: [
         "start-server",
         "--input",
-        regionData.pbf_location,
+        mapData.pbf_location,
         "--cache-dir",
-        regionData.cache_location,
+        mapData.cache_location,
         "--socket-name",
         region,
       ],
     }).spawn();
-
-    this.routers[region] = process;
 
     await new Promise<void>((resolve) => {
       process.stderr.pipeTo(
@@ -59,10 +186,14 @@ export class RouterStore {
         }),
       );
     });
+
+    this.currentFreeMemoryMb += cacheSizeMb; // when server started, leave only running memory
+    this.regionsRunning[region] = process;
+    this.regionsStarting.delete(region);
   }
 
   stopRegion(region: string) {
-    const process = this.routers[region];
+    const process = this.regionsRunning[region];
     if (!process) {
       this.logger.error(
         `region "{region}" is not running`,
@@ -71,9 +202,15 @@ export class RouterStore {
       return;
     }
     process.kill();
+
+    delete this.regionsRunning[region];
+    this.currentFreeMemoryMb += Math.ceil(
+      (this.regions.find((r) => r.region === region)!.cache_size || 0) / 1024 /
+        1024,
+    );
   }
 
   isRegionRunning(region: string) {
-    return !!this.routers[region];
+    return !!this.regionsRunning[region];
   }
 }
