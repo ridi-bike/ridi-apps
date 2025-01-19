@@ -159,7 +159,7 @@ export class RouterServerManager {
     this.currentFreeMemoryMb -= cacheSizeMb + cacheSizeMb; // double the size for startup as it needs to read and parse the cache to load in memory
 
     const process = new Deno.Command(this.env.routerBin, {
-      stderr: "piped",
+      stdout: "piped",
       args: [
         "start-server",
         "--input",
@@ -172,18 +172,18 @@ export class RouterServerManager {
     }).spawn();
 
     await new Promise<void>((resolve) => {
-      process.stderr.pipeTo(
-        new WritableStream({
-          write: (chunk, _controller) => {
-            const text = new TextDecoder().decode(chunk);
-            if (
-              text.split(";").find((t) => t === "RIDI_ROUTER SERVER READY")
-            ) {
-              console.log("found READY");
-              resolve();
-            }
-          },
-        }),
+      const writableStream = new WritableStream({
+        write: (chunk, _controller) => {
+          const text = new TextDecoder().decode(chunk);
+          if (
+            text.split(";").find((t) => t === "RIDI_ROUTER SERVER READY")
+          ) {
+            resolve();
+          }
+        },
+      });
+      process.stdout.pipeTo(
+        writableStream,
       );
     });
 
