@@ -1,4 +1,4 @@
-import { array, parse, string } from "valibot";
+import { number, parse, string } from "valibot";
 
 import { BaseEnvVariables } from "@ridi-router/lib";
 
@@ -26,5 +26,10 @@ export class EnvVariables extends BaseEnvVariables {
   readonly supabaseSecretKey = parse(
     string("SUPABASE_SECRET_KEY env variable"),
     Deno.env.get("SUPABASE_SECRET_KEY"),
+  );
+
+  readonly serverAvailMemoryMb = parse(
+    number("SERVER_AVAIL_MEMORY env variable"),
+    Deno.env.get("SERVER_AVAIL_MEMORY"),
   );
 }
