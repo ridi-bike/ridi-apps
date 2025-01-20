@@ -17,7 +17,9 @@
     "jsr:@std/path@0.221": "0.221.0",
     "jsr:@std/testing@*": "1.0.5",
     "jsr:@std/yaml@1.0.5": "1.0.5",
+    "jsr:@supabase/functions-js@*": "2.4.3",
     "jsr:@supabase/supabase-js@*": "2.45.4",
+    "jsr:@valibot/valibot@*": "0.42.1",
     "jsr:@valibot/valibot@0.42.1": "0.42.1",
     "npm:@supabase/auth-js@2.65.0": "2.65.0",
     "npm:@supabase/functions-js@2.4.1": "2.4.1",
@@ -26,10 +28,13 @@
     "npm:@supabase/realtime-js@2.10.2": "2.10.2",
     "npm:@supabase/storage-js@2.7.0": "2.7.0",
     "npm:@tmcw/togeojson@*": "6.0.0_@types+geojson@7946.0.14_@xmldom+xmldom@0.9.5",
+    "npm:@trpc/server@*": "10.45.2",
     "npm:@types/node@*": "22.5.4",
     "npm:flat@*": "6.0.1",
     "npm:p-queue@8": "8.0.1",
     "npm:postgres@*": "3.4.5",
+    "npm:remeda@*": "2.16.0",
+    "npm:superjson@*": "2.2.1",
     "npm:xmldom@*": "0.6.0"
   },
   "jsr": {
@@ -108,11 +113,14 @@
     "@std/yaml@1.0.5": {
       "integrity": "71ba3d334305ee2149391931508b2c293a8490f94a337eef3a09cade1a2a2742"
     },
+    "@supabase/functions-js@2.4.3": {
+      "integrity": "010834c9e7d2996b4be8e4004a15ed8f42b326490e4b354683f9c191353b76cc"
+    },
     "@supabase/supabase-js@2.45.4": {
       "integrity": "8437784b8631665a28fadff4521003a119e5702010ccb31e68d84a6d29379e18",
       "dependencies": [
         "npm:@supabase/auth-js",
-        "npm:@supabase/functions-js",
+        "npm:@supabase/functions-js@2.4.1",
         "npm:@supabase/node-fetch",
         "npm:@supabase/postgrest-js",
         "npm:@supabase/realtime-js",
@@ -210,6 +218,9 @@
         "@xmldom/xmldom"
       ]
     },
+    "@trpc/server@10.45.2": {
+      "integrity": "sha512-wOrSThNNE4HUnuhJG6PfDRp4L2009KDVxsd+2VYH8ro6o/7/jwYZ8Uu5j+VaW+mOmc8EHerHzGcdbGNQSAUPgg=="
+    },
     "@types/geojson@7946.0.14": {
       "integrity": "sha512-WCfD5Ht3ZesJUsONdhvm84dmzWOiOzOAqOncN0++w0lBw1o8OuDNJF2McvvCef/yBqb/HYRahp1BYtODFQ8bRg=="
     },
@@ -240,11 +251,20 @@
     "commander@2.20.3": {
       "integrity": "sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ=="
     },
+    "copy-anything@3.0.5": {
+      "integrity": "sha512-yCEafptTtb4bk7GLEQoM8KVJpxAfdBJYaXyzQEgQQQgYrZiDp8SJmGKlYza6CYjEDNstAdNdKA3UuoULlEbS6w==",
+      "dependencies": [
+        "is-what"
+      ]
+    },
     "eventemitter3@5.0.1": {
       "integrity": "sha512-GWkBvjiSZK87ELrYOSESUYeVIc9mvLLf/nXalMOS5dYrgZq9o5OVkbZAVM06CVxYsCwH9BDZFPlQTlPA1j4ahA=="
     },
     "flat@6.0.1": {
       "integrity": "sha512-/3FfIa8mbrg3xE7+wAhWeV+bd7L2Mof+xtZb5dRDKZ+wDvYJK4WDYeIOuOhre5Yv5aQObZrlbRmk3RTSiuQBtw=="
+    },
+    "is-what@4.1.16": {
+      "integrity": "sha512-ZhMwEosbFJkA0YhFnNDgTM4ZxDRsS6HqTo7qsZM08fehyRYIYa0yHu5R6mgo1n/8MgaPBXiPimPD77baVFYg+A=="
     },
     "p-queue@8.0.1": {
       "integrity": "sha512-NXzu9aQJTAzbBqOt2hwsR63ea7yvxJc0PwN/zobNAudYfb1B7R08SzB4TsLeSbUCuG467NhnoT0oO6w1qRO+BA==",
@@ -263,6 +283,12 @@
       "integrity": "sha512-vYl3iOX+4CKUWuxGi9Ukhie6fsqXqS9FE2Zaic4tNFD2N2QQaXOMFbuKK4QmDHC0JO6B1Zp41J0LpT0oR68amQ==",
       "dependencies": [
         "safe-buffer"
+      ]
+    },
+    "remeda@2.16.0": {
+      "integrity": "sha512-HOymkGg58HW4LT8MBEabQEdW76YsqcRNNFPXPrOrnYm+/9Pmk0b9fm8PKgQxoRPa6WDLnRM/LxTXkHdXf9Ab0w==",
+      "dependencies": [
+        "type-fest"
       ]
     },
     "safe-buffer@5.2.1": {
@@ -287,6 +313,12 @@
     "source-map@0.6.1": {
       "integrity": "sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g=="
     },
+    "superjson@2.2.1": {
+      "integrity": "sha512-8iGv75BYOa0xRJHK5vRLEjE2H/i4lulTjzpUXic3Eg8akftYjkmQDa8JARQ42rlczXyFR3IeRoeFCc7RxHsYZA==",
+      "dependencies": [
+        "copy-anything"
+      ]
+    },
     "terser@5.36.0": {
       "integrity": "sha512-IYV9eNMuFAV4THUspIRXkLakHnV6XO7FEdtKjf/mDyrnqUg9LnlOn6/RwRvM9SZjR4GUq8Nk8zj67FzVARr74w==",
       "dependencies": [
@@ -298,6 +330,9 @@
     },
     "tr46@0.0.3": {
       "integrity": "sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw=="
+    },
+    "type-fest@4.26.1": {
+      "integrity": "sha512-yOGpmOAL7CkKe/91I5O3gPICmJNLJ1G4zFYVAsRHg7M64biSnPtRj0WNQt++bRkjYOqjWXrhnUw1utzmVErAdg=="
     },
     "undici-types@6.19.8": {
       "integrity": "sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw=="
@@ -324,6 +359,16 @@
       "deploy-handler": {
         "dependencies": [
           "jsr:@valibot/valibot@0.42.1"
+        ]
+      },
+      "function-trpc": {
+        "dependencies": [
+          "jsr:@supabase/supabase-js@*",
+          "jsr:@valibot/valibot@*",
+          "npm:@trpc/server@*",
+          "npm:postgres@*",
+          "npm:remeda@*",
+          "npm:superjson@*"
         ]
       },
       "lib": {
