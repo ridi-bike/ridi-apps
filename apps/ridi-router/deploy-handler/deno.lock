@@ -89,16 +89,6 @@
           "jsr:@valibot/valibot@0.42.1"
         ]
       },
-      "function-trpc": {
-        "dependencies": [
-          "jsr:@supabase/supabase-js@*",
-          "jsr:@valibot/valibot@*",
-          "npm:@trpc/server@*",
-          "npm:postgres@*",
-          "npm:remeda@*",
-          "npm:superjson@*"
-        ]
-      },
       "lib": {
         "dependencies": [
           "jsr:@db/sqlite@0.12",
@@ -116,6 +106,11 @@
           "npm:p-queue@8",
           "npm:postgres@*",
           "npm:xmldom@*"
+        ]
+      },
+      "messaging": {
+        "dependencies": [
+          "npm:postgres@*"
         ]
       },
       "router-handler": {

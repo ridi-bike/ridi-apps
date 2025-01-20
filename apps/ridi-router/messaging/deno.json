@@ -1,0 +1,8 @@
+{
+	"name": "@ridi-router/messaging",
+	"version": "0.1.0",
+	"exports": "./main.ts",
+	"imports": {
+		"postgres": "npm:postgres"
+	}
+}

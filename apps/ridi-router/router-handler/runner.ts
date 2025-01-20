@@ -1,5 +1,5 @@
 import { getDb, pg, RidiLogger } from "@ridi-router/lib";
-import { Messaging } from "@ridi-router/function-trpc";
+import { Messaging } from "@ridi-router/messaging";
 import { EnvVariables } from "./env-variables.ts";
 import { PgClient } from "./pg-client.ts";
 import { PlanProcessor } from "./plan-processor.ts";
