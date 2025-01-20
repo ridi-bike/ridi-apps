@@ -1,5 +1,5 @@
 import { EnvVariables } from "./env-variables.ts";
-import { getDb, RidiLogger } from "@ridi-router/lib";
+import { getDb, handleMaybeErrors, RidiLogger } from "@ridi-router/lib";
 
 type RegionReq = {
   reqId: string;
@@ -27,7 +27,7 @@ export class RouterServerManager {
       this.manageRouterServers().catch((error) => {
         logger.error(
           "Error while running Router Server Management, unrecoverable",
-          { error: error.toString() },
+          { error: handleMaybeErrors(error) },
         );
       }), 500);
   }
@@ -78,7 +78,9 @@ export class RouterServerManager {
 
     if (neededMemory <= this.currentFreeMemoryMb) {
       await this.startRegion(neededRegion).catch((error) =>
-        this.logger.error("Unable to start region", { error })
+        this.logger.error("Unable to start region", {
+          error: handleMaybeErrors(error),
+        })
       );
     } else {
       this.logger.info("All routers busy, can't stop and free memory", {
@@ -108,7 +110,7 @@ export class RouterServerManager {
     if (!this.regionRequestsRunning[region]) {
       this.regionRequestsRunning[region] = [];
     }
-    const waitingReq = this.regionRequestsWaiting[region].find((req) =>
+    const waitingReq = this.regionRequestsWaiting[region]?.find((req) =>
       req.reqId === reqId
     );
     if (

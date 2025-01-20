@@ -9,6 +9,18 @@ import { flatten } from "flat";
 import { stringify } from "yaml";
 import type { BaseEnvVariables } from "./env.ts";
 
+export function handleMaybeErrors(err: unknown): string | unknown {
+  if (!err) {
+    return "";
+  }
+  if (err instanceof Error) {
+    return `\n${err.name}: ${err.message}\n${err.stack}\n${
+      handleMaybeErrors(err.cause)
+    }`;
+  }
+  return err;
+}
+
 export class RidiLogger {
   private static instance: RidiLogger;
 

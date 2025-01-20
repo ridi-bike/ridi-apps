@@ -100,6 +100,7 @@ export class PlanProcessor {
       this.env.routerBin,
       [
         "start-client",
+        "start-finish",
         "--start",
         `${planRecord.fromLat},${planRecord.fromLon}`,
         "--finish",
