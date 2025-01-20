@@ -1,4 +1,7 @@
 {
+	"name": "@ridi-router/function-trpc",
+	"version": "0.1.0",
+	"exports": "./index.ts",
 	"imports": {
 		"@supabase/supabase-js": "jsr:@supabase/supabase-js",
 		"@trpc/server": "npm:@trpc/server",
