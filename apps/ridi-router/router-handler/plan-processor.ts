@@ -1,4 +1,4 @@
-import { RouterServerManager } from "./router-store.ts";
+import { RouterServerManager } from "./router-server-manager.ts";
 import { DenoCommand, getDb, pg, RidiLogger } from "@ridi-router/lib";
 import { PgClient } from "./pg-client.ts";
 import { EnvVariables } from "./env-variables.ts";

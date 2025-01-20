@@ -1,5 +1,5 @@
 {
-	"name": "@ridi-router/function-trpc",
+	"name": "@ridi-router/trpc",
 	"version": "0.1.0",
 	"exports": "./index.ts",
 	"imports": {
@@ -9,6 +9,7 @@
 		"valibot": "jsr:@valibot/valibot",
 		"postgres": "npm:postgres",
 		"remeda": "npm:remeda",
-		"superjson": "npm:superjson"
+		"superjson": "npm:superjson",
+		"@ridi-router/messaging/": "../../../apps/ridi-router/messaging/"
 	}
 }

@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "../../../apps/ridi-router/lib/supabase.ts";
 import type { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import postgres from "postgres";
-import { Messaging } from "./messaging.ts";
+import { Messaging } from "@ridi-router/messaging/main.ts";
 
 type ContextCreatorParams = Parameters<
   NonNullable<Parameters<typeof fetchRequestHandler>[0]["createContext"]>
@@ -27,7 +27,10 @@ export const createContext = async (
   const token = authHeader?.replace("Bearer ", "") || "";
   const { data } = await supabaseClient.auth.getUser(token);
   const user = data.user;
-  const messaging = new Messaging(db);
+  const messaging = new Messaging(db, {
+    info: (...args: unknown[]) => console.log(...args),
+    error: (...args: unknown[]) => console.error(...args),
+  });
 
   return {
     user,

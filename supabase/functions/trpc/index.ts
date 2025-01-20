@@ -2,7 +2,6 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { appRouter } from "./router.ts";
 import { createContext } from "./context.ts";
-export * from "./messaging.ts";
 
 Deno.serve(async (request, info) => {
   // Only used for start-server-and-test package that

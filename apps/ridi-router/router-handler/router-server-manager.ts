@@ -27,7 +27,7 @@ export class RouterServerManager {
       this.manageRouterServers().catch((error) => {
         logger.error(
           "Error while running Router Server Management, unrecoverable",
-          { error },
+          { error: error.toString() },
         );
       }), 500);
   }
@@ -39,6 +39,11 @@ export class RouterServerManager {
       .sort((r1, r2) => r1[1].at(-1)!.createdAt - r2[1].at(-1)!.createdAt)
       .map((w) => w[0])
       .filter((r) => !this.regionsStarting.has(r))[0];
+
+    if (!neededRegion) {
+      return;
+    }
+
     const neededRegionData = this.regions.find((r) =>
       r.region === neededRegion
     );

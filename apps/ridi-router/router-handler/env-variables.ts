@@ -1,4 +1,4 @@
-import { number, parse, string } from "valibot";
+import { integer, parse, pipe, string, transform } from "valibot";
 
 import { BaseEnvVariables } from "@ridi-router/lib";
 
@@ -29,7 +29,13 @@ export class EnvVariables extends BaseEnvVariables {
   );
 
   readonly serverAvailMemoryMb = parse(
-    number("SERVER_AVAIL_MEMORY env variable"),
+    pipe(
+      string("SERVER_AVAIL_MEMORY env variable"),
+      transform(Number),
+      integer(),
+    ),
     Deno.env.get("SERVER_AVAIL_MEMORY"),
   );
 }
+
+console.log({ e: Deno.env.get("SERVER_AVAIL_MEMORY") });

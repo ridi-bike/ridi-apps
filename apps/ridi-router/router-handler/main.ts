@@ -9,9 +9,9 @@ import {
   RidiLogger,
 } from "@ridi-router/lib";
 import { getPgClient } from "./pg-client.ts";
-// import { Supabase } from "./supabase.ts";
 import { PlanProcessor } from "./plan-processor.ts";
-import { RouterServerManager } from "./router-store.ts";
+import { RouterServerManager } from "./router-server-manager.ts";
+import { Messaging } from "../messaging/messaging.ts";
 
 const env = new EnvVariables();
 await RidiLogger.init(env);
@@ -26,7 +26,7 @@ const runner = new Runner(
   db,
   getPgClient(),
   pg,
-  // new Supabase(env, ridiLogger),
+  new Messaging(getPgClient(), ridiLogger),
   new PlanProcessor(
     db,
     ridiLogger,
