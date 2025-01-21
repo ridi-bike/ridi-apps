@@ -1,0 +1,8 @@
+{
+  "name": "@ridi-router/env",
+  "version": "0.1.0",
+  "exports": "./main.ts",
+  "imports": {
+    "valibot": "jsr:@valibot/valibot@0.42.1"
+  }
+}

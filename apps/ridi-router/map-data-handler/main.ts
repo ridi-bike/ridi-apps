@@ -1,12 +1,7 @@
-import {
-  BaseEnvVariables,
-  DenoCommand,
-  getDb,
-  initDb,
-  Locations,
-  pg,
-  RidiLogger,
-} from "@ridi-router/lib";
+import { DenoCommand, getDb, initDb, Locations, pg } from "@ridi-router/lib";
+import { RidiLogger } from "@ridi-router/logging/main.ts";
+"@ridi-router/logging/main.ts";
+import { BaseEnvVariables } from "@ridi-router/env/main.ts";
 
 import { EnvVariables } from "./env-variables.ts";
 import { Md5Downloader, RegionListProcessor } from "./region-list-processor.ts";

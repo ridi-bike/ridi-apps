@@ -1,6 +1,6 @@
 import { integer, parse, pipe, string, transform } from "valibot";
 
-import { BaseEnvVariables } from "@ridi-router/lib";
+import { BaseEnvVariables } from "@ridi-router/env/main.ts";
 
 export class EnvVariables extends BaseEnvVariables {
   readonly routerBin = parse(

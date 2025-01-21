@@ -7,7 +7,7 @@ import {
 } from "logger";
 import { flatten } from "flat";
 import { stringify } from "yaml";
-import type { BaseEnvVariables } from "./env.ts";
+import type { BaseEnvVariables } from "@ridi-router/env/main.ts";
 
 export function handleMaybeErrors(err: unknown): string | unknown {
   if (!err) {
