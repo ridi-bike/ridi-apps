@@ -7,7 +7,7 @@ import {
   sendMessage,
   updateVisibilityTimeout,
 } from "./messaging_sql.ts";
-import { handleMaybeErrors } from "@ridi-router/lib";
+import { handleMaybeErrors } from "@ridi-router/logging/main.ts";
 
 type MessageHandler<TName extends keyof Messages> = (args: {
   message: ReadMessagesWithLongPollRow;

@@ -75,7 +75,7 @@ const routeRouter = router({
                 ]),
               }),
               latLonArray: array(
-                tuple([number(), number()]),
+                tuple([string(), string()]),
               ),
             }),
           }),
@@ -135,6 +135,7 @@ const planRouter = router({
                   literal("new"),
                   literal("planning"),
                   literal("done"),
+                  literal("error"),
                 ]),
                 createdAt: date(),
                 routes: array(

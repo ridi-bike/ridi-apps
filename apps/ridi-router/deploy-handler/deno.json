@@ -3,6 +3,8 @@
 		"dev": "deno run -A --unstable-ffi --env-file=../.env --env-file=.env --watch main.ts"
 	},
 	"imports": {
-		"valibot": "jsr:@valibot/valibot@0.42.1"
+		"valibot": "jsr:@valibot/valibot@0.42.1",
+		"@ridi-router/logging/": "../packages/logging/",
+		"@ridi-router/env/": "../packages/env/"
 	}
 }

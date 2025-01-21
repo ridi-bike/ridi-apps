@@ -1,5 +1,6 @@
 import { EnvVariables } from "./env-variables.ts";
-import { getDb, handleMaybeErrors, RidiLogger } from "@ridi-router/lib";
+import { getDb } from "@ridi-router/lib";
+import { handleMaybeErrors, RidiLogger } from "@ridi-router/logging/main.ts";
 
 type RegionReq = {
   reqId: string;

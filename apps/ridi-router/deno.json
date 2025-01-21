@@ -6,7 +6,9 @@
 		"./deploy-handler",
 		"./map-data-handler",
 		"./router-handler",
-		"./lib",
-		"./messaging"
+		"./packages/lib",
+		"./packages/messaging",
+		"./packages/logging",
+		"./packages/env"
 	]
 }

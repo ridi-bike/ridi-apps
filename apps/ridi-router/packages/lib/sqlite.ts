@@ -1,5 +1,5 @@
 import { Database } from "sqlite";
-import { RidiLogger } from "./logger.ts";
+import { RidiLogger } from "@ridi-router/logging/main.ts";
 import {
   type InferInput,
   integer,

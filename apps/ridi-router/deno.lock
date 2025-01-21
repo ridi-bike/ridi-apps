@@ -238,16 +238,6 @@
           "jsr:@valibot/valibot@0.42.1"
         ]
       },
-      "lib": {
-        "dependencies": [
-          "jsr:@db/sqlite@0.12",
-          "jsr:@logtape/logtape@0.8.0",
-          "jsr:@std/yaml@1.0.5",
-          "jsr:@valibot/valibot@0.42.1",
-          "npm:flat@*",
-          "npm:postgres@*"
-        ]
-      },
       "map-data-handler": {
         "dependencies": [
           "jsr:@valibot/valibot@0.42.1",
@@ -257,7 +247,26 @@
           "npm:xmldom@*"
         ]
       },
-      "messaging": {
+      "packages/env": {
+        "dependencies": [
+          "jsr:@valibot/valibot@0.42.1"
+        ]
+      },
+      "packages/lib": {
+        "dependencies": [
+          "jsr:@db/sqlite@0.12",
+          "jsr:@valibot/valibot@0.42.1",
+          "npm:postgres@*"
+        ]
+      },
+      "packages/logging": {
+        "dependencies": [
+          "jsr:@logtape/logtape@0.8.0",
+          "jsr:@std/yaml@1.0.5",
+          "npm:flat@*"
+        ]
+      },
+      "packages/messaging": {
         "dependencies": [
           "npm:postgres@*"
         ]
