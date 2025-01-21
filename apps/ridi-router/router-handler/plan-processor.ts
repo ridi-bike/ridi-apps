@@ -1,5 +1,6 @@
 import { RouterServerManager } from "./router-server-manager.ts";
-import { DenoCommand, getDb, pg, RidiLogger } from "@ridi-router/lib";
+import { DenoCommand, getDb, pg } from "@ridi-router/lib";
+import { RidiLogger } from "@ridi-router/logging/main.ts";
 import { PgClient } from "./pg-client.ts";
 import { EnvVariables } from "./env-variables.ts";
 type RidiRouterErr = { Err: string };
@@ -96,18 +97,21 @@ export class PlanProcessor {
 
     this.routerStore.startRegionReq(region.region, planId);
 
-    const { code, stderr, stdout } = await this.denoCommand.execute(
+    const { code, stdout, stderr } = await this.denoCommand.executeWithStdin(
       this.env.routerBin,
-      [
-        "start-client",
-        "start-finish",
-        "--start",
-        `${planRecord.fromLat},${planRecord.fromLon}`,
-        "--finish",
-        `${planRecord.toLat},${planRecord.toLon}`,
-        "--socket-name",
-        region.region,
-      ],
+      {
+        args: [
+          "start-client",
+          "--socket-name",
+          region.region,
+          "start-finish",
+          "--start",
+          `${planRecord.fromLat},${planRecord.fromLon}`,
+          "--finish",
+          `${planRecord.toLat},${planRecord.toLon}`,
+        ],
+        stdinContent: "{}",
+      },
     );
 
     this.routerStore.finishRegionReq(region.region, planId);

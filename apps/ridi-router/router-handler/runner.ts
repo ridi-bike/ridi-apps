@@ -1,5 +1,6 @@
-import { getDb, pg, RidiLogger } from "@ridi-router/lib";
-import { Messaging } from "@ridi-router/messaging";
+import { getDb, pg } from "@ridi-router/lib";
+import { Messaging } from "@ridi-router/messaging/main.ts";
+import { RidiLogger } from "@ridi-router/logging/main.ts";
 import { EnvVariables } from "./env-variables.ts";
 import { PgClient } from "./pg-client.ts";
 import { PlanProcessor } from "./plan-processor.ts";
@@ -80,15 +81,18 @@ export class Runner {
         const result = await this.planProcessor.handlePlanNotification(
           data.planId,
         );
+        // TODO when all is good and route gen starts, need to run that separately and
+        // periodically reset vt on the message while it runs.
+        // now the initial vt of 5 secs gets triggered while the route is still generating
         if (result.result === "error") {
-          if (message.readCt < 5) {
-            const retry = 20;
+          if (message.readCt < 600) {
+            const retryInSecs = 30;
             this.logger.error("New Plan message error, retry", {
               message,
               data,
-              retry,
+              retryInSecs,
             });
-            await setVisibilityTimeout(20);
+            await setVisibilityTimeout(retryInSecs);
           } else {
             this.logger.error("New Plan message error", {
               message,
