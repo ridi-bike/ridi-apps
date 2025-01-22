@@ -45,18 +45,29 @@ export class Runner {
         throw new Error("Critical failure");
       }
 
-      this.db.mapData.updateRecordsDemoteCurrent();
-      this.db.mapData.updateRecordsPromoteNext();
+      const allNext = this.db.mapData.getRecordsAllNext();
+      if (allNext.every((rec) => rec.status === "ready")) {
+        this.logger.info("All next records are ready, promoting", { allNext });
+        this.db.mapData.updateRecordsDemoteCurrent();
 
-      await this.pgQueries.regionSetAllPrevious(this.pgClient);
-      for (const nextRec of nextMapData) {
-        await this.pgQueries.regionSetCurrent(this.pgClient, {
-          region: nextRec.region,
-          pbfMd5: nextRec.pbf_md5,
+        this.db.mapData.updateRecordsPromoteNext();
+
+        await this.pgQueries.regionSetAllPrevious(this.pgClient);
+        for (const nextRec of nextMapData) {
+          await this.pgQueries.regionSetCurrent(this.pgClient, {
+            region: nextRec.region,
+            pbfMd5: nextRec.pbf_md5,
+          });
+        }
+      } else {
+        this.logger.info("Not all next records are ready, promotion skipped", {
+          allNext,
         });
       }
-    } else {
-      const currentMapData = this.db.mapData.getRecordsAllCurrent();
+    }
+
+    const currentMapData = this.db.mapData.getRecordsAllCurrent();
+    if (currentMapData.length) {
       this.logger.debug("Current records found", {
         regions: currentMapData.map((r) => r.region),
       });
@@ -65,12 +76,13 @@ export class Runner {
           r.router_version === this.env.routerVersion
         )
       ) {
-        this.logger.error(
+        throw this.logger.error(
           "Some 'current' map data records do not have the correct router version",
           { routerVersion: this.env.routerVersion, nextMapData },
         );
-        throw new Error("Critical failure");
       }
+    } else {
+      throw this.logger.error("No map data records found, critical failure");
     }
 
     this.messaging.listen(

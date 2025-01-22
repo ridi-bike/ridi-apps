@@ -3,9 +3,9 @@ import { DenoCommand, getDb, pg } from "@ridi-router/lib";
 import { RidiLogger } from "@ridi-router/logging/main.ts";
 import { PgClient } from "./pg-client.ts";
 import { EnvVariables } from "./env-variables.ts";
-type RidiRouterErr = { Err: string };
+type RidiRouterErr = { err: string };
 type RidiRouterOk = {
-  Ok: {
+  ok: {
     coords: {
       lat: number;
       lon: number;
@@ -118,9 +118,7 @@ export class PlanProcessor {
     this.logger.debug("router output", { planId, stdout, stderr });
     const routes = JSON.parse(stdout) as RidiRouterOutput;
 
-    console.table(routes);
-
-    if (typeof (routes.result as RidiRouterErr).Err === "string") {
+    if (typeof (routes.result as RidiRouterErr).err === "string") {
       await this.pgQueries.planSetState(this.pgClient, {
         id: planId,
         state: "error",
@@ -135,7 +133,7 @@ export class PlanProcessor {
       );
     }
 
-    const okRoutes = (routes.result as RidiRouterOk).Ok;
+    const okRoutes = (routes.result as RidiRouterOk).ok;
     for (const route of okRoutes) {
       await this.pgQueries.routeInsert(this.pgClient, {
         planId,

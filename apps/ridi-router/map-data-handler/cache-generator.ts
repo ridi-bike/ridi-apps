@@ -1,9 +1,5 @@
-import {
-  DenoCommand,
-  getDb,
-  type MapDataRecord,
-  type RidiLogger,
-} from "@ridi-router/lib";
+import { DenoCommand, getDb, type MapDataRecord } from "@ridi-router/lib";
+import type { RidiLogger } from "@ridi-router/logging/main.ts";
 import PQueue from "p-queue";
 import { type EnvVariables } from "./env-variables.ts";
 import { type KmlProcessor } from "./kml-processor.ts";
@@ -80,6 +76,8 @@ export class CacheGenerator {
         mapDataRecord.pbf_location,
         "--cache-dir",
         mapDataRecord.cache_location,
+        "--socket-name",
+        `${Math.random()}`,
       ],
     }).spawn();
 

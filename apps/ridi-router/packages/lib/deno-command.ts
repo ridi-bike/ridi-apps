@@ -9,6 +9,8 @@ export class DenoCommand {
     const denoCommand = new Deno.Command(command, {
       args: args,
       stdin: "piped",
+      stdout: "piped",
+      stderr: "piped",
     });
     const child = denoCommand.spawn();
     const writer = child.stdin.getWriter();

@@ -33,7 +33,7 @@ export class EnvVariables extends BaseEnvVariables {
     super();
   }
 
-  public static override get(): EnvVariables {
+  public static get(): EnvVariables {
     if (!EnvVariables.instance) {
       EnvVariables.instance = new EnvVariables();
     }

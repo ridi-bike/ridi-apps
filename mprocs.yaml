@@ -17,8 +17,11 @@ procs:
     shell: "pnpm tsc"
     cwd: "apps/expo-app"
   router-handler:
-    shell: "deno task dev"
+    shell: "deno task dev | pino-pretty"
     cwd: "apps/ridi-router/router-handler"
   map-data-handler:
-    shell: "deno task dev"
+    shell: "deno task dev | pino-pretty"
     cwd: "apps/ridi-router/map-data-handler"
+  depliy-handler:
+    shell: "deno task dev | pino-pretty"
+    cwd: "apps/ridi-router/deploy-handler"

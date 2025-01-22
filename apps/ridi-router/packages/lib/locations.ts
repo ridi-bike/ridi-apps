@@ -1,4 +1,4 @@
-import type { BaseEnvVariables } from "./env.ts";
+import type { BaseEnvVariables } from "@ridi-router/env/main.ts";
 
 export class Locations {
   constructor(private readonly baseEnvVariables: BaseEnvVariables) {}

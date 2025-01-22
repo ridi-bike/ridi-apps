@@ -37,5 +37,3 @@ export class EnvVariables extends BaseEnvVariables {
     Deno.env.get("SERVER_AVAIL_MEMORY"),
   );
 }
-
-console.log({ e: Deno.env.get("SERVER_AVAIL_MEMORY") });
