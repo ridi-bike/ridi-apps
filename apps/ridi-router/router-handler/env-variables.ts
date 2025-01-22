@@ -1,4 +1,4 @@
-import { integer, parse, pipe, string, transform } from "valibot";
+import { array, integer, parse, pipe, string, transform } from "valibot";
 
 import { BaseEnvVariables } from "@ridi-router/env/main.ts";
 
@@ -36,4 +36,13 @@ export class EnvVariables extends BaseEnvVariables {
     ),
     Deno.env.get("SERVER_AVAIL_MEMORY"),
   );
+  readonly regions: string[];
+
+  constructor() {
+    super();
+    this.regions = parse(
+      array(string("region list file read")),
+      JSON.parse(Deno.readTextFileSync(this.regionListLoc)),
+    );
+  }
 }

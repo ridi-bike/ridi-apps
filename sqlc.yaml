@@ -10,7 +10,6 @@ sql:
 - schema: "supabase/migrations"
   queries:
     - "supabase/functions/trpc/queries.sql"
-    - "supabase/functions/trpc/messaging.sql"
   engine: postgresql
   database:
     uri: "postgres://postgres:postgres@localhost:54322/postgres"
@@ -21,12 +20,25 @@ sql:
       runtime: node
       driver: postgres
 - schema: "supabase/migrations"
-  queries: "apps/ridi-router/lib/queries.sql"
+  queries:
+    - "apps/ridi-router/packages/lib/queries.sql"
   engine: postgresql
   database:
     uri: "postgres://postgres:postgres@localhost:54322/postgres"
   codegen:
-  - out: "apps/ridi-router/lib/"
+  - out: "apps/ridi-router/packages/lib/"
+    plugin: ts
+    options:
+      runtime: node
+      driver: postgres
+- schema: "supabase/migrations"
+  queries:
+    - "apps/ridi-router/packages/messaging/messaging.sql"
+  engine: postgresql
+  database:
+    uri: "postgres://postgres:postgres@localhost:54322/postgres"
+  codegen:
+  - out: "apps/ridi-router/packages/messaging/"
     plugin: ts
     options:
       runtime: node

@@ -31,7 +31,12 @@ export class Runner {
       });
     }
     const nextMapData = this.db.mapData.getRecordsAllNext();
-    if (nextMapData.length) {
+    if (
+      this.env.regions.every((region) =>
+        nextMapData.find((mapData) => mapData.region === region)?.status ===
+          "ready"
+      )
+    ) {
       this.logger.debug("Next records found", {
         regions: nextMapData.map((r) => r.region),
       });
@@ -67,7 +72,20 @@ export class Runner {
     }
 
     const currentMapData = this.db.mapData.getRecordsAllCurrent();
-    if (currentMapData.length) {
+    const currentRegions = await this.pgQueries.regionGetAllCurrent(
+      this.pgClient,
+    );
+    if (
+      this.env.regions.every((region) => {
+        const mapData = currentMapData.find((mapData) =>
+          mapData.region === region
+        );
+        return mapData?.status ===
+            "ready" &&
+          currentRegions.find((reg) => reg.region === region)?.pbfMd5 ===
+            mapData.pbf_md5;
+      })
+    ) {
       this.logger.debug("Current records found", {
         regions: currentMapData.map((r) => r.region),
       });
@@ -82,7 +100,11 @@ export class Runner {
         );
       }
     } else {
-      throw this.logger.error("No map data records found, critical failure");
+      throw this.logger.error("Map data records found, critical failure", {
+        regions: this.env.regions,
+        currentMapData,
+        currentRegions,
+      });
     }
 
     this.messaging.listen(
@@ -101,7 +123,7 @@ export class Runner {
             await deleteMessage();
           }
         } catch (err) {
-          if (message.readCt < 600) {
+          if (message.readCt < 6) {
             const retryInSecs = 30;
             this.logger.error("New Plan message error, retry", {
               message,
@@ -110,6 +132,10 @@ export class Runner {
               err,
             });
             await setVisibilityTimeout(retryInSecs);
+            await this.pgQueries.planSetState(this.pgClient, {
+              id: data.planId,
+              state: "error",
+            });
           } else {
             this.logger.error("New Plan message error", {
               message,

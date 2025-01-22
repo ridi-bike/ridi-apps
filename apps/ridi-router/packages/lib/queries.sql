@@ -1,9 +1,16 @@
--- name: RegionInsert :one
+-- name: RegionInsertOrUpdate :one
 insert into regions
 (region, pbf_md5, version, geojson, polygon)
 values
 ($1, $2, 'next', $3, $4)
+on conflict (region, pbf_md5, version) do update
+set geojson = excluded.geojson,
+	polygon = excluded.polygon
 returning *;
+
+-- name: RegionGetAllCurrent :many
+select * from regions
+where version = 'current';
 
 -- name: RegionSetDiscarded :one
 update regions

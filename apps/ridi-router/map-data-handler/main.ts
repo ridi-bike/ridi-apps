@@ -15,7 +15,7 @@ import { OsmLocations } from "./osm-locations.ts";
 
 const baseEnv = new BaseEnvVariables();
 RidiLogger.init();
-const envVariables = new EnvVariables();
+const envVariables = EnvVariables.get();
 const ridiLogger = RidiLogger.get();
 const locations = new Locations(baseEnv);
 

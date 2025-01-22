@@ -6,11 +6,13 @@ import { EnvVariables } from "./env-variables.ts";
 type RidiRouterErr = { err: string };
 type RidiRouterOk = {
   ok: {
-    coords: {
-      lat: number;
-      lon: number;
+    routes: {
+      coords: {
+        lat: number;
+        lon: number;
+      }[];
     }[];
-  }[];
+  };
 };
 type RidiRouterOutput = {
   id: string;
@@ -61,10 +63,6 @@ export class PlanProcessor {
     const region = regions[0];
 
     if (!region) {
-      await this.pgQueries.planSetState(this.pgClient, {
-        id: planId,
-        state: "error",
-      });
       throw this.logger.error("Current region not found", { region, planId });
     }
 
@@ -99,10 +97,6 @@ export class PlanProcessor {
     this.routerStore.finishRegionReq(region.region, planId);
 
     if (code !== 0) {
-      await this.pgQueries.planSetState(this.pgClient, {
-        id: planId,
-        state: "error",
-      });
       throw this.logger.error(
         "Error returned from router when generating routes",
         {
@@ -119,10 +113,6 @@ export class PlanProcessor {
     const routes = JSON.parse(stdout) as RidiRouterOutput;
 
     if (typeof (routes.result as RidiRouterErr).err === "string") {
-      await this.pgQueries.planSetState(this.pgClient, {
-        id: planId,
-        state: "error",
-      });
       throw this.logger.error(
         "Error returned from router when generating routes",
         {
@@ -133,7 +123,7 @@ export class PlanProcessor {
       );
     }
 
-    const okRoutes = (routes.result as RidiRouterOk).ok;
+    const okRoutes = (routes.result as RidiRouterOk).ok.routes;
     for (const route of okRoutes) {
       await this.pgQueries.routeInsert(this.pgClient, {
         planId,
