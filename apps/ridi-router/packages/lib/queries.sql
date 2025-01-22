@@ -74,7 +74,7 @@ values (
 	postgis.st_makeline(
 		array(
 			select 
-				postgis.st_point((p->>'lon')::numeric, (p->>'lat')::numeric)
+				postgis.st_point((p->>1)::numeric, (p->>0)::numeric)
 			from (
 				select jsonb_array_elements(sqlc.arg(lat_lon_array)::jsonb) p
 			) arrayPoints
