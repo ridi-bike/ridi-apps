@@ -1,5 +1,6 @@
-import { getDb, RidiLogger } from "@ridi-router/lib";
+import { getDb } from "@ridi-router/lib";
 import { CoolifyClient } from "./coolify.ts";
+import type { RidiLogger } from "@ridi-router/logging/main.ts";
 import { EnvVariables } from "./env.ts";
 
 export class DeployChecker {

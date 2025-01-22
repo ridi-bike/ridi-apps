@@ -1,9 +1,5 @@
-import {
-  getDb,
-  Locations,
-  type MapDataRecord,
-  RidiLogger,
-} from "@ridi-router/lib";
+import { getDb, Locations, type MapDataRecord } from "@ridi-router/lib";
+import type { RidiLogger } from "@ridi-router/logging/main.ts";
 import { EnvVariables } from "./env-variables.ts";
 import { CacheGenerator } from "./cache-generator.ts";
 import { OsmLocations } from "./osm-locations.ts";

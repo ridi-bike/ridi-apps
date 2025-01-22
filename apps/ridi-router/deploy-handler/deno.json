@@ -1,6 +1,7 @@
 {
 	"tasks": {
-		"dev": "deno run -A --unstable-ffi --env-file=../.env --env-file=.env --watch main.ts"
+		"dev": "deno run -A --unstable-ffi --env-file=../.env --env-file=.env --watch --check main.ts",
+		"check": "deno check main.ts"
 	},
 	"imports": {
 		"valibot": "jsr:@valibot/valibot@0.42.1",

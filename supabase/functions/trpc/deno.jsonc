@@ -12,8 +12,6 @@
 		"superjson": "npm:superjson",
 		"@ridi-router/messaging/": "../../../apps/ridi-router/packages/messaging/",
 		"@ridi-router/logging/": "../../../apps/ridi-router/packages/logging/",
-		"logger": "jsr:@logtape/logtape@0.8.0",
-		"yaml": "jsr:@std/yaml@1.0.5",
-		"flat": "npm:flat"
+		"pino": "npm:pino"
 	}
 }
