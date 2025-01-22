@@ -75,7 +75,7 @@ const routeRouter = router({
                 ]),
               }),
               latLonArray: array(
-                tuple([string(), string()]),
+                tuple([number(), number()]),
               ),
             }),
           }),
@@ -106,6 +106,10 @@ const routeRouter = router({
           version: "v1",
           data: {
             ...routesFlat[0],
+            latLonArray: routesFlat[0].latLonArray as unknown as [
+              number,
+              number,
+            ][], // TODO why is sqlc giving me an incorrect type??
             plan: {
               ...routesFlat[0],
             },
