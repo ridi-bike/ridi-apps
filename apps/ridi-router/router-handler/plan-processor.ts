@@ -19,15 +19,6 @@ type RidiRouterOutput = {
     | RidiRouterOk;
 };
 
-type HandePlanNotificationResult = {
-  result: "ok";
-} | {
-  result: "wait";
-  seconds: number;
-} | {
-  result: "error";
-};
-
 export class PlanProcessor {
   constructor(
     private readonly db: ReturnType<typeof getDb>,
@@ -42,15 +33,12 @@ export class PlanProcessor {
 
   async handlePlanNotification(
     planId: string,
-  ): Promise<HandePlanNotificationResult> {
+  ): Promise<null | number> {
     const planRecord = await this.pgQueries.planGetById(this.pgClient, {
       id: planId,
     });
     if (!planRecord) {
-      this.logger.error("Plan record not found from id", { planId });
-      return {
-        result: "error",
-      };
+      throw this.logger.error("Plan record not found from id", { planId });
     }
 
     const regionsFrom = await this.pgQueries.regionFindFromCoords(
@@ -73,14 +61,11 @@ export class PlanProcessor {
     const region = regions[0];
 
     if (!region) {
-      this.logger.error("Current region not found", { region, planId });
       await this.pgQueries.planSetState(this.pgClient, {
         id: planId,
         state: "error",
       });
-      return {
-        result: "error",
-      };
+      throw this.logger.error("Current region not found", { region, planId });
     }
 
     await this.pgQueries.planSetState(this.pgClient, {
@@ -89,10 +74,7 @@ export class PlanProcessor {
     });
     if (!this.routerStore.isRegionRunning(region.region)) {
       await this.routerStore.startRegion(region.region);
-      return {
-        result: "wait",
-        seconds: 1,
-      };
+      return 1;
     }
 
     this.routerStore.startRegionReq(region.region, planId);
@@ -117,20 +99,20 @@ export class PlanProcessor {
     this.routerStore.finishRegionReq(region.region, planId);
 
     if (code !== 0) {
-      this.logger.error("Error returned from router when generating routes", {
-        region,
-        planId,
-        stdout,
-        stderr,
-        code,
-      });
       await this.pgQueries.planSetState(this.pgClient, {
         id: planId,
         state: "error",
       });
-      return {
-        result: "error",
-      };
+      throw this.logger.error(
+        "Error returned from router when generating routes",
+        {
+          region,
+          planId,
+          stdout,
+          stderr,
+          code,
+        },
+      );
     }
 
     this.logger.debug("router output", { planId, stdout, stderr });
@@ -139,18 +121,18 @@ export class PlanProcessor {
     console.table(routes);
 
     if (typeof (routes.result as RidiRouterErr).Err === "string") {
-      this.logger.error("Error returned from router when generating routes", {
-        region,
-        planId,
-        result: routes.result,
-      });
       await this.pgQueries.planSetState(this.pgClient, {
         id: planId,
         state: "error",
       });
-      return {
-        result: "error",
-      };
+      throw this.logger.error(
+        "Error returned from router when generating routes",
+        {
+          region,
+          planId,
+          result: routes.result,
+        },
+      );
     }
 
     const okRoutes = (routes.result as RidiRouterOk).Ok;
@@ -168,8 +150,6 @@ export class PlanProcessor {
       state: "done",
     });
 
-    return {
-      result: "ok",
-    };
+    return null;
   }
 }

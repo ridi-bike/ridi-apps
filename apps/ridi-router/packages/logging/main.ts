@@ -92,5 +92,6 @@ export class RidiLogger {
 
   public error(message: string, properties?: Record<string, unknown>) {
     this.logger.error(message, properties);
+    return Error(message);
   }
 }
