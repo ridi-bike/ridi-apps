@@ -26,7 +26,7 @@ export class Cleaner {
 
   async processCleanup(): Promise<void> {
     const cleanupRecords = this.db.mapData.getRecordsDiscardedAndPrevious();
-    this.logger.debug("{count} Records for cleanup found", {
+    this.logger.debug("Records for cleanup found", {
       count: cleanupRecords.length,
     });
 
