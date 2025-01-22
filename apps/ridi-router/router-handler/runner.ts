@@ -78,19 +78,24 @@ export class Runner {
       async (
         { message, data, actions: { deleteMessage, setVisibilityTimeout } },
       ) => {
-        const result = await this.planProcessor.handlePlanNotification(
-          data.planId,
-        );
-        // TODO when all is good and route gen starts, need to run that separately and
-        // periodically reset vt on the message while it runs.
-        // now the initial vt of 5 secs gets triggered while the route is still generating
-        if (result.result === "error") {
+        const beat = setInterval(() => setVisibilityTimeout(5), 4000);
+        try {
+          const retryIn = await this.planProcessor.handlePlanNotification(
+            data.planId,
+          );
+          if (retryIn) {
+            await setVisibilityTimeout(retryIn);
+          } else {
+            await deleteMessage();
+          }
+        } catch (err) {
           if (message.readCt < 600) {
             const retryInSecs = 30;
             this.logger.error("New Plan message error, retry", {
               message,
               data,
               retryInSecs,
+              err,
             });
             await setVisibilityTimeout(retryInSecs);
           } else {
@@ -100,11 +105,8 @@ export class Runner {
             });
             await deleteMessage();
           }
-        } else if (result.result === "ok") {
-          await deleteMessage();
-        } else {
-          await setVisibilityTimeout(result.seconds);
         }
+        clearInterval(beat);
       },
     );
 
