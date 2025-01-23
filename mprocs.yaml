@@ -1,12 +1,8 @@
 procs:
-  # ngrok:
-  #   shell: "ngrok http http://localhost:2727"
   supabase_status:
     shell: "supabase status"
   supabase_functions:
     shell: "supabase functions serve"
-  # supabase_functions:
-  #   shell: "deno --allow-net --allow-read --allow-write scripts/router-url-env.ts && supabase functions serve"
   astro:
     shell: "pnpm start"
     cwd: "apps/astro-app"
@@ -18,10 +14,10 @@ procs:
     cwd: "apps/expo-app"
   router-handler:
     shell: "deno task dev | pino-pretty"
-    cwd: "apps/ridi-router/router-handler"
+    cwd: "services/ridi-router/router-handler"
   map-data-handler:
     shell: "deno task dev | pino-pretty"
-    cwd: "apps/ridi-router/map-data-handler"
+    cwd: "services/ridi-router/map-data-handler"
   depliy-handler:
     shell: "deno task dev | pino-pretty"
-    cwd: "apps/ridi-router/deploy-handler"
+    cwd: "services/ridi-router/deploy-handler"
