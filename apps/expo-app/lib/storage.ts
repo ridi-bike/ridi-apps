@@ -1,4 +1,5 @@
 import { MMKV } from "react-native-mmkv";
+import { Platform } from "react-native";
 import superjson from "superjson";
 import type { Plan, PlanNew } from "./stores/plans-store";
 import type { Route } from "./stores/routes-store";
@@ -7,6 +8,8 @@ const mmkv = new MMKV();
 const storageVersion = "sv1";
 
 export class Storage<TData, TVersion extends string> {
+	private storage = {} as Record<string, TData>
+
 	constructor(
 		private readonly dataKey: string,
 		public readonly dataVersion: TVersion,
@@ -17,10 +20,17 @@ export class Storage<TData, TVersion extends string> {
 	}
 
 	set(data: TData) {
-		mmkv.set(this.getKey(), superjson.stringify(data));
+		if (Platform.OS === "web") {
+			this.storage[this.getKey()] = data
+		} else {
+			mmkv.set(this.getKey(), superjson.stringify(data));
+		}
 	}
 
 	get(): TData | undefined {
+		if (Platform.OS === "web") {
+			return this.storage[this.getKey()]
+		}
 		const stringData = mmkv.getString(this.getKey());
 		if (stringData) {
 			return superjson.parse(stringData);

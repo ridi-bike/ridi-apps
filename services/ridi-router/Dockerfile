@@ -27,7 +27,10 @@ RUN cd map-data-handler && deno install --lock deno.lock --frozen=true --entrypo
 RUN cd router-handler && deno install --lock deno.lock --frozen=true --entrypoint main.ts
 
 ENV RIDI_ROUTER_BIN=./ridi-router
-RUN curl -L "https://github.com/tomsjansons/ridi-router/releases/download/${RIDI_ROUTER_VERSION}/ridi-router" -o ridi-router \
+RUN curl -L "https://github.com/tomsjansons/ridi-router/releases/download/${RIDI_ROUTER_VERSION}/
+ridi-router-linux-amd64.zip" -o ridi-router-linux-amd64.zip \
+		&& unzip ridi-router-linux-amd64.zip \
+		&& mv ridi-router-linux-amd64 ridi-router \
     && chmod +x ridi-router
 
 CMD ./startup.sh
