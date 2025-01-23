@@ -21,24 +21,24 @@ sql:
       driver: postgres
 - schema: "supabase/migrations"
   queries:
-    - "apps/ridi-router/packages/lib/queries.sql"
+    - "services/ridi-router/packages/lib/queries.sql"
   engine: postgresql
   database:
     uri: "postgres://postgres:postgres@localhost:54322/postgres"
   codegen:
-  - out: "apps/ridi-router/packages/lib/"
+  - out: "services/ridi-router/packages/lib/"
     plugin: ts
     options:
       runtime: node
       driver: postgres
 - schema: "supabase/migrations"
   queries:
-    - "apps/ridi-router/packages/messaging/messaging.sql"
+    - "services/ridi-router/packages/messaging/messaging.sql"
   engine: postgresql
   database:
     uri: "postgres://postgres:postgres@localhost:54322/postgres"
   codegen:
-  - out: "apps/ridi-router/packages/messaging/"
+  - out: "services/ridi-router/packages/messaging/"
     plugin: ts
     options:
       runtime: node

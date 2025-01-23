@@ -10,8 +10,8 @@
 		"postgres": "npm:postgres",
 		"remeda": "npm:remeda",
 		"superjson": "npm:superjson",
-		"@ridi-router/messaging/": "../../../apps/ridi-router/packages/messaging/",
-		"@ridi-router/logging/": "../../../apps/ridi-router/packages/logging/",
+		"@ridi-router/messaging/": "../../../services/ridi-router/packages/messaging/",
+		"@ridi-router/logging/": "../../../services/ridi-router/packages/logging/",
 		"pino": "npm:pino"
 	}
 }
