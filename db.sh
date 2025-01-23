@@ -21,6 +21,9 @@ fi
 case "$1" in
     "migrate")
         supabase db reset
+        rm -rf ./services/ridi-router/.ridi-data/pbf
+        rm -rf ./services/ridi-router/.ridi-data/cache
+        rm -rf ./services/ridi-router/.ridi-data/db
         supabase gen types --lang=typescript --local > ./services/ridi-router/packages/lib/supabase.ts
         sqlc generate
         ;;
