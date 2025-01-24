@@ -1,4 +1,3 @@
-export * from "./sqlite.ts";
 export * from "./locations.ts";
 
 import * as queries from "./queries_sql.ts";

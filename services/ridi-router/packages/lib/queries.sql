@@ -82,3 +82,182 @@ values (
 	)
 )
 returning *;
+
+-- name: ServicesGet :one
+SELECT * FROM ridi_services.services 
+WHERE name = $1;
+
+-- name: ServicesCreateUpdate :exec
+INSERT INTO ridi_services.services (name, router_version, status, updated_at)
+VALUES ($1, $2, 'triggered', NOW())
+ON CONFLICT (name) DO UPDATE 
+SET 
+    router_version = $2, 
+    updated_at = NOW(),
+    status = 'triggered';
+
+-- name: ServicesUpdateRecordProcessing :exec
+UPDATE ridi_services.services
+SET status = 'processing', updated_at = NOW()
+WHERE name = $1;
+
+-- name: ServicesUpdateRecordUpdatedAt :exec
+UPDATE ridi_services.services
+SET updated_at = NOW()
+WHERE name = $1;
+
+-- name: ServicesUpdateRecordDone :exec
+UPDATE ridi_services.services
+SET status = 'done', updated_at = NOW()
+WHERE name = $1;
+
+-- name: MapDataCreateNextRecord :one
+INSERT INTO ridi_services.map_data 
+(
+    region, 
+    version, 
+    status, 
+    pbf_location, 
+    pbf_md5, 
+    cache_location, 
+    router_version, 
+    kml_location,
+    updated_at
+)
+VALUES 
+(
+    $1, 
+    'next', 
+    'new', 
+    $2, 
+    $3, 
+    $4, 
+    $5, 
+    $6,
+    NOW()
+)
+RETURNING *;
+
+-- name: MapDataDeleteRecord :exec
+DELETE FROM ridi_services.map_data
+WHERE id = $1;
+
+-- name: MapDataUpdateRecordCacheSize :exec
+UPDATE ridi_services.map_data
+SET
+    cache_size = $2,
+    updated_at = NOW()
+WHERE id = $1;
+
+-- name: MapDataUpdateRecordStartupTime :exec
+UPDATE ridi_services.map_data
+SET
+    startup_time_s = $2,
+    updated_at = NOW()
+WHERE id = $1;
+
+-- name: MapDataUpdateRecordPbfSize :exec
+UPDATE ridi_services.map_data
+SET
+    pbf_size = $2,
+    pbf_downloaded_size = 0,
+    updated_at = NOW()
+WHERE id = $1;
+
+-- name: MapDataUpdateRecordPbfDownloadedSize :exec
+UPDATE ridi_services.map_data
+SET
+    pbf_downloaded_size = pbf_downloaded_size + $2,
+    updated_at = NOW()
+WHERE id = $1;
+
+-- name: MapDataUpdateRecordDownloaded :exec
+UPDATE ridi_services.map_data
+SET 
+    status = 'downloaded', 
+    updated_at = NOW()
+WHERE id = $1;
+
+-- name: MapDataUpdateRecordProcessing :exec
+UPDATE ridi_services.map_data
+SET 
+    status = 'processing', 
+    updated_at = NOW()
+WHERE id = $1;
+
+-- name: MapDataUpdateRecordReady :exec
+UPDATE ridi_services.map_data
+SET 
+    status = 'ready', 
+    updated_at = NOW()
+WHERE id = $1;
+
+-- name: MapDataUpdateRecordError :exec
+UPDATE ridi_services.map_data
+SET 
+    status = 'error', 
+    error = $2, 
+    updated_at = NOW()
+WHERE id = $1;
+
+-- name: MapDataUpdateRecordDiscarded :exec
+UPDATE ridi_services.map_data
+SET 
+    version = 'discarded',
+    updated_at = NOW()
+WHERE id = $1;
+
+-- name: MapDataGetRecordsDiscardedAndPrevious :many
+SELECT * FROM ridi_services.map_data
+WHERE version = 'discarded' OR version = 'previous';
+
+-- name: MapDataIsKmlInUse :one
+SELECT * FROM ridi_services.map_data
+WHERE 
+    kml_location = $1
+    AND (version = 'current' OR version = 'next')
+LIMIT 1;
+
+-- name: MapDataIsPbfInUse :one
+SELECT * FROM ridi_services.map_data
+WHERE 
+    pbf_location = $1
+    AND (version = 'current' OR version = 'next')
+LIMIT 1;
+
+-- name: MapDataIsCacheDirInUse :one
+SELECT * FROM ridi_services.map_data
+WHERE 
+    cache_location = $1
+    AND (version = 'current' OR version = 'next')
+LIMIT 1;
+
+-- name: MapDataGetRecordNext :one
+SELECT * FROM ridi_services.map_data 
+WHERE 
+    region = $1 
+    AND version = 'next';
+
+-- name: MapDataGetRecordCurrent :one
+SELECT * FROM ridi_services.map_data 
+WHERE 
+    region = $1 
+    AND version = 'current';
+
+-- name: MapDataGetRecordsAllNext :many
+SELECT * FROM ridi_services.map_data 
+WHERE version = 'next';
+
+-- name: MapDataGetRecordsAllCurrent :many
+SELECT * FROM ridi_services.map_data 
+WHERE version = 'current';
+
+-- name: MapDataUpdateRecordsPromoteNext :exec
+UPDATE ridi_services.map_data
+SET version = 'current'
+WHERE version = 'next';
+
+-- name: MapDataUpdateRecordsDemoteCurrent :exec
+UPDATE ridi_services.map_data
+SET version = 'previous'
+WHERE version = 'current';
