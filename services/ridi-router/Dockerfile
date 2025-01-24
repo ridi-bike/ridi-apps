@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Install required packages and clean up
 RUN apt-get update \
-	&& apt-get install -y curl coreutils \
+	&& apt-get install -y curl unzip coreutils \
 	&& rm -rf /var/lib/apt/lists/*
 
 # ARG OPEN_OBSERVE_ORG
