@@ -3,7 +3,7 @@ services:
     restart: on-failure
     build:
       args:
-        RIDI_ROUTER_VERSION: v0.6.14
+        RIDI_ROUTER_VERSION: v0.6.15
       context: .
       dockerfile: ./Dockerfile
     volumes:
