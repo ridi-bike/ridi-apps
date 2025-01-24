@@ -286,7 +286,6 @@
         "dependencies": [
           "npm:flat@*",
           "npm:pino-opentelemetry-transport@*",
-          "npm:pino-pretty@*",
           "npm:pino@*"
         ]
       },
