@@ -1,8 +1,10 @@
-import { getDb, Locations, type MapDataRecord } from "@ridi-router/lib";
+import { Locations, pg } from "@ridi-router/lib";
 import type { RidiLogger } from "@ridi-router/logging/main.ts";
 import { EnvVariables } from "./env-variables.ts";
 import { CacheGenerator } from "./cache-generator.ts";
 import { OsmLocations } from "./osm-locations.ts";
+import { PgClient } from "./pg-client.ts";
+import { MapDataRecord } from "./types.ts";
 
 class ProgressTrack extends TransformStream {
   constructor(logChunkSize: (chunkSize: number) => void) {
@@ -23,8 +25,8 @@ export class FileDownloader {
   async downloadFile(
     url: string,
     dest: string,
-    logTotalSize?: (size: number) => void,
-    logChunkSize?: (chunkSize: number) => void,
+    logTotalSize?: (size: number) => Promise<void>,
+    logChunkSize?: (chunkSize: number) => Promise<void>,
   ): Promise<void> {
     const fileResponse = await fetch(url, { redirect: "follow" });
 
@@ -61,7 +63,8 @@ export class RegionDownloader {
   constructor(
     private readonly locations: Locations,
     private readonly env: EnvVariables,
-    private readonly db: ReturnType<typeof getDb>,
+    private readonly db: typeof pg,
+    private readonly pgClient: PgClient,
     private readonly logger: RidiLogger,
     private readonly fileDownloader: FileDownloader,
     private readonly cacheGenerator: CacheGenerator,
@@ -83,14 +86,19 @@ export class RegionDownloader {
 
     const pbfLocation = await this.locations.getPbfFileLoc(region, md5);
     const kmlLocation = await this.locations.getKmlLocation(region, md5);
-    const mapDataRecord = nextMapDataRecord || this.db.mapData.createNextRecord(
-      region,
-      md5,
-      pbfLocation,
-      this.env.routerVersion,
-      await this.locations.getCacheDirLoc(region, this.env.routerVersion, md5),
-      kmlLocation,
-    );
+    const mapDataRecord = nextMapDataRecord ||
+      (await this.db.mapDataCreateNextRecord(this.pgClient, {
+        region,
+        pbfMd5: md5,
+        pbfLocation,
+        routerVersion: this.env.routerVersion,
+        cacheLocation: await this.locations.getCacheDirLoc(
+          region,
+          this.env.routerVersion,
+          md5,
+        ),
+        kmlLocation,
+      }))!;
 
     this.logger.debug("Downloading PBF file", {
       region,
@@ -104,21 +112,28 @@ export class RegionDownloader {
       await this.fileDownloader.downloadFile(
         remotePbfUrl,
         pbfLocation,
-        (size) => this.db.mapData.updateRecordPbfSize(mapDataRecord.id, size),
+        (size) =>
+          this.db.mapDataUpdateRecordPbfSize(this.pgClient, {
+            id: mapDataRecord.id,
+            pbfSize: size.toString(),
+          }),
         (chunkSize) =>
-          this.db.mapData.updateRecordPbfDownloadedSize(
-            mapDataRecord.id,
-            chunkSize,
-          ),
+          this.db.mapDataUpdateRecordPbfDownloadedSize(this.pgClient, {
+            id: mapDataRecord.id,
+            pbfDownloadedSize: chunkSize.toString(),
+          }),
       );
+      await this.cacheGenerator.schedule(mapDataRecord);
     } catch (err) {
       this.logger.error("Region download failed", {
         region,
         error: String(err),
       });
-      this.db.mapData.updateRecordError(mapDataRecord.id, JSON.stringify(err));
+      await this.db.mapDataUpdateRecordError(this.pgClient, {
+        id: mapDataRecord.id,
+        error: JSON.stringify(err),
+      });
+      throw new Error("unrecoerable");
     }
-
-    await this.cacheGenerator.schedule(mapDataRecord);
   }
 }
