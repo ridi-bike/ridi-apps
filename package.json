@@ -5,7 +5,7 @@
 	"main": "index.js",
 	"scripts": {
 		"clean": "rm -rf ./node_modules/ && rm -rf ./apps/web/node_modules/ && rm -rf ./apps/mobile/node_modules/ && rm -rf ./packages/database/node_modules/ && rm -rf pnpm-lock.yaml",
-		"db": "supabase db reset && supabase gen types --lang=typescript --local > ./apps/ridi-router/lib/supabase.ts && pnpm db:sqlc",
+		"db": "supabase db reset && supabase gen types --lang=typescript --local > ./apps/ridi-router/packages/lib/supabase.ts && pnpm db:sqlc",
 		"db:sqlc": "sqlc generate"
 	},
 	"keywords": [],

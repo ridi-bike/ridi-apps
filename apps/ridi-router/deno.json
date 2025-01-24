@@ -1,11 +1,14 @@
 {
 	"tasks": {
-		"install": "cd ./deploy-handler && deno install --lock deno.lock --frozen=false --entrypoint main.ts && cd ../map-data-handler && deno install --lock deno.lock --frozen=false --entrypoint main.ts && cd ../router-handler && deno install --lock deno.lock --frozen=false --entrypoint main.ts"
+		"install": "cd ./deploy-handler && deno install --lock deno.lock --frozen=false --entrypoint main.ts && cd ../map-data-handler && deno install --lock deno.lock --frozen=false --entrypoint main.ts && cd ../router-handler && deno install --lock deno.lock --frozen=false --entrypoint main.ts && cd ../messaging && deno install --lock deno.lock --frozen=false --entrypoint main.ts"
 	},
 	"workspace": [
 		"./deploy-handler",
 		"./map-data-handler",
 		"./router-handler",
-		"./lib"
+		"./packages/lib",
+		"./packages/messaging",
+		"./packages/logging",
+		"./packages/env"
 	]
 }

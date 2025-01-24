@@ -4,10 +4,9 @@
 	"exports": "./main.ts",
 	"imports": {
 		"sqlite": "jsr:@db/sqlite@0.12",
-		"valibot": "jsr:@valibot/valibot@0.42.1",
-		"logger": "jsr:@logtape/logtape@0.8.0",
-		"yaml": "jsr:@std/yaml@1.0.5",
 		"postgres": "npm:postgres",
-		"flat": "npm:flat"
+		"valibot": "jsr:@valibot/valibot@0.42.1",
+		"@ridi-router/logging/": "../logging/",
+		"@ridi-router/env/": "../env/"
 	}
 }

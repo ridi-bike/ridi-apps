@@ -11,7 +11,7 @@ export type PgClient = ReturnType<typeof postgres>;
 
 export function getPgClient() {
   if (!pgInstance.pgClient) {
-    pgInstance.pgClient = postgres(new EnvVariables().supabaseDbUrl);
+    pgInstance.pgClient = postgres(EnvVariables.get().supabaseDbUrl);
   }
   return pgInstance.pgClient;
 }

@@ -2,21 +2,24 @@
 
 import { Sql } from "postgres";
 
-export const regionInsertQuery = `-- name: RegionInsert :one
+export const regionInsertOrUpdateQuery = `-- name: RegionInsertOrUpdate :one
 insert into regions
 (region, pbf_md5, version, geojson, polygon)
 values
 ($1, $2, 'next', $3, $4)
+on conflict (region, pbf_md5, version) do update
+set geojson = excluded.geojson,
+	polygon = excluded.polygon
 returning id, region, pbf_md5, version, geojson, polygon`;
 
-export interface RegionInsertArgs {
+export interface RegionInsertOrUpdateArgs {
     region: string;
     pbfMd5: string;
     geojson: any;
     polygon: string | null;
 }
 
-export interface RegionInsertRow {
+export interface RegionInsertOrUpdateRow {
     id: string;
     region: string;
     pbfMd5: string;
@@ -25,8 +28,8 @@ export interface RegionInsertRow {
     polygon: string | null;
 }
 
-export async function regionInsert(sql: Sql, args: RegionInsertArgs): Promise<RegionInsertRow | null> {
-    const rows = await sql.unsafe(regionInsertQuery, [args.region, args.pbfMd5, args.geojson, args.polygon]).values();
+export async function regionInsertOrUpdate(sql: Sql, args: RegionInsertOrUpdateArgs): Promise<RegionInsertOrUpdateRow | null> {
+    const rows = await sql.unsafe(regionInsertOrUpdateQuery, [args.region, args.pbfMd5, args.geojson, args.polygon]).values();
     if (rows.length !== 1) {
         return null;
     }
@@ -42,6 +45,30 @@ export async function regionInsert(sql: Sql, args: RegionInsertArgs): Promise<Re
         geojson: row[4],
         polygon: row[5]
     };
+}
+
+export const regionGetAllCurrentQuery = `-- name: RegionGetAllCurrent :many
+select id, region, pbf_md5, version, geojson, polygon from regions
+where version = 'current'`;
+
+export interface RegionGetAllCurrentRow {
+    id: string;
+    region: string;
+    pbfMd5: string;
+    version: "previous" | "current" | "next" | "discarded";
+    geojson: any;
+    polygon: string | null;
+}
+
+export async function regionGetAllCurrent(sql: Sql): Promise<RegionGetAllCurrentRow[]> {
+    return (await sql.unsafe(regionGetAllCurrentQuery, []).values()).map(row => ({
+        id: row[0],
+        region: row[1],
+        pbfMd5: row[2],
+        version: row[3],
+        geojson: row[4],
+        polygon: row[5]
+    }));
 }
 
 export const regionSetDiscardedQuery = `-- name: RegionSetDiscarded :one
@@ -284,7 +311,7 @@ values (
 	postgis.st_makeline(
 		array(
 			select 
-				postgis.st_point((p->>'lon')::numeric, (p->>'lat')::numeric)
+				postgis.st_point((p->>1)::numeric, (p->>0)::numeric)
 			from (
 				select jsonb_array_elements($4::jsonb) p
 			) arrayPoints

@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "../../../apps/ridi-router/lib/supabase.ts";
 import type { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import postgres from "postgres";
+import { Messaging } from "@ridi-router/messaging/main.ts";
 
 type ContextCreatorParams = Parameters<
   NonNullable<Parameters<typeof fetchRequestHandler>[0]["createContext"]>
@@ -11,7 +12,10 @@ const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const supabaseDbUrl = Deno.env.get("SUPABASE_DB_URL") ?? "";
 
-export const createContext = async ({ req }: ContextCreatorParams) => {
+export const createContext = async (
+  { req }: ContextCreatorParams,
+  info: Deno.ServeHandlerInfo<Deno.NetAddr>,
+) => {
   const supabaseClient = createClient<Database, "public", Database["public"]>(
     supabaseUrl,
     supabaseServiceRoleKey,
@@ -23,11 +27,16 @@ export const createContext = async ({ req }: ContextCreatorParams) => {
   const token = authHeader?.replace("Bearer ", "") || "";
   const { data } = await supabaseClient.auth.getUser(token);
   const user = data.user;
+  const messaging = new Messaging(db, {
+    info: (...args: unknown[]) => console.log(...args),
+    error: (...args: unknown[]) => console.error(...args),
+  });
 
   return {
-    supabaseClient,
     user,
     db,
+    messaging,
+    info,
   };
 };
 

@@ -1,7 +1,8 @@
-import { getDb, pg, RidiLogger } from "@ridi-router/lib";
+import { getDb, pg } from "@ridi-router/lib";
+import { Messaging } from "@ridi-router/messaging/main.ts";
+import { RidiLogger } from "@ridi-router/logging/main.ts";
 import { EnvVariables } from "./env-variables.ts";
 import { PgClient } from "./pg-client.ts";
-import { Supabase } from "./supabase.ts";
 import { PlanProcessor } from "./plan-processor.ts";
 
 export class Runner {
@@ -11,7 +12,7 @@ export class Runner {
     private readonly db: ReturnType<typeof getDb>,
     private readonly pgClient: PgClient,
     private readonly pgQueries: typeof pg,
-    private readonly supabase: Supabase,
+    private readonly messaging: Messaging,
     private readonly planProcessor: PlanProcessor,
   ) {
   }
@@ -30,7 +31,12 @@ export class Runner {
       });
     }
     const nextMapData = this.db.mapData.getRecordsAllNext();
-    if (nextMapData.length) {
+    if (
+      this.env.regions.every((region) =>
+        nextMapData.find((mapData) => mapData.region === region)?.status ===
+          "ready"
+      )
+    ) {
       this.logger.debug("Next records found", {
         regions: nextMapData.map((r) => r.region),
       });
@@ -44,18 +50,42 @@ export class Runner {
         throw new Error("Critical failure");
       }
 
-      this.db.mapData.updateRecordsDemoteCurrent();
-      this.db.mapData.updateRecordsPromoteNext();
+      const allNext = this.db.mapData.getRecordsAllNext();
+      if (allNext.every((rec) => rec.status === "ready")) {
+        this.logger.info("All next records are ready, promoting", { allNext });
+        this.db.mapData.updateRecordsDemoteCurrent();
 
-      await this.pgQueries.regionSetAllPrevious(this.pgClient);
-      for (const nextRec of nextMapData) {
-        await this.pgQueries.regionSetCurrent(this.pgClient, {
-          region: nextRec.region,
-          pbfMd5: nextRec.pbf_md5,
+        this.db.mapData.updateRecordsPromoteNext();
+
+        await this.pgQueries.regionSetAllPrevious(this.pgClient);
+        for (const nextRec of nextMapData) {
+          await this.pgQueries.regionSetCurrent(this.pgClient, {
+            region: nextRec.region,
+            pbfMd5: nextRec.pbf_md5,
+          });
+        }
+      } else {
+        this.logger.info("Not all next records are ready, promotion skipped", {
+          allNext,
         });
       }
-    } else {
-      const currentMapData = this.db.mapData.getRecordsAllCurrent();
+    }
+
+    const currentMapData = this.db.mapData.getRecordsAllCurrent();
+    const currentRegions = await this.pgQueries.regionGetAllCurrent(
+      this.pgClient,
+    );
+    if (
+      this.env.regions.every((region) => {
+        const mapData = currentMapData.find((mapData) =>
+          mapData.region === region
+        );
+        return mapData?.status ===
+            "ready" &&
+          currentRegions.find((reg) => reg.region === region)?.pbfMd5 ===
+            mapData.pbf_md5;
+      })
+    ) {
       this.logger.debug("Current records found", {
         regions: currentMapData.map((r) => r.region),
       });
@@ -64,35 +94,74 @@ export class Runner {
           r.router_version === this.env.routerVersion
         )
       ) {
-        this.logger.error(
+        throw this.logger.error(
           "Some 'current' map data records do not have the correct router version",
           { routerVersion: this.env.routerVersion, nextMapData },
         );
-        throw new Error("Critical failure");
       }
+    } else {
+      throw this.logger.error("Map data records found, critical failure", {
+        regions: this.env.regions,
+        currentMapData,
+        currentRegions,
+      });
     }
 
-    const unsubscribe = await this.supabase.listen(async (planId) => {
-      this.logger.debug("Received plan event", { planId });
-      await this.planProcessor.handlePlanNotification(planId);
-    });
-
-    this.processExistingPlans(); // TODO not awaiting on purpose
+    this.messaging.listen(
+      "new-plan",
+      async (
+        { message, data, actions: { deleteMessage, setVisibilityTimeout } },
+      ) => {
+        const beat = setInterval(() => setVisibilityTimeout(5), 4000);
+        try {
+          const retryIn = await this.planProcessor.handlePlanNotification(
+            data.planId,
+          );
+          if (retryIn) {
+            await setVisibilityTimeout(retryIn);
+          } else {
+            await deleteMessage();
+          }
+        } catch (err) {
+          if (message.readCt < 6) {
+            const retryInSecs = 30;
+            this.logger.error("New Plan message error, retry", {
+              message,
+              data,
+              retryInSecs,
+              err,
+            });
+            await setVisibilityTimeout(retryInSecs);
+            await this.pgQueries.planSetState(this.pgClient, {
+              id: data.planId,
+              state: "error",
+            });
+          } else {
+            this.logger.error("New Plan message error", {
+              message,
+              data,
+            });
+            await deleteMessage();
+          }
+        }
+        clearInterval(beat);
+      },
+    );
 
     globalThis.addEventListener("unload", () => {
-      unsubscribe();
+      this.messaging.stop();
     });
 
     Deno.serve(
       { port: Number(this.env.port), hostname: "0.0.0.0" },
       async (_req) => {
         const regionCount = await this.pgQueries.regionGetCount(this.pgClient);
-        if (this.supabase.isListening() && regionCount?.count) {
+        if (this.messaging.isRunning() && regionCount?.count) {
           return new Response("Hello, world");
         }
         return new Response(
           JSON.stringify({
-            listening: this.supabase.isListening(),
+            messagingRunning: this.messaging.isRunning(),
             regionCount: regionCount?.count,
           }),
           {
@@ -101,14 +170,5 @@ export class Runner {
         );
       },
     );
-  }
-
-  async processExistingPlans() {
-    const plans = await this.pgQueries.plansGetNew(this.pgClient);
-    for (const plan of plans) {
-      this.logger.debug("Processing plan", { planId: plan.id });
-
-      await this.planProcessor.handlePlanNotification(plan.id);
-    }
   }
 }
