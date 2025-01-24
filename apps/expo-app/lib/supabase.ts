@@ -6,7 +6,7 @@ import { createTRPCClient, httpBatchLink, loggerLink } from "@trpc/client";
 import "react-native-url-polyfill/auto";
 import { MMKV } from "react-native-mmkv";
 import { type SupportedStorage, createClient } from "@supabase/supabase-js";
-import type { Database } from "../../../supabase/functions/trpc/types";
+import type { Database } from "../../../services/ridi-router/packages/lib/supabase";
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
