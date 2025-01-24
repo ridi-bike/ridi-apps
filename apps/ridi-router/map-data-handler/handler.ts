@@ -1,5 +1,6 @@
-import { getDb, MapDataRecord, RidiLogger } from "@ridi-router/lib";
+import { getDb, MapDataRecord } from "@ridi-router/lib";
 
+import type { RidiLogger } from "@ridi-router/logging/main.ts";
 import { EnvVariables } from "./env-variables.ts";
 
 export class Handler {

@@ -1,6 +1,7 @@
 {
-	"name": "@ridi/function-trpc",
-	"exports": "index.ts",
+	"name": "@ridi-router/trpc",
+	"version": "0.1.0",
+	"exports": "./index.ts",
 	"imports": {
 		"@supabase/supabase-js": "jsr:@supabase/supabase-js",
 		"@trpc/server": "npm:@trpc/server",
@@ -8,6 +9,9 @@
 		"valibot": "jsr:@valibot/valibot",
 		"postgres": "npm:postgres",
 		"remeda": "npm:remeda",
-		"superjson": "npm:superjson"
+		"superjson": "npm:superjson",
+		"@ridi-router/messaging/": "../../../apps/ridi-router/packages/messaging/",
+		"@ridi-router/logging/": "../../../apps/ridi-router/packages/logging/",
+		"pino": "npm:pino"
 	}
 }

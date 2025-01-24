@@ -1,5 +1,5 @@
 import { parse, string } from "valibot";
-import { BaseEnvVariables } from "@ridi-router/lib";
+import { BaseEnvVariables } from "@ridi-router/env/main.ts";
 
 export class EnvVariables extends BaseEnvVariables {
   private static instance: EnvVariables;
@@ -33,7 +33,7 @@ export class EnvVariables extends BaseEnvVariables {
     super();
   }
 
-  public static override get(): EnvVariables {
+  public static get(): EnvVariables {
     if (!EnvVariables.instance) {
       EnvVariables.instance = new EnvVariables();
     }

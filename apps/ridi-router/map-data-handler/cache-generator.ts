@@ -1,9 +1,5 @@
-import {
-  DenoCommand,
-  getDb,
-  type MapDataRecord,
-  type RidiLogger,
-} from "@ridi-router/lib";
+import { DenoCommand, getDb, type MapDataRecord } from "@ridi-router/lib";
+import type { RidiLogger } from "@ridi-router/logging/main.ts";
 import PQueue from "p-queue";
 import { type EnvVariables } from "./env-variables.ts";
 import { type KmlProcessor } from "./kml-processor.ts";
@@ -53,15 +49,13 @@ export class CacheGenerator {
       .denoCommand.execute(
         this.env.routerBin,
         [
-          "cache",
-          "-i",
+          "prep-cache",
+          "--input",
           mapDataRecord.pbf_location,
-          "-c",
+          "--cache-dir",
           mapDataRecord.cache_location,
         ],
       );
-
-    clearInterval(beat);
 
     this.logger.debug("Cache generation process output", {
       id: mapDataRecord.id,
@@ -72,7 +66,48 @@ export class CacheGenerator {
     const cacheSize = await this.dirStat.getDirSize(
       mapDataRecord.cache_location,
     );
+
+    const serverStartMoment = Date.now();
+    const process = new Deno.Command(this.env.routerBin, {
+      stdout: "piped",
+      args: [
+        "start-server",
+        "--input",
+        mapDataRecord.pbf_location,
+        "--cache-dir",
+        mapDataRecord.cache_location,
+        "--socket-name",
+        `${Math.random()}`,
+      ],
+    }).spawn();
+
+    await new Promise<void>((resolve) => {
+      const writableStream = new WritableStream({
+        write: (chunk, _controller) => {
+          const text = new TextDecoder().decode(chunk);
+          if (
+            text.split(";").find((t) => t === "RIDI_ROUTER SERVER READY")
+          ) {
+            resolve();
+          }
+        },
+      });
+      process.stdout.pipeTo(
+        writableStream,
+      );
+    });
+
+    process.kill();
+
+    const serverStartTime = Math.ceil((Date.now() - serverStartMoment) / 1000);
+
     this.db.mapData.updateRecordCacheSize(mapDataRecord.id, cacheSize);
+    this.db.mapData.updateRecordStartupTime(
+      mapDataRecord.id,
+      serverStartTime,
+    );
+
+    clearInterval(beat);
 
     await this.kml.processKml(mapDataRecord);
 

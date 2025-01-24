@@ -1,20 +1,14 @@
 import { Runner } from "./runner.ts";
 import { EnvVariables } from "./env-variables.ts";
-import {
-  DenoCommand,
-  getDb,
-  initDb,
-  Locations,
-  pg,
-  RidiLogger,
-} from "@ridi-router/lib";
+import { DenoCommand, getDb, initDb, Locations, pg } from "@ridi-router/lib";
 import { getPgClient } from "./pg-client.ts";
-import { Supabase } from "./supabase.ts";
 import { PlanProcessor } from "./plan-processor.ts";
-import { RouterStore } from "./router-store.ts";
+import { RouterServerManager } from "./router-server-manager.ts";
+import { Messaging } from "@ridi-router/messaging/main.ts";
+import { RidiLogger } from "@ridi-router/logging/main.ts";
 
 const env = new EnvVariables();
-await RidiLogger.init(env);
+RidiLogger.init();
 const ridiLogger = RidiLogger.get();
 ridiLogger.debug("omg test");
 const locations = new Locations(env);
@@ -26,13 +20,13 @@ const runner = new Runner(
   db,
   getPgClient(),
   pg,
-  new Supabase(env, ridiLogger),
+  new Messaging(getPgClient(), ridiLogger),
   new PlanProcessor(
     db,
     ridiLogger,
     getPgClient(),
     pg,
-    new RouterStore(env, db, ridiLogger),
+    new RouterServerManager(env, db, ridiLogger),
     new DenoCommand(),
     env,
   ),

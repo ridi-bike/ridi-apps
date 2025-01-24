@@ -38,7 +38,7 @@ export class KmlProcessor {
     const polygonCoordsList = polygon.coordinates[0]
       .map((c) => `${c[0]} ${c[1]}`).join(",");
 
-    await this.pgQueries.regionInsert(this.pgClient, {
+    await this.pgQueries.regionInsertOrUpdate(this.pgClient, {
       region: mapData.region,
       pbfMd5: mapData.pbf_md5,
       geojson: converted,
