@@ -15,6 +15,11 @@ export class BaseEnvVariables {
     Deno.env.get("RIDI_ENV_NAME"),
   );
 
+  readonly supabaseDbUrl = parse(
+    string("SUPABASE_DB_URL env variable"),
+    Deno.env.get("SUPABASE_DB_URL"),
+  );
+
   readonly openObserveOrg = parse(
     string("OPEN_OBSERVE_ORG env variable"),
     Deno.env.get("OPEN_OBSERVE_ORG"),

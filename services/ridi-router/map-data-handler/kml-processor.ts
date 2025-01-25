@@ -1,7 +1,7 @@
-import { MapDataRecord, pg } from "@ridi-router/lib";
-import { PgClient } from "./pg-client.ts";
+import { pg, PgClient } from "@ridi-router/lib";
 import { kml } from "to-geo-json";
 import { DOMParser } from "xmldom";
+import { MapDataRecord } from "./types.ts";
 
 export class KmlConverter {
   convert(contents: string) {
@@ -27,7 +27,7 @@ export class KmlProcessor {
 
   async processKml(mapData: MapDataRecord): Promise<void> {
     const kmlFileContents = await this.fileReader.readTextFile(
-      mapData.kml_location,
+      mapData.kmlLocation,
     );
 
     const converted = this.kmlConverter.convert(kmlFileContents);
@@ -40,7 +40,7 @@ export class KmlProcessor {
 
     await this.pgQueries.regionInsertOrUpdate(this.pgClient, {
       region: mapData.region,
-      pbfMd5: mapData.pbf_md5,
+      pbfMd5: mapData.pbfMd5,
       geojson: converted,
       polygon: `POLYGON((${polygonCoordsList}))`,
     });

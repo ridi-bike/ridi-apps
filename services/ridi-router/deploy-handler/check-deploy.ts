@@ -1,7 +1,7 @@
-import { getDb } from "@ridi-router/lib";
 import { CoolifyClient } from "./coolify.ts";
 import type { RidiLogger } from "@ridi-router/logging/main.ts";
 import { EnvVariables } from "./env.ts";
+import { pg, PgClient } from "@ridi-router/lib";
 
 export class DeployChecker {
   private deployed = {
@@ -11,7 +11,8 @@ export class DeployChecker {
   private checkInterval: number | null = null;
 
   constructor(
-    private readonly db: ReturnType<typeof getDb>,
+    private readonly db: typeof pg,
+    private readonly pgClient: PgClient,
     private readonly coolify: CoolifyClient,
     private readonly envVariables: EnvVariables,
     private readonly logger: RidiLogger,
@@ -19,14 +20,20 @@ export class DeployChecker {
   }
 
   async checkDeploy() {
-    this.db.handlers.updateRecordProcessing("deploy");
+    await this.db.servicesUpdateRecordProcessing(this.pgClient, {
+      name: "deploy",
+    });
 
-    const mapDataHandler = this.db.handlers.get("map-data");
-    const routerHandler = this.db.handlers.get("router");
+    const mapDataHandler = await this.db.servicesGet(this.pgClient, {
+      name: "map-data",
+    });
+    const routerHandler = await this.db.servicesGet(this.pgClient, {
+      name: "router",
+    });
 
     this.logger.debug("Checking map data handler", { ...mapDataHandler });
 
-    if (!this.deployed.mapDataHandler && mapDataHandler?.status === "done") {
+    if (!this.deployed.mapDataHandler) {
       await this.coolify.deployMapDataHandler();
       this.deployed.mapDataHandler = true;
       this.logger.debug("Map data handler deployment triggered");
@@ -37,7 +44,7 @@ export class DeployChecker {
     if (
       !this.deployed.routerHandler &&
       this.deployed.mapDataHandler &&
-      mapDataHandler?.router_version === this.envVariables.routerVersion &&
+      mapDataHandler?.routerVersion === this.envVariables.routerVersion &&
       mapDataHandler?.status === "done"
     ) {
       await this.coolify.deployRouterHandler();
@@ -51,7 +58,7 @@ export class DeployChecker {
     ) {
       this.logger.debug("Deployments done, clearing check interval");
       clearInterval(this.checkInterval);
-      this.db.handlers.updateRecordDone("deploy");
+      await this.db.servicesUpdateRecordDone(this.pgClient, { name: "deploy" });
     }
   }
 

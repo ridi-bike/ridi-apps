@@ -1,6 +1,5 @@
-import { getDb, pg } from "@ridi-router/lib";
+import { pg, PgClient } from "@ridi-router/lib";
 import type { RidiLogger } from "@ridi-router/logging/main.ts";
-import { PgClient } from "./pg-client.ts";
 
 export class DenoRemove {
   async remove(path: string, options?: Deno.RemoveOptions): Promise<void> {
@@ -16,8 +15,7 @@ export class DenoRemove {
 
 export class Cleaner {
   constructor(
-    private readonly db: ReturnType<typeof getDb>,
-    private readonly pgQueries: typeof pg,
+    private readonly db: typeof pg,
     private readonly pgClient: PgClient,
     private readonly logger: RidiLogger,
     private readonly denoRemove: DenoRemove,
@@ -25,33 +23,49 @@ export class Cleaner {
   }
 
   async processCleanup(): Promise<void> {
-    const cleanupRecords = this.db.mapData.getRecordsDiscardedAndPrevious();
+    const cleanupRecords = await this.db
+      .mapDataGetRecordsDiscardedAndPrevious(this.pgClient);
+
     this.logger.debug("Records for cleanup found", {
       count: cleanupRecords.length,
     });
 
     for (const record of cleanupRecords) {
       this.logger.debug("Record cleanup", { ...record });
-      if (!this.db.mapData.isCacheDirInUse(record.cache_location)) {
+      if (
+        !this.db.mapDataIsCacheDirInUse(this.pgClient, {
+          cacheLocation: record.cacheLocation,
+        })
+      ) {
         this.logger.debug("Cache can be removed");
-        await this.denoRemove.remove(record.cache_location, {
+        await this.denoRemove.remove(record.cacheLocation, {
           recursive: true,
         });
       }
-      if (!this.db.mapData.isPbfInUse(record.pbf_location)) {
+      if (
+        !this.db.mapDataIsPbfInUse(this.pgClient, {
+          pbfLocation: record.pbfLocation,
+        })
+      ) {
         this.logger.debug("Pbf can be removed");
-        await this.denoRemove.remove(record.pbf_location);
+        await this.denoRemove.remove(record.pbfLocation);
       }
 
-      if (!this.db.mapData.isKmlInUse(record.kml_location)) {
+      if (
+        !this.db.mapDataIsKmlInUse(this.pgClient, {
+          kmlLocation: record.kmlLocation,
+        })
+      ) {
         this.logger.debug("Kml can be removed");
-        await this.denoRemove.remove(record.kml_location);
+        await this.denoRemove.remove(record.kmlLocation);
       }
 
-      this.db.mapData.deleteRecord(record.id);
-      await this.pgQueries.regionDeleteDiscardedAndPrevious(this.pgClient, {
+      await this.db.mapDataDeleteRecord(this.pgClient, {
+        id: record.id,
+      });
+      await this.db.regionDeleteDiscardedAndPrevious(this.pgClient, {
         region: record.region,
-        pbfMd5: record.pbf_md5,
+        pbfMd5: record.pbfMd5,
       });
     }
   }

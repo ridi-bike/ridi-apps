@@ -13,11 +13,6 @@ export class EnvVariables extends BaseEnvVariables {
     Deno.env.get("RIDI_ROUTER_VERSION"),
   );
 
-  readonly supabaseDbUrl = parse(
-    string("SUPABASE_DB_URL env variable"),
-    Deno.env.get("SUPABASE_DB_URL"),
-  );
-
   readonly supabaseUrl = parse(
     string("SUPABASE_URL env variable"),
     Deno.env.get("SUPABASE_URL"),

@@ -1,4 +1,4 @@
-import { EnvVariables } from "./env-variables.ts";
+import { BaseEnvVariables } from "@ridi-router/env/main.ts";
 import postgres from "postgres";
 
 const pgInstance = {
@@ -11,7 +11,7 @@ export type PgClient = ReturnType<typeof postgres>;
 
 export function getPgClient() {
   if (!pgInstance.pgClient) {
-    pgInstance.pgClient = postgres(EnvVariables.get().supabaseDbUrl);
+    pgInstance.pgClient = postgres(new BaseEnvVariables().supabaseDbUrl);
   }
   return pgInstance.pgClient;
 }
