@@ -1,9 +1,8 @@
-import { Locations, pg } from "@ridi-router/lib";
+import { Locations, pg, PgClient } from "@ridi-router/lib";
 import type { RidiLogger } from "@ridi-router/logging/main.ts";
 import { EnvVariables } from "./env-variables.ts";
 import { CacheGenerator } from "./cache-generator.ts";
 import { OsmLocations } from "./osm-locations.ts";
-import { PgClient } from "./pg-client.ts";
 import { MapDataRecord } from "./types.ts";
 
 class ProgressTrack extends TransformStream {

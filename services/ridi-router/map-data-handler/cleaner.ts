@@ -1,6 +1,5 @@
-import { pg } from "@ridi-router/lib";
+import { pg, PgClient } from "@ridi-router/lib";
 import type { RidiLogger } from "@ridi-router/logging/main.ts";
-import { PgClient } from "./pg-client.ts";
 
 export class DenoRemove {
   async remove(path: string, options?: Deno.RemoveOptions): Promise<void> {

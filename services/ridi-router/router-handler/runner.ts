@@ -1,8 +1,7 @@
-import { pg } from "@ridi-router/lib";
+import { pg, PgClient } from "@ridi-router/lib";
 import { Messaging } from "@ridi-router/messaging/main.ts";
 import { RidiLogger } from "@ridi-router/logging/main.ts";
 import { EnvVariables } from "./env-variables.ts";
-import { PgClient } from "./pg-client.ts";
 import { PlanProcessor } from "./plan-processor.ts";
 
 export class Runner {

@@ -1,7 +1,6 @@
 import { Runner } from "./runner.ts";
 import { EnvVariables } from "./env-variables.ts";
-import { DenoCommand, Locations, pg } from "@ridi-router/lib";
-import { getPgClient } from "./pg-client.ts";
+import { DenoCommand, getPgClient, pg } from "@ridi-router/lib";
 import { PlanProcessor } from "./plan-processor.ts";
 import { RouterServerManager } from "./router-server-manager.ts";
 import { Messaging } from "@ridi-router/messaging/main.ts";

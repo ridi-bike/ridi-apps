@@ -1,4 +1,4 @@
-import { DenoCommand, Locations, pg } from "@ridi-router/lib";
+import { DenoCommand, getPgClient, Locations, pg } from "@ridi-router/lib";
 import { RidiLogger } from "@ridi-router/logging/main.ts";
 "@ridi-router/logging/main.ts";
 import { BaseEnvVariables } from "@ridi-router/env/main.ts";
@@ -8,7 +8,6 @@ import { Md5Downloader, RegionListProcessor } from "./region-list-processor.ts";
 import { CacheGenerator, DenoDirStat } from "./cache-generator.ts";
 import { Handler } from "./handler.ts";
 import { Cleaner, DenoRemove } from "./cleaner.ts";
-import { getPgClient } from "./pg-client.ts";
 import { DenoFileReader, KmlConverter, KmlProcessor } from "./kml-processor.ts";
 import { FileDownloader, RegionDownloader } from "./region-downloader.ts";
 import { OsmLocations } from "./osm-locations.ts";
