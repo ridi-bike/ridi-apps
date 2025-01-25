@@ -1,6 +1,7 @@
+import { pg } from "../packages/lib/main.ts";
 import { EnvVariables } from "./env-variables.ts";
-import { getDb } from "@ridi-router/lib";
 import { handleMaybeErrors, RidiLogger } from "@ridi-router/logging/main.ts";
+import { PgClient } from "./pg-client.ts";
 
 type RegionReq = {
   reqId: string;
@@ -13,16 +14,19 @@ export class RouterServerManager {
   private currentFreeMemoryMb: number;
   private regionRequestsRunning: Record<string, RegionReq[]> = {};
   private regionRequestsWaiting: Record<string, RegionReq[]> = {};
-  private regions: ReturnType<
-    ReturnType<typeof getDb>["mapData"]["getRecordsAllCurrent"]
-  >;
+  // private regions: Awaited<
+  //   ReturnType<typeof pg["mapDataGetRecordsAllCurrent"]>
+  // >;
+
   constructor(
     private readonly env: EnvVariables,
-    private readonly db: ReturnType<typeof getDb>,
+    private readonly db: typeof pg,
+    private readonly pgClient: PgClient,
     private readonly logger: RidiLogger,
   ) {
     this.currentFreeMemoryMb = env.serverAvailMemoryMb;
-    this.regions = db.mapData.getRecordsAllCurrent();
+    // this.regions = db.mapData.getRecordsAllCurrent();
+    // this.regions = await this.db.mapDataGetRecordCurrent(this.pgClient)
 
     setInterval(() =>
       this.manageRouterServers().catch((error) => {
@@ -45,14 +49,15 @@ export class RouterServerManager {
       return;
     }
 
-    const neededRegionData = this.regions.find((r) =>
-      r.region === neededRegion
+    const neededRegionData = await this.db.mapDataGetRecordCurrent(
+      this.pgClient,
+      { region: neededRegion },
     );
     if (!neededRegionData) {
       throw new Error("missing region data");
     }
     const neededMemory = Math.ceil(
-      (neededRegionData.cache_size || 0) * 2 / 1024 / 1024,
+      Number(neededRegionData.cacheSize || 0) * 2 / 1024 / 1024,
     );
 
     while (neededMemory > this.currentFreeMemoryMb) {
@@ -64,7 +69,9 @@ export class RouterServerManager {
         ).map((r) => ({
           region: r[0],
           regionMemory: Math.ceil(
-            (this.regions.find((rd) => rd.region === r[0])!.cache_size || 0) /
+            Number(
+              neededRegionData.cacheSize || 0,
+            ) /
               1024 / 1024,
           ),
         })).sort((r1, r2) => r1.regionMemory - r2.regionMemory);
@@ -74,7 +81,7 @@ export class RouterServerManager {
         break;
       }
 
-      this.stopRegion(regionToStop.region);
+      await this.stopRegion(regionToStop.region);
     }
 
     if (neededMemory <= this.currentFreeMemoryMb) {
@@ -150,7 +157,9 @@ export class RouterServerManager {
       return;
     }
 
-    const mapData = this.db.mapData.getRecordCurrent(region);
+    const mapData = await this.db.mapDataGetRecordCurrent(this.pgClient, {
+      region,
+    });
 
     if (!mapData) {
       this.logger.error(
@@ -162,7 +171,7 @@ export class RouterServerManager {
 
     this.regionsStarting.add(region);
 
-    const cacheSizeMb = (mapData.cache_size || 0) / 1024 / 1024;
+    const cacheSizeMb = Number(mapData.cacheSize || 0) / 1024 / 1024;
 
     this.currentFreeMemoryMb -= cacheSizeMb + cacheSizeMb; // double the size for startup as it needs to read and parse the cache to load in memory
 
@@ -171,9 +180,9 @@ export class RouterServerManager {
       args: [
         "start-server",
         "--input",
-        mapData.pbf_location,
+        mapData.pbfLocation,
         "--cache-dir",
-        mapData.cache_location,
+        mapData.cacheLocation,
         "--socket-name",
         region,
       ],
@@ -200,7 +209,11 @@ export class RouterServerManager {
     this.regionsStarting.delete(region);
   }
 
-  stopRegion(region: string) {
+  async stopRegion(region: string) {
+    const neededRegionData = await this.db.mapDataGetRecordCurrent(
+      this.pgClient,
+      { region },
+    );
     const process = this.regionsRunning[region];
     if (!process) {
       this.logger.error(
@@ -213,7 +226,8 @@ export class RouterServerManager {
 
     delete this.regionsRunning[region];
     this.currentFreeMemoryMb += Math.ceil(
-      (this.regions.find((r) => r.region === region)!.cache_size || 0) / 1024 /
+      Number(neededRegionData?.cacheSize || 0) /
+        1024 /
         1024,
     );
   }

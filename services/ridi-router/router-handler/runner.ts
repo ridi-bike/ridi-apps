@@ -1,4 +1,4 @@
-import { getDb, pg } from "@ridi-router/lib";
+import { pg } from "@ridi-router/lib";
 import { Messaging } from "@ridi-router/messaging/main.ts";
 import { RidiLogger } from "@ridi-router/logging/main.ts";
 import { EnvVariables } from "./env-variables.ts";
@@ -9,7 +9,6 @@ export class Runner {
   constructor(
     private readonly env: EnvVariables,
     private readonly logger: RidiLogger,
-    private readonly db: ReturnType<typeof getDb>,
     private readonly pgClient: PgClient,
     private readonly pgQueries: typeof pg,
     private readonly messaging: Messaging,
@@ -20,17 +19,26 @@ export class Runner {
   async start() {
     this.logger.debug("Start triggered");
 
-    const handlerRecord = this.db.handlers.get("router");
+    const handlerRecord = await this.pgQueries.servicesGet(this.pgClient, {
+      name: "router",
+    });
 
-    if (handlerRecord?.router_version !== this.env.routerVersion) {
-      this.db.handlers.createUpdate("router", this.env.routerVersion);
+    if (handlerRecord?.routerVersion !== this.env.routerVersion) {
+      await this.pgQueries.servicesCreateUpdate(this.pgClient, {
+        name: "router",
+        routerVersion: this.env.routerVersion,
+      });
 
       this.logger.debug("New router version", {
-        old: handlerRecord?.router_version,
+        old: handlerRecord?.routerVersion,
         new: this.env.routerVersion,
       });
     }
-    const nextMapData = this.db.mapData.getRecordsAllNext();
+
+    const nextMapData = await this.pgQueries.mapDataGetRecordsAllNext(
+      this.pgClient,
+    );
+
     if (
       this.env.regions.every((region) =>
         nextMapData.find((mapData) => mapData.region === region)?.status ===
@@ -41,7 +49,7 @@ export class Runner {
         regions: nextMapData.map((r) => r.region),
       });
       if (
-        !nextMapData.every((r) => r.router_version === this.env.routerVersion)
+        !nextMapData.every((r) => r.routerVersion === this.env.routerVersion)
       ) {
         this.logger.error(
           "Some 'next' map data records do not have the correct router version",
@@ -50,18 +58,20 @@ export class Runner {
         throw new Error("Critical failure");
       }
 
-      const allNext = this.db.mapData.getRecordsAllNext();
+      const allNext = await this.pgQueries.mapDataGetRecordsAllCurrent(
+        this.pgClient,
+      );
       if (allNext.every((rec) => rec.status === "ready")) {
         this.logger.info("All next records are ready, promoting", { allNext });
-        this.db.mapData.updateRecordsDemoteCurrent();
+        await this.pgQueries.mapDataUpdateRecordsDemoteCurrent(this.pgClient);
 
-        this.db.mapData.updateRecordsPromoteNext();
+        await this.pgQueries.mapDataUpdateRecordsPromoteNext(this.pgClient);
 
         await this.pgQueries.regionSetAllPrevious(this.pgClient);
         for (const nextRec of nextMapData) {
           await this.pgQueries.regionSetCurrent(this.pgClient, {
             region: nextRec.region,
-            pbfMd5: nextRec.pbf_md5,
+            pbfMd5: nextRec.pbfMd5,
           });
         }
       } else {
@@ -71,7 +81,9 @@ export class Runner {
       }
     }
 
-    const currentMapData = this.db.mapData.getRecordsAllCurrent();
+    const currentMapData = await this.pgQueries.mapDataGetRecordsAllCurrent(
+      this.pgClient,
+    );
     const currentRegions = await this.pgQueries.regionGetAllCurrent(
       this.pgClient,
     );
@@ -83,16 +95,14 @@ export class Runner {
         return mapData?.status ===
             "ready" &&
           currentRegions.find((reg) => reg.region === region)?.pbfMd5 ===
-            mapData.pbf_md5;
+            mapData.pbfMd5;
       })
     ) {
       this.logger.debug("Current records found", {
         regions: currentMapData.map((r) => r.region),
       });
       if (
-        !currentMapData.every((r) =>
-          r.router_version === this.env.routerVersion
-        )
+        !currentMapData.every((r) => r.routerVersion === this.env.routerVersion)
       ) {
         throw this.logger.error(
           "Some 'current' map data records do not have the correct router version",
