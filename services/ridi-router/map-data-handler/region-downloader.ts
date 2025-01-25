@@ -50,7 +50,6 @@ export class FileDownloader {
       } else {
         await fileResponse.body.pipeTo(file.writable);
       }
-      file.close();
     } else {
       this.logger.error("no body in download", {
         headers: fileResponse.headers,
