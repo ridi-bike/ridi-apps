@@ -49,8 +49,9 @@ export class RegionListProcessor {
     nextMapData: MapDataRecord,
   ) {
     if (
-      remoteMd5 !== nextMapData.pbfMd5 || nextMapData.status === "error" ||
-      nextMapData.routerVersion !== this.env.routerVersion
+      (remoteMd5 !== nextMapData.pbfMd5 &&
+        nextMapData.nextDownloadAfter.getTime() < Date.now()) ||
+      nextMapData.status === "error"
     ) {
       this.logger.debug("discarding and downloading region", {
         remoteMd5,
@@ -69,7 +70,8 @@ export class RegionListProcessor {
       await this.downloader.downloadRegion(region, remoteMd5, nextMapData);
     } else if (
       nextMapData.status === "downloaded" ||
-      nextMapData.status === "processing"
+      nextMapData.status === "processing" ||
+      nextMapData.routerVersion !== this.env.routerVersion
     ) {
       this.logger.debug("Status {status}, processing", {
         status: nextMapData.status,
@@ -86,11 +88,16 @@ export class RegionListProcessor {
     this.logger.debug("Current Map Data Record", { ...currentMapData });
     if (currentMapData) {
       if (
-        remoteMd5 !== currentMapData.pbfMd5 ||
-        currentMapData.routerVersion !== this.env.routerVersion
+        remoteMd5 !== currentMapData.pbfMd5 &&
+        currentMapData.nextDownloadAfter.getTime() < Date.now()
       ) {
         this.logger.debug("MD5 differs, downloading");
         await this.downloader.downloadRegion(region, remoteMd5, null);
+      } else if (
+        currentMapData.routerVersion !== this.env.routerVersion
+      ) {
+        this.logger.debug("Router version changed, reporcessing");
+        await this.cacheGenerator.schedule(currentMapData);
       }
     } else {
       this.logger.debug("no current record, downloading");

@@ -1,24 +1,46 @@
 receivers:
-  otlp:
-    protocols:
-      http:
-        endpoint: 0.0.0.0:4318
-  filelog/std:
-    include: [ /var/log/**log ]
-    # start_at: beginning
+  filelog/deploy:
+    directory: /var/log/ridi-service-deploy
+  filelog/map-data:
+    directory: /var/log/ridi-service-map-data
+  filelog/router:
+    directory: /var/log/ridi-service-router
   hostmetrics:
     root_path: /
-    collection_interval: 30s
+    collection_interval: 5s
     scrapers:
-      cpu:
-      disk:
-      filesystem:
       load:
       memory:
-      network:
-      paging:          
-      processes:
-      # process: # a bug in the process scraper causes the collector to throw errors so disabling it for now
+  docker_stats:
+    collection_interval: 5s
+    api_version: '1.45'
+    metrics:
+      container.cpu.utilization:
+        enabled: true
+      container.blockio.io_service_bytes_recursive:
+        enabled: false
+      container.cpu.usage.kernelmode:
+        enabled: false
+      container.cpu.usage.total:
+        enabled: false
+      container.cpu.usage.usermode:
+        enabled: false
+      container.memory.file:
+        enabled: false
+      container.memory.percent:
+        enabled: false
+      container.memory.total_cache:
+        enabled: false
+      container.memory.usage.limit:
+        enabled: false
+      container.network.io.usage.rx_bytes:
+        enabled: false
+      container.network.io.usage.rx_dropped:
+        enabled: false
+      container.network.io.usage.tx_bytes:
+        enabled: false
+      container.network.io.usage.tx_dropped:
+        enabled: false
 processors:
   resourcedetection/system:
     detectors: ["system"]
@@ -37,27 +59,23 @@ extensions:
 
 exporters:
   otlphttp/openobserve:
-    endpoint: https://api.openobserve.ai/api/${env:OPEN_OBSERVE_ORG}
+    endpoint: https://api.openobserve.ai/api/toms_organization_50898_KmgBoq7eiBvgqoe/
     headers:
-      Authorization: "Basic ${env:OPEN_OBSERVE_TOKEN}"
-  # otlphttp/openobserve_ridi:
-  #   endpoint: https://api.openobserve.ai/api/${env:OPEN_OBSERVE_ORG}
-  #   headers:
-  #     Authorization: "Basic ${env:OPEN_OBSERVE_TOKEN}"
-  #     stream-name: ridi_${env:RIDI_ENV_NAME}
+      Authorization: "Basic dG9tcy5qYW5zb25zQGhvb2Qtc29mdHdhcmUubHY6RDUxNjJrZm4zOEVvcUE0MHQ3Wjk="
+  otlphttp/openobserve_ridi-service:
+    endpoint: https://api.openobserve.ai/api/toms_organization_50898_KmgBoq7eiBvgqoe/
+    headers:
+      Authorization: "Basic dG9tcy5qYW5zb25zQGhvb2Qtc29mdHdhcmUubHY6RDUxNjJrZm4zOEVvcUE0MHQ3Wjk="
+      stream-name: ridi-service
 
 service:
   extensions: [zpages]
   pipelines:
     metrics:
-      receivers: [hostmetrics]
+      receivers: [hostmetrics, docker_stats]
       processors: [resourcedetection/system, memory_limiter, batch]
       exporters: [otlphttp/openobserve]
-    # logs/ridi:
-    #   receivers: [otlp]
-    #   processors: [resourcedetection/system, memory_limiter, batch]
-    #   exporters: [otlphttp/openobserve_ridi]
     logs:
-      receivers: [filelog/std]
+      receivers: [filelog/deploy, filelog/router, filelog/map-data]
       processors: [resourcedetection/system, memory_limiter, batch]
-      exporters: [otlphttp/openobserve]
+      exporters: [otlphttp/openobserve_ridi-service]

@@ -7,7 +7,7 @@ import { Messaging } from "@ridi-router/messaging/main.ts";
 import { RidiLogger } from "@ridi-router/logging/main.ts";
 
 const env = new EnvVariables();
-RidiLogger.init();
+RidiLogger.init(env.ridiEnvName);
 const ridiLogger = RidiLogger.get();
 ridiLogger.debug("omg test");
 const runner = new Runner(

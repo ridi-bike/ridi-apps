@@ -469,7 +469,7 @@ VALUES
     $6,
     NOW()
 )
-RETURNING id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s`;
+RETURNING id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s, next_download_after`;
 
 export interface MapDataCreateNextRecordArgs {
     region: string;
@@ -496,6 +496,7 @@ export interface MapDataCreateNextRecordRow {
     pbfDownloadedSize: string | null;
     cacheSize: string | null;
     startupTimeS: string | null;
+    nextDownloadAfter: Date;
 }
 
 export async function mapDataCreateNextRecord(sql: Sql, args: MapDataCreateNextRecordArgs): Promise<MapDataCreateNextRecordRow | null> {
@@ -522,7 +523,8 @@ export async function mapDataCreateNextRecord(sql: Sql, args: MapDataCreateNextR
         pbfSize: row[11],
         pbfDownloadedSize: row[12],
         cacheSize: row[13],
-        startupTimeS: row[14]
+        startupTimeS: row[14],
+        nextDownloadAfter: row[15]
     };
 }
 
@@ -681,7 +683,7 @@ export async function mapDataUpdateRecordDiscarded(sql: Sql, args: MapDataUpdate
 }
 
 export const mapDataGetRecordsDiscardedAndPreviousQuery = `-- name: MapDataGetRecordsDiscardedAndPrevious :many
-SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s FROM ridi_services.map_data
+SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s, next_download_after FROM ridi_services.map_data
 WHERE version = 'discarded' OR version = 'previous'`;
 
 export interface MapDataGetRecordsDiscardedAndPreviousRow {
@@ -700,6 +702,7 @@ export interface MapDataGetRecordsDiscardedAndPreviousRow {
     pbfDownloadedSize: string | null;
     cacheSize: string | null;
     startupTimeS: string | null;
+    nextDownloadAfter: Date;
 }
 
 export async function mapDataGetRecordsDiscardedAndPrevious(sql: Sql): Promise<MapDataGetRecordsDiscardedAndPreviousRow[]> {
@@ -718,12 +721,13 @@ export async function mapDataGetRecordsDiscardedAndPrevious(sql: Sql): Promise<M
         pbfSize: row[11],
         pbfDownloadedSize: row[12],
         cacheSize: row[13],
-        startupTimeS: row[14]
+        startupTimeS: row[14],
+        nextDownloadAfter: row[15]
     }));
 }
 
 export const mapDataIsKmlInUseQuery = `-- name: MapDataIsKmlInUse :one
-SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s FROM ridi_services.map_data
+SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s, next_download_after FROM ridi_services.map_data
 WHERE 
     kml_location = $1
     AND (version = 'current' OR version = 'next')
@@ -749,6 +753,7 @@ export interface MapDataIsKmlInUseRow {
     pbfDownloadedSize: string | null;
     cacheSize: string | null;
     startupTimeS: string | null;
+    nextDownloadAfter: Date;
 }
 
 export async function mapDataIsKmlInUse(sql: Sql, args: MapDataIsKmlInUseArgs): Promise<MapDataIsKmlInUseRow | null> {
@@ -775,12 +780,13 @@ export async function mapDataIsKmlInUse(sql: Sql, args: MapDataIsKmlInUseArgs): 
         pbfSize: row[11],
         pbfDownloadedSize: row[12],
         cacheSize: row[13],
-        startupTimeS: row[14]
+        startupTimeS: row[14],
+        nextDownloadAfter: row[15]
     };
 }
 
 export const mapDataIsPbfInUseQuery = `-- name: MapDataIsPbfInUse :one
-SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s FROM ridi_services.map_data
+SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s, next_download_after FROM ridi_services.map_data
 WHERE 
     pbf_location = $1
     AND (version = 'current' OR version = 'next')
@@ -806,6 +812,7 @@ export interface MapDataIsPbfInUseRow {
     pbfDownloadedSize: string | null;
     cacheSize: string | null;
     startupTimeS: string | null;
+    nextDownloadAfter: Date;
 }
 
 export async function mapDataIsPbfInUse(sql: Sql, args: MapDataIsPbfInUseArgs): Promise<MapDataIsPbfInUseRow | null> {
@@ -832,12 +839,13 @@ export async function mapDataIsPbfInUse(sql: Sql, args: MapDataIsPbfInUseArgs): 
         pbfSize: row[11],
         pbfDownloadedSize: row[12],
         cacheSize: row[13],
-        startupTimeS: row[14]
+        startupTimeS: row[14],
+        nextDownloadAfter: row[15]
     };
 }
 
 export const mapDataIsCacheDirInUseQuery = `-- name: MapDataIsCacheDirInUse :one
-SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s FROM ridi_services.map_data
+SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s, next_download_after FROM ridi_services.map_data
 WHERE 
     cache_location = $1
     AND (version = 'current' OR version = 'next')
@@ -863,6 +871,7 @@ export interface MapDataIsCacheDirInUseRow {
     pbfDownloadedSize: string | null;
     cacheSize: string | null;
     startupTimeS: string | null;
+    nextDownloadAfter: Date;
 }
 
 export async function mapDataIsCacheDirInUse(sql: Sql, args: MapDataIsCacheDirInUseArgs): Promise<MapDataIsCacheDirInUseRow | null> {
@@ -889,12 +898,13 @@ export async function mapDataIsCacheDirInUse(sql: Sql, args: MapDataIsCacheDirIn
         pbfSize: row[11],
         pbfDownloadedSize: row[12],
         cacheSize: row[13],
-        startupTimeS: row[14]
+        startupTimeS: row[14],
+        nextDownloadAfter: row[15]
     };
 }
 
 export const mapDataGetRecordNextQuery = `-- name: MapDataGetRecordNext :one
-SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s FROM ridi_services.map_data 
+SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s, next_download_after FROM ridi_services.map_data 
 WHERE 
     region = $1 
     AND version = 'next'`;
@@ -919,6 +929,7 @@ export interface MapDataGetRecordNextRow {
     pbfDownloadedSize: string | null;
     cacheSize: string | null;
     startupTimeS: string | null;
+    nextDownloadAfter: Date;
 }
 
 export async function mapDataGetRecordNext(sql: Sql, args: MapDataGetRecordNextArgs): Promise<MapDataGetRecordNextRow | null> {
@@ -945,12 +956,13 @@ export async function mapDataGetRecordNext(sql: Sql, args: MapDataGetRecordNextA
         pbfSize: row[11],
         pbfDownloadedSize: row[12],
         cacheSize: row[13],
-        startupTimeS: row[14]
+        startupTimeS: row[14],
+        nextDownloadAfter: row[15]
     };
 }
 
 export const mapDataGetRecordCurrentQuery = `-- name: MapDataGetRecordCurrent :one
-SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s FROM ridi_services.map_data 
+SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s, next_download_after FROM ridi_services.map_data 
 WHERE 
     region = $1 
     AND version = 'current'`;
@@ -975,6 +987,7 @@ export interface MapDataGetRecordCurrentRow {
     pbfDownloadedSize: string | null;
     cacheSize: string | null;
     startupTimeS: string | null;
+    nextDownloadAfter: Date;
 }
 
 export async function mapDataGetRecordCurrent(sql: Sql, args: MapDataGetRecordCurrentArgs): Promise<MapDataGetRecordCurrentRow | null> {
@@ -1001,12 +1014,13 @@ export async function mapDataGetRecordCurrent(sql: Sql, args: MapDataGetRecordCu
         pbfSize: row[11],
         pbfDownloadedSize: row[12],
         cacheSize: row[13],
-        startupTimeS: row[14]
+        startupTimeS: row[14],
+        nextDownloadAfter: row[15]
     };
 }
 
 export const mapDataGetRecordsAllNextQuery = `-- name: MapDataGetRecordsAllNext :many
-SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s FROM ridi_services.map_data 
+SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s, next_download_after FROM ridi_services.map_data 
 WHERE version = 'next'`;
 
 export interface MapDataGetRecordsAllNextRow {
@@ -1025,6 +1039,7 @@ export interface MapDataGetRecordsAllNextRow {
     pbfDownloadedSize: string | null;
     cacheSize: string | null;
     startupTimeS: string | null;
+    nextDownloadAfter: Date;
 }
 
 export async function mapDataGetRecordsAllNext(sql: Sql): Promise<MapDataGetRecordsAllNextRow[]> {
@@ -1043,12 +1058,13 @@ export async function mapDataGetRecordsAllNext(sql: Sql): Promise<MapDataGetReco
         pbfSize: row[11],
         pbfDownloadedSize: row[12],
         cacheSize: row[13],
-        startupTimeS: row[14]
+        startupTimeS: row[14],
+        nextDownloadAfter: row[15]
     }));
 }
 
 export const mapDataGetRecordsAllCurrentQuery = `-- name: MapDataGetRecordsAllCurrent :many
-SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s FROM ridi_services.map_data 
+SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s, next_download_after FROM ridi_services.map_data 
 WHERE version = 'current'`;
 
 export interface MapDataGetRecordsAllCurrentRow {
@@ -1067,6 +1083,7 @@ export interface MapDataGetRecordsAllCurrentRow {
     pbfDownloadedSize: string | null;
     cacheSize: string | null;
     startupTimeS: string | null;
+    nextDownloadAfter: Date;
 }
 
 export async function mapDataGetRecordsAllCurrent(sql: Sql): Promise<MapDataGetRecordsAllCurrentRow[]> {
@@ -1085,7 +1102,8 @@ export async function mapDataGetRecordsAllCurrent(sql: Sql): Promise<MapDataGetR
         pbfSize: row[11],
         pbfDownloadedSize: row[12],
         cacheSize: row[13],
-        startupTimeS: row[14]
+        startupTimeS: row[14],
+        nextDownloadAfter: row[15]
     }));
 }
 

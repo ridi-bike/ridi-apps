@@ -132,7 +132,7 @@ export class RegionDownloader {
         id: mapDataRecord.id,
         error: JSON.stringify(err),
       });
-      throw new Error("unrecoerable");
+      throw new Error("unrecoverable");
     }
   }
 }

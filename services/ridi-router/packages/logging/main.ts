@@ -1,17 +1,5 @@
 import { pino } from "pino";
 
-export function handleMaybeErrors(err: unknown): string | unknown {
-  if (!err) {
-    return "";
-  }
-  if (err instanceof Error) {
-    return `\n${err.name}: ${err.message}\n${err.stack}\n${
-      handleMaybeErrors(err.cause)
-    }`;
-  }
-  return err;
-}
-
 export class RidiLogger {
   private static instance: RidiLogger;
 
@@ -20,9 +8,11 @@ export class RidiLogger {
   ) {
   }
 
-  static init() {
+  static init(service: string) {
     const innerLogger = pino({
       level: "trace",
+    }).child({
+      service,
     });
     const logger = new RidiLogger(innerLogger);
     RidiLogger.instance = logger;
@@ -35,17 +25,6 @@ export class RidiLogger {
     return RidiLogger.instance;
   }
 
-  //   fetch(
-  //     `https://api.openobserve.ai/api/${env.openObserveOrg}/ridi_${env.ridiEnvName}/_json`,
-  //     {
-  //       method: "post",
-  //       headers: {
-  //         "Authorization": `Basic ${env.openObserveToken}`,
-  //       },
-  //       body: JSON.stringify([flatten(rec)]),
-  //     },
-  //   );
-  // },
   public debug(message: string, properties?: Record<string, unknown>) {
     this.logger.debug(properties, message);
   }
