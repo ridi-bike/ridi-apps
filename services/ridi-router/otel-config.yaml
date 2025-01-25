@@ -1,10 +1,6 @@
 receivers:
-  filelog/deploy:
-    directory: /var/log/ridi-service-deploy
-  filelog/map-data:
-    directory: /var/log/ridi-service-map-data
-  filelog/router:
-    directory: /var/log/ridi-service-router
+  filelog/std:
+    include: [ /var/log/ridi-service-deploy/service.log, /var/log/ridi-service-map-data/service.log, /var/log/ridi-service-router/service.log ]
   hostmetrics:
     root_path: /
     collection_interval: 5s
@@ -76,6 +72,6 @@ service:
       processors: [resourcedetection/system, memory_limiter, batch]
       exporters: [otlphttp/openobserve]
     logs:
-      receivers: [filelog/deploy, filelog/router, filelog/map-data]
+      receivers: [filelog/std]
       processors: [resourcedetection/system, memory_limiter, batch]
       exporters: [otlphttp/openobserve_ridi-service]

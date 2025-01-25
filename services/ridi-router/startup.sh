@@ -6,4 +6,4 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-deno run --allow-all --unstable-ffi "$1" 2>&1 | tee -a /var/log/ridi-service/service.log | pino-pretty
+deno run --v8-flags="--max-heap-size=24576,--max-old-space-size=24576" --allow-all --unstable-ffi "$1" 2>&1 | tee -a /var/log/ridi-service/service.log | pino-pretty
