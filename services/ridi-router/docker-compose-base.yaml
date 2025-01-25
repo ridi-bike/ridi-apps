@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: ./Dockerfile
     volumes:
-      - ${RIDI_DATA_DIR}:/ridi-data
+      - /ridi-data:${RIDI_DATA_DIR}
     environment:
       RIDI_DATA_DIR: ${RIDI_DATA_DIR}
       PORT: 2727

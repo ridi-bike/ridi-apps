@@ -5,7 +5,7 @@ services:
       file: ./docker-compose-base.yaml
       service: deno_service
     volumes:
-      - /var/log/ridi-service:/var/log/ridi-service-deploy
+      - /var/log/ridi-service-deploy:/var/log/ridi-service
     command: ./startup.sh ./deploy-handler/main.ts
     environment:
       COOLIFY_API_URL: ${COOLIFY_API_URL}
