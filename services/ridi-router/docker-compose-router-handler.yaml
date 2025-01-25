@@ -4,6 +4,8 @@ services:
     extends:
       file: ./docker-compose-base.yaml
       service: deno_service
+    volumes:
+      - /var/log/ridi-service:/var/log/ridi-service-router
     command: ./startup.sh ./router-handler/main.ts
     environment:
       SUPABASE_URL: ${SUPABASE_URL}

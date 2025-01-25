@@ -22,6 +22,7 @@ ENV RIDI_ENV=prod
 COPY . .
 ENV REGION_LIST=./region-list-prod.json
 RUN chmod +x startup.sh
+RUN deno install -A -g npm:pino-pretty
 RUN cd deploy-handler && deno install --entrypoint main.ts
 RUN cd map-data-handler && deno install --entrypoint main.ts
 RUN cd router-handler && deno install --entrypoint main.ts

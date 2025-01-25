@@ -1,6 +1,6 @@
 import { pg, PgClient } from "../packages/lib/main.ts";
+import { RidiLogger } from "@ridi-router/logging/main.ts";
 import { EnvVariables } from "./env-variables.ts";
-import { handleMaybeErrors, RidiLogger } from "@ridi-router/logging/main.ts";
 
 type RegionReq = {
   reqId: string;
@@ -13,9 +13,6 @@ export class RouterServerManager {
   private currentFreeMemoryMb: number;
   private regionRequestsRunning: Record<string, RegionReq[]> = {};
   private regionRequestsWaiting: Record<string, RegionReq[]> = {};
-  // private regions: Awaited<
-  //   ReturnType<typeof pg["mapDataGetRecordsAllCurrent"]>
-  // >;
 
   constructor(
     private readonly env: EnvVariables,
@@ -24,14 +21,12 @@ export class RouterServerManager {
     private readonly logger: RidiLogger,
   ) {
     this.currentFreeMemoryMb = env.serverAvailMemoryMb;
-    // this.regions = db.mapData.getRecordsAllCurrent();
-    // this.regions = await this.db.mapDataGetRecordCurrent(this.pgClient)
 
     setInterval(() =>
       this.manageRouterServers().catch((error) => {
         logger.error(
           "Error while running Router Server Management, unrecoverable",
-          { error: handleMaybeErrors(error) },
+          { error },
         );
       }), 500);
   }
@@ -86,7 +81,7 @@ export class RouterServerManager {
     if (neededMemory <= this.currentFreeMemoryMb) {
       await this.startRegion(neededRegion).catch((error) =>
         this.logger.error("Unable to start region", {
-          error: handleMaybeErrors(error),
+          error,
         })
       );
     } else {

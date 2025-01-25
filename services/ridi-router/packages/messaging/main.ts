@@ -7,7 +7,6 @@ import {
   sendMessage,
   updateVisibilityTimeout,
 } from "./messaging_sql.ts";
-import { handleMaybeErrors } from "@ridi-router/logging/main.ts";
 
 type MessageHandler<TName extends keyof Messages> = (args: {
   message: ReadMessagesWithLongPollRow;
@@ -55,7 +54,7 @@ export class Messaging {
     this.runListener(queueName, messageHandler).catch((error) => {
       this.stopped = true;
       this.logger.error("Error in message listener", {
-        error: handleMaybeErrors(error),
+        error,
       });
     });
   }
@@ -105,7 +104,7 @@ export class Messaging {
           (error) =>
             this.logger.error("Failed to process message unexpectedly", {
               message,
-              error: handleMaybeErrors(error),
+              error,
             }),
         )
       );

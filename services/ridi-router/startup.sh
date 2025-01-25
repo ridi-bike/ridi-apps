@@ -6,11 +6,4 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-# /usr/local/bin/otelcol-contrib --config /etc/otel-config.yaml &
-deno run --allow-all --unstable-ffi "$1" &
-
-# Wait for any process to exit
-wait -n
-
-# Exit with status of process that exited first
-exit $?
+deno run --allow-all --unstable-ffi "$1" 2>&1 | tee -a /var/log/ridi-service/service.log | pino-pretty
