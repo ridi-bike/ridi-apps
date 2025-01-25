@@ -1,9 +1,10 @@
-import { DenoCommand, getDb, type MapDataRecord } from "@ridi-router/lib";
+import { DenoCommand, pg, PgClient } from "@ridi-router/lib";
 import type { RidiLogger } from "@ridi-router/logging/main.ts";
 import PQueue from "p-queue";
 import { type EnvVariables } from "./env-variables.ts";
 import { type KmlProcessor } from "./kml-processor.ts";
 import { type Handler } from "./handler.ts";
+import { MapDataRecord } from "./types.ts";
 
 export class DenoDirStat {
   async getDirSize(dir: string) {
@@ -19,7 +20,8 @@ export class CacheGenerator {
   private queue = new PQueue({ concurrency: 1 });
 
   constructor(
-    private readonly db: ReturnType<typeof getDb>,
+    private readonly db: typeof pg,
+    private readonly pgClient: PgClient,
     private readonly denoCommand: DenoCommand,
     private readonly logger: RidiLogger,
     private readonly env: EnvVariables,
@@ -39,9 +41,14 @@ export class CacheGenerator {
       region: mapDataRecord.region,
     });
 
-    this.db.mapData.updateRecordProcessing(mapDataRecord.id);
+    await this.db.mapDataUpdateRecordProcessing(this.pgClient, {
+      id: mapDataRecord.id,
+    });
     const beat = setInterval(
-      () => this.db.mapData.updateRecordProcessing(mapDataRecord.id),
+      () =>
+        this.db.mapDataUpdateRecordProcessing(this.pgClient, {
+          id: mapDataRecord.id,
+        }),
       60 * 1000,
     );
 
@@ -51,9 +58,9 @@ export class CacheGenerator {
         [
           "prep-cache",
           "--input",
-          mapDataRecord.pbf_location,
+          mapDataRecord.pbfLocation,
           "--cache-dir",
-          mapDataRecord.cache_location,
+          mapDataRecord.cacheLocation,
         ],
       );
 
@@ -64,7 +71,7 @@ export class CacheGenerator {
     });
 
     const cacheSize = await this.dirStat.getDirSize(
-      mapDataRecord.cache_location,
+      mapDataRecord.cacheLocation,
     );
 
     const serverStartMoment = Date.now();
@@ -73,9 +80,9 @@ export class CacheGenerator {
       args: [
         "start-server",
         "--input",
-        mapDataRecord.pbf_location,
+        mapDataRecord.pbfLocation,
         "--cache-dir",
-        mapDataRecord.cache_location,
+        mapDataRecord.cacheLocation,
         "--socket-name",
         `${Math.random()}`,
       ],
@@ -101,30 +108,36 @@ export class CacheGenerator {
 
     const serverStartTime = Math.ceil((Date.now() - serverStartMoment) / 1000);
 
-    this.db.mapData.updateRecordCacheSize(mapDataRecord.id, cacheSize);
-    this.db.mapData.updateRecordStartupTime(
-      mapDataRecord.id,
-      serverStartTime,
-    );
+    await this.db.mapDataUpdateRecordCacheSize(this.pgClient, {
+      id: mapDataRecord.id,
+      cacheSize: cacheSize.toString(),
+    });
+    await this.db.mapDataUpdateRecordStartupTime(this.pgClient, {
+      id: mapDataRecord.id,
+      startupTimeS: serverStartTime.toString(),
+    });
 
     clearInterval(beat);
 
     await this.kml.processKml(mapDataRecord);
 
-    this.db.mapData.updateRecordReady(mapDataRecord.id);
+    await this.db.mapDataUpdateRecordReady(this.pgClient, {
+      id: mapDataRecord.id,
+    });
+
     if (code !== 0) {
       this.logger.error("Cache generation failed", {
         id: mapDataRecord.id,
         code,
         stderr: stderrOutput,
       });
-      this.db.mapData.updateRecordError(
-        mapDataRecord.id,
-        `stdout: ${stdoutOutput}\n\nstderr: ${stderrOutput}`,
-      );
+      await this.db.mapDataUpdateRecordError(this.pgClient, {
+        id: mapDataRecord.id,
+        error: `stdout: ${stdoutOutput}\n\nstderr: ${stderrOutput}`,
+      });
     }
 
-    this.handler.checkStatus();
+    await this.handler.checkStatus();
   }
 
   public waitTillDone() {

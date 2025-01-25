@@ -1,7 +1,7 @@
 import { RouterServerManager } from "./router-server-manager.ts";
-import { DenoCommand, getDb, pg } from "@ridi-router/lib";
+import { DenoCommand, pg } from "@ridi-router/lib";
 import { RidiLogger } from "@ridi-router/logging/main.ts";
-import { PgClient } from "./pg-client.ts";
+import { PgClient } from "@ridi-router/lib";
 import { EnvVariables } from "./env-variables.ts";
 type RidiRouterErr = { err: string };
 type RidiRouterOk = {
@@ -23,7 +23,6 @@ type RidiRouterOutput = {
 
 export class PlanProcessor {
   constructor(
-    private readonly db: ReturnType<typeof getDb>,
     private readonly logger: RidiLogger,
     private readonly pgClient: PgClient,
     private readonly pgQueries: typeof pg,
@@ -55,10 +54,17 @@ export class PlanProcessor {
       lon: planRecord.toLon,
     });
 
-    const regions = regionsFrom.filter((r) =>
-      regionsTo.map((rt) => rt.id).includes(r.id)
-    ).map((r) => this.db.mapData.getRecordCurrent(r.region)).filter((r) => !!r)
-      .sort((a, b) => (a.cache_size || 0) - (b.cache_size || 0));
+    const regionsProm = await Promise.all(
+      regionsFrom.filter((r) => regionsTo.map((rt) => rt.id).includes(r.id))
+        .map((r) =>
+          this.pgQueries.mapDataGetRecordCurrent(this.pgClient, {
+            region: r.region,
+          })
+        ),
+    );
+    const regions = regionsProm
+      .filter((r) => !!r)
+      .sort((a, b) => Number(a?.cacheSize || 0) - Number(b?.cacheSize || 0));
 
     const region = regions[0];
 

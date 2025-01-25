@@ -3,18 +3,6 @@ import type { BaseEnvVariables } from "@ridi-router/env/main.ts";
 export class Locations {
   constructor(private readonly baseEnvVariables: BaseEnvVariables) {}
 
-  getDbFileLoc(): string {
-    const loc = `${this.baseEnvVariables.dataDir}/db`;
-    try {
-      Deno.mkdirSync(loc, { recursive: true });
-    } catch (err) {
-      if (!(err instanceof Deno.errors.AlreadyExists)) {
-        throw err;
-      }
-    }
-    return `${loc}/sqlite.db`;
-  }
-
   async getCacheDirLoc(
     region: string,
     routerVersion: string,

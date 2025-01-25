@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Function to display help/error text
 display_help() {
     echo "Usage: $0 [COMMAND]"

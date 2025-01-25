@@ -355,3 +355,755 @@ export async function routeInsert(sql: Sql, args: RouteInsertArgs): Promise<Rout
     };
 }
 
+export const servicesGetQuery = `-- name: ServicesGet :one
+SELECT name, router_version, status, updated_at FROM ridi_services.services 
+WHERE name = $1`;
+
+export interface ServicesGetArgs {
+    name: string;
+}
+
+export interface ServicesGetRow {
+    name: "map-data" | "router" | "deploy";
+    routerVersion: string;
+    status: "triggered" | "processing" | "done";
+    updatedAt: Date | null;
+}
+
+export async function servicesGet(sql: Sql, args: ServicesGetArgs): Promise<ServicesGetRow | null> {
+    const rows = await sql.unsafe(servicesGetQuery, [args.name]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        name: row[0],
+        routerVersion: row[1],
+        status: row[2],
+        updatedAt: row[3]
+    };
+}
+
+export const servicesCreateUpdateQuery = `-- name: ServicesCreateUpdate :exec
+INSERT INTO ridi_services.services (name, router_version, status, updated_at)
+VALUES ($1, $2, 'triggered', NOW())
+ON CONFLICT (name) DO UPDATE 
+SET 
+    router_version = $2, 
+    updated_at = NOW(),
+    status = 'triggered'`;
+
+export interface ServicesCreateUpdateArgs {
+    name: string;
+    routerVersion: string;
+}
+
+export async function servicesCreateUpdate(sql: Sql, args: ServicesCreateUpdateArgs): Promise<void> {
+    await sql.unsafe(servicesCreateUpdateQuery, [args.name, args.routerVersion]);
+}
+
+export const servicesUpdateRecordProcessingQuery = `-- name: ServicesUpdateRecordProcessing :exec
+UPDATE ridi_services.services
+SET status = 'processing', updated_at = NOW()
+WHERE name = $1`;
+
+export interface ServicesUpdateRecordProcessingArgs {
+    name: string;
+}
+
+export async function servicesUpdateRecordProcessing(sql: Sql, args: ServicesUpdateRecordProcessingArgs): Promise<void> {
+    await sql.unsafe(servicesUpdateRecordProcessingQuery, [args.name]);
+}
+
+export const servicesUpdateRecordUpdatedAtQuery = `-- name: ServicesUpdateRecordUpdatedAt :exec
+UPDATE ridi_services.services
+SET updated_at = NOW()
+WHERE name = $1`;
+
+export interface ServicesUpdateRecordUpdatedAtArgs {
+    name: string;
+}
+
+export async function servicesUpdateRecordUpdatedAt(sql: Sql, args: ServicesUpdateRecordUpdatedAtArgs): Promise<void> {
+    await sql.unsafe(servicesUpdateRecordUpdatedAtQuery, [args.name]);
+}
+
+export const servicesUpdateRecordDoneQuery = `-- name: ServicesUpdateRecordDone :exec
+UPDATE ridi_services.services
+SET status = 'done', updated_at = NOW()
+WHERE name = $1`;
+
+export interface ServicesUpdateRecordDoneArgs {
+    name: string;
+}
+
+export async function servicesUpdateRecordDone(sql: Sql, args: ServicesUpdateRecordDoneArgs): Promise<void> {
+    await sql.unsafe(servicesUpdateRecordDoneQuery, [args.name]);
+}
+
+export const mapDataCreateNextRecordQuery = `-- name: MapDataCreateNextRecord :one
+INSERT INTO ridi_services.map_data 
+(
+    region, 
+    version, 
+    status, 
+    pbf_location, 
+    pbf_md5, 
+    cache_location, 
+    router_version, 
+    kml_location,
+    updated_at
+)
+VALUES 
+(
+    $1, 
+    'next', 
+    'new', 
+    $2, 
+    $3, 
+    $4, 
+    $5, 
+    $6,
+    NOW()
+)
+RETURNING id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s`;
+
+export interface MapDataCreateNextRecordArgs {
+    region: string;
+    pbfLocation: string;
+    pbfMd5: string;
+    cacheLocation: string;
+    routerVersion: string;
+    kmlLocation: string;
+}
+
+export interface MapDataCreateNextRecordRow {
+    id: string;
+    region: string;
+    version: "current" | "previous" | "next" | "discarded";
+    status: "new" | "downloaded" | "processing" | "ready" | "error";
+    pbfLocation: string;
+    pbfMd5: string;
+    cacheLocation: string;
+    routerVersion: string;
+    kmlLocation: string;
+    error: string | null;
+    updatedAt: Date | null;
+    pbfSize: string | null;
+    pbfDownloadedSize: string | null;
+    cacheSize: string | null;
+    startupTimeS: string | null;
+}
+
+export async function mapDataCreateNextRecord(sql: Sql, args: MapDataCreateNextRecordArgs): Promise<MapDataCreateNextRecordRow | null> {
+    const rows = await sql.unsafe(mapDataCreateNextRecordQuery, [args.region, args.pbfLocation, args.pbfMd5, args.cacheLocation, args.routerVersion, args.kmlLocation]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        region: row[1],
+        version: row[2],
+        status: row[3],
+        pbfLocation: row[4],
+        pbfMd5: row[5],
+        cacheLocation: row[6],
+        routerVersion: row[7],
+        kmlLocation: row[8],
+        error: row[9],
+        updatedAt: row[10],
+        pbfSize: row[11],
+        pbfDownloadedSize: row[12],
+        cacheSize: row[13],
+        startupTimeS: row[14]
+    };
+}
+
+export const mapDataDeleteRecordQuery = `-- name: MapDataDeleteRecord :exec
+DELETE FROM ridi_services.map_data
+WHERE id = $1`;
+
+export interface MapDataDeleteRecordArgs {
+    id: string;
+}
+
+export async function mapDataDeleteRecord(sql: Sql, args: MapDataDeleteRecordArgs): Promise<void> {
+    await sql.unsafe(mapDataDeleteRecordQuery, [args.id]);
+}
+
+export const mapDataUpdateRecordCacheSizeQuery = `-- name: MapDataUpdateRecordCacheSize :exec
+UPDATE ridi_services.map_data
+SET
+    cache_size = $2,
+    updated_at = NOW()
+WHERE id = $1`;
+
+export interface MapDataUpdateRecordCacheSizeArgs {
+    id: string;
+    cacheSize: string | null;
+}
+
+export async function mapDataUpdateRecordCacheSize(sql: Sql, args: MapDataUpdateRecordCacheSizeArgs): Promise<void> {
+    await sql.unsafe(mapDataUpdateRecordCacheSizeQuery, [args.id, args.cacheSize]);
+}
+
+export const mapDataUpdateRecordStartupTimeQuery = `-- name: MapDataUpdateRecordStartupTime :exec
+UPDATE ridi_services.map_data
+SET
+    startup_time_s = $2,
+    updated_at = NOW()
+WHERE id = $1`;
+
+export interface MapDataUpdateRecordStartupTimeArgs {
+    id: string;
+    startupTimeS: string | null;
+}
+
+export async function mapDataUpdateRecordStartupTime(sql: Sql, args: MapDataUpdateRecordStartupTimeArgs): Promise<void> {
+    await sql.unsafe(mapDataUpdateRecordStartupTimeQuery, [args.id, args.startupTimeS]);
+}
+
+export const mapDataUpdateRecordPbfSizeQuery = `-- name: MapDataUpdateRecordPbfSize :exec
+UPDATE ridi_services.map_data
+SET
+    pbf_size = $2,
+    pbf_downloaded_size = 0,
+    updated_at = NOW()
+WHERE id = $1`;
+
+export interface MapDataUpdateRecordPbfSizeArgs {
+    id: string;
+    pbfSize: string | null;
+}
+
+export async function mapDataUpdateRecordPbfSize(sql: Sql, args: MapDataUpdateRecordPbfSizeArgs): Promise<void> {
+    await sql.unsafe(mapDataUpdateRecordPbfSizeQuery, [args.id, args.pbfSize]);
+}
+
+export const mapDataUpdateRecordPbfDownloadedSizeQuery = `-- name: MapDataUpdateRecordPbfDownloadedSize :exec
+UPDATE ridi_services.map_data
+SET
+    pbf_downloaded_size = pbf_downloaded_size + $2,
+    updated_at = NOW()
+WHERE id = $1`;
+
+export interface MapDataUpdateRecordPbfDownloadedSizeArgs {
+    id: string;
+    pbfDownloadedSize: string | null;
+}
+
+export async function mapDataUpdateRecordPbfDownloadedSize(sql: Sql, args: MapDataUpdateRecordPbfDownloadedSizeArgs): Promise<void> {
+    await sql.unsafe(mapDataUpdateRecordPbfDownloadedSizeQuery, [args.id, args.pbfDownloadedSize]);
+}
+
+export const mapDataUpdateRecordDownloadedQuery = `-- name: MapDataUpdateRecordDownloaded :exec
+UPDATE ridi_services.map_data
+SET 
+    status = 'downloaded', 
+    updated_at = NOW()
+WHERE id = $1`;
+
+export interface MapDataUpdateRecordDownloadedArgs {
+    id: string;
+}
+
+export async function mapDataUpdateRecordDownloaded(sql: Sql, args: MapDataUpdateRecordDownloadedArgs): Promise<void> {
+    await sql.unsafe(mapDataUpdateRecordDownloadedQuery, [args.id]);
+}
+
+export const mapDataUpdateRecordProcessingQuery = `-- name: MapDataUpdateRecordProcessing :exec
+UPDATE ridi_services.map_data
+SET 
+    status = 'processing', 
+    updated_at = NOW()
+WHERE id = $1`;
+
+export interface MapDataUpdateRecordProcessingArgs {
+    id: string;
+}
+
+export async function mapDataUpdateRecordProcessing(sql: Sql, args: MapDataUpdateRecordProcessingArgs): Promise<void> {
+    await sql.unsafe(mapDataUpdateRecordProcessingQuery, [args.id]);
+}
+
+export const mapDataUpdateRecordReadyQuery = `-- name: MapDataUpdateRecordReady :exec
+UPDATE ridi_services.map_data
+SET 
+    status = 'ready', 
+    updated_at = NOW()
+WHERE id = $1`;
+
+export interface MapDataUpdateRecordReadyArgs {
+    id: string;
+}
+
+export async function mapDataUpdateRecordReady(sql: Sql, args: MapDataUpdateRecordReadyArgs): Promise<void> {
+    await sql.unsafe(mapDataUpdateRecordReadyQuery, [args.id]);
+}
+
+export const mapDataUpdateRecordErrorQuery = `-- name: MapDataUpdateRecordError :exec
+UPDATE ridi_services.map_data
+SET 
+    status = 'error', 
+    error = $2, 
+    updated_at = NOW()
+WHERE id = $1`;
+
+export interface MapDataUpdateRecordErrorArgs {
+    id: string;
+    error: string | null;
+}
+
+export async function mapDataUpdateRecordError(sql: Sql, args: MapDataUpdateRecordErrorArgs): Promise<void> {
+    await sql.unsafe(mapDataUpdateRecordErrorQuery, [args.id, args.error]);
+}
+
+export const mapDataUpdateRecordDiscardedQuery = `-- name: MapDataUpdateRecordDiscarded :exec
+UPDATE ridi_services.map_data
+SET 
+    version = 'discarded',
+    updated_at = NOW()
+WHERE id = $1`;
+
+export interface MapDataUpdateRecordDiscardedArgs {
+    id: string;
+}
+
+export async function mapDataUpdateRecordDiscarded(sql: Sql, args: MapDataUpdateRecordDiscardedArgs): Promise<void> {
+    await sql.unsafe(mapDataUpdateRecordDiscardedQuery, [args.id]);
+}
+
+export const mapDataGetRecordsDiscardedAndPreviousQuery = `-- name: MapDataGetRecordsDiscardedAndPrevious :many
+SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s FROM ridi_services.map_data
+WHERE version = 'discarded' OR version = 'previous'`;
+
+export interface MapDataGetRecordsDiscardedAndPreviousRow {
+    id: string;
+    region: string;
+    version: "current" | "previous" | "next" | "discarded";
+    status: "new" | "downloaded" | "processing" | "ready" | "error";
+    pbfLocation: string;
+    pbfMd5: string;
+    cacheLocation: string;
+    routerVersion: string;
+    kmlLocation: string;
+    error: string | null;
+    updatedAt: Date | null;
+    pbfSize: string | null;
+    pbfDownloadedSize: string | null;
+    cacheSize: string | null;
+    startupTimeS: string | null;
+}
+
+export async function mapDataGetRecordsDiscardedAndPrevious(sql: Sql): Promise<MapDataGetRecordsDiscardedAndPreviousRow[]> {
+    return (await sql.unsafe(mapDataGetRecordsDiscardedAndPreviousQuery, []).values()).map(row => ({
+        id: row[0],
+        region: row[1],
+        version: row[2],
+        status: row[3],
+        pbfLocation: row[4],
+        pbfMd5: row[5],
+        cacheLocation: row[6],
+        routerVersion: row[7],
+        kmlLocation: row[8],
+        error: row[9],
+        updatedAt: row[10],
+        pbfSize: row[11],
+        pbfDownloadedSize: row[12],
+        cacheSize: row[13],
+        startupTimeS: row[14]
+    }));
+}
+
+export const mapDataIsKmlInUseQuery = `-- name: MapDataIsKmlInUse :one
+SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s FROM ridi_services.map_data
+WHERE 
+    kml_location = $1
+    AND (version = 'current' OR version = 'next')
+LIMIT 1`;
+
+export interface MapDataIsKmlInUseArgs {
+    kmlLocation: string;
+}
+
+export interface MapDataIsKmlInUseRow {
+    id: string;
+    region: string;
+    version: "current" | "previous" | "next" | "discarded";
+    status: "new" | "downloaded" | "processing" | "ready" | "error";
+    pbfLocation: string;
+    pbfMd5: string;
+    cacheLocation: string;
+    routerVersion: string;
+    kmlLocation: string;
+    error: string | null;
+    updatedAt: Date | null;
+    pbfSize: string | null;
+    pbfDownloadedSize: string | null;
+    cacheSize: string | null;
+    startupTimeS: string | null;
+}
+
+export async function mapDataIsKmlInUse(sql: Sql, args: MapDataIsKmlInUseArgs): Promise<MapDataIsKmlInUseRow | null> {
+    const rows = await sql.unsafe(mapDataIsKmlInUseQuery, [args.kmlLocation]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        region: row[1],
+        version: row[2],
+        status: row[3],
+        pbfLocation: row[4],
+        pbfMd5: row[5],
+        cacheLocation: row[6],
+        routerVersion: row[7],
+        kmlLocation: row[8],
+        error: row[9],
+        updatedAt: row[10],
+        pbfSize: row[11],
+        pbfDownloadedSize: row[12],
+        cacheSize: row[13],
+        startupTimeS: row[14]
+    };
+}
+
+export const mapDataIsPbfInUseQuery = `-- name: MapDataIsPbfInUse :one
+SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s FROM ridi_services.map_data
+WHERE 
+    pbf_location = $1
+    AND (version = 'current' OR version = 'next')
+LIMIT 1`;
+
+export interface MapDataIsPbfInUseArgs {
+    pbfLocation: string;
+}
+
+export interface MapDataIsPbfInUseRow {
+    id: string;
+    region: string;
+    version: "current" | "previous" | "next" | "discarded";
+    status: "new" | "downloaded" | "processing" | "ready" | "error";
+    pbfLocation: string;
+    pbfMd5: string;
+    cacheLocation: string;
+    routerVersion: string;
+    kmlLocation: string;
+    error: string | null;
+    updatedAt: Date | null;
+    pbfSize: string | null;
+    pbfDownloadedSize: string | null;
+    cacheSize: string | null;
+    startupTimeS: string | null;
+}
+
+export async function mapDataIsPbfInUse(sql: Sql, args: MapDataIsPbfInUseArgs): Promise<MapDataIsPbfInUseRow | null> {
+    const rows = await sql.unsafe(mapDataIsPbfInUseQuery, [args.pbfLocation]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        region: row[1],
+        version: row[2],
+        status: row[3],
+        pbfLocation: row[4],
+        pbfMd5: row[5],
+        cacheLocation: row[6],
+        routerVersion: row[7],
+        kmlLocation: row[8],
+        error: row[9],
+        updatedAt: row[10],
+        pbfSize: row[11],
+        pbfDownloadedSize: row[12],
+        cacheSize: row[13],
+        startupTimeS: row[14]
+    };
+}
+
+export const mapDataIsCacheDirInUseQuery = `-- name: MapDataIsCacheDirInUse :one
+SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s FROM ridi_services.map_data
+WHERE 
+    cache_location = $1
+    AND (version = 'current' OR version = 'next')
+LIMIT 1`;
+
+export interface MapDataIsCacheDirInUseArgs {
+    cacheLocation: string;
+}
+
+export interface MapDataIsCacheDirInUseRow {
+    id: string;
+    region: string;
+    version: "current" | "previous" | "next" | "discarded";
+    status: "new" | "downloaded" | "processing" | "ready" | "error";
+    pbfLocation: string;
+    pbfMd5: string;
+    cacheLocation: string;
+    routerVersion: string;
+    kmlLocation: string;
+    error: string | null;
+    updatedAt: Date | null;
+    pbfSize: string | null;
+    pbfDownloadedSize: string | null;
+    cacheSize: string | null;
+    startupTimeS: string | null;
+}
+
+export async function mapDataIsCacheDirInUse(sql: Sql, args: MapDataIsCacheDirInUseArgs): Promise<MapDataIsCacheDirInUseRow | null> {
+    const rows = await sql.unsafe(mapDataIsCacheDirInUseQuery, [args.cacheLocation]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        region: row[1],
+        version: row[2],
+        status: row[3],
+        pbfLocation: row[4],
+        pbfMd5: row[5],
+        cacheLocation: row[6],
+        routerVersion: row[7],
+        kmlLocation: row[8],
+        error: row[9],
+        updatedAt: row[10],
+        pbfSize: row[11],
+        pbfDownloadedSize: row[12],
+        cacheSize: row[13],
+        startupTimeS: row[14]
+    };
+}
+
+export const mapDataGetRecordNextQuery = `-- name: MapDataGetRecordNext :one
+SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s FROM ridi_services.map_data 
+WHERE 
+    region = $1 
+    AND version = 'next'`;
+
+export interface MapDataGetRecordNextArgs {
+    region: string;
+}
+
+export interface MapDataGetRecordNextRow {
+    id: string;
+    region: string;
+    version: "current" | "previous" | "next" | "discarded";
+    status: "new" | "downloaded" | "processing" | "ready" | "error";
+    pbfLocation: string;
+    pbfMd5: string;
+    cacheLocation: string;
+    routerVersion: string;
+    kmlLocation: string;
+    error: string | null;
+    updatedAt: Date | null;
+    pbfSize: string | null;
+    pbfDownloadedSize: string | null;
+    cacheSize: string | null;
+    startupTimeS: string | null;
+}
+
+export async function mapDataGetRecordNext(sql: Sql, args: MapDataGetRecordNextArgs): Promise<MapDataGetRecordNextRow | null> {
+    const rows = await sql.unsafe(mapDataGetRecordNextQuery, [args.region]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        region: row[1],
+        version: row[2],
+        status: row[3],
+        pbfLocation: row[4],
+        pbfMd5: row[5],
+        cacheLocation: row[6],
+        routerVersion: row[7],
+        kmlLocation: row[8],
+        error: row[9],
+        updatedAt: row[10],
+        pbfSize: row[11],
+        pbfDownloadedSize: row[12],
+        cacheSize: row[13],
+        startupTimeS: row[14]
+    };
+}
+
+export const mapDataGetRecordCurrentQuery = `-- name: MapDataGetRecordCurrent :one
+SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s FROM ridi_services.map_data 
+WHERE 
+    region = $1 
+    AND version = 'current'`;
+
+export interface MapDataGetRecordCurrentArgs {
+    region: string;
+}
+
+export interface MapDataGetRecordCurrentRow {
+    id: string;
+    region: string;
+    version: "current" | "previous" | "next" | "discarded";
+    status: "new" | "downloaded" | "processing" | "ready" | "error";
+    pbfLocation: string;
+    pbfMd5: string;
+    cacheLocation: string;
+    routerVersion: string;
+    kmlLocation: string;
+    error: string | null;
+    updatedAt: Date | null;
+    pbfSize: string | null;
+    pbfDownloadedSize: string | null;
+    cacheSize: string | null;
+    startupTimeS: string | null;
+}
+
+export async function mapDataGetRecordCurrent(sql: Sql, args: MapDataGetRecordCurrentArgs): Promise<MapDataGetRecordCurrentRow | null> {
+    const rows = await sql.unsafe(mapDataGetRecordCurrentQuery, [args.region]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        region: row[1],
+        version: row[2],
+        status: row[3],
+        pbfLocation: row[4],
+        pbfMd5: row[5],
+        cacheLocation: row[6],
+        routerVersion: row[7],
+        kmlLocation: row[8],
+        error: row[9],
+        updatedAt: row[10],
+        pbfSize: row[11],
+        pbfDownloadedSize: row[12],
+        cacheSize: row[13],
+        startupTimeS: row[14]
+    };
+}
+
+export const mapDataGetRecordsAllNextQuery = `-- name: MapDataGetRecordsAllNext :many
+SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s FROM ridi_services.map_data 
+WHERE version = 'next'`;
+
+export interface MapDataGetRecordsAllNextRow {
+    id: string;
+    region: string;
+    version: "current" | "previous" | "next" | "discarded";
+    status: "new" | "downloaded" | "processing" | "ready" | "error";
+    pbfLocation: string;
+    pbfMd5: string;
+    cacheLocation: string;
+    routerVersion: string;
+    kmlLocation: string;
+    error: string | null;
+    updatedAt: Date | null;
+    pbfSize: string | null;
+    pbfDownloadedSize: string | null;
+    cacheSize: string | null;
+    startupTimeS: string | null;
+}
+
+export async function mapDataGetRecordsAllNext(sql: Sql): Promise<MapDataGetRecordsAllNextRow[]> {
+    return (await sql.unsafe(mapDataGetRecordsAllNextQuery, []).values()).map(row => ({
+        id: row[0],
+        region: row[1],
+        version: row[2],
+        status: row[3],
+        pbfLocation: row[4],
+        pbfMd5: row[5],
+        cacheLocation: row[6],
+        routerVersion: row[7],
+        kmlLocation: row[8],
+        error: row[9],
+        updatedAt: row[10],
+        pbfSize: row[11],
+        pbfDownloadedSize: row[12],
+        cacheSize: row[13],
+        startupTimeS: row[14]
+    }));
+}
+
+export const mapDataGetRecordsAllCurrentQuery = `-- name: MapDataGetRecordsAllCurrent :many
+SELECT id, region, version, status, pbf_location, pbf_md5, cache_location, router_version, kml_location, error, updated_at, pbf_size, pbf_downloaded_size, cache_size, startup_time_s FROM ridi_services.map_data 
+WHERE version = 'current'`;
+
+export interface MapDataGetRecordsAllCurrentRow {
+    id: string;
+    region: string;
+    version: "current" | "previous" | "next" | "discarded";
+    status: "new" | "downloaded" | "processing" | "ready" | "error";
+    pbfLocation: string;
+    pbfMd5: string;
+    cacheLocation: string;
+    routerVersion: string;
+    kmlLocation: string;
+    error: string | null;
+    updatedAt: Date | null;
+    pbfSize: string | null;
+    pbfDownloadedSize: string | null;
+    cacheSize: string | null;
+    startupTimeS: string | null;
+}
+
+export async function mapDataGetRecordsAllCurrent(sql: Sql): Promise<MapDataGetRecordsAllCurrentRow[]> {
+    return (await sql.unsafe(mapDataGetRecordsAllCurrentQuery, []).values()).map(row => ({
+        id: row[0],
+        region: row[1],
+        version: row[2],
+        status: row[3],
+        pbfLocation: row[4],
+        pbfMd5: row[5],
+        cacheLocation: row[6],
+        routerVersion: row[7],
+        kmlLocation: row[8],
+        error: row[9],
+        updatedAt: row[10],
+        pbfSize: row[11],
+        pbfDownloadedSize: row[12],
+        cacheSize: row[13],
+        startupTimeS: row[14]
+    }));
+}
+
+export const mapDataUpdateRecordsPromoteNextQuery = `-- name: MapDataUpdateRecordsPromoteNext :exec
+UPDATE ridi_services.map_data
+SET version = 'current'
+WHERE version = 'next'`;
+
+export async function mapDataUpdateRecordsPromoteNext(sql: Sql): Promise<void> {
+    await sql.unsafe(mapDataUpdateRecordsPromoteNextQuery, []);
+}
+
+export const mapDataUpdateRecordsDemoteCurrentQuery = `-- name: MapDataUpdateRecordsDemoteCurrent :exec
+UPDATE ridi_services.map_data
+SET version = 'previous'
+WHERE version = 'current'`;
+
+export async function mapDataUpdateRecordsDemoteCurrent(sql: Sql): Promise<void> {
+    await sql.unsafe(mapDataUpdateRecordsDemoteCurrentQuery, []);
+}
+
