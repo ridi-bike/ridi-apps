@@ -5,7 +5,7 @@ import { DeployChecker } from "./check-deploy.ts";
 import { CoolifyClient } from "./coolify.ts";
 
 const envVariables = EnvVariables.get();
-RidiLogger.init();
+RidiLogger.init(envVariables.ridiEnvName);
 const ridiLogger = RidiLogger.get();
 
 const pgClient = getPgClient();

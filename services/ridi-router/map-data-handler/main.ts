@@ -13,7 +13,7 @@ import { FileDownloader, RegionDownloader } from "./region-downloader.ts";
 import { OsmLocations } from "./osm-locations.ts";
 
 const baseEnv = new BaseEnvVariables();
-RidiLogger.init();
+RidiLogger.init(baseEnv.ridiEnvName);
 const envVariables = EnvVariables.get();
 const ridiLogger = RidiLogger.get();
 const locations = new Locations(baseEnv);
