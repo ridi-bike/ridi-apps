@@ -5,7 +5,7 @@ services:
       file: ./docker-compose-base.yaml
       service: deno_service
     volumes:
-      - /var/log/ridi-service:/var/log/ridi-service-map-data
+      - /var/log/ridi-service-map-data:/var/log/ridi-service
     command: ./startup.sh ./map-data-handler/main.ts
     environment:
       SUPABASE_DB_URL: ${SUPABASE_DB_URL}
