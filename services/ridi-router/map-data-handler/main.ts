@@ -83,10 +83,10 @@ setInterval(() => regionProcessor.process(), 24 * 60 * 60 * 1000); // every 24h
 Deno.serve(
   { port: Number(envVariables.port), hostname: "0.0.0.0" },
   async (_req) => {
-    const handlerRec = await pg.servicesGet(getPgClient(), {
+    const serviceRecord = await pg.servicesGet(getPgClient(), {
       name: "map-data",
     });
-    if (handlerRec) {
+    if (serviceRecord) {
       return new Response("ok");
     } else {
       return new Response("nok", { status: 400 });
