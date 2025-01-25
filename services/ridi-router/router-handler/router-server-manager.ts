@@ -1,7 +1,6 @@
-import { pg } from "../packages/lib/main.ts";
+import { pg, PgClient } from "../packages/lib/main.ts";
 import { EnvVariables } from "./env-variables.ts";
 import { handleMaybeErrors, RidiLogger } from "@ridi-router/logging/main.ts";
-import { PgClient } from "./pg-client.ts";
 
 type RegionReq = {
   reqId: string;

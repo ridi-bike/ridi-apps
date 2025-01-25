@@ -1,7 +1,6 @@
-import { pg } from "@ridi-router/lib";
+import { pg, PgClient } from "@ridi-router/lib";
 
 import type { RidiLogger } from "@ridi-router/logging/main.ts";
-import { type PgClient } from "./pg-client.ts";
 import { type Cleaner } from "./cleaner.ts";
 import { type EnvVariables } from "./env-variables.ts";
 import { type CacheGenerator } from "./cache-generator.ts";

@@ -1,7 +1,7 @@
 import { RouterServerManager } from "./router-server-manager.ts";
 import { DenoCommand, pg } from "@ridi-router/lib";
 import { RidiLogger } from "@ridi-router/logging/main.ts";
-import { PgClient } from "./pg-client.ts";
+import { PgClient } from "@ridi-router/lib";
 import { EnvVariables } from "./env-variables.ts";
 type RidiRouterErr = { err: string };
 type RidiRouterOk = {

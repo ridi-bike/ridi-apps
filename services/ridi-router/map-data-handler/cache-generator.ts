@@ -1,10 +1,9 @@
-import { DenoCommand, pg } from "@ridi-router/lib";
+import { DenoCommand, pg, PgClient } from "@ridi-router/lib";
 import type { RidiLogger } from "@ridi-router/logging/main.ts";
 import PQueue from "p-queue";
 import { type EnvVariables } from "./env-variables.ts";
 import { type KmlProcessor } from "./kml-processor.ts";
 import { type Handler } from "./handler.ts";
-import { PgClient } from "./pg-client.ts";
 import { MapDataRecord } from "./types.ts";
 
 export class DenoDirStat {

@@ -1,5 +1,4 @@
-import { pg } from "@ridi-router/lib";
-import { PgClient } from "./pg-client.ts";
+import { pg, PgClient } from "@ridi-router/lib";
 import { kml } from "to-geo-json";
 import { DOMParser } from "xmldom";
 import { MapDataRecord } from "./types.ts";
