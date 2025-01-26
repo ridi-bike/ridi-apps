@@ -20,16 +20,6 @@ export class BaseEnvVariables {
     Deno.env.get("SUPABASE_DB_URL"),
   );
 
-  readonly openObserveOrg = parse(
-    string("OPEN_OBSERVE_ORG env variable"),
-    Deno.env.get("OPEN_OBSERVE_ORG"),
-  );
-
-  readonly openObserveToken = parse(
-    string("OPEN_OBSERVE_TOKEN env variable"),
-    Deno.env.get("OPEN_OBSERVE_TOKEN"),
-  );
-
   readonly regionListLoc = parse(
     string("REGION_LIST env variable"),
     Deno.env.get("REGION_LIST"),
