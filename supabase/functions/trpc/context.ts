@@ -31,7 +31,8 @@ export const createContext = async (
 
   const db = postgres(supabaseDbUrl);
   console.log({ db });
-  await servicesGet(db, { name: "router" });
+  const routerRec = await servicesGet(db, { name: "router" });
+  console.log({ routerRec });
 
   const authHeader = req.headers.get("Authorization");
   const token = authHeader?.replace("Bearer ", "") || "";

@@ -7,13 +7,14 @@
     "jsr:@std/internal@^1.0.5": "1.0.5",
     "jsr:@std/testing@*": "1.0.5",
     "jsr:@supabase/functions-js@*": "2.4.3",
+    "jsr:@valibot/valibot@0.42": "0.42.1",
     "jsr:@valibot/valibot@0.42.1": "0.42.1",
-    "npm:@tmcw/togeojson@*": "6.0.0_@types+geojson@7946.0.14_@xmldom+xmldom@0.9.5",
-    "npm:flat@*": "6.0.1",
+    "npm:@tmcw/togeojson@6": "6.0.0_@types+geojson@7946.0.16_@xmldom+xmldom@0.9.7",
     "npm:p-queue@8": "8.0.1",
-    "npm:pino@*": "9.6.0",
+    "npm:pino@9": "9.6.0",
     "npm:postgres@*": "3.4.5",
-    "npm:xmldom@*": "0.6.0"
+    "npm:postgres@3": "3.4.5",
+    "npm:xmldom@0.6": "0.6.0"
   },
   "jsr": {
     "@std/assert@1.0.8": {
@@ -46,8 +47,8 @@
     }
   },
   "npm": {
-    "@jridgewell/gen-mapping@0.3.5": {
-      "integrity": "sha512-IzL8ZoEDIBRWEzlCcRhOaCupYyN5gdIK+Q6fbFdPDg6HqX6jpkItn7DFIpW9LQzXG6Df9sA7+OKnq0qlz/GaQg==",
+    "@jridgewell/gen-mapping@0.3.8": {
+      "integrity": "sha512-imAbBGkb+ebQyxKgzv5Hu2nmROxoDOXHh80evxdoXNOrvAnVx7zimzc1Oo5h9RlfV4vPXaE2iM5pOFbvOCClWA==",
       "dependencies": [
         "@jridgewell/set-array",
         "@jridgewell/sourcemap-codec",
@@ -85,7 +86,7 @@
         "terser"
       ]
     },
-    "@tmcw/togeojson@6.0.0_@types+geojson@7946.0.14_@xmldom+xmldom@0.9.5": {
+    "@tmcw/togeojson@6.0.0_@types+geojson@7946.0.16_@xmldom+xmldom@0.9.7": {
       "integrity": "sha512-48+l0N43M1dUZEqS+vOEAWwWLNB6Y372NuEFYxll/bxV/q3qSvYcTMY+9eGoWwQYeATmn8Xi+uaNb0OFDIcXYw==",
       "dependencies": [
         "@rollup/plugin-terser",
@@ -93,14 +94,14 @@
         "@xmldom/xmldom"
       ]
     },
-    "@types/geojson@7946.0.14": {
-      "integrity": "sha512-WCfD5Ht3ZesJUsONdhvm84dmzWOiOzOAqOncN0++w0lBw1o8OuDNJF2McvvCef/yBqb/HYRahp1BYtODFQ8bRg=="
+    "@types/geojson@7946.0.16": {
+      "integrity": "sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg=="
     },
-    "@xmldom/xmldom@0.9.5": {
-      "integrity": "sha512-6g1EwSs8cr8JhP1iBxzyVAWM6BIDvx9Y3FZRIQiMDzgG43Pxi8YkWOZ0nQj2NHgNzgXDZbJewFx/n+YAvMZrfg=="
+    "@xmldom/xmldom@0.9.7": {
+      "integrity": "sha512-syvR8iIJjpTZ/stv7l89UAViwGFh6lbheeOaqSxkYx9YNmIVvPTRH+CT/fpykFtUx5N+8eSMDRvggF9J8GEPzQ=="
     },
-    "acorn@8.13.0": {
-      "integrity": "sha512-8zSiw54Oxrdym50NlZ9sUusyO1Z1ZchgRLWRaK6c86XJFClyCgFKetdowBg5bKxyp/u+CDBJG4Mpp0m3HLZl9w=="
+    "acorn@8.14.0": {
+      "integrity": "sha512-cl669nCJTZBsL97OF4kUQm5g5hC2uihk0NxY3WENAC0TYdILVkAyHymAntgxGkl7K+t0cXIrH5siy5S4XkFycA=="
     },
     "atomic-sleep@1.0.0": {
       "integrity": "sha512-kNOjDqAh7px0XWNI+4QbzoiR/nTkHAWNud2uvnJquD1/x5a7EQZMJT0AczqK0Qn67oY/TTQ1LbUKajZpp3I9tQ=="
@@ -116,9 +117,6 @@
     },
     "fast-redact@3.5.0": {
       "integrity": "sha512-dwsoQlS7h9hMeYUq1W++23NDcBLV4KqONnITDV9DjfS3q1SgDGVrBdvvTLUotWtPSD7asWDV9/CmsZPy8Hf70A=="
-    },
-    "flat@6.0.1": {
-      "integrity": "sha512-/3FfIa8mbrg3xE7+wAhWeV+bd7L2Mof+xtZb5dRDKZ+wDvYJK4WDYeIOuOhre5Yv5aQObZrlbRmk3RTSiuQBtw=="
     },
     "on-exit-leak-free@2.1.2": {
       "integrity": "sha512-0eJJY6hXLGf1udHwfNftBqH+g73EU4B504nZeKpz1sYRKafAghwxEJunB2O7rDZkL4PGfsMVnTXZ2EjibbqcsA=="
@@ -210,8 +208,8 @@
     "split2@4.2.0": {
       "integrity": "sha512-UcjcJOWknrNkF6PLX83qcHM6KHgVKNkV62Y8a5uYDVv9ydGQVwAHMKqHdJje1VTWpljG0WYpCDhrCdAOYH4TWg=="
     },
-    "terser@5.36.0": {
-      "integrity": "sha512-IYV9eNMuFAV4THUspIRXkLakHnV6XO7FEdtKjf/mDyrnqUg9LnlOn6/RwRvM9SZjR4GUq8Nk8zj67FzVARr74w==",
+    "terser@5.37.0": {
+      "integrity": "sha512-B8wRRkmre4ERucLM/uXx4MOV5cbnOlVAqUst+1+iLKPI0dOgFO28f84ptoQt9HEI537PMzfYa/d+GEPKTRXmYA==",
       "dependencies": [
         "@jridgewell/source-map",
         "acorn",
@@ -239,15 +237,15 @@
       "map-data-handler": {
         "dependencies": [
           "jsr:@valibot/valibot@0.42.1",
-          "npm:@tmcw/togeojson@*",
+          "npm:@tmcw/togeojson@6",
           "npm:p-queue@8",
-          "npm:postgres@*",
-          "npm:xmldom@*"
+          "npm:postgres@3",
+          "npm:xmldom@0.6"
         ]
       },
       "packages/env": {
         "dependencies": [
-          "jsr:@valibot/valibot@0.42.1"
+          "jsr:@valibot/valibot@0.42"
         ]
       },
       "packages/lib": {
@@ -258,20 +256,18 @@
       },
       "packages/logging": {
         "dependencies": [
-          "npm:flat@*",
-          "npm:pino-opentelemetry-transport@*",
-          "npm:pino@*"
+          "npm:pino@9"
         ]
       },
       "packages/messaging": {
         "dependencies": [
-          "npm:postgres@*"
+          "npm:postgres@3"
         ]
       },
       "router-handler": {
         "dependencies": [
           "jsr:@valibot/valibot@0.42.1",
-          "npm:postgres@*"
+          "npm:postgres@3"
         ]
       }
     }

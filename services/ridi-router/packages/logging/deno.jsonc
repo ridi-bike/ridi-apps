@@ -3,9 +3,7 @@
   "version": "0.1.0",
   "exports": "./main.ts",
   "imports": {
-    "pino": "npm:pino",
-    "pino-opentelemetry-transport": "npm:pino-opentelemetry-transport",
-    "flat": "npm:flat",
+    "pino": "npm:pino@9",
     "@ridi-router/env/": "../env/"
   }
 }
