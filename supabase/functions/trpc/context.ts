@@ -31,6 +31,8 @@ export const createContext = async (
 
   const db = postgres(supabaseDbUrl);
   console.log({ db });
+  const manualRec = await db.unsafe("select * from ridi_services.services");
+  console.log({ manualRec });
   const routerRec = await servicesGet(db, { name: "router" });
   console.log({ routerRec });
 
