@@ -12,6 +12,7 @@
 		"superjson": "npm:superjson",
 		"@ridi-router/messaging/": "../../../services/ridi-router/packages/messaging/",
 		"@ridi-router/logging/": "../../../services/ridi-router/packages/logging/",
+		"@ridi-router/lib/": "../../../services/ridi-router/packages/lib/",
 		"pino": "npm:pino"
 	}
 }
