@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@ridi-router/lib/supabase.ts";
 import { servicesGet } from "@ridi-router/lib/queries_sql.ts";
 import type { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import postgres from "postgres";
+import postgres from "postgres/mod.js";
 import { Messaging } from "@ridi-router/messaging/main.ts";
 import { parse, string } from "valibot";
 

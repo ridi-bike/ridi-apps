@@ -109,11 +109,14 @@ export class Runner {
         );
       }
     } else {
-      throw this.logger.error("Map data records found, critical failure", {
-        regions: this.env.regions,
-        currentMapData,
-        currentRegions,
-      });
+      throw this.logger.error(
+        "Map data or region records not found, critical failure",
+        {
+          regions: this.env.regions,
+          currentMapData,
+          currentRegions,
+        },
+      );
     }
 
     this.messaging.listen(

@@ -3,7 +3,8 @@
 	"version": "0.1.0",
 	"exports": "./main.ts",
 	"imports": {
-		"postgres": "npm:postgres@3",
+		"postgres": "https://deno.land/x/postgresjs/types/index.d.ts",
+		"postgres/": "https://deno.land/x/postgresjs/",
 		"@ridi-router/logging/": "../logging/"
 	}
 }

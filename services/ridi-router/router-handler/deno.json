@@ -5,7 +5,6 @@
 	},
 	"imports": {
 		"valibot": "jsr:@valibot/valibot@0.42.1",
-		"postgres": "npm:postgres@3",
 		"@ridi-router/logging/": "../packages/logging/",
 		"@ridi-router/env/": "../packages/env/",
 		"@ridi-router/messaging/": "../packages/messaging/"

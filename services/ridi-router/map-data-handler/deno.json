@@ -8,7 +8,6 @@
 		"p-queue": "npm:p-queue@8",
 		"to-geo-json": "npm:@tmcw/togeojson@6",
 		"xmldom": "npm:xmldom@0.6",
-		"postgres": "npm:postgres@3",
 		"@ridi-router/logging/": "../packages/logging/",
 		"@ridi-router/env/": "../packages/env/"
 	}
