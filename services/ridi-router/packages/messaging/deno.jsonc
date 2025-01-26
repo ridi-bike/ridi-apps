@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"exports": "./main.ts",
 	"imports": {
-		"postgres": "npm:postgres",
-		"@ridi-router/logging/": "../logging/",
+		"postgres": "npm:postgres@3",
+		"@ridi-router/logging/": "../logging/"
 	}
 }

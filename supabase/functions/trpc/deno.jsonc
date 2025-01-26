@@ -3,16 +3,16 @@
 	"version": "0.1.0",
 	"exports": "./index.ts",
 	"imports": {
-		"@supabase/supabase-js": "jsr:@supabase/supabase-js",
-		"@trpc/server": "npm:@trpc/server",
-		"@trpc/server/adapters/fetch": "npm:@trpc/server/adapters/fetch",
-		"valibot": "jsr:@valibot/valibot",
-		"postgres": "npm:postgres",
-		"remeda": "npm:remeda",
-		"superjson": "npm:superjson",
+		"@supabase/supabase-js": "jsr:@supabase/supabase-js@2",
+		"@trpc/server": "npm:@trpc/server@10",
+		"@trpc/server/adapters/fetch": "npm:@trpc/server@10/adapters/fetch",
+		"valibot": "jsr:@valibot/valibot@0.42",
+		"postgres": "npm:postgres@3",
+		"remeda": "npm:remeda@2",
+		"superjson": "npm:superjson@2",
 		"@ridi-router/messaging/": "../../../services/ridi-router/packages/messaging/",
 		"@ridi-router/logging/": "../../../services/ridi-router/packages/logging/",
 		"@ridi-router/lib/": "../../../services/ridi-router/packages/lib/",
-		"pino": "npm:pino"
+		"pino": "npm:pino@9"
 	}
 }
