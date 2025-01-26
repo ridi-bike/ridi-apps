@@ -25,7 +25,8 @@ const supabaseClient = createClient<Database, "public", Database["public"]>(
 );
 
 const dbUrl = new URL(supabaseDbUrl);
-if (dbUrl.port !== "6543") {
+// in localhost the hostname is db
+if (dbUrl.hostname !== "db" && dbUrl.port !== "6543") {
   dbUrl.port = "6543";
 }
 const db = postgres(dbUrl.toString());

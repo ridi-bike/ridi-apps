@@ -1,4 +1,8 @@
 receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
   filelog/std:
     include: [ /var/log/ridi-service-deploy/service.log, /var/log/ridi-service-map-data/service.log, /var/log/ridi-service-router/service.log ]
   hostmetrics:
@@ -37,6 +41,13 @@ receivers:
         enabled: false
       container.network.io.usage.tx_dropped:
         enabled: false
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'otel-collector'
+          scrape_interval: 30s
+          static_configs:
+            - targets: ['localhost:8888']
 processors:
   resourcedetection/system:
     detectors: ["system"]
@@ -49,6 +60,11 @@ processors:
   batch:
     send_batch_size: 10000
     timeout: 10s
+  attributes/betterstack:
+    actions:
+      - key: better_stack_source_token
+        value: =====================================================
+        action: insert
 
 extensions:
   zpages: {}
@@ -57,12 +73,16 @@ exporters:
   otlphttp/openobserve:
     endpoint: https://api.openobserve.ai/api/toms_organization_50898_KmgBoq7eiBvgqoe/
     headers:
-      Authorization: "Basic dG9tcy5qYW5zb25zQGhvb2Qtc29mdHdhcmUubHY6RDUxNjJrZm4zOEVvcUE0MHQ3Wjk="
+      Authorization: "Basic ==============================================="
   otlphttp/openobserve_ridi-service:
     endpoint: https://api.openobserve.ai/api/toms_organization_50898_KmgBoq7eiBvgqoe/
     headers:
-      Authorization: "Basic dG9tcy5qYW5zb25zQGhvb2Qtc29mdHdhcmUubHY6RDUxNjJrZm4zOEVvcUE0MHQ3Wjk="
+      Authorization: "Basic =============================================="
       stream-name: ridi-service
+  otlp/betterstack:
+    endpoint: "https://in-otel.logs.betterstack.com:443"
+  prometheusremotewrite/betterstack:
+    endpoint: "https://in-otel.logs.betterstack.com/metrics"
 
 service:
   extensions: [zpages]
@@ -75,3 +95,11 @@ service:
       receivers: [filelog/std]
       processors: [resourcedetection/system, memory_limiter, batch]
       exporters: [otlphttp/openobserve_ridi-service]
+    metrics/betterstack:
+      receivers: [hostmetrics, docker_stats, otlp, prometheus] # You can add more metrics receivers here
+      processors: [batch, attributes/betterstack]
+      exporters: [prometheusremotewrite/betterstack]
+    logs/betterstack:
+      receivers: [filelog/std, otlp, filelog/betterstack] # You can add more logs receivers here
+      processors: [batch, attributes/betterstack]
+      exporters: [otlp/betterstack]
