@@ -1,5 +1,5 @@
 import { BaseEnvVariables } from "@ridi-router/env/main.ts";
-import postgres from "postgres";
+import postgres from "postgres/mod.js";
 
 const pgInstance = {
   pgClient: null,

@@ -1,4 +1,4 @@
-import type postgres from "postgres";
+import type postgres from "postgres/mod.js";
 import {
   archiveMessage,
   deleteMessage,
