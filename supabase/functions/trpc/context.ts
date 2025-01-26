@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@ridi-router/lib/supabase.ts";
+import { servicesGet } from "@ridi-router/lib/queries_sql.ts";
 import type { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import postgres from "postgres";
 import { Messaging } from "@ridi-router/messaging/main.ts";
@@ -29,6 +30,8 @@ export const createContext = async (
   );
 
   const db = postgres(supabaseDbUrl);
+  console.log({ db });
+  await servicesGet(db, { name: "router" });
 
   const authHeader = req.headers.get("Authorization");
   const token = authHeader?.replace("Bearer ", "") || "";
