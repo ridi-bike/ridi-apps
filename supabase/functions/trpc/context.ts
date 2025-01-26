@@ -20,27 +20,28 @@ const supabaseDbUrl = parse(
   Deno.env.get("SUPABASE_DB_URL"),
 );
 
+const supabaseClient = createClient<Database, "public", Database["public"]>(
+  supabaseUrl,
+  supabaseServiceRoleKey,
+);
+
+const dbUrl = new URL(supabaseDbUrl);
+if (dbUrl.port !== "6543") {
+  console.log("updating port");
+  dbUrl.port = "6543";
+} else {
+  console.log("correct port");
+}
+const db = postgres(dbUrl.toString());
+
 export const createContext = async (
   { req }: ContextCreatorParams,
   info: Deno.ServeHandlerInfo<Deno.NetAddr>,
 ) => {
-  const supabaseClient = createClient<Database, "public", Database["public"]>(
-    supabaseUrl,
-    supabaseServiceRoleKey,
-  );
-
-  const db = postgres(supabaseDbUrl);
-  console.log({ db });
-  const manualRec = await db.unsafe("select * from ridi_services.services");
-  console.log({ manualRec });
-  const routerRec = await servicesGet(db, { name: "router" });
-  console.log({ routerRec });
-
   const authHeader = req.headers.get("Authorization");
   const token = authHeader?.replace("Bearer ", "") || "";
   const { data } = await supabaseClient.auth.getUser(token);
   const user = data.user;
-  console.log({ user });
   const messaging = new Messaging(db, {
     info: (...args: unknown[]) => console.log(...args),
     error: (...args: unknown[]) => console.error(...args),
