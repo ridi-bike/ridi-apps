@@ -23,16 +23,16 @@ export default function PlansPage() {
 
   return (
     <>
-      <ScrollView className="min-h-screen w-full bg-white">
+      <ScrollView className="min-h-screen w-full bg-white dark:bg-gray-900">
         <Stack.Screen options={{
           header: () => (
-            <View className="bg-white border-b border-gray-200 mx-auto px-6 md:px-8 h-16 flex flex-row w-full items-center justify-between">
+            <View className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 mx-auto px-6 md:px-8 h-16 flex flex-row w-full items-center justify-between">
               <Text role="heading" aria-level={1} className="text-2xl font-bold tracking-tight text-[#FF5937]">
                 Ridi plans
               </Text>
               <Link
                 role="button"
-                className="w-10 h-10 flex items-center justify-center text-gray-600 hover:text-[#FF5937] transition-colors"
+                className="w-10 h-10 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:text-[#FF5937] transition-colors"
                 aria-label="Profile"
                 href="/settings"
               >
@@ -57,7 +57,7 @@ export default function PlansPage() {
         aria-label="Create new plan"
         href="/plans/new"
       >
-        <Plus className="w-12 h-12 text-white" />
+        <Plus className="w-12 h-12 text-white dark:text-gray-900" />
       </Link>
     </>
   );
