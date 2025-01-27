@@ -20,9 +20,9 @@ export const RouteCard = ({
 
   return (
     <ScrollView className="w-full h-full">
-      <View role="article" className="w-full bg-white rounded-2xl shadow-lg border-2 border-black p-6">
+      <View role="article" className="w-full bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-2 border-black dark:border-gray-700 p-6">
         <View
-          className="h-[240px] mb-6 rounded-xl overflow-hidden border-2 border-black"
+          className="h-[240px] mb-6 rounded-xl overflow-hidden border-2 border-black dark:border-gray-700"
         >
           <GeoMapStatic points={[{
             icon:
@@ -35,23 +35,23 @@ export const RouteCard = ({
 
         </View>
         <View className="space-y-4">
-          <View className="flex items-start gap-3">
+          <View className="flex flex-row items-start gap-3">
             <MapPin className="w-6 h-6 mt-1 text-[#FF5937]" />
             <View>
               <Text role="heading" aria-level={2} className="text-sm font-bold text-[#FF5937]">Start</Text>
-              <Text className="text-base font-medium">{startAddress}</Text>
+              <Text className="text-base font-medium dark:text-gray-200">{startAddress}</Text>
             </View>
           </View>
-          <View className="flex items-start gap-3">
+          <View className="flex flex-row items-start gap-3">
             <Navigation className="w-6 h-6 mt-1 text-[#FF5937]" />
             <View>
               <Text role="heading" aria-level={2} className="text-sm font-bold text-[#FF5937]">End</Text>
-              <Text className="text-base font-medium">{endAddress}</Text>
+              <Text className="text-base font-medium dark:text-gray-200">{endAddress}</Text>
             </View>
           </View>
-          <View className="text-base pt-4 border-t-2 border-black">
-            <Text className="font-bold">Straigt line distance: </Text>
-            <Text className="font-medium">{distance}</Text>
+          <View className="text-base pt-4 border-t-2 border-black dark:border-gray-700 flex flex-row">
+            <Text className="font-bold dark:text-gray-100">Straigt line distance: </Text>
+            <Text className="font-medium dark:text-gray-200">{distance}</Text>
           </View>
         </View>
       </View>
