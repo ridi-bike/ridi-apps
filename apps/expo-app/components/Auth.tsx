@@ -5,8 +5,9 @@ import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 import { supabase } from "~/lib/supabase";
 import { useEffect } from "react";
-import { Button } from "./ui/button";
+import { Button } from "./button";
 import { Text } from "./ui/text";
+import { Link } from "./link";
 
 const redirectTo = makeRedirectUri();
 
@@ -95,12 +96,12 @@ export default function Auth() {
 
 	return (
 		<>
-			<Button variant="outline" onPress={performOAuth}>
-				<Text>Sign in</Text>
+			<Button variant="primary" fullWidth onPress={performOAuth}>
+				Sign in
 			</Button>
-			<Button variant="outline" onPress={() => supabase.auth.signOut()}>
-				<Text>Sign out</Text>
-			</Button>
+			<Link variant="secondary" fullWidth href="/plans" >
+				Try it out
+			</Link>
 		</>
 	);
 }
