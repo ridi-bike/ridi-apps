@@ -97,11 +97,15 @@ export default function Auth() {
 	return (
 		<>
 			<Button variant="primary" fullWidth onPress={performOAuth}>
-				Sign in
+				<Text>
+					Sign in
+				</Text>
 			</Button>
-			<Link variant="secondary" fullWidth href="/plans" >
-				Try it out
-			</Link>
+			<Button variant="secondary" fullWidth onPress={() => router.replace("/plans")} >
+				<Text>
+					Try it out
+				</Text>
+			</Button>
 		</>
 	);
 }
