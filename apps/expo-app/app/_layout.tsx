@@ -9,10 +9,8 @@ import { registerBackgroundFetchAsync } from "~/lib/background";
 registerBackgroundFetchAsync();
 
 async function syncSession() {
-	console.log("omg wtf lets mount");
 	supabase.auth.onAuthStateChange((_event, session) => {
 		$session.set(session);
-		console.log("auth changed");
 	});
 
 	const sessionData = await supabase.auth.getSession();
@@ -28,17 +26,13 @@ async function syncSession() {
 const queryClient = new QueryClient();
 
 export default function App() {
-	console.log("app running yeah");
-
 	useEffectOnce(() => {
 		syncSession();
 	});
 
 	return (
 		<QueryClientProvider client={queryClient}>
-			<Stack>
-				<Stack.Screen name="index" />
-			</Stack>
+			<Stack/>
 			<PortalHost />
 		</QueryClientProvider>
 	);
