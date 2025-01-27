@@ -2,7 +2,7 @@ import { useLocalSearchParams } from "expo-router";
 import { Text } from "~/components/ui/text";
 import { ScrollView } from "react-native";
 import { useStoreRoute } from "~/lib/stores/routes-store";
-import GeoMap from "~/components/geo-map";
+import GeoMap from "~/components/geo-map/geo-map-coords-selector";
 
 export default function RoutePage() {
 	const { routeId } = useLocalSearchParams<{ routeId: string }>();

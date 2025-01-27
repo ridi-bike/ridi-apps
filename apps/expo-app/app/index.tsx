@@ -19,9 +19,9 @@ export default function Index() {
 			<Stack.Screen options={{ headerShown: false }} />
 			<View className="w-full max-w-[375px] flex flex-col items-center">
 				<View className="mb-16">
-					<h1 className="text-6xl font-bold tracking-tight text-[#FF5937]">
+					<Text className="text-6xl font-bold tracking-tight text-[#FF5937]">
 						Ridi
-					</h1>
+					</Text>
 				</View>
 				<View className="w-full space-y-4">
 					{!session &&
