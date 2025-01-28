@@ -14,9 +14,9 @@ type RouteCardProps = {
   distance: string;
   startCoords: [number, number];
   finishCoords: [number, number];
-}
+};
 
-export const RouteCard = ({
+export const PlanCard = ({
   startAddress,
   endAddress,
   distance,
