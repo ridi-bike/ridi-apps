@@ -1,11 +1,12 @@
 import { Link, Stack } from "expo-router";
-import { Plus, UserCircle } from "lucide-react-native";
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { Plus } from "lucide-react-native";
+import { View, ScrollView } from "react-native";
 
-import { RouteCard } from "~/components/plan-card";
+import { PlanCard } from "~/components/plan-card";
+import { ScreenHeader } from "~/components/screen-header";
 
 export default function PlansPage() {
-  const routes = [
+  const plans = [
     {
       startAddress: "123 Main St, San Francisco, CA",
       endAddress: "456 Market St, San Francisco, CA",
@@ -27,24 +28,8 @@ export default function PlansPage() {
       <ScrollView className="min-h-screen w-full bg-white dark:bg-gray-900">
         <Stack.Screen
           options={{
-            header: () => (
-              <View className="mx-auto flex h-16 w-full flex-row items-center justify-between border-b border-gray-200 bg-white px-6 md:px-8 dark:border-gray-700 dark:bg-gray-900">
-                <Text
-                  role="heading"
-                  aria-level={1}
-                  className="text-2xl font-bold tracking-tight text-[#FF5937]"
-                >
-                  Ridi plans
-                </Text>
-                <Link
-                  role="button"
-                  className="flex size-10 items-center justify-center text-gray-600 transition-colors hover:text-[#FF5937] dark:text-gray-400"
-                  aria-label="Profile"
-                  href="/settings"
-                >
-                  <UserCircle className="size-8" />
-                </Link>
-              </View>
+            header: (props) => (
+              <ScreenHeader headerProps={props} title="Ridi plans" />
             ),
           }}
         />
@@ -53,9 +38,11 @@ export default function PlansPage() {
           className="flex flex-row justify-center px-6 pb-24 pt-8 md:px-8"
         >
           <View className="mx-2 max-w-3xl flex-1">
-            <View className="space-y-6">
-              {routes.map((route, index) => (
-                <RouteCard key={index} {...route} />
+            <View className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {plans.map((plan, index) => (
+                <Link key={index} href="/plans/1">
+                  <PlanCard {...plan} />
+                </Link>
               ))}
             </View>
           </View>
