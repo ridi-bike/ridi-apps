@@ -1,9 +1,9 @@
-import { Link, Stack } from "expo-router";
+import { Link } from "expo-router";
 import { Plus } from "lucide-react-native";
-import { View, ScrollView } from "react-native";
+import { View } from "react-native";
 
 import { PlanCard } from "~/components/plan-card";
-import { ScreenHeader } from "~/components/screen-header";
+import { ScreenFrame } from "~/components/screen-frame";
 
 export default function PlansPage() {
   const plans = [
@@ -24,38 +24,28 @@ export default function PlansPage() {
   ];
 
   return (
-    <>
-      <ScrollView className="min-h-screen w-full bg-white dark:bg-gray-900">
-        <Stack.Screen
-          options={{
-            header: (props) => (
-              <ScreenHeader headerProps={props} title="Ridi plans" />
-            ),
-          }}
-        />
-        <View
-          role="main"
-          className="flex flex-row justify-center px-6 pb-24 pt-8 md:px-8"
+    <ScreenFrame
+      title="Ridi plans"
+      floating={
+        <Link
+          role="button"
+          className="fixed bottom-8 right-8 flex size-24 items-center justify-center rounded-full bg-[#FF5937] shadow-lg transition-colors hover:bg-[#ff4a25]"
+          aria-label="Create new plan"
+          href="/plans/new"
         >
-          <View className="mx-2 max-w-3xl flex-1">
-            <View className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              {plans.map((plan, index) => (
-                <Link key={index} href="/plans/1">
-                  <PlanCard {...plan} />
-                </Link>
-              ))}
-            </View>
-          </View>
+          <Plus className="size-12 text-white dark:text-gray-900" />
+        </Link>
+      }
+    >
+      <View className="mx-2 max-w-3xl flex-1">
+        <View className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {plans.map((plan, index) => (
+            <Link key={index} href="/plans/1">
+              <PlanCard {...plan} />
+            </Link>
+          ))}
         </View>
-      </ScrollView>
-      <Link
-        role="button"
-        className="fixed bottom-8 right-8 flex size-24 items-center justify-center rounded-full bg-[#FF5937] shadow-lg transition-colors hover:bg-[#ff4a25]"
-        aria-label="Create new plan"
-        href="/plans/new"
-      >
-        <Plus className="size-12 text-white dark:text-gray-900" />
-      </Link>
-    </>
+      </View>
+    </ScreenFrame>
   );
 }
