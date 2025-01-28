@@ -6,7 +6,7 @@ import { ScreenHeader } from "~/components/screen-header";
 type ScreenFramePropsn = {
   title: string;
   children: React.ReactNode;
-  floating: React.ReactNode;
+  floating?: React.ReactNode;
 };
 export function ScreenFrame({ children, floating, title }: ScreenFramePropsn) {
   return (
