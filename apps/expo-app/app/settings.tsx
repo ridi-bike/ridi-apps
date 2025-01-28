@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from "react-native";
+import { Stack } from "expo-router";
 import {
   User,
   Map,
@@ -7,11 +7,11 @@ import {
   ChevronRight,
   LogOut,
 } from "lucide-react-native";
-import { Stack } from "expo-router";
+import { View, Text, Pressable } from "react-native";
 
 export default function UserSettings() {
   return (
-    <View role="main" className="relative flex flex-col w-full min-h-screen bg-white">
+    <View role="main" className="relative flex min-h-screen w-full flex-col bg-white">
       <Stack.Screen options={{
         headerTitle: () => (
           <Text role="heading" aria-level={1} className="text-lg font-medium">
@@ -21,10 +21,10 @@ export default function UserSettings() {
       }} />
 
       {/* Profile Section */}
-      <View className="p-4 border-b-2 border-black">
+      <View className="border-b-2 border-black p-4">
         <View className="flex flex-row items-center gap-4">
-          <View className="w-16 h-16 rounded-full bg-gray-100 border-2 border-black flex items-center justify-center">
-            <User className="w-8 h-8" />
+          <View className="flex size-16 items-center justify-center rounded-full border-2 border-black bg-gray-100">
+            <User className="size-8" />
           </View>
           <View>
             <Text role="heading" aria-level={2} className="font-medium">
@@ -36,15 +36,15 @@ export default function UserSettings() {
       </View>
 
       {/* Statistics Section */}
-      <View className="p-4 border-b-2 border-black">
-        <Text role="heading" aria-level={3} className="text-sm text-gray-500 mb-3">
+      <View className="border-b-2 border-black p-4">
+        <Text role="heading" aria-level={3} className="mb-3 text-sm text-gray-500">
           Statistics
         </Text>
         <View className="space-y-3">
           <View className="flex flex-row items-center justify-between">
             <View className="flex flex-row items-center gap-3">
-              <View className="w-8 h-8 rounded-lg bg-[#FF5937]/10 flex items-center justify-center">
-                <Map className="w-4 h-4 text-[#FF5937]" />
+              <View className="flex size-8 items-center justify-center rounded-lg bg-[#FF5937]/10">
+                <Map className="size-4 text-[#FF5937]" />
               </View>
               <Text className="text-sm">Routes Generated</Text>
             </View>
@@ -52,8 +52,8 @@ export default function UserSettings() {
           </View>
           <View className="flex flex-row items-center justify-between">
             <View className="flex flex-row items-center gap-3">
-              <View className="w-8 h-8 rounded-lg bg-[#FF5937]/10 flex items-center justify-center">
-                <Download className="w-4 h-4 text-[#FF5937]" />
+              <View className="flex size-8 items-center justify-center rounded-lg bg-[#FF5937]/10">
+                <Download className="size-4 text-[#FF5937]" />
               </View>
               <Text className="text-sm">Routes Downloaded</Text>
             </View>
@@ -63,21 +63,21 @@ export default function UserSettings() {
       </View>
 
       {/* Billing Section */}
-      <View className="p-4 border-b-2 border-black">
-        <Text role="heading" aria-level={3} className="text-sm text-gray-500 mb-3">
+      <View className="border-b-2 border-black p-4">
+        <Text role="heading" aria-level={3} className="mb-3 text-sm text-gray-500">
           Billing
         </Text>
-        <Pressable role="button" className="w-full flex flex-row items-center justify-between p-3 border-2 border-black rounded-xl">
+        <Pressable role="button" className="flex w-full flex-row items-center justify-between rounded-xl border-2 border-black p-3">
           <View className="flex flex-row items-center gap-3">
-            <View className="w-8 h-8 rounded-lg bg-[#FF5937]/10 flex flex-row items-center justify-center">
-              <CreditCard className="w-4 h-4 text-[#FF5937]" />
+            <View className="flex size-8 flex-row items-center justify-center rounded-lg bg-[#FF5937]/10">
+              <CreditCard className="size-4 text-[#FF5937]" />
             </View>
             <View className="text-left">
               <Text className="text-sm font-medium">Free Plan</Text>
               <Text className="text-xs text-gray-500">Up to 5 routes/month</Text>
             </View>
           </View>
-          <ChevronRight className="w-5 h-5 text-gray-400" />
+          <ChevronRight className="size-5 text-gray-400" />
         </Pressable>
       </View>
 
@@ -85,10 +85,10 @@ export default function UserSettings() {
       <View className="p-4">
         <Pressable
           role="button"
-          className="w-full flex flex-row items-center justify-center gap-2 px-4 py-3 border-2 border-black rounded-xl text-[#FF5937] hover:bg-[#FF5937]/5"
+          className="flex w-full flex-row items-center justify-center gap-2 rounded-xl border-2 border-black px-4 py-3 text-[#FF5937] hover:bg-[#FF5937]/5"
           onPress={() => console.log("Sign out")}
         >
-          <LogOut className="w-5 h-5" />
+          <LogOut className="size-5" />
           <Text className="font-medium">Sign Out</Text>
         </Pressable>
       </View>

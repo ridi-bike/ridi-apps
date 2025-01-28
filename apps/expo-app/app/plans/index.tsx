@@ -1,7 +1,8 @@
-import { View, Text, Pressable, ScrollView } from "react-native";
-import { RouteCard } from "~/components/plan-card";
-import { Plus, UserCircle } from "lucide-react-native";
 import { Link, Stack } from "expo-router";
+import { Plus, UserCircle } from "lucide-react-native";
+import { View, Text, Pressable, ScrollView } from "react-native";
+
+import { RouteCard } from "~/components/plan-card";
 
 export default function PlansPage() {
   const routes = [
@@ -24,25 +25,34 @@ export default function PlansPage() {
   return (
     <>
       <ScrollView className="min-h-screen w-full bg-white dark:bg-gray-900">
-        <Stack.Screen options={{
-          header: () => (
-            <View className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 mx-auto px-6 md:px-8 h-16 flex flex-row w-full items-center justify-between">
-              <Text role="heading" aria-level={1} className="text-2xl font-bold tracking-tight text-[#FF5937]">
-                Ridi plans
-              </Text>
-              <Link
-                role="button"
-                className="w-10 h-10 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:text-[#FF5937] transition-colors"
-                aria-label="Profile"
-                href="/settings"
-              >
-                <UserCircle className="w-8 h-8" />
-              </Link>
-            </View>
-          ),
-        }} />
-        <View role="main" className="flex flex-row justify-center pt-8 px-6 md:px-8 pb-24">
-          <View className="max-w-3xl flex-1 mx-2">
+        <Stack.Screen
+          options={{
+            header: () => (
+              <View className="mx-auto flex h-16 w-full flex-row items-center justify-between border-b border-gray-200 bg-white px-6 md:px-8 dark:border-gray-700 dark:bg-gray-900">
+                <Text
+                  role="heading"
+                  aria-level={1}
+                  className="text-2xl font-bold tracking-tight text-[#FF5937]"
+                >
+                  Ridi plans
+                </Text>
+                <Link
+                  role="button"
+                  className="flex size-10 items-center justify-center text-gray-600 transition-colors hover:text-[#FF5937] dark:text-gray-400"
+                  aria-label="Profile"
+                  href="/settings"
+                >
+                  <UserCircle className="size-8" />
+                </Link>
+              </View>
+            ),
+          }}
+        />
+        <View
+          role="main"
+          className="flex flex-row justify-center px-6 pb-24 pt-8 md:px-8"
+        >
+          <View className="mx-2 max-w-3xl flex-1">
             <View className="space-y-6">
               {routes.map((route, index) => (
                 <RouteCard key={index} {...route} />
@@ -53,11 +63,11 @@ export default function PlansPage() {
       </ScrollView>
       <Link
         role="button"
-        className="fixed bottom-8 right-8 w-24 h-24 bg-[#FF5937] rounded-full shadow-lg flex items-center justify-center hover:bg-[#ff4a25] transition-colors"
+        className="fixed bottom-8 right-8 flex size-24 items-center justify-center rounded-full bg-[#FF5937] shadow-lg transition-colors hover:bg-[#ff4a25]"
         aria-label="Create new plan"
         href="/plans/new"
       >
-        <Plus className="w-12 h-12 text-white dark:text-gray-900" />
+        <Plus className="size-12 text-white dark:text-gray-900" />
       </Link>
     </>
   );

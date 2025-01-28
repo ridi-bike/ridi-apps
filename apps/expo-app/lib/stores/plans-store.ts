@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { generate } from "xksuid";
-import { supabase, trpcClient } from "../supabase";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { plansPendingStorage, plansStorage } from "../storage";
+import { generate } from "xksuid";
+
 import { dataSyncPendingPush } from "../data-sync";
+import { plansPendingStorage, plansStorage } from "../storage";
+import { supabase, trpcClient } from "../supabase";
 
 export type Plan = Awaited<
 	ReturnType<typeof trpcClient.plans.list.query>

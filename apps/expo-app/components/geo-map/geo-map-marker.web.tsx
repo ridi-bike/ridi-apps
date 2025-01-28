@@ -1,5 +1,6 @@
 import { Marker } from "@vis.gl/react-maplibre";
-import type { GeoMapMarkerProps } from "./types";
+
+import  { type GeoMapMarkerProps } from "./types";
 
 export default function GeoMapMarker({
 	lat,

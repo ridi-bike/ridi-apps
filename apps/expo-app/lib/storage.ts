@@ -1,8 +1,9 @@
-import { MMKV } from "react-native-mmkv";
 import { Platform } from "react-native";
+import { MMKV } from "react-native-mmkv";
 import superjson from "superjson";
-import type { Plan, PlanNew } from "./stores/plans-store";
-import type { Route } from "./stores/routes-store";
+
+import  { type Plan, type PlanNew } from "./stores/plans-store";
+import  { type Route } from "./stores/routes-store";
 
 const mmkv = new MMKV();
 const storageVersion = "sv1";

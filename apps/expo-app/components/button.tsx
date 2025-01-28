@@ -1,5 +1,6 @@
-import React from "react";
+import type React from "react";
 import { Pressable } from 'react-native';
+
 import { cn } from "~/lib/utils";
 
 const baseStyles =
@@ -9,11 +10,11 @@ const variantStyles = {
   secondary: "bg-white text-[#FF5937] border-2 border-black hover:bg-gray-50",
 };
 
-interface ButtonProps extends React.ComponentPropsWithoutRef<typeof Pressable> {
+type ButtonProps = {
   variant?: keyof typeof variantStyles;
   fullWidth?: boolean;
   children: React.ReactNode;
-}
+} & React.ComponentPropsWithoutRef<typeof Pressable>
 export const Button = ({
   variant = "primary",
   fullWidth = false,

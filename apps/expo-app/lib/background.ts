@@ -1,5 +1,6 @@
 import * as BackgroundFetch from "expo-background-fetch";
 import * as TaskManager from "expo-task-manager";
+
 import { dataSyncPendingPush, dataSyncPull } from "./data-sync";
 
 const BACKGROUND_FETCH_TASK = "background-data-sync";

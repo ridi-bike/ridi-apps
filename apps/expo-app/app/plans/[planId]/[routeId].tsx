@@ -1,14 +1,15 @@
 import { useLocalSearchParams } from "expo-router";
-import { Text } from "~/components/ui/text";
 import { ScrollView } from "react-native";
-import { useStoreRoute } from "~/lib/stores/routes-store";
+
 import GeoMap from "~/components/geo-map/geo-map-coords-selector";
+import { Text } from "~/components/ui/text";
+import { useStoreRoute } from "~/lib/stores/routes-store";
 
 export default function RoutePage() {
 	const { routeId } = useLocalSearchParams<{ routeId: string }>();
 	const { data, error, status } = useStoreRoute(routeId);
 	return (
-		<ScrollView className="flex-col h-full w-full">
+		<ScrollView className="size-full flex-col">
 			<Text>{`Route ${routeId}`}</Text>
 			<Text>{status}</Text>
 			<Text>{error?.message}</Text>

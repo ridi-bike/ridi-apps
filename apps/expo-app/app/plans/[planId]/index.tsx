@@ -1,7 +1,7 @@
-import { useLocalSearchParams } from "expo-router";
-import { Link } from "expo-router";
+import { useLocalSearchParams , Link } from "expo-router";
 import { useMemo } from "react";
 import { ScrollView } from "react-native";
+
 import { buttonVariants } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { useStorePlans } from "~/lib/stores/plans-store";
@@ -14,7 +14,7 @@ export default function PlanRoutes() {
 	const plan = useMemo(() => data.find((p) => p.id === planId), [data, planId]);
 
 	return (
-		<ScrollView className="flex-col h-full w-full">
+		<ScrollView className="size-full flex-col">
 			<Text>{status}</Text>
 			<Text>{error?.message}</Text>
 			<Text>{plan?.id || "not found"}</Text>
