@@ -1,5 +1,6 @@
 import { Link as ExpoLink } from "expo-router";
-import React from "react";
+import type React from "react";
+
 import { cn } from "~/lib/utils";
 
 const baseStyles =
@@ -9,11 +10,11 @@ const variantStyles = {
   secondary: "bg-white text-[#FF5937] border-2 border-black hover:bg-gray-50",
 };
 
-interface LinkProps extends React.ComponentPropsWithoutRef<typeof ExpoLink> {
+type LinkProps = {
   variant?: keyof typeof variantStyles;
   fullWidth?: boolean;
   children: React.ReactNode;
-}
+} & React.ComponentPropsWithoutRef<typeof ExpoLink>
 export const Link = ({
   variant = "primary",
   fullWidth = false,

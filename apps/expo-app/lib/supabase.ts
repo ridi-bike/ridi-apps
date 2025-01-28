@@ -1,12 +1,14 @@
-import { AppState, Platform } from "react-native";
-import type { AppRouter } from "../../../supabase/functions/trpc/router";
-import superjson from "superjson";
 import { createTRPCClient, httpBatchLink, loggerLink } from "@trpc/client";
+import { AppState, Platform } from "react-native";
+import superjson from "superjson";
+
+import  { type AppRouter } from "../../../supabase/functions/trpc/router";
 
 import "react-native-url-polyfill/auto";
 import { MMKV } from "react-native-mmkv";
 import { type SupportedStorage, createClient } from "@supabase/supabase-js";
-import type { Database } from "../../../services/ridi-router/packages/lib/supabase";
+
+import  { type Database } from "../../../services/ridi-router/packages/lib/supabase";
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;

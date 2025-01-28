@@ -1,5 +1,6 @@
 import { Platform, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { Button } from "~/components/ui/button";
 import {
 	Popover,
@@ -7,8 +8,9 @@ import {
 	PopoverTrigger,
 } from "~/components/ui/popover";
 import { Text } from "~/components/ui/text";
+
 import GeoMapMarker from "./geo-map-marker";
-import type { GeoMapMarkerProps } from "./types";
+import  { type GeoMapMarkerProps } from "./types";
 
 export function MapMarker({
 	children,
@@ -34,7 +36,7 @@ export function MapMarker({
 		<GeoMapMarker lat={lat} lon={lon}>
 			<Popover>
 				<PopoverTrigger asChild>
-					<Button variant="ghost" className="rounded-3xl h-12 w-12">
+					<Button variant="ghost" className="size-12 rounded-3xl">
 						{children}
 					</Button>
 				</PopoverTrigger>
@@ -43,11 +45,11 @@ export function MapMarker({
 					insets={contentInsets}
 					className="w-80"
 				>
-					<Text className="font-medium leading-none native:text-xl">
+					<Text className="native:text-xl font-medium leading-none">
 						{title}
 					</Text>
 					<Text className="text-sm text-muted-foreground">{description}</Text>
-					<View className="flex flex-row justify-between items-center">
+					<View className="flex flex-row items-center justify-between">
 						{actions}
 					</View>
 				</PopoverContent>

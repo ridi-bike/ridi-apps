@@ -1,8 +1,9 @@
+import MapLibreGL from "@maplibre/maplibre-react-native";
 import React, { Component } from "react";
 import { StyleSheet, View } from "react-native";
-import MapLibreGL from "@maplibre/maplibre-react-native";
+
 import { MapView } from "./maplibre/map-view";
-import type { GeoMapProps } from "./types";
+import  { type GeoMapProps } from "./types";
 
 // Will be null for most users (only Mapbox authenticates this way).
 // Required on Android. See Android installation notes.
@@ -23,7 +24,7 @@ MapLibreGL.setAccessToken(null);
 
 export default function GeoMap(props: GeoMapProps) {
 	return (
-		<View className="h-full w-full flex-1 items-center justify-center bg-slate-100">
+		<View className="size-full flex-1 items-center justify-center bg-slate-100">
 			<MapView
 				className="flex-1 self-stretch"
 				logoEnabled={false}

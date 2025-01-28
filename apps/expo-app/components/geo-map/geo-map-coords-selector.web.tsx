@@ -6,6 +6,7 @@ import {
 	type MapRef,
 } from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
+import  { type FeatureCollection } from "geojson";
 import {
 	CircleDotIcon,
 	CircleFadingPlusIcon,
@@ -15,11 +16,13 @@ import {
 } from "lucide-react-native";
 import maplibre from "maplibre-gl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { Text } from "~/components/ui/text";
+
 import { Button } from "../ui/button";
+
 import { MapMarker } from "./marker";
-import type { Coords, GeoMapProps } from "./types";
-import type { FeatureCollection } from "geojson";
+import  { type Coords, type GeoMapProps } from "./types";
 
 export default function GeoMap({
 	start,
@@ -195,7 +198,7 @@ export default function GeoMap({
 					description={point.description}
 					actions={<Actions lat={point.coords.lat} lon={point.coords.lon} />}
 				>
-					<CircleFadingPlusIcon className="h-8 w-8 text-blue-500" />
+					<CircleFadingPlusIcon className="size-8 text-blue-500" />
 				</MapMarker>
 			))}
 			{start && (
@@ -205,7 +208,7 @@ export default function GeoMap({
 					title="From"
 					description={`${start.lat}, ${start.lon}`}
 				>
-					<CirclePlayIcon className="h-8 w-8 text-green-500" />
+					<CirclePlayIcon className="size-8 text-green-500" />
 				</MapMarker>
 			)}
 			{finish && (
@@ -215,7 +218,7 @@ export default function GeoMap({
 					title="To"
 					description={`${finish.lat}, ${finish.lon}`}
 				>
-					<CirclePauseIcon className="h-8 w-8 text-red-500" />
+					<CirclePauseIcon className="size-8 text-red-500" />
 				</MapMarker>
 			)}
 			{current && (
@@ -226,7 +229,7 @@ export default function GeoMap({
 					description={`${current.lat}, ${current.lon}`}
 					actions={<Actions lat={current.lat} lon={current.lon} />}
 				>
-					<CircleUserIcon className="h-8 w-8 text-teal-500" />
+					<CircleUserIcon className="size-8 text-teal-500" />
 				</MapMarker>
 			)}
 			{findCoordsCurr && (
@@ -239,7 +242,7 @@ export default function GeoMap({
 						<Actions lat={findCoordsCurr.lat} lon={findCoordsCurr.lon} />
 					}
 				>
-					<CircleDotIcon className="h-8 w-8 text-yellow-500" />
+					<CircleDotIcon className="size-8 text-yellow-500" />
 				</MapMarker>
 			)}
 			{routeLayer}

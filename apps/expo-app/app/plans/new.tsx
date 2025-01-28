@@ -1,13 +1,14 @@
 import * as Location from "expo-location";
+import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import { View } from "react-native";
+
 import GeoMap from "~/components/geo-map/geo-map-coords-selector";
-import type { Coords, MapPoint } from "~/components/geo-map/types";
+import  { type Coords, type MapPoint } from "~/components/geo-map/types";
+import { LocationPermsNotGiven } from "~/components/LocationPermsNotGiven";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
-import { LocationPermsNotGiven } from "~/components/LocationPermsNotGiven";
-import { useRouter } from "expo-router";
 import { useStorePlans } from "~/lib/stores/plans-store";
 
 export default function TrackRequestNew() {

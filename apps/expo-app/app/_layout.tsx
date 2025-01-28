@@ -1,10 +1,11 @@
-import { Stack } from "expo-router";
 import { PortalHost } from "@rn-primitives/portal";
-import { supabase } from "~/lib/supabase";
-import { $session } from "~/lib/stores/session-store";
-import { useEffectOnce } from "~/lib/utils";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Stack } from "expo-router";
+
 import { registerBackgroundFetchAsync } from "~/lib/background";
+import { $session } from "~/lib/stores/session-store";
+import { supabase } from "~/lib/supabase";
+import { useEffectOnce } from "~/lib/utils";
 
 registerBackgroundFetchAsync();
 
