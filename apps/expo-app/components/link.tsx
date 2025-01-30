@@ -14,7 +14,7 @@ type LinkProps = {
   variant?: keyof typeof variantStyles;
   fullWidth?: boolean;
   children: React.ReactNode;
-} & React.ComponentPropsWithoutRef<typeof ExpoLink>
+} & React.ComponentPropsWithoutRef<typeof ExpoLink>;
 export const Link = ({
   variant = "primary",
   fullWidth = false,
@@ -24,7 +24,9 @@ export const Link = ({
 }: LinkProps) => {
   return (
     <ExpoLink
-      className={cn(baseStyles, variantStyles[variant], className, { "w-full": fullWidth })}
+      className={cn(baseStyles, variantStyles[variant], className, {
+        "w-full": fullWidth,
+      })}
       {...props}
     >
       {children}

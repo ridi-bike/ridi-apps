@@ -1,4 +1,4 @@
-import * as turf from '@turf/turf'
+import * as turf from "@turf/turf";
 import {
   type LineLayer,
   Layer,
@@ -9,40 +9,31 @@ import {
 import "maplibre-gl/dist/maplibre-gl.css";
 import { type FeatureCollection } from "geojson";
 import maplibre from "maplibre-gl";
-import { useEffect, useMemo, useRef, } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
-import { type GeoMapRouteViewProps, } from "~/components/geo-map/types";
+import { type GeoMapRouteViewProps } from "~/components/geo-map/types";
 
-export function GeoMapRouteView({
-  route,
-}: GeoMapRouteViewProps) {
+export function GeoMapRouteView({ route }: GeoMapRouteViewProps) {
   const mapRef = useRef<MapRef>(null);
 
   const mapBounds = useMemo(() => {
-    const allPoints = [
-      ...route.map(p => [p.lon, p.lat])
-    ]
+    const allPoints = [...route.map((p) => [p.lon, p.lat])];
     if (!allPoints.length) {
-      return null
+      return null;
     }
-    const features = turf.points(
-      allPoints
-    );
+    const features = turf.points(allPoints);
     const mapBounds = turf.bbox(features);
     return [
       mapBounds[0] - 0.001,
       mapBounds[1] - 0.001,
       mapBounds[2] + 0.001,
-      mapBounds[3] + 0.001
-    ] as [number, number, number, number]
+      mapBounds[3] + 0.001,
+    ] as [number, number, number, number];
   }, [route]);
-
 
   useEffect(() => {
     if (mapRef.current && mapBounds) {
-      mapRef.current.fitBounds(
-        mapBounds
-      );
+      mapRef.current.fitBounds(mapBounds);
     }
   }, [mapBounds]);
 
@@ -90,14 +81,13 @@ export function GeoMapRouteView({
       initialViewState={
         mapBounds
           ? {
-            bounds:
-              mapBounds,
-          }
+              bounds: mapBounds,
+            }
           : {
-            longitude: 24.853,
-            latitude: 57.153,
-            zoom: 4,
-          }
+              longitude: 24.853,
+              latitude: 57.153,
+              zoom: 4,
+            }
       }
       mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
     >

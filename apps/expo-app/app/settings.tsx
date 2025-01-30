@@ -11,14 +11,19 @@ import { View, Text, Pressable } from "react-native";
 
 export default function UserSettings() {
   return (
-    <View role="main" className="relative flex min-h-screen w-full flex-col bg-white">
-      <Stack.Screen options={{
-        headerTitle: () => (
-          <Text role="heading" aria-level={1} className="text-lg font-medium">
-            Settings
-          </Text>
-        )
-      }} />
+    <View
+      role="main"
+      className="relative flex min-h-screen w-full flex-col bg-white"
+    >
+      <Stack.Screen
+        options={{
+          headerTitle: () => (
+            <Text role="heading" aria-level={1} className="text-lg font-medium">
+              Settings
+            </Text>
+          ),
+        }}
+      />
 
       {/* Profile Section */}
       <View className="border-b-2 border-black p-4">
@@ -37,7 +42,11 @@ export default function UserSettings() {
 
       {/* Statistics Section */}
       <View className="border-b-2 border-black p-4">
-        <Text role="heading" aria-level={3} className="mb-3 text-sm text-gray-500">
+        <Text
+          role="heading"
+          aria-level={3}
+          className="mb-3 text-sm text-gray-500"
+        >
           Statistics
         </Text>
         <View className="space-y-3">
@@ -64,17 +73,26 @@ export default function UserSettings() {
 
       {/* Billing Section */}
       <View className="border-b-2 border-black p-4">
-        <Text role="heading" aria-level={3} className="mb-3 text-sm text-gray-500">
+        <Text
+          role="heading"
+          aria-level={3}
+          className="mb-3 text-sm text-gray-500"
+        >
           Billing
         </Text>
-        <Pressable role="button" className="flex w-full flex-row items-center justify-between rounded-xl border-2 border-black p-3">
+        <Pressable
+          role="button"
+          className="flex w-full flex-row items-center justify-between rounded-xl border-2 border-black p-3"
+        >
           <View className="flex flex-row items-center gap-3">
             <View className="flex size-8 flex-row items-center justify-center rounded-lg bg-[#FF5937]/10">
               <CreditCard className="size-4 text-[#FF5937]" />
             </View>
             <View className="text-left">
               <Text className="text-sm font-medium">Free Plan</Text>
-              <Text className="text-xs text-gray-500">Up to 5 routes/month</Text>
+              <Text className="text-xs text-gray-500">
+                Up to 5 routes/month
+              </Text>
             </View>
           </View>
           <ChevronRight className="size-5 text-gray-400" />
@@ -94,4 +112,4 @@ export default function UserSettings() {
       </View>
     </View>
   );
-};
+}

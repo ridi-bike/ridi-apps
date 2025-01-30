@@ -99,14 +99,10 @@ export default function Auth() {
   return (
     <>
       <Button variant="primary" fullWidth onPress={performOAuth}>
-        <Text>
-          Sign in
-        </Text>
+        <Text>Sign in</Text>
       </Button>
       <Link variant="secondary" fullWidth href="/plans" replace>
-        <Text>
-          Try it out
-        </Text>
+        <Text>Try it out</Text>
       </Link>
     </>
   );

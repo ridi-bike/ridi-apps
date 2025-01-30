@@ -10,31 +10,31 @@ import { useEffectOnce } from "~/lib/utils";
 registerBackgroundFetchAsync();
 
 async function syncSession() {
-	supabase.auth.onAuthStateChange((_event, session) => {
-		$session.set(session);
-	});
+  supabase.auth.onAuthStateChange((_event, session) => {
+    $session.set(session);
+  });
 
-	const sessionData = await supabase.auth.getSession();
-	const session = sessionData.data.session;
+  const sessionData = await supabase.auth.getSession();
+  const session = sessionData.data.session;
 
-	if (session) {
-		$session.set(session);
-	} else {
-		supabase.auth.signInAnonymously();
-	}
+  if (session) {
+    $session.set(session);
+  } else {
+    supabase.auth.signInAnonymously();
+  }
 }
 
 const queryClient = new QueryClient();
 
 export default function App() {
-	useEffectOnce(() => {
-		syncSession();
-	});
+  useEffectOnce(() => {
+    syncSession();
+  });
 
-	return (
-		<QueryClientProvider client={queryClient}>
-			<Stack/>
-			<PortalHost />
-		</QueryClientProvider>
-	);
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Stack />
+      <PortalHost />
+    </QueryClientProvider>
+  );
 }

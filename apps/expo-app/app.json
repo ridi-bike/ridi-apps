@@ -1,64 +1,64 @@
 {
-	"expo": {
-		"name": "ridi",
-		"slug": "ridi",
-		"version": "1.0.0",
-		"orientation": "portrait",
-		"icon": "./assets/images/icon.png",
-		"scheme": "bike.ridi.app",
-		"userInterfaceStyle": "automatic",
-		"splash": {
-			"image": "./assets/images/splash.png",
-			"resizeMode": "contain",
-			"backgroundColor": "#ffffff"
-		},
-		"ios": {
-			"supportsTablet": true,
-			"bundleIdentifier": "bike.ridi.app"
-		},
-		"android": {
-			"adaptiveIcon": {
-				"foregroundImage": "./assets/images/adaptive-icon.png",
-				"backgroundColor": "#ffffff"
-			},
-			"package": "bike.ridi.app"
-		},
-		"web": {
-			"bundler": "metro",
-			"output": "single",
-			"favicon": "./assets/images/favicon.png"
-		},
-		"plugins": [
-			[
-				"expo-location",
-				{
-					"locationWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location.",
-					"isAndroidForegroundServiceEnabled": true
-				}
-			],
-			[
-				"expo-build-properties",
-				{
-					"ios": {
-						"newArchEnabled": false
-					},
-					"android": {
-						"newArchEnabled": false
-					}
-				}
-			],
-			"expo-router",
-			"@maplibre/maplibre-react-native",
-			"expo-font"
-		],
-		"experiments": {
-			"typedRoutes": true
-		},
-		"extra": {
-			"eas": {
-				"projectId": "f0835355-433f-4e84-8e65-b628a0f9e080"
-			}
-		},
-		"owner": "tomstomstoms"
-	}
+  "expo": {
+    "name": "ridi",
+    "slug": "ridi",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "bike.ridi.app",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "bike.ridi.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "bike.ridi.app"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location.",
+          "isAndroidForegroundServiceEnabled": true
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "newArchEnabled": false
+          },
+          "android": {
+            "newArchEnabled": false
+          }
+        }
+      ],
+      "expo-router",
+      "@maplibre/maplibre-react-native",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "f0835355-433f-4e84-8e65-b628a0f9e080"
+      }
+    },
+    "owner": "tomstomstoms"
+  }
 }

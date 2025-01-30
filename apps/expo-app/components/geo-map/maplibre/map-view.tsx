@@ -6,7 +6,7 @@ MapLibreGL.setAccessToken(null);
 // const { MapView } = MapLibreGL;
 
 const MapView = remapProps(MapLibreGL.MapView, {
-	className: "style",
+  className: "style",
 });
 
 export { MapView };
