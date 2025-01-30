@@ -1,7 +1,10 @@
-import * as turf from '@turf/turf'
+import * as turf from "@turf/turf";
 import {
   Map as MapLibre,
   type MapRef,
+  type FillLayer,
+  Source,
+  Layer,
 } from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import {
@@ -12,12 +15,41 @@ import {
   CircleUserIcon,
 } from "lucide-react-native";
 import maplibre from "maplibre-gl";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import { Button } from '~/components/button';
 import { MapMarker } from "~/components/geo-map/marker";
-import { type Coords, type GeoMapCoordsSelectorProps } from "~/components/geo-map/types";
+import {
+  type Coords,
+  type GeoMapCoordsSelectorProps,
+} from "~/components/geo-map/types";
 
+function createRoundTripPolygon(
+  startPoint: [number, number],
+  bearing: number,
+  distance: number,
+) {
+  const start = turf.point(startPoint);
+  const leftBearing = (bearing - 40 + 360) % 360;
+  const rightBearing = (bearing + 40 + 360) % 360;
+  const points = [];
+  points.push(start.geometry.coordinates);
+  const rightPoint = turf.destination(start, distance / 5, rightBearing, {
+    units: "kilometers",
+  });
+  points.push(rightPoint.geometry.coordinates);
+  const apexPoint = turf.destination(start, distance / 5, bearing, {
+    units: "kilometers",
+  });
+  points.push(apexPoint.geometry.coordinates);
+  const leftPoint = turf.destination(start, distance / 5, leftBearing, {
+    units: "kilometers",
+  });
+  points.push(leftPoint.geometry.coordinates);
+  points.push(start.geometry.coordinates);
+  const polygon = turf.polygon([points]);
+
+  return polygon;
+}
 export function GeoMapCoordsSelector({
   start,
   finish,
@@ -26,53 +58,87 @@ export function GeoMapCoordsSelector({
   findCoords,
   setStart,
   setFinish,
-  isRoundTrip
+  isRoundTrip,
+  bearing,
+  distance,
 }: GeoMapCoordsSelectorProps) {
   const mapRef = useRef<MapRef>(null);
-  const [findCoordsCurr, setFindCoordsCurr] = useState<Coords | null>(
-    null,
-  );
+  const [findCoordsCurr, setFindCoordsCurr] = useState<Coords | null>(null);
 
   useEffect(() => {
     if (findCoords) {
-      const coords = mapRef.current?.getCenter()
+      const coords = mapRef.current?.getCenter();
       setFindCoordsCurr({
         lat: coords.lat,
         lon: coords.lng,
       });
     } else {
-      setFindCoordsCurr(null)
+      setFindCoordsCurr(null);
     }
   }, [findCoords]);
+
+  const roundTripPolygon = useMemo(() => {
+    if (isRoundTrip && start) {
+      return createRoundTripPolygon(
+        [start.lon, start.lat],
+        bearing || 0,
+        distance || 0,
+      );
+    }
+    return null;
+  }, [isRoundTrip, start, distance, bearing]);
+
+  const rountdTripLayer = useMemo(() => {
+    if (roundTripPolygon) {
+      const routeLayerId = "round-trip-layer";
+      const layerStyle: FillLayer = {
+        id: routeLayerId,
+        type: "fill",
+        source: routeLayerId,
+        paint: {
+          "fill-color": "#FF5937",
+          "fill-opacity": 0.3,
+        },
+      };
+      return (
+        <Source id={routeLayerId} type="geojson" data={roundTripPolygon}>
+          <Layer {...layerStyle} />
+        </Source>
+      );
+    }
+    return null;
+  }, [roundTripPolygon]);
 
   const mapBounds = useMemo(() => {
     const allPoints = [
       ...(start ? [[start.lon, start.lat]] : []),
       ...(finish ? [[finish.lon, finish.lat]] : []),
       ...(current ? [[current.lon, current.lat]] : []),
-      ...(points || []).map(p => [p.coords.lon, p.coords.lat]),
-    ]
+      ...(points || []).map((p) => [p.coords.lon, p.coords.lat]),
+    ];
     if (!allPoints.length) {
-      return null
+      return null;
     }
-    const features = turf.points(
-      allPoints
-    );
-    const mapBounds = turf.bbox(features);
+    const pointsFeatures = turf.points(allPoints);
+    const pointsBbox = turf.bbox(pointsFeatures);
+    const coneBbox = roundTripPolygon ? turf.bbox(roundTripPolygon) : null
+    const combinedBbox = coneBbox ? [
+      Math.min(pointsBbox[0], coneBbox[0]), // minX
+      Math.min(pointsBbox[1], coneBbox[1]), // minY
+      Math.max(pointsBbox[2], coneBbox[2]), // maxX
+      Math.max(pointsBbox[3], coneBbox[3]), // maxY
+    ] : pointsBbox
     return [
-      mapBounds[0] - 0.001,
-      mapBounds[1] - 0.001,
-      mapBounds[2] + 0.001,
-      mapBounds[3] + 0.001
-    ] as [number, number, number, number]
-  }, [finish, points, start, current]);
-
+      combinedBbox[0] - Math.abs(combinedBbox[0] - combinedBbox[2]) / 10,
+      combinedBbox[1] - Math.abs(combinedBbox[1] - combinedBbox[3]) / 10,
+      combinedBbox[2] + Math.abs(combinedBbox[0] - combinedBbox[2]) / 10,
+      combinedBbox[3] + Math.abs(combinedBbox[1] - combinedBbox[3]) / 10,
+    ] as [number, number, number, number];
+  }, [start, finish, current, points, roundTripPolygon]);
 
   useEffect(() => {
     if (mapRef.current && mapBounds) {
-      mapRef.current.fitBounds(
-        mapBounds
-      );
+      mapRef.current.fitBounds(mapBounds);
     }
   }, [mapBounds]);
 
@@ -83,8 +149,7 @@ export function GeoMapCoordsSelector({
       initialViewState={
         mapBounds
           ? {
-            bounds:
-              mapBounds,
+            bounds: mapBounds,
           }
           : {
             longitude: 24.853,
@@ -161,6 +226,7 @@ export function GeoMapCoordsSelector({
           <CircleDotIcon className="size-8 text-yellow-500" />
         </MapMarker>
       )}
+      {rountdTripLayer}
     </MapLibre>
   );
 }

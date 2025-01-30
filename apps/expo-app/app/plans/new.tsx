@@ -1,4 +1,5 @@
 import { Slider } from "@miblanchard/react-native-slider";
+import { distance } from "@turf/turf";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import {
@@ -27,29 +28,26 @@ type Coords = {
   lon: number;
 };
 
-
 export default function PlansNew() {
-  const router = useRouter()
-  const { planAdd } = useStorePlans()
+  const router = useRouter();
+  const { planAdd } = useStorePlans();
   const [startCoords, setStartCoords] = useState<Coords | null>(null);
   const [finishCoords, setFinishCoords] = useState<Coords | null>(null);
   const [isRoundTrip, setIsRoundTrip] = useState(true);
   const [selectedDistance, setSelectedDistance] = useState(200);
   const [bearing, setBearing] = useState(0);
-  const [findCoords, setFindCoords] = useState(false)
-  const [searchPoints, setSearchPoints] = useState([])
+  const [findCoords, setFindCoords] = useState(false);
+  const [searchPoints, setSearchPoints] = useState([]);
 
   const [showLocationAlert, setShowLocationAlert] = useState(false);
   const [currentCoords, setCurrentCoords] = useState<Coords | null>(null);
-
 
   const getCardinalDirection = (degrees: number): string => {
     const index = Math.round(degrees / 45) % 8;
     return DIRECTIONS[index];
   };
   const getCurrentLocation = useCallback(async () => {
-    const { status } =
-      await Location.requestForegroundPermissionsAsync();
+    const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
       setShowLocationAlert(true);
       return;
@@ -63,11 +61,13 @@ export default function PlansNew() {
         lon: location.coords.longitude,
       });
     }
-  }, [])
-
+  }, []);
 
   function canCreateRoute(): boolean {
-    return (isRoundTrip && !!startCoords) || (!isRoundTrip && !!startCoords && !!finishCoords)
+    return (
+      (isRoundTrip && !!startCoords) ||
+      (!isRoundTrip && !!startCoords && !!finishCoords)
+    );
   }
 
   return (
@@ -121,8 +121,9 @@ export default function PlansNew() {
                 <Text className="text-sm dark:text-gray-200">
                   {isRoundTrip ? "Start/Finish Point: " : "Start: "}
                   {startCoords
-                    ? `${startCoords.lat.toFixed(4)}, ${startCoords.lon.toFixed(4)
-                    }`
+                    ? `${startCoords.lat.toFixed(4)}, ${startCoords.lon.toFixed(
+                        4,
+                      )}`
                     : "Not set"}
                 </Text>
               </View>
@@ -130,7 +131,8 @@ export default function PlansNew() {
                 <View className="flex flex-row items-center gap-2">
                   <Crosshair className="size-4 text-[#FF5937]" />
                   <Text className="text-sm dark:text-gray-200">
-                    Finish: {finishCoords
+                    Finish:{" "}
+                    {finishCoords
                       ? `${finishCoords.lat.toFixed(4)}, ${finishCoords.lon.toFixed(4)}`
                       : "Not set"}
                   </Text>
@@ -166,7 +168,12 @@ export default function PlansNew() {
                 },
               )}
             >
-              <Route className={cn("size-8", { "dark:text-gray-400": isRoundTrip, "dark:text-gray-800": !isRoundTrip })} />
+              <Route
+                className={cn("size-8", {
+                  "dark:text-gray-400": isRoundTrip,
+                  "dark:text-gray-800": !isRoundTrip,
+                })}
+              />
             </Pressable>
           </View>
         </View>
@@ -180,6 +187,8 @@ export default function PlansNew() {
             findCoords={findCoords}
             setStart={setStartCoords}
             setFinish={setFinishCoords}
+            bearing={bearing}
+            distance={selectedDistance}
           />
         </View>
         <View className="my-4 flex flex-row gap-2">
@@ -191,7 +200,7 @@ export default function PlansNew() {
             <Text className="text-sm dark:text-gray-200">My Location</Text>
           </Pressable>
           <Pressable
-            onPress={() => setFindCoords(v => !v)}
+            onPress={() => setFindCoords((v) => !v)}
             className={cn(
               "flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 px-4 py-2",
               {
@@ -223,8 +232,10 @@ export default function PlansNew() {
                     <Text
                       key={idx}
                       className={cn("text-xs font-medium transition-colors", {
-                        "text-[#FF5937]": getCardinalDirection(bearing) === direction,
-                        "text-gray-400 dark:text-gray-500": getCardinalDirection((bearing)) !== direction
+                        "text-[#FF5937]":
+                          getCardinalDirection(bearing) === direction,
+                        "text-gray-400 dark:text-gray-500":
+                          getCardinalDirection(bearing) !== direction,
                       })}
                     >
                       {direction}
@@ -236,16 +247,17 @@ export default function PlansNew() {
                     <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
                   </View>
                   <Slider
-                    renderThumbComponent={() => <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />}
-
+                    renderThumbComponent={() => (
+                      <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
+                    )}
                     trackClickable={true}
                     step={1}
                     value={bearing}
                     maximumValue={359}
                     minimumValue={0}
-                    trackStyle={{ backgroundColor: 'transparent' }}
+                    trackStyle={{ backgroundColor: "transparent" }}
                     onValueChange={(value) => {
-                      setBearing(value[0])
+                      setBearing(value[0]);
                     }}
                   />
                 </View>
@@ -255,10 +267,11 @@ export default function PlansNew() {
                   {DISTANCES.map((distance) => (
                     <Text
                       key={distance}
-                      className={`text-xs font-medium transition-colors ${selectedDistance === distance
-                        ? "text-[#FF5937]"
-                        : "text-gray-400 dark:text-gray-500"
-                        }`}
+                      className={`text-xs font-medium transition-colors ${
+                        selectedDistance === distance
+                          ? "text-[#FF5937]"
+                          : "text-gray-400 dark:text-gray-500"
+                      }`}
                     >
                       {distance}km
                     </Text>
@@ -269,12 +282,14 @@ export default function PlansNew() {
                     <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
                   </View>
                   <Slider
-                    renderThumbComponent={() => <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />}
+                    renderThumbComponent={() => (
+                      <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
+                    )}
                     trackClickable={true}
                     step={1}
                     value={DISTANCES.indexOf(selectedDistance)}
                     maximumValue={DISTANCES.length - 1}
-                    trackStyle={{ backgroundColor: 'transparent' }}
+                    trackStyle={{ backgroundColor: "transparent" }}
                     onValueChange={(value) => {
                       console.log({ value });
                       setSelectedDistance(DISTANCES[value[0]]);

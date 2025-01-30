@@ -4,14 +4,16 @@ export type GeoMapRouteViewProps = {
   route: Coords[];
 };
 export type GeoMapCoordsSelectorProps = {
-  isRoundTrip: boolean
+  isRoundTrip: boolean;
   start?: Coords | null;
   finish?: Coords | null;
   current?: Coords | null;
   points?: MapPoint[];
-  findCoords?: boolean
+  findCoords?: boolean;
   setStart: (coords: Coords | null) => void;
   setFinish: (cords: Coords | null) => void;
+  bearing?: number;
+  distance?: number;
 };
 
 export type Coords = {
