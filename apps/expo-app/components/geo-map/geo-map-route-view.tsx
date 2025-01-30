@@ -22,7 +22,7 @@ MapLibreGL.setAccessToken(null);
 // 	},
 // });
 
-export function GeoMapCoordsSelector(props: GeoMapCoordsSelectorProps) {
+export function GeoMapRouteView(props: GeoMapCoordsSelectorProps) {
   return (
     <View className="size-full flex-1 items-center justify-center bg-slate-100">
       <MapView

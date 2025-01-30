@@ -138,12 +138,11 @@ export default [
 
     settings: {
       "import/internal-regex": "^~/",
-
       "import/resolver": {
+        ..._import.configs.typescript.settings["import/resolver"],
         node: {
           extensions: [".ts", ".tsx"],
         },
-
         typescript: {
           alwaysTryTypes: true,
         },

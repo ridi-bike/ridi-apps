@@ -144,6 +144,9 @@ importers:
       '@maplibre/maplibre-react-native':
         specifier: 10.0.0-alpha.22
         version: 10.0.0-alpha.22(@expo/config-plugins@8.0.11)(react-native@0.74.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)
+      '@miblanchard/react-native-slider':
+        specifier: ^2.6.0
+        version: 2.6.0(react-native@0.74.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)
       '@nanostores/react':
         specifier: ^0.8.0
         version: 0.8.4(nanostores@0.11.3)(react@18.2.0)
@@ -1988,6 +1991,12 @@ packages:
     peerDependenciesMeta:
       '@expo/config-plugins':
         optional: true
+
+  '@miblanchard/react-native-slider@2.6.0':
+    resolution: {integrity: sha512-o7hk/f/8vkqh6QNR5L52m+ws846fQeD/qNCC9CCSRdBqjq66KiCgbxzlhRzKM/gbtxcvMYMIEEJ1yes5cr6I3A==}
+    peerDependencies:
+      react: '>=16.8'
+      react-native: '>=0.59'
 
   '@nanostores/react@0.8.4':
     resolution: {integrity: sha512-EciHSzDXg7GmGODjegGG1VldPEinbAK+12/Uz5+MAdHmxf082Rl6eXqKFxAAu4pZAcr5dNTpv6wMfEe7XacjkQ==}
@@ -11039,6 +11048,11 @@ snapshots:
       react-native: 0.74.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.2.79)(react@18.2.0)
     optionalDependencies:
       '@expo/config-plugins': 8.0.11
+
+  '@miblanchard/react-native-slider@2.6.0(react-native@0.74.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      react: 18.2.0
+      react-native: 0.74.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.2.79)(react@18.2.0)
 
   '@nanostores/react@0.8.4(nanostores@0.11.3)(react@18.2.0)':
     dependencies:

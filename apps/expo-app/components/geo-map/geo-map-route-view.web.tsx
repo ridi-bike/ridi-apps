@@ -1,0 +1,107 @@
+import * as turf from '@turf/turf'
+import {
+  type LineLayer,
+  Layer,
+  Map as MapLibre,
+  Source,
+  type MapRef,
+} from "@vis.gl/react-maplibre";
+import "maplibre-gl/dist/maplibre-gl.css";
+import { type FeatureCollection } from "geojson";
+import maplibre from "maplibre-gl";
+import { useEffect, useMemo, useRef, } from "react";
+
+import { type GeoMapRouteViewProps, } from "~/components/geo-map/types";
+
+export function GeoMapRouteView({
+  route,
+}: GeoMapRouteViewProps) {
+  const mapRef = useRef<MapRef>(null);
+
+  const mapBounds = useMemo(() => {
+    const allPoints = [
+      ...route.map(p => [p.lon, p.lat])
+    ]
+    if (!allPoints.length) {
+      return null
+    }
+    const features = turf.points(
+      allPoints
+    );
+    const mapBounds = turf.bbox(features);
+    return [
+      mapBounds[0] - 0.001,
+      mapBounds[1] - 0.001,
+      mapBounds[2] + 0.001,
+      mapBounds[3] + 0.001
+    ] as [number, number, number, number]
+  }, [route]);
+
+
+  useEffect(() => {
+    if (mapRef.current && mapBounds) {
+      mapRef.current.fitBounds(
+        mapBounds
+      );
+    }
+  }, [mapBounds]);
+
+  const routeLayer = useMemo(() => {
+    if (!route) {
+      return null;
+    }
+    const routeLayerId = "route-layer";
+    const layerStyle: LineLayer = {
+      id: "route-layer",
+      type: "line",
+      source: routeLayerId,
+      paint: {
+        "line-color": "#FF5937",
+        "line-width": 3,
+      },
+    };
+    const geojson: FeatureCollection = {
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "LineString",
+            coordinates: route.map((routePoint) => [
+              routePoint.lon,
+              routePoint.lat,
+            ]),
+          },
+        },
+      ],
+    };
+    return (
+      <Source id={routeLayerId} type="geojson" data={geojson}>
+        <Layer {...layerStyle} />
+      </Source>
+    );
+  }, [route]);
+
+  return (
+    <MapLibre
+      ref={mapRef}
+      mapLib={maplibre}
+      initialViewState={
+        mapBounds
+          ? {
+            bounds:
+              mapBounds,
+          }
+          : {
+            longitude: 24.853,
+            latitude: 57.153,
+            zoom: 4,
+          }
+      }
+      mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
+    >
+      {routeLayer}
+    </MapLibre>
+  );
+}
