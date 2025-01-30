@@ -14,100 +14,100 @@ import { Text } from "./ui/text";
 const redirectTo = makeRedirectUri();
 
 const createSessionFromUrl = async (url: string) => {
-	const { params, errorCode } = QueryParams.getQueryParams(url);
+  const { params, errorCode } = QueryParams.getQueryParams(url);
 
-	if (errorCode) {
-		throw new Error(errorCode);
-	}
+  if (errorCode) {
+    throw new Error(errorCode);
+  }
 
-	const { access_token, refresh_token } = params;
+  const { access_token, refresh_token } = params;
 
-	if (!access_token) {
-		return;
-	}
+  if (!access_token) {
+    return;
+  }
 
-	console.log({ access_token, refresh_token });
-	if (access_token || refresh_token) {
-		WebBrowser.maybeCompleteAuthSession(); // required for web only
-		router.setParams({ access_token: undefined, refresh_token: undefined });
-	}
+  console.log({ access_token, refresh_token });
+  if (access_token || refresh_token) {
+    WebBrowser.maybeCompleteAuthSession(); // required for web only
+    router.setParams({ access_token: undefined, refresh_token: undefined });
+  }
 
-	const { data, error } = await supabase.auth.setSession({
-		access_token,
-		refresh_token,
-	});
+  const { data, error } = await supabase.auth.setSession({
+    access_token,
+    refresh_token,
+  });
 
-	if (error) {
-		throw error;
-	}
+  if (error) {
+    throw error;
+  }
 
-	return data.session;
+  return data.session;
 };
 
 const performOAuth = async () => {
-	const { data, error } = await supabase.auth.linkIdentity({
-		provider: "github",
-		options: {
-			redirectTo,
-			skipBrowserRedirect: true,
-		},
-	});
-	if (error) {
-		throw error;
-	}
-	console.log("test here 2", { redirectTo });
-	// if (Platform.OS !== "web") {
-	const res = await WebBrowser.openAuthSessionAsync(
-		data?.url ?? "",
-		redirectTo,
-	);
-	console.log("after open auth session");
+  const { data, error } = await supabase.auth.linkIdentity({
+    provider: "github",
+    options: {
+      redirectTo,
+      skipBrowserRedirect: true,
+    },
+  });
+  if (error) {
+    throw error;
+  }
+  console.log("test here 2", { redirectTo });
+  // if (Platform.OS !== "web") {
+  const res = await WebBrowser.openAuthSessionAsync(
+    data?.url ?? "",
+    redirectTo,
+  );
+  console.log("after open auth session");
 
-	if (res.type === "success") {
-		const { url } = res;
-		await createSessionFromUrl(url);
-	}
-	// } else {
-	// 	window.location.href = data?.url;
-	// }
+  if (res.type === "success") {
+    const { url } = res;
+    await createSessionFromUrl(url);
+  }
+  // } else {
+  // 	window.location.href = data?.url;
+  // }
 };
 
 const sendMagicLink = async () => {
-	const { error } = await supabase.auth.signInWithOtp({
-		email: "example@email.com",
-		options: {
-			emailRedirectTo: redirectTo,
-		},
-	});
+  const { error } = await supabase.auth.signInWithOtp({
+    email: "example@email.com",
+    options: {
+      emailRedirectTo: redirectTo,
+    },
+  });
 
-	if (error) {
-		throw error;
-	}
-	// Email sent.
+  if (error) {
+    throw error;
+  }
+  // Email sent.
 };
 
 export default function Auth() {
-	// Handle linking into app from email app.
+  // Handle linking into app from email app.
 
-	const url = Linking.useURL();
-	useEffect(() => {
-		if (url) {
-			createSessionFromUrl(url);
-		}
-	}, [url]);
+  const url = Linking.useURL();
+  useEffect(() => {
+    if (url) {
+      createSessionFromUrl(url);
+    }
+  }, [url]);
 
-	return (
-		<>
-			<Button variant="primary" fullWidth onPress={performOAuth}>
-				<Text>
-					Sign in
-				</Text>
-			</Button>
-			<Button variant="secondary" fullWidth onPress={() => router.replace("/plans")} >
-				<Text>
-					Try it out
-				</Text>
-			</Button>
-		</>
-	);
+  return (
+    <>
+      <Button variant="primary" fullWidth onPress={performOAuth}>
+        <Text>
+          Sign in
+        </Text>
+      </Button>
+      <Link variant="secondary" fullWidth href="/plans" replace>
+        <Text>
+          Try it out
+        </Text>
+      </Link>
+    </>
+  );
 }
