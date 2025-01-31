@@ -27,7 +27,12 @@ export function GeoMapStatic(props: GeoMapStaticProps) {
       <MapLibre
         mapLib={maplibre}
         initialViewState={{
-          bounds: [bbox[0] - 0.1, bbox[1] - 0.1, bbox[2] + 0.1, bbox[3] + 0.1],
+          bounds: [
+            bbox[0] - 0.03,
+            bbox[1] - 0.03,
+            bbox[2] + 0.03,
+            bbox[3] + 0.03,
+          ],
         }}
         mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
         interactive={false}

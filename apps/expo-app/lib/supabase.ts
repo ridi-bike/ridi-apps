@@ -42,7 +42,7 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
 });
 
 const links = [
-  loggerLink(),
+  // loggerLink(),
   httpBatchLink({
     url: `${supabaseUrl}/functions/v1/trpc/`,
     transformer: superjson,

@@ -21,6 +21,20 @@ export default function PlansPage() {
       startCoords: [37.7855, -122.4071],
       finishCoords: [37.7897, -122.3947],
     },
+    {
+      startAddress: "789 Mission St, San Francisco, CA",
+      endAddress: "321 Howard St, San Francisco, CA",
+      distance: "2.8 miles",
+      startCoords: [37.7855, -122.4071],
+      finishCoords: [37.7897, -122.3947],
+    },
+    {
+      startAddress: "789 Mission St, San Francisco, CA",
+      endAddress: "321 Howard St, San Francisco, CA",
+      distance: "2.8 miles",
+      startCoords: [37.7855, -122.4071],
+      finishCoords: [37.7897, -122.3947],
+    },
   ];
 
   return (
@@ -36,8 +50,8 @@ export default function PlansPage() {
         </Link>
       }
     >
-      <View className="mx-2 max-w-3xl flex-1">
-        <View className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <View className="mx-2 max-w-5xl flex-1">
+        <View className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {plans.map((plan, index) => (
             <Link key={index} href="/plans/1">
               <PlanCard {...plan} />

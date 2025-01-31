@@ -121,13 +121,15 @@ export function GeoMapCoordsSelector({
     }
     const pointsFeatures = turf.points(allPoints);
     const pointsBbox = turf.bbox(pointsFeatures);
-    const coneBbox = roundTripPolygon ? turf.bbox(roundTripPolygon) : null
-    const combinedBbox = coneBbox ? [
-      Math.min(pointsBbox[0], coneBbox[0]), // minX
-      Math.min(pointsBbox[1], coneBbox[1]), // minY
-      Math.max(pointsBbox[2], coneBbox[2]), // maxX
-      Math.max(pointsBbox[3], coneBbox[3]), // maxY
-    ] : pointsBbox
+    const coneBbox = roundTripPolygon ? turf.bbox(roundTripPolygon) : null;
+    const combinedBbox = coneBbox
+      ? [
+          Math.min(pointsBbox[0], coneBbox[0]), // minX
+          Math.min(pointsBbox[1], coneBbox[1]), // minY
+          Math.max(pointsBbox[2], coneBbox[2]), // maxX
+          Math.max(pointsBbox[3], coneBbox[3]), // maxY
+        ]
+      : pointsBbox;
     return [
       combinedBbox[0] - Math.abs(combinedBbox[0] - combinedBbox[2]) / 10,
       combinedBbox[1] - Math.abs(combinedBbox[1] - combinedBbox[3]) / 10,
@@ -149,13 +151,13 @@ export function GeoMapCoordsSelector({
       initialViewState={
         mapBounds
           ? {
-            bounds: mapBounds,
-          }
+              bounds: mapBounds,
+            }
           : {
-            longitude: 24.853,
-            latitude: 57.153,
-            zoom: 4,
-          }
+              longitude: 24.853,
+              latitude: 57.153,
+              zoom: 4,
+            }
       }
       mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
       onMove={(event) => {

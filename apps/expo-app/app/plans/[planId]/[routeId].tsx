@@ -30,7 +30,7 @@ const route = {
 export default function RouteDetails() {
   return (
     <ScreenFrame title="Route details">
-      <View className="mx-2 max-w-3xl flex-1 gap-4">
+      <View className="mx-2 max-w-5xl flex-1 gap-4">
         <ScreenCard
           topClassName="h-[65vh]"
           top={

@@ -55,7 +55,7 @@ export default function PlanDetails() {
 
   return (
     <ScreenFrame title="Plan routes">
-      <View className="mx-2 max-w-3xl flex-1">
+      <View className="mx-2 max-w-5xl flex-1">
         <ScreenCard
           middle={
             <>
@@ -103,7 +103,7 @@ export default function PlanDetails() {
         >
           Available Routes
         </Text>
-        <View className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <View className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {plan.routes.map((route) => (
             <Link key={route.id} href="/plans/1/1">
               <RouteCard route={route} />
