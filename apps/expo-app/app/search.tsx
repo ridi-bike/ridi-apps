@@ -96,8 +96,7 @@ export default function LocationSearch() {
 
   const gotoNewScreen = useCallback(() => {
     if (navState.routes[(navState.index || 0) - 1]?.name === "plans/new") {
-      router.back(); // TODO not quite working
-      router.back(); // TODO not quite working
+      router.back(); // TODO not quite working, seems to be replacing
     } else {
       router.replace("/plans/new");
     }
