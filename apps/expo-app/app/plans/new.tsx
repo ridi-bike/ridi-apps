@@ -1,7 +1,6 @@
 import { Slider } from "@miblanchard/react-native-slider";
-import { distance } from "@turf/turf";
 import * as Location from "expo-location";
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import {
   Compass,
   Crosshair,
@@ -18,26 +17,25 @@ import { GeoMapCoordsSelector } from "~/components/geo-map/geo-map-coords-select
 import { LocationPermsNotGiven } from "~/components/LocationPermsNotGiven";
 import { ScreenFrame } from "~/components/screen-frame";
 import { useStorePlans } from "~/lib/stores/plans-store";
+import { useUrlParams } from "~/lib/url-params";
 import { cn } from "~/lib/utils";
 
 const DIRECTIONS = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
 const DISTANCES = [100, 150, 200, 250, 300, 350];
 
-type Coords = {
-  lat: number;
-  lon: number;
-};
+export type Coords = [number, number];
 
 export default function PlansNew() {
   const router = useRouter();
   const { planAdd } = useStorePlans();
-  const [startCoords, setStartCoords] = useState<Coords | null>(null);
-  const [finishCoords, setFinishCoords] = useState<Coords | null>(null);
-  const [isRoundTrip, setIsRoundTrip] = useState(true);
-  const [selectedDistance, setSelectedDistance] = useState(200);
-  const [bearing, setBearing] = useState(0);
+  const [startCoords, setStartCoords] = useUrlParams<Coords>("start");
+  const [finishCoords, setFinishCoords] = useUrlParams<Coords>("finish");
+  const [isRoundTrip, setIsRoundTrip] = useUrlParams<boolean>("round-trip");
+  const [selectedDistance, setSelectedDistance] =
+    useUrlParams<number>("distance");
+  const [bearing, setBearing] = useUrlParams<number>("bearing");
   const [findCoords, setFindCoords] = useState(false);
-  const [searchPoints, setSearchPoints] = useState([]);
+  const [searchPoints] = useUrlParams<Coords[]>("search-results");
 
   const [showLocationAlert, setShowLocationAlert] = useState(false);
   const [currentCoords, setCurrentCoords] = useState<Coords | null>(null);
@@ -56,10 +54,7 @@ export default function PlansNew() {
     const location = await Location.getCurrentPositionAsync({});
 
     if (location) {
-      setCurrentCoords({
-        lat: location.coords.latitude,
-        lon: location.coords.longitude,
-      });
+      setCurrentCoords([location.coords.latitude, location.coords.longitude]);
     }
   }, []);
 
@@ -79,10 +74,10 @@ export default function PlansNew() {
             onPress={() => {
               if (startCoords && finishCoords) {
                 const planId = planAdd({
-                  fromLat: startCoords.lat,
-                  fromLon: startCoords.lon,
-                  toLat: finishCoords.lat,
-                  toLon: finishCoords.lon,
+                  fromLat: startCoords[0],
+                  fromLon: startCoords[1],
+                  toLat: finishCoords[0],
+                  toLon: finishCoords[1],
                 });
                 router.replace({
                   pathname: "/plans/[planId]",
@@ -121,7 +116,7 @@ export default function PlansNew() {
                 <Text className="text-sm dark:text-gray-200">
                   {isRoundTrip ? "Start/Finish Point: " : "Start: "}
                   {startCoords
-                    ? `${startCoords.lat.toFixed(4)}, ${startCoords.lon.toFixed(
+                    ? `${startCoords[0].toFixed(4)}, ${startCoords[1].toFixed(
                         4,
                       )}`
                     : "Not set"}
@@ -133,7 +128,7 @@ export default function PlansNew() {
                   <Text className="text-sm dark:text-gray-200">
                     Finish:{" "}
                     {finishCoords
-                      ? `${finishCoords.lat.toFixed(4)}, ${finishCoords.lon.toFixed(4)}`
+                      ? `${finishCoords[0].toFixed(4)}, ${finishCoords[1].toFixed(4)}`
                       : "Not set"}
                   </Text>
                 </View>
@@ -149,7 +144,7 @@ export default function PlansNew() {
                   <View className="flex flex-row items-center gap-2">
                     <Compass className="size-4 text-[#FF5937]" />
                     <Text className="text-sm dark:text-gray-200">
-                      {getCardinalDirection(bearing)} ({bearing}°)
+                      {getCardinalDirection(bearing || 0)} ({bearing || 0}°)
                     </Text>
                   </View>
                 </View>
@@ -179,14 +174,28 @@ export default function PlansNew() {
         </View>
         <View className="h-[400px] w-full overflow-hidden rounded-xl border-2 border-black dark:border-gray-700">
           <GeoMapCoordsSelector
-            isRoundTrip={isRoundTrip}
-            start={startCoords}
-            finish={finishCoords}
-            current={currentCoords}
-            points={searchPoints}
+            isRoundTrip={isRoundTrip || false}
+            start={
+              startCoords ? { lat: startCoords[0], lon: startCoords[1] } : null
+            }
+            finish={
+              finishCoords
+                ? { lat: finishCoords[0], lon: finishCoords[1] }
+                : null
+            }
+            current={
+              currentCoords
+                ? { lat: currentCoords[0], lon: currentCoords[1] }
+                : null
+            }
+            points={searchPoints?.map((c) => ({
+              title: "omg",
+              description: "omgomg",
+              coords: { lat: c[0], lon: c[1] },
+            }))}
             findCoords={findCoords}
-            setStart={setStartCoords}
-            setFinish={setFinishCoords}
+            setStart={(c) => setStartCoords(c ? [c.lat, c.lon] : undefined)}
+            setFinish={(c) => setFinishCoords(c ? [c.lat, c.lon] : undefined)}
             bearing={bearing}
             distance={selectedDistance}
           />
@@ -213,15 +222,13 @@ export default function PlansNew() {
             <MapPin className="size-4" />
             <Text className="text-sm dark:text-gray-200">Map Location</Text>
           </Pressable>
-          <Pressable
-            onPress={() => {
-              console.log("Navigate to search screen");
-            }}
+          <Link
+            href="/search"
             className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-900"
           >
             <Search className="size-4" />
             <Text className="text-sm dark:text-gray-200">Search</Text>
-          </Pressable>
+          </Link>
         </View>
         <View className="space-y-4">
           {isRoundTrip && (
@@ -233,9 +240,9 @@ export default function PlansNew() {
                       key={idx}
                       className={cn("text-xs font-medium transition-colors", {
                         "text-[#FF5937]":
-                          getCardinalDirection(bearing) === direction,
+                          getCardinalDirection(bearing || 0) === direction,
                         "text-gray-400 dark:text-gray-500":
-                          getCardinalDirection(bearing) !== direction,
+                          getCardinalDirection(bearing || 0) !== direction,
                       })}
                     >
                       {direction}
@@ -256,6 +263,8 @@ export default function PlansNew() {
                     maximumValue={359}
                     minimumValue={0}
                     trackStyle={{ backgroundColor: "transparent" }}
+                    minimumTrackStyle={{ backgroundColor: "transparent" }}
+                    maximumTrackStyle={{ backgroundColor: "transparent" }}
                     onValueChange={(value) => {
                       setBearing(value[0]);
                     }}
@@ -287,9 +296,11 @@ export default function PlansNew() {
                     )}
                     trackClickable={true}
                     step={1}
-                    value={DISTANCES.indexOf(selectedDistance)}
+                    value={DISTANCES.indexOf(selectedDistance || 100)}
                     maximumValue={DISTANCES.length - 1}
                     trackStyle={{ backgroundColor: "transparent" }}
+                    minimumTrackStyle={{ backgroundColor: "transparent" }}
+                    maximumTrackStyle={{ backgroundColor: "transparent" }}
                     onValueChange={(value) => {
                       console.log({ value });
                       setSelectedDistance(DISTANCES[value[0]]);
