@@ -10,8 +10,9 @@ import {
   Search,
   StretchHorizontal,
 } from "lucide-react-native";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
+import { array, boolean, type InferInput, number, tuple } from "valibot";
 
 import { GeoMapCoordsSelector } from "~/components/geo-map/geo-map-coords-selector";
 import { LocationPermsNotGiven } from "~/components/LocationPermsNotGiven";
@@ -23,27 +24,56 @@ import { cn } from "~/lib/utils";
 const DIRECTIONS = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
 const DISTANCES = [100, 150, 200, 250, 300, 350];
 
-export type Coords = [number, number];
+const coordsSchema = tuple([number(), number()]);
+type Coords = InferInput<typeof coordsSchema>;
 
 export default function PlansNew() {
   const router = useRouter();
   const { planAdd } = useStorePlans();
-  const [startCoords, setStartCoords] = useUrlParams<Coords>("start");
-  const [finishCoords, setFinishCoords] = useUrlParams<Coords>("finish");
-  const [isRoundTrip, setIsRoundTrip] = useUrlParams<boolean>("round-trip");
-  const [selectedDistance, setSelectedDistance] =
-    useUrlParams<number>("distance");
-  const [bearing, setBearing] = useUrlParams<number>("bearing");
+  const [startCoords, setStartCoords] = useUrlParams("start", coordsSchema);
+  const [finishCoords, setFinishCoords] = useUrlParams("finish", coordsSchema);
+  const [isRoundTrip, setIsRoundTrip] = useUrlParams<boolean>(
+    "round-trip",
+    boolean(),
+  );
+  const [selectedDistance, setSelectedDistance] = useUrlParams<number>(
+    "distance",
+    number(),
+  );
+  const [bearing, setBearing] = useUrlParams<number>("bearing", number());
   const [findCoords, setFindCoords] = useState(false);
-  const [searchPoints] = useUrlParams<Coords[]>("search-results");
+  const [searchPoints, setSearchPoints] = useUrlParams<Coords[]>(
+    "search-results",
+    array(coordsSchema),
+  );
 
   const [showLocationAlert, setShowLocationAlert] = useState(false);
   const [currentCoords, setCurrentCoords] = useState<Coords | null>(null);
+
+  useEffect(() => {
+    if (isRoundTrip) {
+      setFinishCoords();
+      if (bearing === undefined) {
+        setBearing(0);
+      }
+      if (selectedDistance === undefined) {
+        setSelectedDistance(100);
+      }
+    }
+  }, [
+    bearing,
+    isRoundTrip,
+    selectedDistance,
+    setBearing,
+    setFinishCoords,
+    setSelectedDistance,
+  ]);
 
   const getCardinalDirection = (degrees: number): string => {
     const index = Math.round(degrees / 45) % 8;
     return DIRECTIONS[index];
   };
+
   const getCurrentLocation = useCallback(async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
@@ -69,7 +99,7 @@ export default function PlansNew() {
     <ScreenFrame
       title="New plan"
       floating={
-        <View className="fixed bottom-0 w-full bg-white/50 p-4 dark:bg-gray-800/50">
+        <View className="fixed bottom-0 w-full bg-white p-4 dark:bg-gray-800">
           <Pressable
             onPress={() => {
               if (startCoords && finishCoords) {
@@ -87,7 +117,7 @@ export default function PlansNew() {
             }}
             aria-disabled={!canCreateRoute()}
             className={cn(
-              "w-full rounded-xl px-4 py-3 mb-24 font-medium text-white transition-colors",
+              "w-full rounded-xl px-4 py-3 font-medium text-white transition-colors",
               {
                 "bg-[#FF5937] hover:bg-[#FF5937]/90": canCreateRoute(),
                 "cursor-not-allowed bg-gray-200 dark:bg-gray-700":
@@ -205,7 +235,7 @@ export default function PlansNew() {
             onPress={getCurrentLocation}
             className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-900"
           >
-            <Navigation className="size-4" />
+            <Navigation className="size-4 dark:text-gray-200" />
             <Text className="text-sm dark:text-gray-200">My Location</Text>
           </Pressable>
           <Pressable
@@ -219,16 +249,29 @@ export default function PlansNew() {
               },
             )}
           >
-            <MapPin className="size-4" />
+            <MapPin className="size-4 dark:text-gray-200" />
             <Text className="text-sm dark:text-gray-200">Map Location</Text>
           </Pressable>
-          <Link
-            href="/search"
-            className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-900"
-          >
-            <Search className="size-4" />
-            <Text className="text-sm dark:text-gray-200">Search</Text>
-          </Link>
+          {!searchPoints && (
+            <Link
+              href="/search"
+              className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-900"
+            >
+              <Search className="size-4 dark:text-gray-200" />
+              <Text className="text-sm dark:text-gray-200">Search</Text>
+            </Link>
+          )}
+          {searchPoints?.length && (
+            <Pressable
+              onPress={() => {
+                setSearchPoints();
+              }}
+              className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-[#FF5937] bg-[#FF5937] px-4 py-2 text-white"
+            >
+              <Search className="size-4 dark:text-gray-200" />
+              <Text className="text-sm dark:text-gray-200">Search</Text>
+            </Pressable>
+          )}
         </View>
         <View className="space-y-4">
           {isRoundTrip && (

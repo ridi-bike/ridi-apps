@@ -1,16 +1,42 @@
 import { useLocalSearchParams, router } from "expo-router";
+import { useCallback, useMemo } from "react";
+import { type GenericSchema, safeParse } from "valibot";
 
-export function useUrlParams<T>(key: string): [T | undefined, (d?: T) => void] {
+export function useUrlParams<T>(
+  key: string,
+  schema: GenericSchema<T>,
+): [T | undefined, (d?: T) => void] {
   const params = useLocalSearchParams();
+  const paramsValue = params[key];
 
-  return [
-    params[key] !== undefined && !Array.isArray(params[key])
-      ? JSON.parse(params[key] as string)
-      : undefined,
-    (d) => {
+  const value: T | undefined = useMemo(() => {
+    if (
+      paramsValue !== undefined &&
+      !Array.isArray(paramsValue) &&
+      paramsValue !== "undefined"
+    ) {
+      const parsedValue = JSON.parse(paramsValue as string);
+      const checkedValue = safeParse(schema, parsedValue);
+      if (checkedValue.success) {
+        return checkedValue.output;
+      }
+      console.error(
+        "Error parsing query param, not matching schema",
+        key,
+        paramsValue,
+        checkedValue.issues,
+      );
+    }
+  }, [key, paramsValue, schema]);
+
+  const setValue = useCallback(
+    (newValue?: T) => {
       router.setParams({
-        [key]: d !== undefined ? JSON.stringify(d) : undefined,
+        [key]: newValue !== undefined ? JSON.stringify(newValue) : undefined,
       });
     },
-  ];
+    [key],
+  );
+
+  return [value, setValue];
 }
