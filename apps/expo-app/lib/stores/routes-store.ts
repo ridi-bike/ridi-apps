@@ -1,11 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 
+import { apiClient } from "../api";
 import { getRouteStorage } from "../storage";
-import { trpcClient } from "../supabase";
+
+type ApiClient = typeof apiClient;
 
 export type Route = Awaited<
-  ReturnType<typeof trpcClient.routes.get.query>
+  ReturnType<
+    Awaited<
+      ReturnType<
+        ApiClient["user"]["routes"][":routeId"]["v"][":version"]["$get"]
+      >
+    >["json"]
+  >
 >["data"];
 
 export function useStoreRoute(routeId: string) {
@@ -14,10 +22,14 @@ export function useStoreRoute(routeId: string) {
   const { data, error, status } = useQuery({
     queryKey: ["route", routeId],
     queryFn: () =>
-      trpcClient.routes.get.query({
-        version: routeStore.dataVersion,
-        data: { routeId },
-      }),
+      apiClient.user.routes[":routeId"].v[":version"]
+        .$get({
+          param: {
+            version: routeStore.dataVersion,
+            routeId,
+          },
+        })
+        .then((r) => r.json()),
     initialData: () => {
       const storedData = routeStore.get();
       if (storedData) {

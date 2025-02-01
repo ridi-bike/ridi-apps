@@ -4,38 +4,10 @@ import { View } from "react-native";
 
 import { PlanCard } from "~/components/plan-card";
 import { ScreenFrame } from "~/components/screen-frame";
+import { useStorePlans } from "~/lib/stores/plans-store";
 
 export default function PlansPage() {
-  const plans = [
-    {
-      startAddress: "123 Main St, San Francisco, CA",
-      endAddress: "456 Market St, San Francisco, CA",
-      distance: "3.2 miles",
-      startCoords: [37.7749, -122.4194],
-      finishCoords: [37.7937, -122.3965],
-    },
-    {
-      startAddress: "789 Mission St, San Francisco, CA",
-      endAddress: "321 Howard St, San Francisco, CA",
-      distance: "2.8 miles",
-      startCoords: [37.7855, -122.4071],
-      finishCoords: [37.7897, -122.3947],
-    },
-    {
-      startAddress: "789 Mission St, San Francisco, CA",
-      endAddress: "321 Howard St, San Francisco, CA",
-      distance: "2.8 miles",
-      startCoords: [37.7855, -122.4071],
-      finishCoords: [37.7897, -122.3947],
-    },
-    {
-      startAddress: "789 Mission St, San Francisco, CA",
-      endAddress: "321 Howard St, San Francisco, CA",
-      distance: "2.8 miles",
-      startCoords: [37.7855, -122.4071],
-      finishCoords: [37.7897, -122.3947],
-    },
-  ];
+  const { data: plans, error, status } = useStorePlans();
 
   return (
     <ScreenFrame
@@ -54,7 +26,13 @@ export default function PlansPage() {
         <View className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {plans.map((plan, index) => (
             <Link key={index} href="/plans/1">
-              <PlanCard {...plan} />
+              <PlanCard
+                distance="999 km"
+                endAddress="END ADDR"
+                startAddress="STRT ADDR"
+                startCoords={[plan.fromLat, plan.fromLon]}
+                finishCoords={[plan.toLat, plan.toLon]}
+              />
             </Link>
           ))}
         </View>

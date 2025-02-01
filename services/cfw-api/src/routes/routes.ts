@@ -2,6 +2,7 @@ import { z } from "zod";
 import { latOut, lonOut, RidiHonoApp } from "./shared";
 import { routesGet } from "../queries_sql";
 import { zValidator } from "@hono/zod-validator";
+import { Schema } from "hono";
 
 const routeOutputSchema = z.discriminatedUnion("version", [
   z.object({
@@ -20,9 +21,9 @@ const routeOutputSchema = z.discriminatedUnion("version", [
   }),
 ]);
 
-export function addRouteHandlers(app: RidiHonoApp) {
-  app.get(
-    "/user/routes/all/:routeId/v/:version",
+export function addRouteHandlers<T extends Schema>(app: RidiHonoApp<T>) {
+  return app.get(
+    "/user/routes/:routeId/v/:version",
     zValidator(
       "param",
       z.object({

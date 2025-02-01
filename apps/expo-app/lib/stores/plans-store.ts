@@ -2,17 +2,24 @@ import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { generate } from "xksuid";
 
+import { apiClient } from "../api";
 import { dataSyncPendingPush } from "../data-sync";
 import { plansPendingStorage, plansStorage } from "../storage";
-import { supabase, trpcClient } from "../supabase";
+import { supabase } from "../supabase";
+
+type ApiClient = typeof apiClient;
 
 export type Plan = Awaited<
-  ReturnType<typeof trpcClient.plans.list.query>
+  ReturnType<
+    Awaited<
+      ReturnType<ApiClient["user"]["plans"]["all"]["v"][":version"]["$get"]>
+    >["json"]
+  >
 >["data"][number];
 
 export type PlanNew = Parameters<
-  typeof trpcClient.plans.create.mutate
->[0]["data"];
+  ApiClient["user"]["plans"]["create"]["$post"]
+>[0]["json"]["data"];
 
 export function useStorePlans() {
   const [plansPending, setPlansPending] = useState(
@@ -22,7 +29,13 @@ export function useStorePlans() {
   const { data, error, status, refetch } = useQuery({
     queryKey: ["plans"],
     queryFn: () =>
-      trpcClient.plans.list.query({ version: plansStorage.dataVersion }),
+      apiClient.user.plans.all.v[":version"]
+        .$get({
+          param: {
+            version: plansStorage.dataVersion,
+          },
+        })
+        .then((r) => r.json()),
     initialData: {
       version: plansStorage.dataVersion,
       data: plansStorage.get() || [],
@@ -39,6 +52,7 @@ export function useStorePlans() {
     const plans: Plan[] = plansPending.map((p) => ({
       ...p,
       state: "new",
+      createdAt: p.createdAt.toString(),
       routes: [],
     }));
 
@@ -58,10 +72,10 @@ export function useStorePlans() {
         {
           id,
           name: `from ${planNew.fromLat},${planNew.fromLon} to ${planNew.toLat},${planNew.toLon}`,
-          fromLat: planNew.fromLat.toString(),
-          fromLon: planNew.fromLon.toString(),
-          toLat: planNew.toLat.toString(),
-          toLon: planNew.toLon.toString(),
+          fromLat: planNew.fromLat,
+          fromLon: planNew.fromLon,
+          toLat: planNew.toLat,
+          toLon: planNew.toLon,
           createdAt: new Date(),
         },
       ];

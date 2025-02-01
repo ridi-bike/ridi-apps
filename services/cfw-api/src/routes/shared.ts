@@ -1,8 +1,7 @@
 import { z } from "zod";
 import { Variables } from "../middlewares";
-import { Hono } from "hono";
+import { Hono, Schema } from "hono";
 
-// Common validators
 export const latIn = z
   .number()
   .min(-90)
@@ -16,4 +15,11 @@ export const lonIn = z
 export const latOut = z.coerce.number().min(-90).max(90);
 export const lonOut = z.coerce.number().min(-180).max(180);
 
-export type RidiHonoApp = Hono<{ Bindings: CloudflareBindings } & Variables>;
+export type RidiHonoApp<T extends Schema> = Hono<
+  { Bindings: CloudflareBindings } & Variables,
+  T
+>;
+
+export type FieldsNotNull<T extends object> = {
+  [n in keyof T]: NonNullable<T[n]>;
+};
