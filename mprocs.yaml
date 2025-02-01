@@ -1,8 +1,11 @@
 procs:
   supabase_status:
     shell: "supabase status"
-  supabase_functions:
-    shell: "supabase functions serve"
+  # supabase_functions:
+  #   shell: "supabase functions serve"
+  cloudflare-worker-api:
+    shell: "pnpm dev"
+    cwd: services/cfw-api
   astro:
     shell: "pnpm start"
     cwd: "apps/astro-app"
