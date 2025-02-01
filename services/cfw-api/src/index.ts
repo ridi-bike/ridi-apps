@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import { z } from "zod";
 import {
   contextMiddleware,
   loggerMiddleware,
@@ -8,8 +7,6 @@ import {
   userMiddleware,
   Variables,
 } from "./middlewares";
-import { zValidator } from "@hono/zod-validator";
-import { planCreate, planList, routesGet } from "./queries_sql";
 import { addRouteHandlers } from "./routes/routes";
 import { addPlanHandlers } from "./routes/plans";
 import { addCoordsHandler } from "./routes/coords";
@@ -22,12 +19,14 @@ app.use(contextMiddleware);
 app.use(netAddrActivityMiddleware);
 app.use("/user/*", userMiddleware);
 
-addPlanHandlers(app);
-addRouteHandlers(app);
-addCoordsHandler(app);
+const appWithPlanRoutes = addPlanHandlers(app);
+const appWithRouteRoutes = addRouteHandlers(appWithPlanRoutes);
+const appWithCoordsRoutes = addCoordsHandler(appWithRouteRoutes);
 
-app.get("/", (c) => {
+const fullApp = appWithCoordsRoutes.get("/", (c) => {
   return c.text("Hello Ridi!");
 });
 
 export default app;
+
+export type RidiHonoApp = typeof fullApp;

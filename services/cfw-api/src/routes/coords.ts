@@ -1,9 +1,10 @@
 import { zValidator } from "@hono/zod-validator";
 import { latIn, lonIn, RidiHonoApp } from "./shared";
 import { z } from "zod";
+import { Schema } from "hono";
 
-export function addCoordsHandler(app: RidiHonoApp) {
-  app.post(
+export function addCoordsHandler<T extends Schema>(app: RidiHonoApp<T>) {
+  return app.post(
     "/user/coords/selected",
     zValidator(
       "json",
