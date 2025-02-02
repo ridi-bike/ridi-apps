@@ -45,6 +45,10 @@ export const plansPendingStorage = new Storage<PlanNew[], "v1">(
   "v1",
 );
 
+const routeStorages: Record<string, Storage<Route, "v1">> = {};
 export function getRouteStorage(routeId: string): Storage<Route, "v1"> {
-  return new Storage<Route, "v1">(`route/${routeId}`, "v1");
+  if (!routeStorages[routeId]) {
+    routeStorages[routeId] = new Storage<Route, "v1">(`route/${routeId}`, "v1");
+  }
+  return routeStorages[routeId];
 }
