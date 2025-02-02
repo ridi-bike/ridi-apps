@@ -1,4 +1,4 @@
-import { Hono } from "hono";
+import { OpenAPIHono } from "@hono/zod-openapi";
 import {
   contextMiddleware,
   loggerMiddleware,
@@ -11,7 +11,7 @@ import { addRouteHandlers } from "./routes/routes";
 import { addPlanHandlers } from "./routes/plans";
 import { addCoordsHandler } from "./routes/coords";
 
-const app = new Hono<{ Bindings: CloudflareBindings } & Variables>();
+const app = new OpenAPIHono<{ Bindings: CloudflareBindings } & Variables>();
 
 app.use(loggerMiddleware);
 app.use(timingMiddleware);
