@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { Variables } from "../middlewares";
-import { Hono, Schema } from "hono";
+import { Schema } from "hono";
+import { OpenAPIHono } from "@hono/zod-openapi";
 
 export const latIn = z
   .number()
@@ -15,7 +16,7 @@ export const lonIn = z
 export const latOut = z.coerce.number().min(-90).max(90);
 export const lonOut = z.coerce.number().min(-180).max(180);
 
-export type RidiHonoApp<T extends Schema> = Hono<
+export type RidiHonoApp<T extends Schema> = OpenAPIHono<
   { Bindings: CloudflareBindings } & Variables,
   T
 >;
