@@ -6,15 +6,17 @@ import { getRouteStorage } from "../storage";
 
 type ApiClient = typeof apiClient;
 
-export type Route = Awaited<
-  ReturnType<
-    Awaited<
-      ReturnType<
-        ApiClient["user"]["routes"][":routeId"]["v"][":version"]["$get"]
-      >
-    >["json"]
-  >
->["data"];
+export type Route = NonNullable<
+  Awaited<
+    ReturnType<
+      Awaited<
+        ReturnType<
+          ApiClient["user"]["routes"][":routeId"]["v"][":version"]["$get"]
+        >
+      >["json"]
+    >
+  >["data"]
+>;
 
 export function useStoreRoute(routeId: string) {
   const routeStore = useMemo(() => getRouteStorage(routeId), [routeId]);
@@ -42,7 +44,7 @@ export function useStoreRoute(routeId: string) {
   });
 
   useEffect(() => {
-    if (data) {
+    if (data && data.data) {
       routeStore.set(data.data);
     }
   }, [data, routeStore]);

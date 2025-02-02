@@ -26,39 +26,40 @@ const routeResponseSchema = z
   .discriminatedUnion("version", [
     z.object({
       version: z.literal("v1"),
-      data: z.object({
-        id: z.string().openapi({
-          example: "route_123abc",
-        }),
-        name: z.string().openapi({
-          example: "Route to Work",
-        }),
-        createdAt: z.date().openapi({
-          example: "2024-02-02T12:00:00Z",
-        }),
-        plan: z.object({
-          planId: z.string().openapi({
-            example: "plan_456def",
+      data: z
+        .object({
+          id: z.string().openapi({
+            example: "route_123abc",
           }),
-          planName: z.string().openapi({
-            example: "Daily Commute",
+          name: z.string().openapi({
+            example: "Route to Work",
           }),
-          planState: z.enum(["new", "planning", "done", "error"]).openapi({
-            example: "done",
+          createdAt: z.date().openapi({
+            example: "2024-02-02T12:00:00Z",
           }),
-        }),
-        latLonArray: z.array(z.tuple([latOut, lonOut])).openapi({
-          example: [
-            [51.5074, -0.1278],
-            [51.5098, -0.118],
-          ],
-        }),
-      }),
+          plan: z.object({
+            planId: z.string().openapi({
+              example: "plan_456def",
+            }),
+            planName: z.string().openapi({
+              example: "Daily Commute",
+            }),
+            planState: z.enum(["new", "planning", "done", "error"]).openapi({
+              example: "done",
+            }),
+          }),
+          latLonArray: z.array(z.tuple([latOut, lonOut])).openapi({
+            example: [
+              [51.5074, -0.1278],
+              [51.5098, -0.118],
+            ],
+          }),
+        })
+        .nullable(),
     }),
   ])
   .openapi("RouteResponse");
 
-// Route definition
 const routeGetRoute = createRoute({
   method: "get",
   path: "/user/routes/{routeId}/v/{version}",
@@ -73,18 +74,6 @@ const routeGetRoute = createRoute({
         },
       },
       description: "Route details including plan information and coordinates",
-    },
-    404: {
-      description: "Route not found",
-      content: {
-        "application/json": {
-          schema: z
-            .object({
-              error: z.literal("not found"),
-            })
-            .openapi("NotFoundError"),
-        },
-      },
     },
   },
 });
