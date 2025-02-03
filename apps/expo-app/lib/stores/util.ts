@@ -8,7 +8,10 @@ export function getSuccessResponseOrThrow<
   TCode extends number,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TResp extends { status: number; body: any },
->(successCode: TCode, response: TResp): GetRespTypeFromCode<TCode, TResp> {
+>(
+  successCode: TCode,
+  response: TResp,
+): GetRespTypeFromCode<TCode, TResp>["body"] {
   if (response.status === successCode) {
     return response.body;
   }

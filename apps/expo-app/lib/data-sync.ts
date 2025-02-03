@@ -27,7 +27,8 @@ export async function dataSyncPull() {
         version: "v1",
       },
     }),
-  ).body;
+  );
+  console.log({ plans });
   plansStorage.set(plans.data);
   for (const plan of plans.data) {
     for (const route of plan.routes) {
@@ -44,7 +45,7 @@ export async function dataSyncPull() {
               routeId: route.routeId,
             },
           }),
-        ).body;
+        );
         routeStorage.set(remoteRoute.data);
       }
     }

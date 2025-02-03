@@ -1,4 +1,8 @@
-import { fetchRequestHandler, tsr } from "@ts-rest/serverless/fetch";
+import {
+  TsRestResponse,
+  fetchRequestHandler,
+  tsr,
+} from "@ts-rest/serverless/fetch";
 import * as R from "remeda";
 import type {
   Request as WorkerRequest,
@@ -31,148 +35,145 @@ const router = tsr
     db: ReturnType<typeof postgres>;
     messaging: Messaging;
     logger: RidiLogger;
-    user: User;
   }>()
-  .router(apiContract, {
-    coordsSelect: async ({ body: { version, lon, lat } }, ctx) => {
-      if (version !== "v1") {
-        return {
-          status: 400,
-          body: {
-            message: "wrong version",
-          },
-        };
-      }
-
-      await ctx.messaging.send("coords-activty", { lat, lon });
+  .routerWithMiddleware(apiContract)<{ user: User }>({
+  coordsSelect: async ({ body: { version, lon, lat } }, ctx) => {
+    if (version !== "v1") {
       return {
-        status: 200,
+        status: 400,
         body: {
-          ok: true,
+          message: "wrong version",
         },
       };
-    },
-    planCreate: async ({ body: { version, data } }, ctx) => {
-      if (version !== "v1") {
-        return {
-          status: 400,
-          body: {
-            message: "wrong version",
-          },
-        };
-      }
+    }
 
-      const newPlan = await planCreate(ctx.db, {
-        ...data,
-        userId: ctx.user.id,
+    await ctx.messaging.send("coords-activty", { lat, lon });
+    return {
+      status: 200,
+      body: {
+        ok: true,
+      },
+    };
+  },
+  planCreate: async ({ body: { version, data } }, ctx) => {
+    if (version !== "v1") {
+      return {
+        status: 400,
+        body: {
+          message: "wrong version",
+        },
+      };
+    }
+
+    const newPlan = await planCreate(ctx.db, {
+      ...data,
+      userId: ctx.request.user.id,
+    });
+
+    if (!newPlan) {
+      throw new Error("can't happen");
+    }
+
+    await ctx.messaging.send("new-plan", { planId: newPlan.id });
+
+    const response = {
+      version: "v1",
+      data: newPlan,
+    };
+
+    return {
+      status: 200,
+      body: response,
+    };
+  },
+  plansList: async ({ query: { version } }, ctx) => {
+    if (version !== "v1") {
+      return {
+        status: 400,
+        body: {
+          message: "wrong version",
+        },
+      };
+    }
+    const plansFlat = await planList(ctx.db, {
+      userId: ctx.request.user.id,
+    });
+
+    const plans = R.pipe(
+      plansFlat,
+      R.groupBy(R.prop("id")),
+      R.entries(),
+      R.map(([_planId, onePlanFlat]) => ({
+        ...R.first(onePlanFlat),
+        routes: R.first(onePlanFlat).routeId
+          ? R.pipe(
+              onePlanFlat as FieldsNotNull<(typeof onePlanFlat)[number]>[],
+              R.groupBy(R.prop("routeId")),
+              R.entries(),
+              R.map(([_routeId, oneRouteFlat]) => ({
+                ...R.first(oneRouteFlat),
+              })),
+            )
+          : [],
+      })),
+    );
+
+    const validates = plansListResponseSchema.parse({
+      version: "v1",
+      data: plans,
+    });
+
+    return {
+      status: 200,
+      body: validates,
+    };
+  },
+  routeGet: async ({ params: { routeId }, query: { version } }, ctx) => {
+    if (version !== "v1") {
+      return {
+        status: 400,
+        body: {
+          message: "wrong version",
+        },
+      } as const;
+    }
+
+    try {
+      const routesFlat = await routesGet(ctx.db, {
+        id: routeId,
+        userId: ctx.request.user.id,
       });
 
-      if (!newPlan) {
-        throw new Error("can't happen");
+      if (!routesFlat.length) {
+        throw new Error("not found");
       }
-
-      await ctx.messaging.send("new-plan", { planId: newPlan.id });
 
       const response = {
         version: "v1",
-        data: newPlan,
-      };
-
-      return {
-        status: 200,
-        body: response,
-      };
-    },
-    plansList: async ({ query: { version } }, ctx) => {
-      if (version !== "v1") {
-        return {
-          status: 400,
-          body: {
-            message: "wrong version",
-          },
-        };
-      }
-      console.log("---------------", ctx.user);
-      const plansFlat = await planList(ctx.db, {
-        userId: ctx.user.id,
-      });
-      console.log({ plansFlat });
-
-      const plans = R.pipe(
-        plansFlat,
-        R.groupBy(R.prop("id")),
-        R.entries(),
-        R.map(([_planId, onePlanFlat]) => ({
-          ...R.first(onePlanFlat),
-          routes: R.first(onePlanFlat).routeId
-            ? R.pipe(
-                onePlanFlat as FieldsNotNull<(typeof onePlanFlat)[number]>[],
-                R.groupBy(R.prop("routeId")),
-                R.entries(),
-                R.map(([_routeId, oneRouteFlat]) => ({
-                  ...R.first(oneRouteFlat),
-                })),
-              )
-            : [],
-        })),
-      );
-
-      const validates = plansListResponseSchema.parse({
-        version: "v1",
-        data: plans,
-      });
-
-      return {
-        status: 200,
-        body: validates,
-      };
-    },
-    routeGet: async ({ params: { routeId }, query: { version } }, ctx) => {
-      if (version !== "v1") {
-        return {
-          status: 400,
-          body: {
-            message: "wrong version",
-          },
-        } as const;
-      }
-
-      try {
-        const routesFlat = await routesGet(ctx.db, {
-          id: routeId,
-          userId: ctx.user.id,
-        });
-
-        if (!routesFlat.length) {
-          throw new Error("not found");
-        }
-
-        const response = {
-          version: "v1",
-          data: {
+        data: {
+          ...routesFlat[0],
+          latLonArray: routesFlat[0].latLonArray,
+          plan: {
             ...routesFlat[0],
-            latLonArray: routesFlat[0].latLonArray,
-            plan: {
-              ...routesFlat[0],
-            },
           },
-        };
+        },
+      };
 
-        const validated = routeGetRespopnseSchema.parse(response);
-        return {
-          status: 200,
-          body: validated,
-        };
-      } catch (error) {
-        return {
-          status: 500,
-          body: {
-            message: "internal error",
-          },
-        } as const;
-      }
-    },
-  });
+      const validated = routeGetRespopnseSchema.parse(response);
+      return {
+        status: 200,
+        body: validated,
+      };
+    } catch (error) {
+      return {
+        status: 500,
+        body: {
+          message: "internal error",
+        },
+      } as const;
+    }
+  },
+});
 
 RidiLogger.init("cfw-api");
 const ridiLogger = RidiLogger.get();
@@ -195,7 +196,43 @@ export default {
       request,
       contract: apiContract,
       router,
-      options: {},
+      options: {
+        requestMiddleware: [
+          tsr.middleware<{ timeStartMs: number }>((request) => {
+            request.timeStartMs = Date.now();
+          }),
+          tsr.middleware<{ timeStartMs: number }>(async (request) => {
+            const netAddr = request.headers.get("CF-Connecting-IP");
+            if (netAddr) {
+              await messaging.send("net-addr-activity", {
+                netAddr,
+              });
+            }
+          }),
+          tsr.middleware<{ user: User; timeStartMs: number }>(
+            async (request) => {
+              const authHeader = request.headers.get("Authorization");
+              const token = authHeader?.replace("Bearer ", "") || "";
+              const { data } = await supabaseClient.auth.getUser(token);
+              const user = data.user;
+              if (!user) {
+                return TsRestResponse.fromJson(
+                  { message: "Unauthorized" },
+                  { status: 401 },
+                );
+              }
+              request.user = user;
+            },
+          ),
+        ],
+        responseHandlers: [
+          (_response, request) => {
+            ridiLogger.info("Req finished", {
+              ms: Date.now() - request.timeStartMs,
+            });
+          },
+        ],
+      },
       platformContext: {
         workerRequest: request as unknown as WorkerRequest,
         workerEnv: env,
@@ -204,7 +241,6 @@ export default {
         messaging,
         db,
         logger: ridiLogger,
-        user: {} as unknown as User,
       },
     });
   },
