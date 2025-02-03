@@ -45,13 +45,13 @@ export class PlanProcessor {
     const regionsFrom = await this.pgQueries.regionFindFromCoords(
       this.pgClient,
       {
-        lat: planRecord.fromLat,
-        lon: planRecord.fromLon,
+        lat: planRecord.startLat,
+        lon: planRecord.startLon,
       },
     );
     const regionsTo = await this.pgQueries.regionFindFromCoords(this.pgClient, {
-      lat: planRecord.toLat,
-      lon: planRecord.toLon,
+      lat: planRecord.finishLat,
+      lon: planRecord.finishLon,
     });
 
     const regionsProm = await Promise.all(
@@ -92,9 +92,9 @@ export class PlanProcessor {
           region.region,
           "start-finish",
           "--start",
-          `${planRecord.fromLat},${planRecord.fromLon}`,
+          `${planRecord.startLat},${planRecord.startLon}`,
           "--finish",
-          `${planRecord.toLat},${planRecord.toLon}`,
+          `${planRecord.finishLat},${planRecord.finishLon}`,
         ],
         stdinContent: "{}",
       },

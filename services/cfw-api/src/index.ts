@@ -19,6 +19,7 @@ import postgres from "postgres";
 import { Messaging } from "./messaging";
 import { RidiLogger } from "./logging";
 import { planCreate, planList, routesGet } from "./queries_sql";
+import { lookupCooordsInfo } from "./maps/lookup";
 
 export type FieldsNotNull<T extends object> = {
   [n in keyof T]: NonNullable<T[n]>;
@@ -64,9 +65,24 @@ const router = tsr
         },
       };
     }
+    let startFinishDesc: [string, string];
+    try {
+      startFinishDesc = await lookupCooordsInfo([
+        [data.startLat, data.startLon],
+        [data.finishLat, data.finishLon],
+      ]);
+    } catch (error) {
+      ctx.logger.error("Error on coords description prep", { error, data });
+      startFinishDesc = [
+        `${data.startLat}, ${data.startLon}`,
+        `${data.finishLat}, ${data.finishLon}`,
+      ];
+    }
 
     const newPlan = await planCreate(ctx.db, {
       ...data,
+      startDesc: startFinishDesc[0],
+      finishDesc: startFinishDesc[1],
       userId: ctx.request.user.id,
     });
 

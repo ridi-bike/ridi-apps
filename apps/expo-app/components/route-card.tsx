@@ -1,16 +1,16 @@
 import { CirclePauseIcon, CirclePlayIcon, Trophy } from "lucide-react-native";
 import { View, Text } from "react-native";
 
-import { GeoMapStatic } from "~/components/geo-map/geo-map-static";
-
+import { GeoMapStatic } from "./geo-map/geo-map-static";
+import { type Coords } from "./geo-map/types";
 import { ScreenCard } from "./screen-card";
 
 type RouteCardProps = {
   route: {
     id: number;
     distance: string;
-    startCoords: [number, number];
-    finishCoords: [number, number];
+    startCoords: Coords;
+    finishCoords: Coords;
     roadTypes: {
       paved: number;
       gravel: number;

@@ -1,3 +1,7 @@
+import { router } from "expo-router";
+
+import { supabase } from "../supabase";
+
 type GetRespTypeFromCode<
   TCode extends number,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -14,6 +18,10 @@ export function getSuccessResponseOrThrow<
 ): GetRespTypeFromCode<TCode, TResp>["body"] {
   if (response.status === successCode) {
     return response.body;
+  }
+
+  if (response.status === 401) {
+    supabase.auth.signOut().then(() => router.replace("/"));
   }
 
   throw new Error(`Error from API call: ${JSON.stringify(response.body)}`);

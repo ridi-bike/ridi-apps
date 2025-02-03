@@ -61,10 +61,10 @@ export const planListQuery = `-- name: PlanList :many
 select 
 	p.id,
 	p.name,
-	p.from_lat,
-	p.from_lon,
-	p.to_lat,
-	p.to_lon,
+	p.start_lat,
+	p.start_lon,
+	p.finish_lat,
+	p.finish_lon,
 	p.state,
 	p.created_at,
 	r.id as route_id,
@@ -84,10 +84,10 @@ export interface PlanListArgs {
 export interface PlanListRow {
     id: string;
     name: string;
-    fromLat: string;
-    fromLon: string;
-    toLat: string;
-    toLon: string;
+    startLat: string;
+    startLon: string;
+    finishLat: string | null;
+    finishLon: string | null;
     state: "new" | "planning" | "done" | "error";
     createdAt: Date;
     routeId: string | null;
@@ -99,10 +99,10 @@ export async function planList(sql: Sql, args: PlanListArgs): Promise<PlanListRo
     return (await sql.unsafe(planListQuery, [args.userId]).values()).map(row => ({
         id: row[0],
         name: row[1],
-        fromLat: row[2],
-        fromLon: row[3],
-        toLat: row[4],
-        toLon: row[5],
+        startLat: row[2],
+        startLon: row[3],
+        finishLat: row[4],
+        finishLon: row[5],
         state: row[6],
         createdAt: row[7],
         routeId: row[8],
@@ -112,18 +112,20 @@ export async function planList(sql: Sql, args: PlanListArgs): Promise<PlanListRo
 }
 
 export const planCreateQuery = `-- name: PlanCreate :one
-insert into plans (user_id, id, name, from_lat, from_lon, to_lat, to_lon)
-values ($1, $2, $3, $4, $5, $6, $7)
+insert into plans (user_id, id, name, start_lat, start_lon, finish_lat, finish_lon, start_desc, finish_desc)
+values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 returning id`;
 
 export interface PlanCreateArgs {
     userId: string;
     id: string;
     name: string;
-    fromLat: string;
-    fromLon: string;
-    toLat: string;
-    toLon: string;
+    startLat: string;
+    startLon: string;
+    finishLat: string | null;
+    finishLon: string | null;
+    startDesc: string;
+    finishDesc: string | null;
 }
 
 export interface PlanCreateRow {
@@ -131,7 +133,7 @@ export interface PlanCreateRow {
 }
 
 export async function planCreate(sql: Sql, args: PlanCreateArgs): Promise<PlanCreateRow | null> {
-    const rows = await sql.unsafe(planCreateQuery, [args.userId, args.id, args.name, args.fromLat, args.fromLon, args.toLat, args.toLon]).values();
+    const rows = await sql.unsafe(planCreateQuery, [args.userId, args.id, args.name, args.startLat, args.startLon, args.finishLat, args.finishLon, args.startDesc, args.finishDesc]).values();
     if (rows.length !== 1) {
         return null;
     }

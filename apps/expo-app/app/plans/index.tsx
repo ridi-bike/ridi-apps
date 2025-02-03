@@ -27,11 +27,17 @@ export default function PlansPage() {
           {plans.map((plan, index) => (
             <Link key={index} href="/plans/1">
               <PlanCard
-                distance="999 km"
-                endAddress="END ADDR"
-                startAddress="STRT ADDR"
-                startCoords={[plan.fromLat, plan.fromLon]}
-                finishCoords={[plan.toLat, plan.toLon]}
+                startDesc={plan.startDesc}
+                finishDesc={plan.finishDesc}
+                startCoords={{ lat: plan.startLat, lon: plan.startLon }}
+                finishCoords={
+                  plan.finishLat && plan.finishLon
+                    ? { lat: plan.finishLat, lon: plan.finishLon }
+                    : null
+                }
+                bearing={plan.bearing}
+                distance={plan.distance}
+                tripType={plan.tripType}
               />
             </Link>
           ))}

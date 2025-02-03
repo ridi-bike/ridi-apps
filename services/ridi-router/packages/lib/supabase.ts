@@ -36,42 +36,57 @@ export type Database = {
     Tables: {
       plans: {
         Row: {
+          bearing: number | null
           created_at: string
+          distance: number
           error: string | null
-          from_lat: number
-          from_lon: number
+          finish_desc: string | null
+          finish_lat: number | null
+          finish_lon: number | null
           id: string
           modified_at: string | null
           name: string
+          start_desc: string
+          start_lat: number
+          start_lon: number
           state: Database["public"]["Enums"]["plan_state"]
-          to_lat: number
-          to_lon: number
+          trip_type: Database["public"]["Enums"]["plan_type"]
           user_id: string
         }
         Insert: {
+          bearing?: number | null
           created_at?: string
+          distance: number
           error?: string | null
-          from_lat: number
-          from_lon: number
+          finish_desc?: string | null
+          finish_lat?: number | null
+          finish_lon?: number | null
           id?: string
           modified_at?: string | null
           name: string
+          start_desc: string
+          start_lat: number
+          start_lon: number
           state?: Database["public"]["Enums"]["plan_state"]
-          to_lat: number
-          to_lon: number
+          trip_type: Database["public"]["Enums"]["plan_type"]
           user_id: string
         }
         Update: {
+          bearing?: number | null
           created_at?: string
+          distance?: number
           error?: string | null
-          from_lat?: number
-          from_lon?: number
+          finish_desc?: string | null
+          finish_lat?: number | null
+          finish_lon?: number | null
           id?: string
           modified_at?: string | null
           name?: string
+          start_desc?: string
+          start_lat?: number
+          start_lon?: number
           state?: Database["public"]["Enums"]["plan_state"]
-          to_lat?: number
-          to_lon?: number
+          trip_type?: Database["public"]["Enums"]["plan_type"]
           user_id?: string
         }
         Relationships: []
@@ -150,6 +165,7 @@ export type Database = {
     }
     Enums: {
       plan_state: "new" | "planning" | "done" | "error"
+      plan_type: "round-trip" | "start-finish"
       regions_version: "previous" | "current" | "next" | "discarded"
     }
     CompositeTypes: {

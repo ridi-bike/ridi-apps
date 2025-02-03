@@ -8,16 +8,17 @@ import { View } from "react-native";
 import { cn } from "~/lib/utils";
 
 import GeoMapMarker from "./geo-map-marker";
+import { type Coords } from "./types";
 
 type GeoMapStaticProps = {
-  points: { icon: React.ReactNode; coords: [number, number] }[];
+  points: { icon: React.ReactNode; coords: Coords }[];
   className?: string;
 };
 
 export function GeoMapStatic(props: GeoMapStaticProps) {
   const bbox = useMemo(() => {
     const features = turf.points(
-      props.points.map((p) => [p.coords[1], p.coords[0]]),
+      props.points.map((p) => [p.coords.lon, p.coords.lat]),
     );
     return turf.bbox(features);
   }, [props.points]);
@@ -40,9 +41,9 @@ export function GeoMapStatic(props: GeoMapStaticProps) {
       >
         {props.points.map((point) => (
           <GeoMapMarker
-            key={`${point.coords[0]}-${point.coords[1]}`}
-            lat={point.coords[0]}
-            lon={point.coords[1]}
+            key={`${point.coords.lat}-${point.coords.lon}`}
+            lat={point.coords.lat}
+            lon={point.coords.lon}
           >
             {point.icon}
           </GeoMapMarker>

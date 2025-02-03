@@ -1,7 +1,6 @@
-import { useNavigationState } from "@react-navigation/native";
 import { useRootNavigationState, useRouter } from "expo-router";
 import { Search, MapPin, Map as MapIcon, Pin } from "lucide-react-native";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { View, Text, TextInput, Pressable } from "react-native";
 
 import { GeoMapStatic } from "~/components/geo-map/geo-map-static";
@@ -54,7 +53,10 @@ function LocationCard({ location, gotoNewScreen }: LocationCardProps) {
             points={[
               {
                 icon: <Pin className="size-6" />,
-                coords: [parseFloat(location.lat), parseFloat(location.lon)],
+                coords: {
+                  lat: parseFloat(location.lat),
+                  lon: parseFloat(location.lon),
+                },
               },
             ]}
           />
