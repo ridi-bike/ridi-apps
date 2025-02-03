@@ -202,7 +202,7 @@ export async function regionGetCount(sql: Sql): Promise<RegionGetCountRow | null
 }
 
 export const planGetByIdQuery = `-- name: PlanGetById :one
-select id, user_id, created_at, modified_at, from_lat, from_lon, to_lat, to_lon, state, name, error from plans
+select id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc from plans
 where plans.id = $1`;
 
 export interface PlanGetByIdArgs {
@@ -214,13 +214,18 @@ export interface PlanGetByIdRow {
     userId: string;
     createdAt: Date;
     modifiedAt: Date | null;
-    fromLat: string;
-    fromLon: string;
-    toLat: string;
-    toLon: string;
+    startLat: string;
+    startLon: string;
+    finishLat: string | null;
+    finishLon: string | null;
     state: "new" | "planning" | "done" | "error";
     name: string;
     error: string | null;
+    tripType: "round-trip" | "start-finish";
+    distance: string;
+    bearing: string | null;
+    startDesc: string;
+    finishDesc: string | null;
 }
 
 export async function planGetById(sql: Sql, args: PlanGetByIdArgs): Promise<PlanGetByIdRow | null> {
@@ -237,18 +242,23 @@ export async function planGetById(sql: Sql, args: PlanGetByIdArgs): Promise<Plan
         userId: row[1],
         createdAt: row[2],
         modifiedAt: row[3],
-        fromLat: row[4],
-        fromLon: row[5],
-        toLat: row[6],
-        toLon: row[7],
+        startLat: row[4],
+        startLon: row[5],
+        finishLat: row[6],
+        finishLon: row[7],
         state: row[8],
         name: row[9],
-        error: row[10]
+        error: row[10],
+        tripType: row[11],
+        distance: row[12],
+        bearing: row[13],
+        startDesc: row[14],
+        finishDesc: row[15]
     };
 }
 
 export const plansGetNewQuery = `-- name: PlansGetNew :many
-select id, user_id, created_at, modified_at, from_lat, from_lon, to_lat, to_lon, state, name, error from plans
+select id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc from plans
 where state = 'new'`;
 
 export interface PlansGetNewRow {
@@ -256,13 +266,18 @@ export interface PlansGetNewRow {
     userId: string;
     createdAt: Date;
     modifiedAt: Date | null;
-    fromLat: string;
-    fromLon: string;
-    toLat: string;
-    toLon: string;
+    startLat: string;
+    startLon: string;
+    finishLat: string | null;
+    finishLon: string | null;
     state: "new" | "planning" | "done" | "error";
     name: string;
     error: string | null;
+    tripType: "round-trip" | "start-finish";
+    distance: string;
+    bearing: string | null;
+    startDesc: string;
+    finishDesc: string | null;
 }
 
 export async function plansGetNew(sql: Sql): Promise<PlansGetNewRow[]> {
@@ -271,13 +286,18 @@ export async function plansGetNew(sql: Sql): Promise<PlansGetNewRow[]> {
         userId: row[1],
         createdAt: row[2],
         modifiedAt: row[3],
-        fromLat: row[4],
-        fromLon: row[5],
-        toLat: row[6],
-        toLon: row[7],
+        startLat: row[4],
+        startLon: row[5],
+        finishLat: row[6],
+        finishLon: row[7],
         state: row[8],
         name: row[9],
-        error: row[10]
+        error: row[10],
+        tripType: row[11],
+        distance: row[12],
+        bearing: row[13],
+        startDesc: row[14],
+        finishDesc: row[15]
     }));
 }
 

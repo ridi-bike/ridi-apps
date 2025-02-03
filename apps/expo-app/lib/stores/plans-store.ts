@@ -3,6 +3,7 @@ import {
   type PlansListResponse,
 } from "@ridi/api-contracts";
 import { useQuery } from "@tanstack/react-query";
+import { distance } from "@turf/turf";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { generate } from "xksuid";
 
@@ -43,6 +44,8 @@ export function useStorePlans() {
     const plans: Plan[] = plansPending.map((p) => ({
       ...p,
       state: "new",
+      startDesc: `${p.startLat}, ${p.startLon}`,
+      finishDesc: `$${p.finishLat}, ${p.finishLon}`,
       createdAt: p.createdAt,
       routes: [],
     }));
@@ -52,21 +55,27 @@ export function useStorePlans() {
 
   const planAdd = useCallback(
     (planNew: {
-      fromLat: number;
-      fromLon: number;
-      toLat: number;
-      toLon: number;
+      startLat: number;
+      startLon: number;
+      finishLat: number | null;
+      finishLon: number | null;
+      distance: number;
+      bearing: number | null;
+      tripType: "round-trip" | "start-finish";
     }): string => {
       const id = generate();
       const plansPendingUpdated = [
         ...plansPending,
         {
           id,
-          name: `from ${planNew.fromLat},${planNew.fromLon} to ${planNew.toLat},${planNew.toLon}`,
-          fromLat: planNew.fromLat,
-          fromLon: planNew.fromLon,
-          toLat: planNew.toLat,
-          toLon: planNew.toLon,
+          name: `from ${planNew.startLat},${planNew.startLon} to ${planNew.finishLat},${planNew.finishLon}`,
+          startLat: planNew.startLat,
+          startLon: planNew.startLon,
+          finishLat: planNew.finishLat,
+          finishLon: planNew.finishLon,
+          distance: planNew.distance,
+          bearing: planNew.bearing,
+          tripType: planNew.tripType,
           createdAt: new Date(),
         },
       ];

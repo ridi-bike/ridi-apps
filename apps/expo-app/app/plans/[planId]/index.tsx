@@ -11,14 +11,14 @@ export default function PlanDetails() {
     startAddress: "123 Main St, San Francisco, CA",
     endAddress: "456 Market St, San Francisco, CA",
     distance: "3.2 miles",
-    startCoords: [37.7749, -122.4194] as [number, number],
-    finishCoords: [37.7937, -122.3965] as [number, number],
+    startCoords: { lat: 37.7749, lon: -122.4194 },
+    finishCoords: { lat: 37.7937, lon: -122.3965 },
     routes: [
       {
         id: 1,
         distance: "3.2 miles",
-        startCoords: [37.7749, -122.4194] as [number, number],
-        finishCoords: [37.7937, -122.3965] as [number, number],
+        startCoords: { lat: 37.7749, lon: -122.4194 },
+        finishCoords: { lat: 37.7937, lon: -122.3965 },
         roadTypes: {
           paved: 70,
           gravel: 20,
@@ -29,8 +29,8 @@ export default function PlanDetails() {
       {
         id: 2,
         distance: "3.5 miles",
-        startCoords: [37.7749, -122.4194] as [number, number],
-        finishCoords: [37.7937, -122.3965] as [number, number],
+        startCoords: { lat: 37.7749, lon: -122.4194 },
+        finishCoords: { lat: 37.7937, lon: -122.3965 },
         roadTypes: {
           paved: 90,
           gravel: 10,
@@ -41,8 +41,8 @@ export default function PlanDetails() {
       {
         id: 3,
         distance: "3.8 miles",
-        startCoords: [37.7749, -122.4194] as [number, number],
-        finishCoords: [37.7937, -122.3965] as [number, number],
+        startCoords: { lat: 37.7749, lon: -122.4194 },
+        finishCoords: { lat: 37.7937, lon: -122.3965 },
         roadTypes: {
           paved: 60,
           gravel: 30,

@@ -1,22 +1,31 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
 
-export const latIn = z
+const latIn = z
   .number()
   .min(-90)
   .max(90)
   .transform((v) => v.toString());
-export const lonIn = z
+const lonIn = z
   .number()
   .min(-180)
   .max(180)
   .transform((v) => v.toString());
-export const latOut = z.coerce.number().min(-90).max(90);
-export const lonOut = z.coerce.number().min(-180).max(180);
+const latOut = z.coerce.number().min(-90).max(90);
+const lonOut = z.coerce.number().min(-180).max(180);
+
+const bearingIn = z
+  .number()
+  .min(0)
+  .max(360)
+  .nullable()
+  .transform((t) => (t ? t.toString() : null));
+const bearingOut = z.coerce.number().min(0).max(360).nullable();
 
 const c = initContract();
 
 const planStateSchema = z.enum(["new", "planning", "done", "error"]);
+const planTypeSchema = z.enum(["round-trip", "start-finish"]);
 
 export const routeGetRespopnseSchema = z.discriminatedUnion("version", [
   z.object({
@@ -44,12 +53,17 @@ export const plansListResponseSchema = z.discriminatedUnion("version", [
       z.object({
         id: z.string(),
         name: z.string(),
-        fromLat: latOut,
-        fromLon: lonOut,
-        toLat: latOut,
-        toLon: lonOut,
+        startLat: latOut,
+        startLon: lonOut,
+        startDesc: z.string(),
+        finishLat: latOut.nullable(),
+        finishLon: lonOut.nullable(),
+        finishDesc: z.string().nullable(),
         state: planStateSchema,
         createdAt: z.date(),
+        tripType: planTypeSchema,
+        distance: z.coerce.number(),
+        bearing: bearingOut,
         routes: z.array(
           z.object({
             routeId: z.string(),
@@ -68,13 +82,16 @@ export const planCreateRequestSchema = z.discriminatedUnion("version", [
   z.object({
     version: z.literal("v1"),
     data: z.object({
-      fromLat: latIn,
-      fromLon: lonIn,
-      toLat: latIn,
-      toLon: lonIn,
+      startLat: latIn,
+      startLon: lonIn,
+      finishLat: latIn.nullable(),
+      finishLon: lonIn.nullable(),
       name: z.string(),
       id: z.string(),
       createdAt: z.date(),
+      bearing: bearingIn,
+      tripType: planTypeSchema,
+      distance: z.number().transform((t) => (t ? t.toString() : null)),
     }),
   }),
 ]);

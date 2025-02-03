@@ -13,8 +13,8 @@ import { ScreenFrame } from "~/components/screen-frame";
 const route = {
   name: "Downtown Loop",
   distance: "3.2 miles",
-  startCoords: [37.7749, -122.4194] as [number, number],
-  finishCoords: [37.7937, -122.3965] as [number, number],
+  startCoords: { lat: 37.7749, lon: -122.4194 },
+  finishCoords: { lat: 37.7937, lon: -122.3965 },
   roadTypes: {
     paved: 70,
     gravel: 20,

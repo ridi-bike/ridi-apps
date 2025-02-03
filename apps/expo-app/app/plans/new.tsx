@@ -15,13 +15,13 @@ import { Pressable, Text, View } from "react-native";
 import * as z from "zod";
 
 import { GeoMapCoordsSelector } from "~/components/geo-map/geo-map-coords-selector";
+import { DIRECTIONS, getCardinalDirection } from "~/components/geo-map/util";
 import { LocationPermsNotGiven } from "~/components/LocationPermsNotGiven";
 import { ScreenFrame } from "~/components/screen-frame";
 import { useStorePlans } from "~/lib/stores/plans-store";
 import { useUrlParams } from "~/lib/url-params";
 import { cn } from "~/lib/utils";
 
-const DIRECTIONS = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
 const DISTANCES = [100, 150, 200, 250, 300, 350];
 
 const coordsSchema = z.tuple([z.number(), z.number()]);
@@ -69,11 +69,6 @@ export default function PlansNew() {
     setSelectedDistance,
   ]);
 
-  const getCardinalDirection = (degrees: number): string => {
-    const index = Math.round(degrees / 45) % 8;
-    return DIRECTIONS[index];
-  };
-
   const getCurrentLocation = useCallback(async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
@@ -102,12 +97,21 @@ export default function PlansNew() {
         <View className="fixed bottom-0 w-full bg-white p-4 dark:bg-gray-800">
           <Pressable
             onPress={() => {
-              if (startCoords && finishCoords) {
+              if (
+                (!isRoundTrip && startCoords && finishCoords) ||
+                (isRoundTrip &&
+                  startCoords &&
+                  bearing !== undefined &&
+                  selectedDistance)
+              ) {
                 const planId = planAdd({
-                  fromLat: startCoords[0],
-                  fromLon: startCoords[1],
-                  toLat: finishCoords[0],
-                  toLon: finishCoords[1],
+                  startLat: startCoords[0],
+                  startLon: startCoords[1],
+                  finishLat: finishCoords ? finishCoords[0] : null,
+                  finishLon: finishCoords ? finishCoords[1] : null,
+                  bearing: bearing !== undefined ? bearing : null,
+                  distance: selectedDistance || 100,
+                  tripType: isRoundTrip ? "round-trip" : "start-finish",
                 });
                 router.replace({
                   pathname: "/plans/[planId]",
