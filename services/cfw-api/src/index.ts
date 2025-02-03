@@ -1,32 +1,211 @@
-import { OpenAPIHono } from "@hono/zod-openapi";
+import { fetchRequestHandler, tsr } from "@ts-rest/serverless/fetch";
+import * as R from "remeda";
+import type {
+  Request as WorkerRequest,
+  ExecutionContext,
+} from "@cloudflare/workers-types/experimental";
 import {
-  contextMiddleware,
-  loggerMiddleware,
-  netAddrActivityMiddleware,
-  timingMiddleware,
-  userMiddleware,
-  Variables,
-} from "./middlewares";
-import { addRouteHandlers } from "./routes/routes";
-import { addPlanHandlers } from "./routes/plans";
-import { addCoordsHandler } from "./routes/coords";
+  apiContract,
+  plansListResponseSchema,
+  routeGetRespopnseSchema,
+} from "@ridi/api-contracts";
+import { User, createClient } from "@supabase/supabase-js";
+import { Database } from "./supabase";
+import postgres from "postgres";
+import { Messaging } from "./messaging";
+import { RidiLogger } from "./logging";
+import { planCreate, planList, routesGet } from "./queries_sql";
 
-const app = new OpenAPIHono<{ Bindings: CloudflareBindings } & Variables>();
+export type FieldsNotNull<T extends object> = {
+  [n in keyof T]: NonNullable<T[n]>;
+};
 
-app.use(loggerMiddleware);
-app.use(timingMiddleware);
-app.use(contextMiddleware);
-app.use(netAddrActivityMiddleware);
-app.use("/user/*", userMiddleware);
+const router = tsr
+  .platformContext<{
+    workerRequest: WorkerRequest;
+    workerEnv: CloudflareBindings;
+    workerContext: ExecutionContext;
+    supabaseClient: ReturnType<
+      typeof createClient<Database, "public", Database["public"]>
+    >;
+    db: ReturnType<typeof postgres>;
+    messaging: Messaging;
+    logger: RidiLogger;
+    user: User;
+  }>()
+  .router(apiContract, {
+    coordsSelect: async ({ body: { version, lon, lat } }, ctx) => {
+      if (version !== "v1") {
+        return {
+          status: 400,
+          body: {
+            message: "wrong version",
+          },
+        };
+      }
 
-const appWithPlanRoutes = addPlanHandlers(app);
-const appWithRouteRoutes = addRouteHandlers(appWithPlanRoutes);
-const appWithCoordsRoutes = addCoordsHandler(appWithRouteRoutes);
+      await ctx.messaging.send("coords-activty", { lat, lon });
+      return {
+        status: 200,
+        body: {
+          ok: true,
+        },
+      };
+    },
+    planCreate: async ({ body: { version, data } }, ctx) => {
+      if (version !== "v1") {
+        return {
+          status: 400,
+          body: {
+            message: "wrong version",
+          },
+        };
+      }
 
-const fullApp = appWithCoordsRoutes.get("/", (c) => {
-  return c.text("Hello Ridi!");
-});
+      const newPlan = await planCreate(ctx.db, {
+        ...data,
+        userId: ctx.user.id,
+      });
 
-export default app;
+      if (!newPlan) {
+        throw new Error("can't happen");
+      }
 
-export type RidiHonoApp = typeof fullApp;
+      await ctx.messaging.send("new-plan", { planId: newPlan.id });
+
+      const response = {
+        version: "v1",
+        data: newPlan,
+      };
+
+      return {
+        status: 200,
+        body: response,
+      };
+    },
+    plansList: async ({ query: { version } }, ctx) => {
+      if (version !== "v1") {
+        return {
+          status: 400,
+          body: {
+            message: "wrong version",
+          },
+        };
+      }
+      console.log("---------------", ctx.user);
+      const plansFlat = await planList(ctx.db, {
+        userId: ctx.user.id,
+      });
+      console.log({ plansFlat });
+
+      const plans = R.pipe(
+        plansFlat,
+        R.groupBy(R.prop("id")),
+        R.entries(),
+        R.map(([_planId, onePlanFlat]) => ({
+          ...R.first(onePlanFlat),
+          routes: R.first(onePlanFlat).routeId
+            ? R.pipe(
+                onePlanFlat as FieldsNotNull<(typeof onePlanFlat)[number]>[],
+                R.groupBy(R.prop("routeId")),
+                R.entries(),
+                R.map(([_routeId, oneRouteFlat]) => ({
+                  ...R.first(oneRouteFlat),
+                })),
+              )
+            : [],
+        })),
+      );
+
+      const validates = plansListResponseSchema.parse({
+        version: "v1",
+        data: plans,
+      });
+
+      return {
+        status: 200,
+        body: validates,
+      };
+    },
+    routeGet: async ({ params: { routeId }, query: { version } }, ctx) => {
+      if (version !== "v1") {
+        return {
+          status: 400,
+          body: {
+            message: "wrong version",
+          },
+        } as const;
+      }
+
+      try {
+        const routesFlat = await routesGet(ctx.db, {
+          id: routeId,
+          userId: ctx.user.id,
+        });
+
+        if (!routesFlat.length) {
+          throw new Error("not found");
+        }
+
+        const response = {
+          version: "v1",
+          data: {
+            ...routesFlat[0],
+            latLonArray: routesFlat[0].latLonArray,
+            plan: {
+              ...routesFlat[0],
+            },
+          },
+        };
+
+        const validated = routeGetRespopnseSchema.parse(response);
+        return {
+          status: 200,
+          body: validated,
+        };
+      } catch (error) {
+        return {
+          status: 500,
+          body: {
+            message: "internal error",
+          },
+        } as const;
+      }
+    },
+  });
+
+RidiLogger.init("cfw-api");
+const ridiLogger = RidiLogger.get();
+
+export default {
+  async fetch(
+    request: Request,
+    env: CloudflareBindings,
+    ctx: ExecutionContext,
+  ): Promise<Response> {
+    const supabaseClient = createClient<Database, "public", Database["public"]>(
+      env.SUPABASE_URL,
+      env.SUPABASE_SERVICE_ROLE_KEY,
+    );
+
+    const db = postgres(env.SUPABASE_DB_URL);
+    const messaging = new Messaging(db, ridiLogger);
+
+    return fetchRequestHandler({
+      request,
+      contract: apiContract,
+      router,
+      options: {},
+      platformContext: {
+        workerRequest: request as unknown as WorkerRequest,
+        workerEnv: env,
+        workerContext: ctx,
+        supabaseClient,
+        messaging,
+        db,
+        logger: ridiLogger,
+        user: {} as unknown as User,
+      },
+    });
+  },
+};
