@@ -26,7 +26,7 @@ export function useStorePlans() {
     queryFn: () =>
       apiClient
         .plansList({ query: { version: plansStorage.dataVersion } })
-        .then((r) => getSuccessResponseOrThrow(200, r).body),
+        .then((r) => getSuccessResponseOrThrow(200, r)),
     initialData: {
       version: plansStorage.dataVersion,
       data: plansStorage.get() || [],
