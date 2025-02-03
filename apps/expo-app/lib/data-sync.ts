@@ -1,12 +1,13 @@
 import { apiClient } from "./api";
 import { getRouteStorage, plansPendingStorage, plansStorage } from "./storage";
+import { getSuccessResponseOrThrow } from "./stores/util";
 
 export async function dataSyncPendingPush() {
   const plansPending = plansPendingStorage.get();
   if (plansPending) {
     for (const planPending of plansPending) {
-      await apiClient.user.plans.create.$post({
-        json: {
+      await apiClient.planCreate({
+        body: {
           version: "v1",
           data: planPending,
         },
@@ -19,27 +20,31 @@ export async function dataSyncPendingPush() {
 }
 
 export async function dataSyncPull() {
-  const plans = await (
-    await apiClient.user.plans.all.v[":version"].$get({
-      param: {
+  const plans = getSuccessResponseOrThrow(
+    200,
+    await apiClient.plansList({
+      query: {
         version: "v1",
       },
-    })
-  ).json();
+    }),
+  ).body;
   plansStorage.set(plans.data);
   for (const plan of plans.data) {
     for (const route of plan.routes) {
       const routeStorage = getRouteStorage(route.routeId);
       const localRoute = routeStorage.get();
       if (!localRoute) {
-        const remoteRoute = await (
-          await apiClient.user.routes[":routeId"].v[":version"].$get({
-            param: {
+        const remoteRoute = getSuccessResponseOrThrow(
+          200,
+          await apiClient.routeGet({
+            query: {
               version: "v1",
+            },
+            params: {
               routeId: route.routeId,
             },
-          })
-        ).json();
+          }),
+        ).body;
         routeStorage.set(remoteRoute.data);
       }
     }

@@ -1,10 +1,10 @@
 import { useLocalSearchParams, router } from "expo-router";
 import { useCallback, useMemo } from "react";
-import { type GenericSchema, safeParse } from "valibot";
+import type * as z from "zod";
 
 export function useUrlParams<T>(
   key: string,
-  schema: GenericSchema<T>,
+  schema: z.Schema<T>,
 ): [T | undefined, (d?: T) => void] {
   const params = useLocalSearchParams();
   const paramsValue = params[key];
@@ -16,15 +16,15 @@ export function useUrlParams<T>(
       paramsValue !== "undefined"
     ) {
       const parsedValue = JSON.parse(paramsValue as string);
-      const checkedValue = safeParse(schema, parsedValue);
+      const checkedValue = schema.safeParse(parsedValue);
       if (checkedValue.success) {
-        return checkedValue.output;
+        return checkedValue.data;
       }
       console.error(
         "Error parsing query param, not matching schema",
         key,
         paramsValue,
-        checkedValue.issues,
+        checkedValue.error,
       );
     }
   }, [key, paramsValue, schema]);

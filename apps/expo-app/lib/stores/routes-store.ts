@@ -1,22 +1,13 @@
+import { type RouteGetResponse } from "@ridi/api-contracts";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 
 import { apiClient } from "../api";
 import { getRouteStorage } from "../storage";
 
-type ApiClient = typeof apiClient;
+import { getSuccessResponseOrThrow } from "./util";
 
-export type Route = NonNullable<
-  Awaited<
-    ReturnType<
-      Awaited<
-        ReturnType<
-          ApiClient["user"]["routes"][":routeId"]["v"][":version"]["$get"]
-        >
-      >["json"]
-    >
-  >["data"]
->;
+export type Route = RouteGetResponse["data"];
 
 export function useStoreRoute(routeId: string) {
   const routeStore = useMemo(() => getRouteStorage(routeId), [routeId]);
@@ -24,14 +15,9 @@ export function useStoreRoute(routeId: string) {
   const { data, error, status } = useQuery({
     queryKey: ["route", routeId],
     queryFn: () =>
-      apiClient.user.routes[":routeId"].v[":version"]
-        .$get({
-          param: {
-            version: routeStore.dataVersion,
-            routeId,
-          },
-        })
-        .then((r) => r.json()),
+      apiClient
+        .routeGet({ params: { routeId }, query: { version: "v1" } })
+        .then((r) => getSuccessResponseOrThrow(201, r)),
     initialData: () => {
       const storedData = routeStore.get();
       if (storedData) {

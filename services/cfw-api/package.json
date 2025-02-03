@@ -1,15 +1,14 @@
 {
-  "name": "cfw-api",
+  "name": "@ridi/cfw-api",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy --minify",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings"
   },
   "dependencies": {
-    "@hono/zod-openapi": "^0.18.3",
-    "@hono/zod-validator": "^0.4.2",
+    "@ridi/api-contracts": "workspace:^",
     "@supabase/supabase-js": "^2.48.1",
-    "hono": "^4.6.20",
+    "@ts-rest/serverless": "^3.51.0",
     "pino": "^9.6.0",
     "postgres": "^3.4.5",
     "remeda": "^2.20.0",

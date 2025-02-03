@@ -1,3 +1,7 @@
+import {
+  type PlanCreateRequest,
+  type PlansListResponse,
+} from "@ridi/api-contracts";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { generate } from "xksuid";
@@ -7,19 +11,10 @@ import { dataSyncPendingPush } from "../data-sync";
 import { plansPendingStorage, plansStorage } from "../storage";
 import { supabase } from "../supabase";
 
-type ApiClient = typeof apiClient;
+import { getSuccessResponseOrThrow } from "./util";
 
-export type Plan = Awaited<
-  ReturnType<
-    Awaited<
-      ReturnType<ApiClient["user"]["plans"]["all"]["v"][":version"]["$get"]>
-    >["json"]
-  >
->["data"][number];
-
-export type PlanNew = Parameters<
-  ApiClient["user"]["plans"]["create"]["$post"]
->[0]["json"]["data"];
+export type Plan = PlansListResponse["data"][number];
+export type PlanNew = PlanCreateRequest["data"];
 
 export function useStorePlans() {
   const [plansPending, setPlansPending] = useState(
@@ -29,13 +24,9 @@ export function useStorePlans() {
   const { data, error, status, refetch } = useQuery({
     queryKey: ["plans"],
     queryFn: () =>
-      apiClient.user.plans.all.v[":version"]
-        .$get({
-          param: {
-            version: plansStorage.dataVersion,
-          },
-        })
-        .then((r) => r.json()),
+      apiClient
+        .plansList({ query: { version: plansStorage.dataVersion } })
+        .then((r) => getSuccessResponseOrThrow(200, r).body),
     initialData: {
       version: plansStorage.dataVersion,
       data: plansStorage.get() || [],
@@ -52,7 +43,7 @@ export function useStorePlans() {
     const plans: Plan[] = plansPending.map((p) => ({
       ...p,
       state: "new",
-      createdAt: p.createdAt.toString(),
+      createdAt: p.createdAt,
       routes: [],
     }));
 

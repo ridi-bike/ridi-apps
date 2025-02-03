@@ -12,7 +12,7 @@ import {
 } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
-import { array, boolean, type InferInput, number, tuple } from "valibot";
+import * as z from "zod";
 
 import { GeoMapCoordsSelector } from "~/components/geo-map/geo-map-coords-selector";
 import { LocationPermsNotGiven } from "~/components/LocationPermsNotGiven";
@@ -24,8 +24,8 @@ import { cn } from "~/lib/utils";
 const DIRECTIONS = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
 const DISTANCES = [100, 150, 200, 250, 300, 350];
 
-const coordsSchema = tuple([number(), number()]);
-type Coords = InferInput<typeof coordsSchema>;
+const coordsSchema = z.tuple([z.number(), z.number()]);
+type Coords = z.infer<typeof coordsSchema>;
 
 export default function PlansNew() {
   const router = useRouter();
@@ -34,17 +34,17 @@ export default function PlansNew() {
   const [finishCoords, setFinishCoords] = useUrlParams("finish", coordsSchema);
   const [isRoundTrip, setIsRoundTrip] = useUrlParams<boolean>(
     "round-trip",
-    boolean(),
+    z.boolean(),
   );
   const [selectedDistance, setSelectedDistance] = useUrlParams<number>(
     "distance",
-    number(),
+    z.number(),
   );
-  const [bearing, setBearing] = useUrlParams<number>("bearing", number());
+  const [bearing, setBearing] = useUrlParams<number>("bearing", z.number());
   const [findCoords, setFindCoords] = useState(false);
   const [searchPoints, setSearchPoints] = useUrlParams<Coords[]>(
     "search-results",
-    array(coordsSchema),
+    z.array(coordsSchema),
   );
 
   const [showLocationAlert, setShowLocationAlert] = useState(false);
