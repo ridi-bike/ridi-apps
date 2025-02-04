@@ -16,9 +16,7 @@ type RidiRouterOk = {
 };
 type RidiRouterOutput = {
   id: string;
-  result:
-    | RidiRouterErr
-    | RidiRouterOk;
+  result: RidiRouterErr | RidiRouterOk;
 };
 
 export class PlanProcessor {
@@ -29,12 +27,9 @@ export class PlanProcessor {
     private readonly routerStore: RouterServerManager,
     private readonly denoCommand: DenoCommand,
     private readonly env: EnvVariables,
-  ) {
-  }
+  ) {}
 
-  async handlePlanNotification(
-    planId: string,
-  ): Promise<null | number> {
+  async handlePlanNotification(planId: string): Promise<null | number> {
     const planRecord = await this.pgQueries.planGetById(this.pgClient, {
       id: planId,
     });
@@ -49,17 +44,23 @@ export class PlanProcessor {
         lon: planRecord.startLon,
       },
     );
-    const regionsTo = await this.pgQueries.regionFindFromCoords(this.pgClient, {
-      lat: planRecord.finishLat,
-      lon: planRecord.finishLon,
-    });
+    const regionsTo =
+      planRecord.finishLat && planRecord.finishLon
+        ? await this.pgQueries.regionFindFromCoords(this.pgClient, {
+            lat: planRecord.finishLat,
+            lon: planRecord.finishLon,
+          })
+        : null;
 
     const regionsProm = await Promise.all(
-      regionsFrom.filter((r) => regionsTo.map((rt) => rt.id).includes(r.id))
+      regionsFrom
+        .filter(
+          (r) => !regionsTo || regionsTo.map((rt) => rt.id).includes(r.id),
+        )
         .map((r) =>
           this.pgQueries.mapDataGetRecordCurrent(this.pgClient, {
             region: r.region,
-          })
+          }),
         ),
     );
     const regions = regionsProm
@@ -86,16 +87,30 @@ export class PlanProcessor {
     const { code, stdout, stderr } = await this.denoCommand.executeWithStdin(
       this.env.routerBin,
       {
-        args: [
-          "start-client",
-          "--socket-name",
-          region.region,
-          "start-finish",
-          "--start",
-          `${planRecord.startLat},${planRecord.startLon}`,
-          "--finish",
-          `${planRecord.finishLat},${planRecord.finishLon}`,
-        ],
+        args:
+          planRecord.tripType === "start-finish"
+            ? [
+                "start-client",
+                "--socket-name",
+                region.region,
+                "start-finish",
+                "--start",
+                `${planRecord.startLat},${planRecord.startLon}`,
+                "--finish",
+                `${planRecord.finishLat},${planRecord.finishLon}`,
+              ]
+            : [
+                "start-client",
+                "--socket-name",
+                region.region,
+                "round-trip",
+                "--start-finish",
+                `${planRecord.startLat},${planRecord.startLon}`,
+                "--bearing",
+                planRecord.bearing as string,
+                "--distance",
+                planRecord.distance,
+              ],
         stdinContent: "{}",
       },
     );
