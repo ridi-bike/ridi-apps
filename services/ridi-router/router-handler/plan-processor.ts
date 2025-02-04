@@ -3,6 +3,7 @@ import { DenoCommand, pg } from "@ridi-router/lib";
 import { RidiLogger } from "@ridi-router/logging/main.ts";
 import { PgClient } from "@ridi-router/lib";
 import { EnvVariables } from "./env-variables.ts";
+type RoadTagStats = Record<string, { len_m: number; percentage: number }>;
 type RidiRouterErr = { err: string };
 type RidiRouterOk = {
   ok: {
@@ -11,6 +12,27 @@ type RidiRouterOk = {
         lat: number;
         lon: number;
       }[];
+      stats: {
+        len_m: number;
+        junction_count: number;
+        highway: RoadTagStats;
+        surface: RoadTagStats;
+        smoothness: RoadTagStats;
+        score: number;
+        cluster: number;
+        approximated_route: [
+          [number, number],
+          [number, number],
+          [number, number],
+          [number, number],
+          [number, number],
+          [number, number],
+          [number, number],
+          [number, number],
+          [number, number],
+          [number, number],
+        ];
+      };
     }[];
   };
 };
@@ -146,12 +168,36 @@ export class PlanProcessor {
 
     const okRoutes = (routes.result as RidiRouterOk).ok.routes;
     for (const route of okRoutes) {
-      await this.pgQueries.routeInsert(this.pgClient, {
+      const routeRecord = await this.pgQueries.routeInsert(this.pgClient, {
         planId,
         name: "some name",
         userId: planRecord.userId,
         latLonArray: route.coords,
+        statsLenM: route.stats.len_m.toString(),
+        statsJunctionCount: route.stats.junction_count.toString(),
+        statsScore: route.stats.score.toString(),
       });
+      if (!routeRecord) {
+        throw new Error("must exist");
+      }
+      const inserStats = async (
+        statType: "type" | "surface" | "smoothness",
+        statsKey: keyof (typeof route)["stats"],
+      ) => {
+        for (const routeStat of Object.entries(route.stats[statsKey])) {
+          await this.pgQueries.routeBreakdownStatsInsert(this.pgClient, {
+            userId: planRecord.userId,
+            routeId: routeRecord.id,
+            statType,
+            statName: routeStat[0],
+            lenM: routeStat[1].len_m.toString(),
+            percentage: routeStat[1].percentage.toString(),
+          });
+        }
+      };
+      await inserStats("type", "highway");
+      await inserStats("surface", "surface");
+      await inserStats("smoothness", "smoothness");
     }
 
     await this.pgQueries.planSetState(this.pgClient, {

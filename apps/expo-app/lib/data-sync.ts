@@ -38,6 +38,7 @@ export async function dataSyncPull() {
       const routeStorage = getRouteStorage(route.routeId);
       const localRoute = routeStorage.get();
       if (!localRoute) {
+        console.log("route get from sync", route.routeId);
         const remoteRoute = getSuccessResponseOrThrow(
           200,
           await apiClient.routeGet({

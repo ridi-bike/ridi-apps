@@ -118,6 +118,44 @@ export type Database = {
         }
         Relationships: []
       }
+      route_breakdown_stats: {
+        Row: {
+          id: string
+          len_m: number
+          percentage: number
+          route_id: string
+          stat_name: string
+          stat_type: Database["public"]["Enums"]["route_stat_type"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          len_m: number
+          percentage: number
+          route_id: string
+          stat_name: string
+          stat_type: Database["public"]["Enums"]["route_stat_type"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          len_m?: number
+          percentage?: number
+          route_id?: string
+          stat_name?: string
+          stat_type?: Database["public"]["Enums"]["route_stat_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_breakdown_stats_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       routes: {
         Row: {
           created_at: string
@@ -125,6 +163,9 @@ export type Database = {
           linestring: unknown | null
           name: string
           plan_id: string
+          stats_junction_count: number
+          stats_len_m: number
+          stats_score: number
           user_id: string
         }
         Insert: {
@@ -133,6 +174,9 @@ export type Database = {
           linestring?: unknown | null
           name: string
           plan_id: string
+          stats_junction_count: number
+          stats_len_m: number
+          stats_score: number
           user_id: string
         }
         Update: {
@@ -141,6 +185,9 @@ export type Database = {
           linestring?: unknown | null
           name?: string
           plan_id?: string
+          stats_junction_count?: number
+          stats_len_m?: number
+          stats_score?: number
           user_id?: string
         }
         Relationships: [
@@ -167,6 +214,7 @@ export type Database = {
       plan_state: "new" | "planning" | "done" | "error"
       plan_type: "round-trip" | "start-finish"
       regions_version: "previous" | "current" | "next" | "discarded"
+      route_stat_type: "type" | "surface" | "smoothness"
     }
     CompositeTypes: {
       [_ in never]: never

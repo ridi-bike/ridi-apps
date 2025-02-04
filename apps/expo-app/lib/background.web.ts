@@ -1,8 +1,6 @@
 import { dataSyncPendingPush, dataSyncPull } from "./data-sync";
 
 async function backgroundTask() {
-  const now = Date.now();
-
   try {
     await dataSyncPendingPush();
   } catch (err) {

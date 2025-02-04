@@ -12,6 +12,9 @@ select
 	r.id,
 	r.name,
 	r.created_at,
+  r.stats_score,
+  r.stats_len_m,
+  r.stats_junction_count,
 	pa.lat_lon_array,
 	p.id as plan_id,
 	p.name as plan_name,
@@ -25,6 +28,11 @@ where r.user_id = $1
 	and r.id = $2
 order by 
 	r.created_at desc;
+
+-- name: RouteStatsGet :many
+select * from route_breakdown_stats
+where user_id = $1
+  and route_id = $2;
 
 -- name: PlanList :many
 select 

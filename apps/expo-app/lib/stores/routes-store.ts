@@ -17,7 +17,7 @@ export function useStoreRoute(routeId: string) {
     queryFn: () =>
       apiClient
         .routeGet({ params: { routeId }, query: { version: "v1" } })
-        .then((r) => getSuccessResponseOrThrow(201, r)),
+        .then((r) => getSuccessResponseOrThrow(200, r)),
     initialData: () => {
       const storedData = routeStore.get();
       if (storedData) {

@@ -19,7 +19,7 @@ import { Database } from "./supabase";
 import postgres from "postgres";
 import { Messaging } from "./messaging";
 import { RidiLogger } from "./logging";
-import { planCreate, planList, routesGet } from "./queries_sql";
+import { planCreate, planList, routeStatsGet, routesGet } from "./queries_sql";
 import { lookupCooordsInfo } from "./maps/lookup";
 
 export type FieldsNotNull<T extends object> = {
@@ -195,6 +195,11 @@ const router = tsr
         throw new Error("not found");
       }
 
+      const statsBreakdown = await routeStatsGet(ctx.db, {
+        routeId: routeId,
+        userId: ctx.request.user.id,
+      });
+
       const response = {
         version: "v1",
         data: {
@@ -202,6 +207,12 @@ const router = tsr
           latLonArray: routesFlat[0].latLonArray,
           plan: {
             ...routesFlat[0],
+          },
+          stats: {
+            lenM: routesFlat[0].statsLenM,
+            junctionCount: routesFlat[0].statsJunctionCount,
+            score: routesFlat[0].statsScore,
+            breakdown: statsBreakdown,
           },
         },
       };

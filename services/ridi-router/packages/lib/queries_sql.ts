@@ -322,28 +322,37 @@ insert into routes (
 	name, 
 	user_id, 
 	plan_id, 
+  stats_len_m,
+  stats_junction_count,
+  stats_score,
 	linestring
 )
 values (
 	$1, 
 	$2, 
 	$3, 
+  $4,
+  $5,
+  $6,
 	postgis.st_makeline(
 		array(
 			select 
 				postgis.st_point((p->>1)::numeric, (p->>0)::numeric)
 			from (
-				select jsonb_array_elements($4::jsonb) p
+				select jsonb_array_elements($7::jsonb) p
 			) arrayPoints
 		)
 	)
 )
-returning id, user_id, created_at, plan_id, name, linestring`;
+returning id, user_id, created_at, plan_id, name, linestring, stats_len_m, stats_score, stats_junction_count`;
 
 export interface RouteInsertArgs {
     name: string;
     userId: string;
     planId: string;
+    statsLenM: string;
+    statsJunctionCount: string;
+    statsScore: string;
     latLonArray: any;
 }
 
@@ -354,10 +363,13 @@ export interface RouteInsertRow {
     planId: string;
     name: string;
     linestring: string | null;
+    statsLenM: string;
+    statsScore: string;
+    statsJunctionCount: string;
 }
 
 export async function routeInsert(sql: Sql, args: RouteInsertArgs): Promise<RouteInsertRow | null> {
-    const rows = await sql.unsafe(routeInsertQuery, [args.name, args.userId, args.planId, args.latLonArray]).values();
+    const rows = await sql.unsafe(routeInsertQuery, [args.name, args.userId, args.planId, args.statsLenM, args.statsJunctionCount, args.statsScore, args.latLonArray]).values();
     if (rows.length !== 1) {
         return null;
     }
@@ -371,7 +383,68 @@ export async function routeInsert(sql: Sql, args: RouteInsertArgs): Promise<Rout
         createdAt: row[2],
         planId: row[3],
         name: row[4],
-        linestring: row[5]
+        linestring: row[5],
+        statsLenM: row[6],
+        statsScore: row[7],
+        statsJunctionCount: row[8]
+    };
+}
+
+export const routeBreakdownStatsInsertQuery = `-- name: RouteBreakdownStatsInsert :one
+insert into route_breakdown_stats (
+  user_id,
+  route_id,
+  stat_type,
+  stat_name,
+  len_m,
+  percentage
+)
+values (
+  $1,
+  $2,
+  $3,
+  $4,
+  $5,
+  $6
+)
+returning id, user_id, route_id, stat_type, stat_name, len_m, percentage`;
+
+export interface RouteBreakdownStatsInsertArgs {
+    userId: string;
+    routeId: string;
+    statType: "type" | "surface" | "smoothness";
+    statName: string;
+    lenM: string;
+    percentage: string;
+}
+
+export interface RouteBreakdownStatsInsertRow {
+    id: string;
+    userId: string;
+    routeId: string;
+    statType: "type" | "surface" | "smoothness";
+    statName: string;
+    lenM: string;
+    percentage: string;
+}
+
+export async function routeBreakdownStatsInsert(sql: Sql, args: RouteBreakdownStatsInsertArgs): Promise<RouteBreakdownStatsInsertRow | null> {
+    const rows = await sql.unsafe(routeBreakdownStatsInsertQuery, [args.userId, args.routeId, args.statType, args.statName, args.lenM, args.percentage]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        userId: row[1],
+        routeId: row[2],
+        statType: row[3],
+        statName: row[4],
+        lenM: row[5],
+        percentage: row[6]
     };
 }
 

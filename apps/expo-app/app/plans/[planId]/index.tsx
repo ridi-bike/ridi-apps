@@ -22,7 +22,7 @@ export default function PlanDetails() {
               <View className="flex w-full flex-row items-center justify-center">
                 <Text className="dark:text-gray-200">
                   Plan with id
-                  <Text className=" px-2 text-gray-500">{planId}</Text> is not
+                  <Text className="px-2 text-gray-500">{planId}</Text> is not
                   found
                 </Text>
               </View>
@@ -107,7 +107,7 @@ export default function PlanDetails() {
               key={route.routeId}
               href={`/plans/${plan.id}/${route.routeId}`}
             >
-              <RouteCard route={route} />
+              <RouteCard routeId={route.routeId} plan={plan} />
             </Link>
           ))}
         </View>
