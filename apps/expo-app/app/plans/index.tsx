@@ -25,7 +25,7 @@ export default function PlansPage() {
       <View className="mx-2 max-w-5xl flex-1">
         <View className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {plans.map((plan, index) => (
-            <Link key={index} href="/plans/1">
+            <Link key={index} href={`/plans/${plan.id}`}>
               <PlanCard
                 startDesc={plan.startDesc}
                 finishDesc={plan.finishDesc}

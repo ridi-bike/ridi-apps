@@ -50,29 +50,34 @@ function formatCitySame(coords: ReverseGeocodingResponse): string {
   return `${coords.address.isolated_dwelling || coords.address.road}, ${coords.address.city || coords.address.town}`;
 }
 export async function lookupCooordsInfo(
-  coords: [[string, string], [string, string]],
-): Promise<[string, string]> {
-  try {
-    const coordsDetails = (await Promise.all(
-      coords.map((c) =>
-        fetch(
-          `https://nominatim.openstreetmap.org/reverse?lat=${c[0]}&lon=${c[1]}&format=json`,
-        ).then((r) => r.json()),
-      ),
-    )) as [ReverseGeocodingResponse, ReverseGeocodingResponse];
-    const coordsOne = coordsDetails[0];
-    const coordsTwo = coordsDetails[1];
-    if (coordsOne.address.country !== coordsTwo.address.country) {
-      return [formatCountryDiff(coordsOne), formatCountryDiff(coordsTwo)];
-    }
-    if (
-      (coordsOne.address.city || coordsOne.address.town) !==
-      (coordsTwo.address.city || coordsTwo.address.town)
-    ) {
-      return [formatCityDiff(coordsOne), formatCityDiff(coordsTwo)];
-    }
-    return [formatCitySame(coordsOne), formatCitySame(coordsTwo)];
-  } catch (error) {
-    return coords.map((c) => `${c[0]},${c[1]}`);
+  coords: [[string, string], null | [string, string]],
+): Promise<[string, null | string]> {
+  const coordsDetails = (await Promise.all(
+    coords.map((c) => {
+      if (!c) {
+        return null;
+      }
+      const url = `https://nominatim.openstreetmap.org/reverse?lat=${c[0]}&lon=${c[1]}&format=json`;
+      return fetch(url, {
+        headers: {
+          Referer: "https://app.ridi.bike",
+        },
+      }).then((r) => r.json());
+    }),
+  )) as [ReverseGeocodingResponse, null | ReverseGeocodingResponse];
+  const coordsOne = coordsDetails[0];
+  const coordsTwo = coordsDetails[1];
+  if (!coordsTwo) {
+    return [formatCitySame(coordsOne), null];
   }
+  if (coordsOne.address.country !== coordsTwo.address.country) {
+    return [formatCountryDiff(coordsOne), formatCountryDiff(coordsTwo)];
+  }
+  if (
+    (coordsOne.address.city || coordsOne.address.town) !==
+    (coordsTwo.address.city || coordsTwo.address.town)
+  ) {
+    return [formatCityDiff(coordsOne), formatCityDiff(coordsTwo)];
+  }
+  return [formatCitySame(coordsOne), formatCitySame(coordsTwo)];
 }

@@ -11,13 +11,11 @@ TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
   const now = Date.now();
 
   try {
-    console.log("bg pending sync", now);
     await dataSyncPendingPush();
   } catch (err) {
     console.error("bg push error", err);
   }
   try {
-    console.log("bg data pull", now);
     await dataSyncPull();
   } catch (err) {
     console.error("bg data pull error", err);
