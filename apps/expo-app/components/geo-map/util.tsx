@@ -1,6 +1,7 @@
 import * as turf from "@turf/turf";
 import { type FillLayer } from "@vis.gl/react-maplibre";
 import { Layer, Source } from "@vis.gl/react-maplibre";
+import { type BBox } from "geojson";
 import { useMemo } from "react";
 
 import { type Coords } from "./types";
@@ -79,4 +80,24 @@ export function useRoundTripPolygon(
   }, [roundTripPolygon]);
 
   return { rountdTripLayer, roundTripPolygon };
+}
+
+export function combineBBox(
+  bbox1: BBox,
+  bbox2: BBox | null,
+): [number, number, number, number] {
+  const combinedBbox = bbox2
+    ? [
+        Math.min(bbox1[0], bbox2[0]), // minX
+        Math.min(bbox1[1], bbox2[1]), // minY
+        Math.max(bbox1[2], bbox2[2]), // maxX
+        Math.max(bbox1[3], bbox2[3]), // maxY
+      ]
+    : bbox1;
+  return [
+    combinedBbox[0] - Math.abs(combinedBbox[0] - combinedBbox[2]) / 10,
+    combinedBbox[1] - Math.abs(combinedBbox[1] - combinedBbox[3]) / 10,
+    combinedBbox[2] + Math.abs(combinedBbox[0] - combinedBbox[2]) / 10,
+    combinedBbox[3] + Math.abs(combinedBbox[1] - combinedBbox[3]) / 10,
+  ] as [number, number, number, number];
 }

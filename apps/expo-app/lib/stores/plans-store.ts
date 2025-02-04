@@ -50,16 +50,17 @@ export function useStorePlans() {
     const plans: Plan[] = plansPending.map((p) => ({
       ...p,
       state: "new",
-      startDesc: `${p.startLat}, ${p.startLon}`,
-      finishDesc: `$${p.finishLat}, ${p.finishLon}`,
+      startDesc: `${Math.round(p.startLat * 10000) / 10000}, ${Math.round(p.startLon * 10000) / 10000}`,
+      finishDesc:
+        p.finishLat && p.finishLon
+          ? `${Math.round(p.finishLat * 10000) / 10000}, ${Math.round(p.finishLon * 10000) / 10000}`
+          : null,
       createdAt: p.createdAt.toString(),
       routes: [],
     }));
 
     return [...data.data, ...plans];
   }, [data.data, plansPending]);
-
-  console.log({ dataWithPending });
 
   const planAdd = useCallback(
     (planNew: {
@@ -87,7 +88,6 @@ export function useStorePlans() {
           createdAt: new Date(),
         },
       ];
-      console.log({ plansPendingUpdated });
       plansPendingStorage.set(plansPendingUpdated);
       setPlansPending(plansPendingUpdated);
       dataSyncPendingPush()

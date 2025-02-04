@@ -25,6 +25,7 @@ export const PlanCard = ({
   finishCoords,
   tripType,
 }: RouteCardProps) => {
+  console.log("card", { startCoords, distance, bearing });
   return (
     <ScreenCard
       top={
@@ -64,7 +65,7 @@ export const PlanCard = ({
                   Direction
                 </Text>
                 <Text className="text-base font-medium dark:text-gray-200">
-                  {getCardinalDirection(bearing || 0)} (${bearing || 0}°)
+                  {getCardinalDirection(bearing || 0)} ({bearing || 0}°)
                 </Text>
               </View>
             </View>
@@ -92,8 +93,8 @@ export const PlanCard = ({
         <>
           <Text className="font-bold dark:text-gray-100">
             {tripType === "start-finish"
-              ? "Distance between start and finish"
-              : "Desired distance"}
+              ? "Straigt line Distance"
+              : "Target distance"}
           </Text>
           <Text className="font-medium dark:text-gray-200">
             {Math.round(distance / 1000)}km

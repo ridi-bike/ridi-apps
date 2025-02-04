@@ -1,4 +1,5 @@
 import { Slider } from "@miblanchard/react-native-slider";
+import * as turf from "@turf/turf";
 import * as Location from "expo-location";
 import { Link, useRouter } from "expo-router";
 import {
@@ -104,13 +105,21 @@ export default function PlansNew() {
                   bearing !== undefined &&
                   selectedDistance)
               ) {
+                let distance = (selectedDistance || 0) * 1000;
+                if (!isRoundTrip && finishCoords) {
+                  const turfP1 = turf.point([startCoords[1], startCoords[0]]);
+                  const turfP2 = turf.point([finishCoords[1], finishCoords[0]]);
+                  distance = turf.distance(turfP1, turfP2, {
+                    units: "meters",
+                  });
+                }
                 const planId = planAdd({
                   startLat: startCoords[0],
                   startLon: startCoords[1],
                   finishLat: finishCoords ? finishCoords[0] : null,
                   finishLon: finishCoords ? finishCoords[1] : null,
-                  bearing: bearing !== undefined ? bearing : null,
-                  distance: selectedDistance || 100,
+                  bearing: isRoundTrip ? bearing || 0 : null,
+                  distance,
                   tripType: isRoundTrip ? "round-trip" : "start-finish",
                 });
                 router.replace({

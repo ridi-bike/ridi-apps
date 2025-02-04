@@ -1,16 +1,17 @@
 import * as turf from "@turf/turf";
+import { type MapRef } from "@vis.gl/react-maplibre";
 import { Map as MapLibre } from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { CirclePauseIcon, CirclePlayIcon } from "lucide-react-native";
 import maplibre from "maplibre-gl";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { View } from "react-native";
 
 import { cn } from "~/lib/utils";
 
 import GeoMapMarker from "./geo-map-marker";
 import { type Coords } from "./types";
-import { useRoundTripPolygon } from "./util";
+import { combineBBox, useRoundTripPolygon } from "./util";
 
 type GeoMapPlanView = {
   start: Coords;
@@ -25,8 +26,9 @@ export function GeoMapPlanView(props: GeoMapPlanView) {
     props.bearing !== null,
     props.start,
     props.bearing ?? undefined,
-    props.distance,
+    props.distance / 1000,
   );
+
   const bbox = useMemo(() => {
     const pointsFeatures = turf.points(
       [[props.start.lon, props.start.lat]].concat(
@@ -35,25 +37,20 @@ export function GeoMapPlanView(props: GeoMapPlanView) {
     );
     const pointsBbox = turf.bbox(pointsFeatures);
     const coneBbox = roundTripPolygon ? turf.bbox(roundTripPolygon) : null;
-    const combinedBbox = coneBbox
-      ? [
-          Math.min(pointsBbox[0], coneBbox[0]), // minX
-          Math.min(pointsBbox[1], coneBbox[1]), // minY
-          Math.max(pointsBbox[2], coneBbox[2]), // maxX
-          Math.max(pointsBbox[3], coneBbox[3]), // maxY
-        ]
-      : pointsBbox;
-    return [
-      combinedBbox[0] - Math.abs(combinedBbox[0] - combinedBbox[2]) / 10,
-      combinedBbox[1] - Math.abs(combinedBbox[1] - combinedBbox[3]) / 10,
-      combinedBbox[2] + Math.abs(combinedBbox[0] - combinedBbox[2]) / 10,
-      combinedBbox[3] + Math.abs(combinedBbox[1] - combinedBbox[3]) / 10,
-    ] as [number, number, number, number];
+    return combineBBox(pointsBbox, coneBbox);
   }, [props.finish, props.start.lat, props.start.lon, roundTripPolygon]);
+
+  const mapRef = useRef<MapRef>(null);
+  useEffect(() => {
+    if (mapRef.current && bbox) {
+      mapRef.current.fitBounds(bbox);
+    }
+  }, [bbox]);
 
   return (
     <View className={cn("size-full", props.className)}>
       <MapLibre
+        ref={mapRef}
         mapLib={maplibre}
         initialViewState={{
           bounds: [
