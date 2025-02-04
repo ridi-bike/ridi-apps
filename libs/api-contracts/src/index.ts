@@ -1,6 +1,7 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
 
+const numericOut = z.coerce.number();
 const dateIn = z.coerce.date();
 const dateOut = z.coerce.string();
 const latIn = z
@@ -42,6 +43,24 @@ export const routeGetRespopnseSchema = z.discriminatedUnion("version", [
         planState: planStateSchema,
       }),
       latLonArray: z.array(z.tuple([z.number(), z.number()])),
+      stats: z.object({
+        lenM: numericOut,
+        score: numericOut,
+        junctionCount: numericOut,
+        breakdown: z.array(
+          z.object({
+            id: z.string(),
+            statType: z.union([
+              z.literal("type"),
+              z.literal("surface"),
+              z.literal("smoothness"),
+            ]),
+            statName: z.string(),
+            lenM: numericOut,
+            percentage: numericOut,
+          }),
+        ),
+      }),
     }),
   }),
 ]);

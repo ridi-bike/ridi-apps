@@ -65,12 +65,18 @@ insert into routes (
 	name, 
 	user_id, 
 	plan_id, 
+  stats_len_m,
+  stats_junction_count,
+  stats_score,
 	linestring
 )
 values (
 	$1, 
 	$2, 
 	$3, 
+  $4,
+  $5,
+  $6,
 	postgis.st_makeline(
 		array(
 			select 
@@ -80,6 +86,25 @@ values (
 			) arrayPoints
 		)
 	)
+)
+returning *;
+
+-- name: RouteBreakdownStatsInsert :one
+insert into route_breakdown_stats (
+  user_id,
+  route_id,
+  stat_type,
+  stat_name,
+  len_m,
+  percentage
+)
+values (
+  $1,
+  $2,
+  $3,
+  $4,
+  $5,
+  $6
 )
 returning *;
 

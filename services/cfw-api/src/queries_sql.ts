@@ -16,6 +16,9 @@ select
 	r.id,
 	r.name,
 	r.created_at,
+  r.stats_score,
+  r.stats_len_m,
+  r.stats_junction_count,
 	pa.lat_lon_array,
 	p.id as plan_id,
 	p.name as plan_name,
@@ -39,6 +42,9 @@ export interface RoutesGetRow {
     id: string;
     name: string;
     createdAt: Date;
+    statsScore: string;
+    statsLenM: string;
+    statsJunctionCount: string;
     latLonArray: string[];
     planId: string;
     planName: string;
@@ -50,10 +56,45 @@ export async function routesGet(sql: Sql, args: RoutesGetArgs): Promise<RoutesGe
         id: row[0],
         name: row[1],
         createdAt: row[2],
-        latLonArray: row[3],
-        planId: row[4],
-        planName: row[5],
-        planState: row[6]
+        statsScore: row[3],
+        statsLenM: row[4],
+        statsJunctionCount: row[5],
+        latLonArray: row[6],
+        planId: row[7],
+        planName: row[8],
+        planState: row[9]
+    }));
+}
+
+export const routeStatsGetQuery = `-- name: RouteStatsGet :many
+select id, user_id, route_id, stat_type, stat_name, len_m, percentage from route_breakdown_stats
+where user_id = $1
+  and route_id = $2`;
+
+export interface RouteStatsGetArgs {
+    userId: string;
+    routeId: string;
+}
+
+export interface RouteStatsGetRow {
+    id: string;
+    userId: string;
+    routeId: string;
+    statType: "type" | "surface" | "smoothness";
+    statName: string;
+    lenM: string;
+    percentage: string;
+}
+
+export async function routeStatsGet(sql: Sql, args: RouteStatsGetArgs): Promise<RouteStatsGetRow[]> {
+    return (await sql.unsafe(routeStatsGetQuery, [args.userId, args.routeId]).values()).map(row => ({
+        id: row[0],
+        userId: row[1],
+        routeId: row[2],
+        statType: row[3],
+        statName: row[4],
+        lenM: row[5],
+        percentage: row[6]
     }));
 }
 
