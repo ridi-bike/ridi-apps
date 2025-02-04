@@ -17,7 +17,7 @@ import {
   type GeoMapCoordsSelectorProps,
 } from "~/components/geo-map/types";
 
-import { useRoundTripPolygon } from "./util";
+import { combineBBox, useRoundTripPolygon } from "./util";
 
 export function GeoMapCoordsSelector({
   start,
@@ -66,20 +66,7 @@ export function GeoMapCoordsSelector({
     const pointsFeatures = turf.points(allPoints);
     const pointsBbox = turf.bbox(pointsFeatures);
     const coneBbox = roundTripPolygon ? turf.bbox(roundTripPolygon) : null;
-    const combinedBbox = coneBbox
-      ? [
-          Math.min(pointsBbox[0], coneBbox[0]), // minX
-          Math.min(pointsBbox[1], coneBbox[1]), // minY
-          Math.max(pointsBbox[2], coneBbox[2]), // maxX
-          Math.max(pointsBbox[3], coneBbox[3]), // maxY
-        ]
-      : pointsBbox;
-    return [
-      combinedBbox[0] - Math.abs(combinedBbox[0] - combinedBbox[2]) / 10,
-      combinedBbox[1] - Math.abs(combinedBbox[1] - combinedBbox[3]) / 10,
-      combinedBbox[2] + Math.abs(combinedBbox[0] - combinedBbox[2]) / 10,
-      combinedBbox[3] + Math.abs(combinedBbox[1] - combinedBbox[3]) / 10,
-    ] as [number, number, number, number];
+    return combineBBox(pointsBbox, coneBbox);
   }, [start, finish, current, points, roundTripPolygon]);
 
   useEffect(() => {

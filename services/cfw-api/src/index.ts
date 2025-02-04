@@ -68,16 +68,13 @@ const router = tsr
     }
     let startFinishDesc: [string, null | string];
     try {
-      console.log("description lookup start");
       startFinishDesc = await lookupCooordsInfo([
         [data.startLat, data.startLon],
         data.finishLat && data.finishLon
           ? [data.finishLat, data.finishLon]
           : null,
       ]);
-      console.log("description lookup end");
     } catch (error) {
-      console.error("description lookup errpr", error);
       ctx.logger.error("Error on coords description prep", { error, data });
       startFinishDesc = [
         `${data.startLat}, ${data.startLon}`,
@@ -118,7 +115,7 @@ const router = tsr
     await ctx.messaging.send("new-plan", { planId: newPlan.id });
 
     const response = {
-      version: "v1",
+      version: "v1" as const,
       data: newPlan,
     };
 
