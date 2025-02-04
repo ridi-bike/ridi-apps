@@ -32,8 +32,13 @@ select
 	p.name,
 	p.start_lat,
 	p.start_lon,
+  p.start_desc,
 	p.finish_lat,
 	p.finish_lon,
+  p.finish_desc,
+  p.distance,
+  p.bearing,
+  p.trip_type,
 	p.state,
 	p.created_at,
 	r.id as route_id,
@@ -47,6 +52,33 @@ order by
 	p.created_at desc;
 
 -- name: PlanCreate :one
-insert into plans (user_id, id, name, start_lat, start_lon, finish_lat, finish_lon, start_desc, finish_desc)
-values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+insert into plans (
+  user_id, 
+  id, 
+  name, 
+  start_lat, 
+  start_lon, 
+  finish_lat, 
+  finish_lon, 
+  start_desc, 
+  finish_desc, 
+  trip_type,
+  distance,
+  bearing
+)
+
+values (
+  $1, 
+  $2, 
+  $3, 
+  $4, 
+  $5, 
+  $6, 
+  $7, 
+  $8, 
+  $9, 
+  $10,
+  $11,
+  $12
+)
 returning id;

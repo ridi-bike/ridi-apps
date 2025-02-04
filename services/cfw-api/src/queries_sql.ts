@@ -63,8 +63,13 @@ select
 	p.name,
 	p.start_lat,
 	p.start_lon,
+  p.start_desc,
 	p.finish_lat,
 	p.finish_lon,
+  p.finish_desc,
+  p.distance,
+  p.bearing,
+  p.trip_type,
 	p.state,
 	p.created_at,
 	r.id as route_id,
@@ -86,8 +91,13 @@ export interface PlanListRow {
     name: string;
     startLat: string;
     startLon: string;
+    startDesc: string;
     finishLat: string | null;
     finishLon: string | null;
+    finishDesc: string | null;
+    distance: string;
+    bearing: string | null;
+    tripType: "round-trip" | "start-finish";
     state: "new" | "planning" | "done" | "error";
     createdAt: Date;
     routeId: string | null;
@@ -101,19 +111,51 @@ export async function planList(sql: Sql, args: PlanListArgs): Promise<PlanListRo
         name: row[1],
         startLat: row[2],
         startLon: row[3],
-        finishLat: row[4],
-        finishLon: row[5],
-        state: row[6],
-        createdAt: row[7],
-        routeId: row[8],
-        routeName: row[9],
-        routeCreatedAt: row[10]
+        startDesc: row[4],
+        finishLat: row[5],
+        finishLon: row[6],
+        finishDesc: row[7],
+        distance: row[8],
+        bearing: row[9],
+        tripType: row[10],
+        state: row[11],
+        createdAt: row[12],
+        routeId: row[13],
+        routeName: row[14],
+        routeCreatedAt: row[15]
     }));
 }
 
 export const planCreateQuery = `-- name: PlanCreate :one
-insert into plans (user_id, id, name, start_lat, start_lon, finish_lat, finish_lon, start_desc, finish_desc)
-values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+insert into plans (
+  user_id, 
+  id, 
+  name, 
+  start_lat, 
+  start_lon, 
+  finish_lat, 
+  finish_lon, 
+  start_desc, 
+  finish_desc, 
+  trip_type,
+  distance,
+  bearing
+)
+
+values (
+  $1, 
+  $2, 
+  $3, 
+  $4, 
+  $5, 
+  $6, 
+  $7, 
+  $8, 
+  $9, 
+  $10,
+  $11,
+  $12
+)
 returning id`;
 
 export interface PlanCreateArgs {
@@ -126,6 +168,9 @@ export interface PlanCreateArgs {
     finishLon: string | null;
     startDesc: string;
     finishDesc: string | null;
+    tripType: "round-trip" | "start-finish";
+    distance: string;
+    bearing: string | null;
 }
 
 export interface PlanCreateRow {
@@ -133,7 +178,7 @@ export interface PlanCreateRow {
 }
 
 export async function planCreate(sql: Sql, args: PlanCreateArgs): Promise<PlanCreateRow | null> {
-    const rows = await sql.unsafe(planCreateQuery, [args.userId, args.id, args.name, args.startLat, args.startLon, args.finishLat, args.finishLon, args.startDesc, args.finishDesc]).values();
+    const rows = await sql.unsafe(planCreateQuery, [args.userId, args.id, args.name, args.startLat, args.startLon, args.finishLat, args.finishLon, args.startDesc, args.finishDesc, args.tripType, args.distance, args.bearing]).values();
     if (rows.length !== 1) {
         return null;
     }

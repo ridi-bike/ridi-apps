@@ -26,7 +26,6 @@ const createSessionFromUrl = async (url: string) => {
     return;
   }
 
-  console.log({ access_token, refresh_token });
   if (access_token || refresh_token) {
     WebBrowser.maybeCompleteAuthSession(); // required for web only
     router.setParams({ access_token: undefined, refresh_token: undefined });
@@ -55,13 +54,11 @@ const performOAuth = async () => {
   if (error) {
     throw error;
   }
-  console.log("test here 2", { redirectTo });
   // if (Platform.OS !== "web") {
   const res = await WebBrowser.openAuthSessionAsync(
     data?.url ?? "",
     redirectTo,
   );
-  console.log("after open auth session");
 
   if (res.type === "success") {
     const { url } = res;

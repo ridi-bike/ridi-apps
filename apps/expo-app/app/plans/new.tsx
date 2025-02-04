@@ -349,7 +349,6 @@ export default function PlansNew() {
                     minimumTrackStyle={{ backgroundColor: "transparent" }}
                     maximumTrackStyle={{ backgroundColor: "transparent" }}
                     onValueChange={(value) => {
-                      console.log({ value });
                       setSelectedDistance(DISTANCES[value[0]]);
                     }}
                   />

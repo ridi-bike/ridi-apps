@@ -6,12 +6,16 @@ export async function dataSyncPendingPush() {
   const plansPending = plansPendingStorage.get();
   if (plansPending) {
     for (const planPending of plansPending) {
-      await apiClient.planCreate({
+      const result = await apiClient.planCreate({
         body: {
           version: "v1",
           data: planPending,
         },
       });
+      if (result.status !== 201) {
+        console.error("Plan Create Error", result.body);
+        throw new Error(`Plan Create Error`, { cause: result.body });
+      }
       plansPendingStorage.set(
         plansPending.filter((p) => p.id !== planPending.id),
       );
@@ -28,7 +32,6 @@ export async function dataSyncPull() {
       },
     }),
   );
-  console.log({ plans });
   plansStorage.set(plans.data);
   for (const plan of plans.data) {
     for (const route of plan.routes) {

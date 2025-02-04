@@ -1,3 +1,4 @@
+import * as turf from "@turf/turf";
 import {
   TsRestResponse,
   fetchRequestHandler,
@@ -65,13 +66,18 @@ const router = tsr
         },
       };
     }
-    let startFinishDesc: [string, string];
+    let startFinishDesc: [string, null | string];
     try {
+      console.log("description lookup start");
       startFinishDesc = await lookupCooordsInfo([
         [data.startLat, data.startLon],
-        [data.finishLat, data.finishLon],
+        data.finishLat && data.finishLon
+          ? [data.finishLat, data.finishLon]
+          : null,
       ]);
+      console.log("description lookup end");
     } catch (error) {
+      console.error("description lookup errpr", error);
       ctx.logger.error("Error on coords description prep", { error, data });
       startFinishDesc = [
         `${data.startLat}, ${data.startLon}`,
@@ -79,8 +85,27 @@ const router = tsr
       ];
     }
 
+    let distance = data.distance || "0";
+    if (data.finishLat && data.finishLon) {
+      const startPoint = turf.point([
+        Number(data.startLat),
+        Number(data.startLon),
+      ]);
+      const finishPoint = turf.point([
+        Number(data.finishLat),
+        Number(data.finishLon),
+      ]);
+
+      distance = turf
+        .distance(startPoint, finishPoint, {
+          units: "meters",
+        })
+        .toString();
+    }
+
     const newPlan = await planCreate(ctx.db, {
       ...data,
+      distance,
       startDesc: startFinishDesc[0],
       finishDesc: startFinishDesc[1],
       userId: ctx.request.user.id,
@@ -98,7 +123,7 @@ const router = tsr
     };
 
     return {
-      status: 200,
+      status: 201,
       body: response,
     };
   },
@@ -134,14 +159,23 @@ const router = tsr
       })),
     );
 
-    const validates = plansListResponseSchema.parse({
+    const validated = plansListResponseSchema.safeParse({
       version: "v1",
       data: plans,
     });
 
+    if (!validated.success) {
+      return {
+        status: 500,
+        body: {
+          message: validated.error.toString(),
+        },
+      };
+    }
+
     return {
       status: 200,
-      body: validates,
+      body: validated.data,
     };
   },
   routeGet: async ({ params: { routeId }, query: { version } }, ctx) => {
@@ -175,10 +209,18 @@ const router = tsr
         },
       };
 
-      const validated = routeGetRespopnseSchema.parse(response);
+      const validated = routeGetRespopnseSchema.safeParse(response);
+      if (!validated.success) {
+        return {
+          status: 500,
+          body: {
+            message: validated.error.toString(),
+          },
+        };
+      }
       return {
         status: 200,
-        body: validated,
+        body: validated.data,
       };
     } catch (error) {
       return {

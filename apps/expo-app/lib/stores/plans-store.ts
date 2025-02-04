@@ -3,7 +3,7 @@ import {
   type PlansListResponse,
 } from "@ridi/api-contracts";
 import { useQuery } from "@tanstack/react-query";
-import { distance } from "@turf/turf";
+import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { generate } from "xksuid";
 
@@ -21,6 +21,12 @@ export function useStorePlans() {
   const [plansPending, setPlansPending] = useState(
     plansPendingStorage.get() || [],
   );
+
+  const refresh = useCallback(() => {
+    setPlansPending(plansPendingStorage.get() || []);
+  }, []);
+
+  useFocusEffect(refresh);
 
   const { data, error, status, refetch } = useQuery({
     queryKey: ["plans"],
@@ -46,12 +52,14 @@ export function useStorePlans() {
       state: "new",
       startDesc: `${p.startLat}, ${p.startLon}`,
       finishDesc: `$${p.finishLat}, ${p.finishLon}`,
-      createdAt: p.createdAt,
+      createdAt: p.createdAt.toString(),
       routes: [],
     }));
 
     return [...data.data, ...plans];
   }, [data.data, plansPending]);
+
+  console.log({ dataWithPending });
 
   const planAdd = useCallback(
     (planNew: {
@@ -79,6 +87,7 @@ export function useStorePlans() {
           createdAt: new Date(),
         },
       ];
+      console.log({ plansPendingUpdated });
       plansPendingStorage.set(plansPendingUpdated);
       setPlansPending(plansPendingUpdated);
       dataSyncPendingPush()
@@ -90,22 +99,18 @@ export function useStorePlans() {
   );
 
   useEffect(() => {
-    console.log("use effect refetch", refetch);
     const plansSub = supabase
       .channel(`plans_routes_${Math.random()}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "plans" },
         (_payload) => {
-          console.log("plans sub received", _payload);
           refetch();
         },
       )
       .subscribe();
 
-    console.log("subscribed to plans", plansSub.state);
     return () => {
-      console.log("unsubed from plans");
       plansSub.unsubscribe();
     };
   }, [refetch]);

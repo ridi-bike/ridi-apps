@@ -78,7 +78,7 @@ export const PlanCard = ({
                   aria-level={2}
                   className="text-sm font-bold text-[#FF5937]"
                 >
-                  End
+                  Finish
                 </Text>
                 <Text className="text-base font-medium dark:text-gray-200">
                   {finishDesc}

@@ -1,6 +1,8 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
 
+const dateIn = z.coerce.date();
+const dateOut = z.coerce.string();
 const latIn = z
   .number()
   .min(-90)
@@ -33,7 +35,7 @@ export const routeGetRespopnseSchema = z.discriminatedUnion("version", [
     data: z.object({
       id: z.string(),
       name: z.string(),
-      createdAt: z.date(),
+      createdAt: dateOut,
       plan: z.object({
         planId: z.string(),
         planName: z.string(),
@@ -60,7 +62,7 @@ export const plansListResponseSchema = z.discriminatedUnion("version", [
         finishLon: lonOut.nullable(),
         finishDesc: z.string().nullable(),
         state: planStateSchema,
-        createdAt: z.date(),
+        createdAt: dateOut,
         tripType: planTypeSchema,
         distance: z.coerce.number(),
         bearing: bearingOut,
@@ -68,7 +70,7 @@ export const plansListResponseSchema = z.discriminatedUnion("version", [
           z.object({
             routeId: z.string(),
             routeName: z.string(),
-            routeCreatedAt: z.date(),
+            routeCreatedAt: dateOut,
           }),
         ),
       }),
@@ -88,7 +90,7 @@ export const planCreateRequestSchema = z.discriminatedUnion("version", [
       finishLon: lonIn.nullable(),
       name: z.string(),
       id: z.string(),
-      createdAt: z.date(),
+      createdAt: dateIn,
       bearing: bearingIn,
       tripType: planTypeSchema,
       distance: z.number().transform((t) => (t ? t.toString() : null)),
