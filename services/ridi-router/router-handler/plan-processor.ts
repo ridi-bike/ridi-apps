@@ -59,6 +59,36 @@ export class PlanProcessor {
       throw this.logger.error("Plan record not found from id", { planId });
     }
 
+    if (planRecord.tripType === "round-trip") {
+      if (
+        Number(planRecord.bearing).toString() !== planRecord.bearing ||
+        Number(planRecord.distance).toString() !== planRecord.distance ||
+        Number(planRecord.startLat).toString() !== planRecord.startLat ||
+        Number(planRecord.startLon).toString() !== planRecord.startLon
+      ) {
+        throw this.logger.error(
+          "Plan record validation failed for 'round-trip'",
+          {
+            ...planRecord,
+          },
+        );
+      }
+    } else {
+      if (
+        Number(planRecord.startLat).toString() !== planRecord.startLat ||
+        Number(planRecord.startLon).toString() !== planRecord.startLon ||
+        Number(planRecord.finishLat).toString() !== planRecord.finishLat ||
+        Number(planRecord.finishLon).toString() !== planRecord.finishLon
+      ) {
+        throw this.logger.error(
+          "Plan record validation failed for 'start-finish'",
+          {
+            ...planRecord,
+          },
+        );
+      }
+    }
+
     const regionsFrom = await this.pgQueries.regionFindFromCoords(
       this.pgClient,
       {
