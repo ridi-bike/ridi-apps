@@ -65,8 +65,8 @@ export function PointSelectDialog({
             </View>
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="flex flex-col items-center justify-between gap-6">
-          <View className="flex flex-row items-center justify-between gap-6">
+        <AlertDialogFooter className="flex w-full flex-col items-center justify-between gap-6">
+          <View className="flex w-full flex-row items-center justify-between gap-6">
             {!!unset && (
               <Button
                 className="flex-1"
@@ -106,10 +106,10 @@ export function PointSelectDialog({
           </View>
           <Button
             variant="secondary"
-            className="flex-1"
+            className="flex w-full flex-row items-center justify-center"
             onPress={() => setOpen(false)}
           >
-            <Text>Cancel</Text>
+            <Text className="dark:text-gray-200">Cancel</Text>
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
