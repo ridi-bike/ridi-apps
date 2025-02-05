@@ -2,6 +2,7 @@ import { type PropsWithChildren } from "react";
 
 export type GeoMapRouteViewProps = {
   route: Coords[];
+  interactive: boolean;
 };
 export type GeoMapCoordsSelectorProps = {
   isRoundTrip: boolean;

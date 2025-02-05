@@ -5,6 +5,7 @@ import {
   Map as MapLibre,
   Source,
   type MapRef,
+  NavigationControl,
 } from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { type FeatureCollection } from "geojson";
@@ -15,7 +16,7 @@ import { type GeoMapRouteViewProps } from "~/components/geo-map/types";
 
 import { combineBBox } from "./util";
 
-export function GeoMapRouteView({ route }: GeoMapRouteViewProps) {
+export function GeoMapRouteView({ route, interactive }: GeoMapRouteViewProps) {
   const mapRef = useRef<MapRef>(null);
 
   const mapBounds = useMemo(() => {
@@ -75,7 +76,7 @@ export function GeoMapRouteView({ route }: GeoMapRouteViewProps) {
     <MapLibre
       ref={mapRef}
       mapLib={maplibre}
-      interactive={false}
+      interactive={interactive}
       initialViewState={
         mapBounds
           ? {
@@ -89,6 +90,7 @@ export function GeoMapRouteView({ route }: GeoMapRouteViewProps) {
       }
       mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
     >
+      {interactive && <NavigationControl position="bottom-left" />}
       {routeLayer}
     </MapLibre>
   );
