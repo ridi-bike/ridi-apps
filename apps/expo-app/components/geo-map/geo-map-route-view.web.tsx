@@ -13,6 +13,8 @@ import { useEffect, useMemo, useRef } from "react";
 
 import { type GeoMapRouteViewProps } from "~/components/geo-map/types";
 
+import { combineBBox } from "./util";
+
 export function GeoMapRouteView({ route }: GeoMapRouteViewProps) {
   const mapRef = useRef<MapRef>(null);
 
@@ -23,12 +25,7 @@ export function GeoMapRouteView({ route }: GeoMapRouteViewProps) {
     }
     const features = turf.points(allPoints);
     const mapBounds = turf.bbox(features);
-    return [
-      mapBounds[0] - 0.001,
-      mapBounds[1] - 0.001,
-      mapBounds[2] + 0.001,
-      mapBounds[3] + 0.001,
-    ] as [number, number, number, number];
+    return combineBBox(mapBounds, null);
   }, [route]);
 
   useEffect(() => {
@@ -78,6 +75,7 @@ export function GeoMapRouteView({ route }: GeoMapRouteViewProps) {
     <MapLibre
       ref={mapRef}
       mapLib={maplibre}
+      interactive={false}
       initialViewState={
         mapBounds
           ? {
