@@ -22,7 +22,7 @@ const bearingIn = z
   .min(0)
   .max(360)
   .nullable()
-  .transform((t) => (t ? t.toString() : null));
+  .transform((t) => (Number(t) === t ? t.toString() : null));
 const bearingOut = z.coerce.number().min(0).max(360).nullable();
 
 const c = initContract();
