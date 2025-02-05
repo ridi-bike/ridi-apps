@@ -75,8 +75,7 @@ export default function PlanDetails() {
                         Direction
                       </Text>
                       <Text className="text-base font-medium dark:text-gray-200">
-                        {getCardinalDirection(plan.bearing!)} ({plan.bearing}
-                        °)
+                        {getCardinalDirection(plan.bearing!)} ({plan.bearing}°)
                       </Text>
                     </View>
                   </View>

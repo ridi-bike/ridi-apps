@@ -28,7 +28,17 @@ export function RouteCard({ routeId, plan }: RouteCardProps) {
       });
   }, [route]);
 
-  if (!route || !breakdown) {
+  const routeOverview = useMemo(() => {
+    return route
+      ? route.data.latLonArray
+          .filter(
+            (_c, i) => i % Math.ceil(route.data.latLonArray.length / 25) === 0,
+          )
+          .map((c) => ({ lat: c[0], lon: c[1] }))
+      : null;
+  }, [route]);
+
+  if (!route || !breakdown || !routeOverview) {
     return (
       <ScreenCard
         middle={
@@ -45,16 +55,7 @@ export function RouteCard({ routeId, plan }: RouteCardProps) {
 
   return (
     <ScreenCard
-      top={
-        <GeoMapRouteView
-          route={route.data.latLonArray
-            .filter(
-              (_c, i) =>
-                i % Math.ceil(route.data.latLonArray.length / 25) === 0,
-            )
-            .map((c) => ({ lat: c[0], lon: c[1] }))}
-        />
-      }
+      top={<GeoMapRouteView route={routeOverview} interactive={false} />}
       middle={
         <>
           <View className="flex flex-row items-center justify-between">
