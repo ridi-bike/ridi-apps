@@ -1,5 +1,13 @@
 {
   "version": "4",
+  "specifiers": {
+    "jsr:@valibot/valibot@0.42": "0.42.1"
+  },
+  "jsr": {
+    "@valibot/valibot@0.42.1": {
+      "integrity": "ba0f6f7964aaeec0e4b1f793d575061f325ae6254cbb9d7ff01fb65068a0a23b"
+    }
+  },
   "redirects": {
     "https://deno.land/x/postgresjs/mod.js": "https://deno.land/x/postgresjs@v3.4.5/mod.js",
     "https://deno.land/x/postgresjs/types/index.d.ts": "https://deno.land/x/postgresjs@v3.4.5/types/index.d.ts"
