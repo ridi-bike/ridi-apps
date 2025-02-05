@@ -2,7 +2,10 @@ import { Link, useLocalSearchParams } from "expo-router";
 import { MapPin, Navigation } from "lucide-react-native";
 import { View, Text } from "react-native";
 
-import { getCardinalDirection } from "~/components/geo-map/util";
+import {
+  getCardinalDirection,
+  metersToDisplay,
+} from "~/components/geo-map/util";
 import { RouteCard } from "~/components/route-card";
 import { ScreenCard } from "~/components/screen-card";
 import { ScreenFrame } from "~/components/screen-frame";
@@ -89,7 +92,7 @@ export default function PlanDetails() {
                   : "Straigt line distance"}
               </Text>
               <Text className="font-medium dark:text-gray-200">
-                {plan.distance / 1000}km
+                {metersToDisplay(plan.distance)}
               </Text>
             </>
           }

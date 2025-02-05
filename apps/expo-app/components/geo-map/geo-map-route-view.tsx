@@ -1,9 +1,8 @@
 import MapLibreGL from "@maplibre/maplibre-react-native";
-import React, { Component } from "react";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 
 import { MapView } from "./maplibre/map-view";
-import { type GeoMapCoordsSelectorProps } from "./types";
+import { type GeoMapRouteViewProps } from "./types";
 
 // Will be null for most users (only Mapbox authenticates this way).
 // Required on Android. See Android installation notes.
@@ -22,7 +21,7 @@ MapLibreGL.setAccessToken(null);
 // 	},
 // });
 
-export function GeoMapRouteView(props: GeoMapCoordsSelectorProps) {
+export function GeoMapRouteView(props: GeoMapRouteViewProps) {
   return (
     <View className="size-full flex-1 items-center justify-center bg-slate-100">
       <MapView

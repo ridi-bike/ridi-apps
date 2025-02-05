@@ -101,3 +101,7 @@ export function combineBBox(
     combinedBbox[3] + Math.abs(combinedBbox[1] - combinedBbox[3]) / 10,
   ] as [number, number, number, number];
 }
+
+export function metersToDisplay(value: number): string {
+  return `${Math.round(value / 1000)}km`;
+}

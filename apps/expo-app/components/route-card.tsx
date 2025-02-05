@@ -1,10 +1,12 @@
 import { CirclePauseIcon, CirclePlayIcon, Trophy } from "lucide-react-native";
+import { useMemo } from "react";
 import { View, Text } from "react-native";
 
 import { type Plan } from "~/lib/stores/plans-store";
 import { useStoreRoute } from "~/lib/stores/routes-store";
 
-import { GeoMapStatic } from "./geo-map/geo-map-static";
+import { GeoMapRouteView } from "./geo-map/geo-map-route-view";
+import { metersToDisplay } from "./geo-map/util";
 import { ScreenCard } from "./screen-card";
 
 type RouteCardProps = {
@@ -15,13 +17,24 @@ type RouteCardProps = {
 export function RouteCard({ routeId, plan }: RouteCardProps) {
   const { data: route, error, status } = useStoreRoute(routeId);
 
-  if (!route) {
+  const breakdown = useMemo(() => {
+    if (!route) {
+      return null;
+    }
+    return Object.values(route.data.stats.breakdown)
+      .filter((bd) => bd.statType === "surface")
+      .sort((a, b) => {
+        return b.percentage - a.percentage;
+      });
+  }, [route]);
+
+  if (!route || !breakdown) {
     return (
       <ScreenCard
         middle={
           <View>
             <Text>
-              Route with id<Text className="px-2 text-gray-500">{route}</Text>
+              Route with id<Text className="px-2 text-gray-500">{routeId}</Text>
             </Text>
             is not found
           </View>
@@ -33,23 +46,13 @@ export function RouteCard({ routeId, plan }: RouteCardProps) {
   return (
     <ScreenCard
       top={
-        <GeoMapStatic
-          points={[
-            {
-              icon: <CirclePlayIcon className="size-8 text-green-500" />,
-              coords: {
-                lat: plan.startLat,
-                lon: plan.startLon,
-              },
-            },
-            {
-              icon: <CirclePauseIcon className="size-8 text-red-500" />,
-              coords: {
-                lat: plan.finishLat,
-                lon: plan.finishLon,
-              },
-            },
-          ]}
+        <GeoMapRouteView
+          route={route.data.latLonArray
+            .filter(
+              (_c, i) =>
+                i % Math.ceil(route.data.latLonArray.length / 25) === 0,
+            )
+            .map((c) => ({ lat: c[0], lon: c[1] }))}
         />
       }
       middle={
@@ -60,12 +63,12 @@ export function RouteCard({ routeId, plan }: RouteCardProps) {
               aria-level={2}
               className="text-lg font-bold dark:text-gray-100"
             >
-              {route.data.stats.lenM / 1000}km
+              {metersToDisplay(route.data.stats.lenM)}
             </Text>
             <View className="flex flex-row items-center gap-2">
               <Trophy className="size-5 text-[#FF5937]" />
               <Text className="font-bold text-[#FF5937]">
-                {route.data.stats.score}
+                {Math.round(route.data.stats.score)}
               </Text>
             </View>
           </View>
@@ -82,36 +85,33 @@ export function RouteCard({ routeId, plan }: RouteCardProps) {
                 <View
                   className="mb-1 h-2 rounded-full bg-[#FF5937]"
                   style={{
-                    width: `${route.data.stats.breakdown[0].percentage}%`,
+                    width: `${Math.round(breakdown[0].percentage)}%`,
                   }}
                 />
                 <Text className="dark:text-gray-200">
-                  {route.data.stats.breakdown[0].statName}{" "}
-                  {route.data.stats.breakdown[0].percentage}%
+                  {breakdown[0].statName} {Math.round(breakdown[0].percentage)}%
                 </Text>
               </View>
               <View className="flex-1">
                 <View
                   className="mb-1 h-2 rounded-full bg-[#FFA37F]"
                   style={{
-                    width: `${route.data.stats.breakdown[1].percentage}%`,
+                    width: `${Math.round(breakdown[1].percentage)}%`,
                   }}
                 />
                 <Text className="dark:text-gray-200">
-                  {route.data.stats.breakdown[1].statName}{" "}
-                  {route.data.stats.breakdown[1].percentage}%
+                  {breakdown[1].statName} {Math.round(breakdown[1].percentage)}%
                 </Text>
               </View>
               <View className="flex-1">
                 <View
                   className="mb-1 h-2 rounded-full bg-[#FFD7C9]"
                   style={{
-                    width: `${route.data.stats.breakdown[2].percentage}%`,
+                    width: `${Math.round(breakdown[2].percentage)}%`,
                   }}
                 />
                 <Text className="dark:text-gray-200">
-                  {route.data.stats.breakdown[2].statName}{" "}
-                  {route.data.stats.breakdown[2].percentage}%
+                  {breakdown[2].statName} {Math.round(breakdown[2].percentage)}%
                 </Text>
               </View>
             </View>
