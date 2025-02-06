@@ -25,7 +25,6 @@ export const PlanCard = ({
   finishCoords,
   tripType,
 }: RouteCardProps) => {
-  console.log("card", { startCoords, distance, bearing });
   return (
     <ScreenCard
       top={

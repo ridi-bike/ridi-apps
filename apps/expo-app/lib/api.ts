@@ -12,7 +12,6 @@ export const apiClient = initClient(apiContract, {
 
   api: async (args) => {
     const { data: session } = await supabase.auth.getSession();
-    console.log("api call", { session });
     args.headers.Authorization = `Bearer ${session.session?.access_token}`;
 
     return tsRestFetchApi(args);
