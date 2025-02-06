@@ -250,6 +250,21 @@ export default {
     env: CloudflareBindings,
     ctx: ExecutionContext,
   ): Promise<Response> {
+    if (request.method === "OPTIONS") {
+      return new Response("ok", {
+        headers: {
+          "Access-Control-Allow-Origin": "https://app.ridi.bike",
+          "Access-Control-Allow-Credentials": "true",
+          "Access-Control-Allow-Headers":
+            "authorization, origin, content-type, accept",
+          "Access-Control-Request-Method": "GET, POST",
+        },
+      });
+    }
+    if (request.method === "HEAD") {
+      return new Response();
+    }
+
     const supabaseClient = createClient<Database, "public", Database["public"]>(
       env.SUPABASE_URL,
       env.SUPABASE_SERVICE_ROLE_KEY,
@@ -258,7 +273,7 @@ export default {
     const db = postgres(env.SUPABASE_DB_URL);
     const messaging = new Messaging(db, ridiLogger);
 
-    return fetchRequestHandler({
+    const response = await fetchRequestHandler({
       request,
       contract: apiContract,
       router,
@@ -309,5 +324,11 @@ export default {
         logger: ridiLogger,
       },
     });
+    response.headers.set(
+      "Access-Control-Allow-Origin",
+      "https://app.ridi.bike",
+    );
+    response.headers.set("Access-Control-Allow-Credentials", "true");
+    return response;
   },
 };
