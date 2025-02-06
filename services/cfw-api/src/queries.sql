@@ -1,3 +1,43 @@
+-- name: rulePacksGet :many 
+select * from rule_packs
+where rule_packs.user_id = $1
+  or rule_packs.user_id is null;
+
+-- name: rulePackRoadTagsGet :many
+select * from rule_pack_road_tags
+where rule_pack_road_tags.user_id = $1
+  or rule_pack_road_tags.user_id is null;
+
+-- name: rulePacksUpsert :one
+insert into rule_packs (
+  user_id, 
+  name
+)
+values (
+  $1,
+  $2
+)
+on conflict (id) do update
+set name = excluded.name
+returning *;
+
+-- name: rulePackRoadTagsUpsert :one
+insert into rule_pack_road_tags (
+  user_id,
+  rule_set_id,
+  tag_key,
+  value
+)
+values (
+  $1,
+  $2,
+  $3,
+  $4
+)
+on conflict (rule_set_id, tag_key) do update
+set value = excluded.value
+returning *;
+
 -- name: RoutesGet :many
 with points_array as (
 	select 

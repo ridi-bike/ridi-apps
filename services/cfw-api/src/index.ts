@@ -10,16 +10,27 @@ import type {
   ExecutionContext,
 } from "@cloudflare/workers-types/experimental";
 import {
+  RoadTags,
   apiContract,
   plansListResponseSchema,
   routeGetRespopnseSchema,
+  rulePacksListSchema,
 } from "@ridi/api-contracts";
 import { User, createClient } from "@supabase/supabase-js";
 import { Database } from "./supabase";
 import postgres from "postgres";
 import { Messaging } from "./messaging";
 import { RidiLogger } from "./logging";
-import { planCreate, planList, routeStatsGet, routesGet } from "./queries_sql";
+import {
+  planCreate,
+  planList,
+  routeStatsGet,
+  routesGet,
+  rulePackRoadTagsGet,
+  rulePackRoadTagsUpsert,
+  rulePacksGet,
+  rulePacksUpsert,
+} from "./queries_sql";
 import { lookupCooordsInfo } from "./maps/lookup";
 
 export type FieldsNotNull<T extends object> = {
@@ -39,6 +50,80 @@ const router = tsr
     logger: RidiLogger;
   }>()
   .routerWithMiddleware(apiContract)<{ user: User }>({
+  rulePacksList: async ({ query }, ctx) => {
+    if (query.version !== "v1") {
+      return {
+        status: 400,
+        body: {
+          message: "wrong version",
+        },
+      };
+    }
+    const rules = await rulePacksGet(ctx.db, {
+      userId: ctx.request.user.id,
+    });
+    const tags = await rulePackRoadTagsGet(ctx.db, {
+      userId: ctx.request.user.id,
+    });
+
+    const data = {
+      version: "v1" as const,
+      data: rules.map((r) => ({
+        ...r,
+        system: r.userId === null,
+        roadTags: tags
+          .filter((t) => t.ruleSetId === r.id)
+          .reduce(
+            (all, curr) => ({ ...all, [curr.tagKey]: curr.value }),
+            {} as Record<RoadTags, number | null>,
+          ),
+      })),
+    };
+    const validated = rulePacksListSchema.safeParse(data);
+
+    if (!validated.success) {
+      return {
+        status: 500,
+        body: {
+          message: validated.error.toString(),
+        },
+      };
+    }
+
+    return {
+      status: 200,
+      body: validated.data,
+    };
+  },
+  rulePackUpdate: async ({ body }, ctx) => {
+    const updatedRec = await rulePacksUpsert(ctx.db, {
+      userId: ctx.request.user.id,
+      name: body.data.name,
+    });
+    if (!updatedRec) {
+      throw new Error("can't happen");
+    }
+
+    await Promise.all(
+      Object.entries(body.data.roadTags).map(([tagKey, value]) =>
+        rulePackRoadTagsUpsert(ctx.db, {
+          ruleSetId: updatedRec.id,
+          tagKey,
+          value: value as string | null, // it's number but sqlc incorrectly wants a string
+          userId: ctx.request.user.id,
+        }),
+      ),
+    );
+    return {
+      status: 201,
+      body: {
+        version: "v1",
+        data: {
+          id: updatedRec.id,
+        },
+      },
+    };
+  },
   coordsSelect: async ({ body: { version, lon, lat } }, ctx) => {
     if (version !== "v1") {
       return {

@@ -2,6 +2,142 @@
 
 import { Sql } from "postgres";
 
+export const rulePacksGetQuery = `-- name: rulePacksGet :many
+select id, user_id, name from rule_packs
+where rule_packs.user_id = $1
+  or rule_packs.user_id is null`;
+
+export interface rulePacksGetArgs {
+    userId: string | null;
+}
+
+export interface rulePacksGetRow {
+    id: string;
+    userId: string | null;
+    name: string;
+}
+
+export async function rulePacksGet(sql: Sql, args: rulePacksGetArgs): Promise<rulePacksGetRow[]> {
+    return (await sql.unsafe(rulePacksGetQuery, [args.userId]).values()).map(row => ({
+        id: row[0],
+        userId: row[1],
+        name: row[2]
+    }));
+}
+
+export const rulePackRoadTagsGetQuery = `-- name: rulePackRoadTagsGet :many
+select user_id, rule_set_id, tag_key, value from rule_pack_road_tags
+where rule_pack_road_tags.user_id = $1
+  or rule_pack_road_tags.user_id is null`;
+
+export interface rulePackRoadTagsGetArgs {
+    userId: string | null;
+}
+
+export interface rulePackRoadTagsGetRow {
+    userId: string | null;
+    ruleSetId: string;
+    tagKey: string;
+    value: number | null;
+}
+
+export async function rulePackRoadTagsGet(sql: Sql, args: rulePackRoadTagsGetArgs): Promise<rulePackRoadTagsGetRow[]> {
+    return (await sql.unsafe(rulePackRoadTagsGetQuery, [args.userId]).values()).map(row => ({
+        userId: row[0],
+        ruleSetId: row[1],
+        tagKey: row[2],
+        value: row[3]
+    }));
+}
+
+export const rulePacksUpsertQuery = `-- name: rulePacksUpsert :one
+insert into rule_packs (
+  user_id, 
+  name
+)
+values (
+  $1,
+  $2
+)
+on conflict (id) do update
+set name = excluded.name
+returning id, user_id, name`;
+
+export interface rulePacksUpsertArgs {
+    userId: string | null;
+    name: string;
+}
+
+export interface rulePacksUpsertRow {
+    id: string;
+    userId: string | null;
+    name: string;
+}
+
+export async function rulePacksUpsert(sql: Sql, args: rulePacksUpsertArgs): Promise<rulePacksUpsertRow | null> {
+    const rows = await sql.unsafe(rulePacksUpsertQuery, [args.userId, args.name]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        userId: row[1],
+        name: row[2]
+    };
+}
+
+export const rulePackRoadTagsUpsertQuery = `-- name: rulePackRoadTagsUpsert :one
+insert into rule_pack_road_tags (
+  user_id,
+  rule_set_id,
+  tag_key,
+  value
+)
+values (
+  $1,
+  $2,
+  $3,
+  $4
+)
+on conflict (rule_set_id, tag_key) do update
+set value = excluded.value
+returning user_id, rule_set_id, tag_key, value`;
+
+export interface rulePackRoadTagsUpsertArgs {
+    userId: string | null;
+    ruleSetId: string;
+    tagKey: string;
+    value: string | null;
+}
+
+export interface rulePackRoadTagsUpsertRow {
+    userId: string | null;
+    ruleSetId: string;
+    tagKey: string;
+    value: number | null;
+}
+
+export async function rulePackRoadTagsUpsert(sql: Sql, args: rulePackRoadTagsUpsertArgs): Promise<rulePackRoadTagsUpsertRow | null> {
+    const rows = await sql.unsafe(rulePackRoadTagsUpsertQuery, [args.userId, args.ruleSetId, args.tagKey, args.value]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        userId: row[0],
+        ruleSetId: row[1],
+        tagKey: row[2],
+        value: row[3]
+    };
+}
+
 export const routesGetQuery = `-- name: RoutesGet :many
 with points_array as (
 	select 
