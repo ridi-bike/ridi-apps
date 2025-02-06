@@ -10,6 +10,7 @@ export function useEffectOnce(fn: Parameters<typeof useEffect>[0]) {
   const calledRef = useRef(false);
   useEffect(() => {
     if (!calledRef.current) {
+      calledRef.current = true;
       return fn();
     }
   }, [fn]);

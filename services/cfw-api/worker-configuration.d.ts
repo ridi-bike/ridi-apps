@@ -2,6 +2,7 @@
 
 interface CloudflareBindings {
 	SUPABASE_URL: "http://127.0.0.1:54321";
+	RIDI_APP_URL: "http://127.0.0.1:8081";
 	SUPABASE_DB_URL: string;
 	SUPABASE_SERVICE_ROLE_KEY: string;
 }
