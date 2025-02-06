@@ -17,7 +17,6 @@ const queryClient = new QueryClient();
 export default function App() {
   useEffectOnce(() => {
     supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("onAuthStateChange", session, _event);
       $session.set(session);
     });
   });
