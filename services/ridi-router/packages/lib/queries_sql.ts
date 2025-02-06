@@ -202,7 +202,7 @@ export async function regionGetCount(sql: Sql): Promise<RegionGetCountRow | null
 }
 
 export const planGetByIdQuery = `-- name: PlanGetById :one
-select id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc from plans
+select id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc, rule_set_id from plans
 where plans.id = $1`;
 
 export interface PlanGetByIdArgs {
@@ -226,6 +226,7 @@ export interface PlanGetByIdRow {
     bearing: string | null;
     startDesc: string;
     finishDesc: string | null;
+    ruleSetId: string;
 }
 
 export async function planGetById(sql: Sql, args: PlanGetByIdArgs): Promise<PlanGetByIdRow | null> {
@@ -253,12 +254,13 @@ export async function planGetById(sql: Sql, args: PlanGetByIdArgs): Promise<Plan
         distance: row[12],
         bearing: row[13],
         startDesc: row[14],
-        finishDesc: row[15]
+        finishDesc: row[15],
+        ruleSetId: row[16]
     };
 }
 
 export const plansGetNewQuery = `-- name: PlansGetNew :many
-select id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc from plans
+select id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc, rule_set_id from plans
 where state = 'new'`;
 
 export interface PlansGetNewRow {
@@ -278,6 +280,7 @@ export interface PlansGetNewRow {
     bearing: string | null;
     startDesc: string;
     finishDesc: string | null;
+    ruleSetId: string;
 }
 
 export async function plansGetNew(sql: Sql): Promise<PlansGetNewRow[]> {
@@ -297,7 +300,8 @@ export async function plansGetNew(sql: Sql): Promise<PlansGetNewRow[]> {
         distance: row[12],
         bearing: row[13],
         startDesc: row[14],
-        finishDesc: row[15]
+        finishDesc: row[15],
+        ruleSetId: row[16]
     }));
 }
 

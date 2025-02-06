@@ -46,6 +46,7 @@ export type Database = {
           id: string
           modified_at: string | null
           name: string
+          rule_set_id: string
           start_desc: string
           start_lat: number
           start_lon: number
@@ -64,6 +65,7 @@ export type Database = {
           id?: string
           modified_at?: string | null
           name: string
+          rule_set_id: string
           start_desc: string
           start_lat: number
           start_lon: number
@@ -82,6 +84,7 @@ export type Database = {
           id?: string
           modified_at?: string | null
           name?: string
+          rule_set_id?: string
           start_desc?: string
           start_lat?: number
           start_lon?: number
@@ -89,7 +92,15 @@ export type Database = {
           trip_type?: Database["public"]["Enums"]["plan_type"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "plans_rule_set_id_fkey"
+            columns: ["rule_set_id"]
+            isOneToOne: false
+            referencedRelation: "rule_packs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       regions: {
         Row: {
@@ -199,6 +210,53 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      rule_pack_road_tags: {
+        Row: {
+          rule_set_id: string
+          tag_key: string
+          user_id: string | null
+          value: number | null
+        }
+        Insert: {
+          rule_set_id: string
+          tag_key: string
+          user_id?: string | null
+          value?: number | null
+        }
+        Update: {
+          rule_set_id?: string
+          tag_key?: string
+          user_id?: string | null
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rule_pack_road_tags_rule_set_id_fkey"
+            columns: ["rule_set_id"]
+            isOneToOne: false
+            referencedRelation: "rule_packs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rule_packs: {
+        Row: {
+          id: string
+          name: string
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          user_id?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
