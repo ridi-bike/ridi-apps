@@ -23,8 +23,8 @@ export function getSuccessResponseOrThrow<
   }
 
   if (response.status === 401) {
-    $session.set(null);
-    supabase.auth.signOut().then(() => {
+    supabase.auth.signOut({ scope: "local" }).then(() => {
+      $session.set(null);
       router.replace("/");
     });
   }

@@ -253,7 +253,7 @@ export default {
     if (request.method === "OPTIONS") {
       return new Response("ok", {
         headers: {
-          "Access-Control-Allow-Origin": "https://app.ridi.bike",
+          "Access-Control-Allow-Origin": env.RIDI_APP_URL,
           "Access-Control-Allow-Credentials": "true",
           "Access-Control-Allow-Headers":
             "authorization, origin, content-type, accept",
@@ -324,10 +324,7 @@ export default {
         logger: ridiLogger,
       },
     });
-    response.headers.set(
-      "Access-Control-Allow-Origin",
-      "https://app.ridi.bike",
-    );
+    response.headers.set("Access-Control-Allow-Origin", env.RIDI_APP_URL);
     response.headers.set("Access-Control-Allow-Credentials", "true");
     return response;
   },
