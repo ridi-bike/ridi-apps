@@ -155,6 +155,9 @@ importers:
       '@rn-primitives/popover':
         specifier: ^1.1.0
         version: 1.1.0(@rn-primitives/portal@1.1.0(@types/react@18.2.79)(react-native-web@0.19.13(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-native@0.74.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.3.5(@types/react@18.2.79))(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react-native-web@0.19.13(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-native@0.74.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)
+      '@rn-primitives/portal':
+        specifier: ^1.1.0
+        version: 1.1.0(@types/react@18.2.79)(react-native-web@0.19.13(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-native@0.74.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)
       '@rn-primitives/slot':
         specifier: ^1.0.4
         version: 1.1.0(react-native-web@0.19.13(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-native@0.74.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)

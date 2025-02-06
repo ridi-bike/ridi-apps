@@ -11,7 +11,7 @@ type ScreenFramePropsn = {
 export function ScreenFrame({ children, floating, title }: ScreenFramePropsn) {
   return (
     <>
-      <ScrollView className="min-h-screen w-full bg-white dark:bg-gray-900">
+      <ScrollView className="mb-12 min-h-screen w-full bg-white dark:bg-gray-900">
         <Stack.Screen
           options={{
             header: (props) => (

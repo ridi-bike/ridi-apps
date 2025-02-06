@@ -27,7 +27,13 @@ export default function App() {
     if (session && !bgSyncRunning.current) {
       registerBackgroundFetchAsync().then(() => (bgSyncRunning.current = true));
     } else if (!session) {
-      supabase.auth.signInAnonymously();
+      supabase.auth.getSession().then((s) => {
+        if (s.data.session) {
+          $session.set(s.data.session);
+        } else {
+          supabase.auth.signInAnonymously();
+        }
+      });
       if (bgSyncRunning.current) {
         unregisterBackgroundFetchAsync().then(
           () => (bgSyncRunning.current = false),
