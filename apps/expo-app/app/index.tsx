@@ -24,15 +24,7 @@ export default function Index() {
             Ridi
           </Text>
         </View>
-        <View className="w-full space-y-4">
-          {!session && (
-            <View className="relative flex size-12 w-full justify-center">
-              <View className="absolute size-full animate-pulse rounded-full border-4 border-[#FF5937] opacity-20"></View>
-              <View className="absolute size-full animate-spin rounded-full border-4 border-[#FF5937] border-t-transparent"></View>
-            </View>
-          )}
-          <Auth />
-        </View>
+        <View className="w-full space-y-4">{!session && <Auth />}</View>
       </View>
     </View>
   );
