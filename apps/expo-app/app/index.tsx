@@ -1,18 +1,24 @@
-import { useStore } from "@nanostores/react";
+import { type Session } from "@supabase/supabase-js";
 import { useRouter, useFocusEffect, Stack } from "expo-router";
+import { useState } from "react";
 import { Text, View } from "react-native";
 
 import Auth from "~/components/Auth";
-import { $session } from "~/lib/stores/session-store";
+import { supabase } from "~/lib/supabase";
 
 export default function Index() {
-  const session = useStore($session);
   const router = useRouter();
 
+  const [session, setSession] = useState<Session | null>(null);
+
   useFocusEffect(() => {
-    if (session && !session.user.is_anonymous) {
-      router.replace("/plans");
-    }
+    supabase.auth.onAuthStateChange((_event, session) => {
+      if (session && !session.user.is_anonymous) {
+        router.replace("/plans");
+      } else {
+        setSession(session);
+      }
+    });
   });
 
   return (
