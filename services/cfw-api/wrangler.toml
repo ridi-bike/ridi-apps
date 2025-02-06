@@ -9,8 +9,8 @@ enabled = true
 # Environment Variables
 # https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
 [vars]
-SUPABASE_URL = "http://127.0.0.1:54321"
-RIDI_APP_URL = "http://127.0.0.1:8081"
+SUPABASE_URL = "https://sb.ridi.bike"
+RIDI_APP_URL = "https://app.ridi.bike"
 
 # Note: Use secrets to store sensitive data.
 # https://developers.cloudflare.com/workers/configuration/secrets/
