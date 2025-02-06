@@ -1,44 +1,40 @@
-import { useStore } from "@nanostores/react";
 import { PortalHost } from "@rn-primitives/portal";
+import { type Session } from "@supabase/supabase-js";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   registerBackgroundFetchAsync,
   unregisterBackgroundFetchAsync,
 } from "~/lib/background";
-import { $session } from "~/lib/stores/session-store";
 import { supabase } from "~/lib/supabase";
 import { useEffectOnce } from "~/lib/utils";
 
 const queryClient = new QueryClient();
 
 export default function App() {
+  const [session, setSession] = useState<Session | null>(null);
+
   useEffectOnce(() => {
     supabase.auth.onAuthStateChange((_event, session) => {
-      $session.set(session);
+      setSession(session);
+      if (!session) {
+        supabase.auth.signInAnonymously();
+      }
     });
+    supabase.auth.getSession();
   });
 
   const bgSyncRunning = useRef(false);
-  const session = useStore($session);
+
   useEffect(() => {
     if (session && !bgSyncRunning.current) {
       registerBackgroundFetchAsync().then(() => (bgSyncRunning.current = true));
-    } else if (!session) {
-      supabase.auth.getSession().then((s) => {
-        if (s.data.session) {
-          $session.set(s.data.session);
-        } else {
-          supabase.auth.signInAnonymously();
-        }
-      });
-      if (bgSyncRunning.current) {
-        unregisterBackgroundFetchAsync().then(
-          () => (bgSyncRunning.current = false),
-        );
-      }
+    } else if (!session && bgSyncRunning.current) {
+      unregisterBackgroundFetchAsync().then(
+        () => (bgSyncRunning.current = false),
+      );
     }
   }, [session]);
 
