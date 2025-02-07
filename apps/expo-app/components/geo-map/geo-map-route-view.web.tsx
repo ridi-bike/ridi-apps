@@ -90,7 +90,7 @@ export function GeoMapRouteView({ route, interactive }: GeoMapRouteViewProps) {
       }
       mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
     >
-      {interactive && <NavigationControl position="bottom-left" />}
+      {interactive && <NavigationControl position="bottom-right" />}
       {routeLayer}
     </MapLibre>
   );

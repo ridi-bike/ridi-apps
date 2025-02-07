@@ -26,6 +26,7 @@ import {
   planList,
   routeStatsGet,
   routesGet,
+  rulePackGetById,
   rulePackRoadTagsGet,
   rulePackRoadTagsUpsert,
   rulePacksGet,
@@ -72,7 +73,7 @@ const router = tsr
         ...r,
         system: r.userId === null,
         roadTags: tags
-          .filter((t) => t.ruleSetId === r.id)
+          .filter((t) => t.rulePackId === r.id)
           .reduce(
             (all, curr) => ({ ...all, [curr.tagKey]: curr.value }),
             {} as Record<RoadTags, number | null>,
@@ -96,8 +97,30 @@ const router = tsr
     };
   },
   rulePackUpdate: async ({ body }, ctx) => {
+    if (body.version !== "v1") {
+      return {
+        status: 400,
+        body: {
+          message: "wrong version",
+        },
+      };
+    }
+
+    const rulePackCheck = await rulePackGetById(ctx.db, {
+      id: body.data.id,
+    });
+
+    if (rulePackCheck && !rulePackCheck.userId) {
+      return {
+        status: 400,
+        body: {
+          message: "Cannot modify system rule packs",
+        },
+      };
+    }
     const updatedRec = await rulePacksUpsert(ctx.db, {
       userId: ctx.request.user.id,
+      id: body.data.id,
       name: body.data.name,
     });
     if (!updatedRec) {
@@ -107,7 +130,7 @@ const router = tsr
     await Promise.all(
       Object.entries(body.data.roadTags).map(([tagKey, value]) =>
         rulePackRoadTagsUpsert(ctx.db, {
-          ruleSetId: updatedRec.id,
+          rulePackId: updatedRec.id,
           tagKey,
           value: value as string | null, // it's number but sqlc incorrectly wants a string
           userId: ctx.request.user.id,

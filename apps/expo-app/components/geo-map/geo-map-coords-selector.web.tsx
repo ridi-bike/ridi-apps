@@ -1,5 +1,9 @@
 import * as turf from "@turf/turf";
-import { Map as MapLibre, type MapRef } from "@vis.gl/react-maplibre";
+import {
+  Map as MapLibre,
+  NavigationControl,
+  type MapRef,
+} from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import {
   CircleDotIcon,
@@ -160,6 +164,7 @@ export function GeoMapCoordsSelector({
         </MapMarker>
       )}
       {rountdTripLayer}
+      <NavigationControl position="bottom-right" />
     </MapLibre>
   );
 }

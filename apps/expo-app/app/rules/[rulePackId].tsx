@@ -188,29 +188,31 @@ export default function RulePackDetails() {
     <ScreenFrame
       title="Routing rules"
       floating={
-        <View className="fixed bottom-0 w-full bg-white p-4 dark:bg-gray-800">
-          <Pressable
-            onPress={() => {
-              if (unsavedChangesExist) {
-                rulePackSet({
-                  ...rulePack,
-                  roadTags: roadTags!,
-                });
-              }
-            }}
-            aria-disabled={!unsavedChangesExist}
-            className={cn(
-              "w-full rounded-xl px-4 py-3 font-medium text-white transition-colors",
-              {
-                "bg-[#FF5937] hover:bg-[#FF5937]/90": unsavedChangesExist,
-                "cursor-not-allowed bg-gray-200 dark:bg-gray-700":
-                  !unsavedChangesExist,
-              },
-            )}
-          >
-            <Text className="text-center text-white">Save</Text>
-          </Pressable>
-        </View>
+        !rulePack.system && (
+          <View className="fixed bottom-0 w-full bg-white p-4 dark:bg-gray-800">
+            <Pressable
+              onPress={() => {
+                if (unsavedChangesExist) {
+                  rulePackSet({
+                    ...rulePack,
+                    roadTags: roadTags!,
+                  });
+                }
+              }}
+              aria-disabled={!unsavedChangesExist}
+              className={cn(
+                "w-full rounded-xl px-4 py-3 font-medium text-white transition-colors",
+                {
+                  "bg-[#FF5937] hover:bg-[#FF5937]/90": unsavedChangesExist,
+                  "cursor-not-allowed bg-gray-200 dark:bg-gray-700":
+                    !unsavedChangesExist,
+                },
+              )}
+            >
+              <Text className="text-center text-white">Save</Text>
+            </Pressable>
+          </View>
+        )
       }
     >
       <View className="mx-2 max-w-5xl flex-1">

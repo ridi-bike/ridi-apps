@@ -1,30 +1,32 @@
--- name: rulePacksGet :many 
+-- name: RulePacksGet :many 
 select * from rule_packs
 where rule_packs.user_id = $1
   or rule_packs.user_id is null;
 
--- name: rulePackRoadTagsGet :many
+-- name: RulePackRoadTagsGet :many
 select * from rule_pack_road_tags
 where rule_pack_road_tags.user_id = $1
   or rule_pack_road_tags.user_id is null;
 
--- name: rulePacksUpsert :one
+-- name: RulePacksUpsert :one
 insert into rule_packs (
+  id,
   user_id, 
   name
 )
 values (
   $1,
-  $2
+  $2,
+  $3
 )
 on conflict (id) do update
 set name = excluded.name
 returning *;
 
--- name: rulePackRoadTagsUpsert :one
+-- name: RulePackRoadTagsUpsert :one
 insert into rule_pack_road_tags (
   user_id,
-  rule_set_id,
+  rule_pack_id,
   tag_key,
   value
 )
@@ -34,9 +36,13 @@ values (
   $3,
   $4
 )
-on conflict (rule_set_id, tag_key) do update
+on conflict (rule_pack_id, tag_key) do update
 set value = excluded.value
 returning *;
+
+-- name: RulePackGetById :one
+select * from rule_packs
+where rule_packs.id = $1;
 
 -- name: RoutesGet :many
 with points_array as (
