@@ -213,27 +213,27 @@ export type Database = {
       }
       rule_pack_road_tags: {
         Row: {
-          rule_set_id: string
+          rule_pack_id: string
           tag_key: string
           user_id: string | null
           value: number | null
         }
         Insert: {
-          rule_set_id: string
+          rule_pack_id: string
           tag_key: string
           user_id?: string | null
           value?: number | null
         }
         Update: {
-          rule_set_id?: string
+          rule_pack_id?: string
           tag_key?: string
           user_id?: string | null
           value?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "rule_pack_road_tags_rule_set_id_fkey"
-            columns: ["rule_set_id"]
+            foreignKeyName: "rule_pack_road_tags_rule_pack_id_fkey"
+            columns: ["rule_pack_id"]
             isOneToOne: false
             referencedRelation: "rule_packs"
             referencedColumns: ["id"]

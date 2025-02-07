@@ -5,7 +5,10 @@ import { Link, useRouter } from "expo-router";
 import {
   Compass,
   Crosshair,
+  Locate,
+  LocateFixed,
   MapPin,
+  MapPinned,
   Navigation,
   Route,
   Search,
@@ -18,8 +21,10 @@ import * as z from "zod";
 import { GeoMapCoordsSelector } from "~/components/geo-map/geo-map-coords-selector";
 import { DIRECTIONS, getCardinalDirection } from "~/components/geo-map/util";
 import { LocationPermsNotGiven } from "~/components/LocationPermsNotGiven";
+import { RulePackSelectDialog } from "~/components/rule-pack-select-dialog";
 import { ScreenFrame } from "~/components/screen-frame";
 import { useStorePlans } from "~/lib/stores/plans-store";
+import { useStoreRulePacks } from "~/lib/stores/rules-store";
 import { useUrlParams } from "~/lib/url-params";
 import { cn } from "~/lib/utils";
 
@@ -33,17 +38,14 @@ export default function PlansNew() {
   const { planAdd } = useStorePlans();
   const [startCoords, setStartCoords] = useUrlParams("start", coordsSchema);
   const [finishCoords, setFinishCoords] = useUrlParams("finish", coordsSchema);
-  const [isRoundTrip, setIsRoundTrip] = useUrlParams<boolean>(
-    "round-trip",
-    z.boolean(),
-  );
-  const [selectedDistance, setSelectedDistance] = useUrlParams<number>(
+  const [isRoundTrip, setIsRoundTrip] = useUrlParams("round-trip", z.boolean());
+  const [selectedDistance, setSelectedDistance] = useUrlParams(
     "distance",
     z.number(),
   );
-  const [bearing, setBearing] = useUrlParams<number>("bearing", z.number());
+  const [bearing, setBearing] = useUrlParams("bearing", z.number());
   const [findCoords, setFindCoords] = useState(false);
-  const [searchPoints, setSearchPoints] = useUrlParams<Coords[]>(
+  const [searchPoints, setSearchPoints] = useUrlParams(
     "search-results",
     z.array(coordsSchema),
   );
@@ -52,23 +54,42 @@ export default function PlansNew() {
   const [currentCoords, setCurrentCoords] = useState<Coords | null>(null);
 
   useEffect(() => {
-    if (isRoundTrip) {
-      setFinishCoords();
-      if (bearing === undefined) {
-        setBearing(0);
+    // set immediate is needed to let the stack mount first and then update params
+    // this happens when reloading browser with isRoundTrip query param
+    setImmediate(() => {
+      if (isRoundTrip) {
+        if (finishCoords) {
+          setFinishCoords();
+        }
+        if (bearing === undefined) {
+          setBearing(0);
+        }
+        if (selectedDistance === undefined) {
+          setSelectedDistance(100);
+        }
       }
-      if (selectedDistance === undefined) {
-        setSelectedDistance(100);
-      }
-    }
+    });
   }, [
     bearing,
+    finishCoords,
     isRoundTrip,
     selectedDistance,
     setBearing,
     setFinishCoords,
     setSelectedDistance,
   ]);
+
+  const [rulePackId, setRulePackId] = useUrlParams("rule", z.string());
+  const { data: rulePacks } = useStoreRulePacks();
+  useEffect(() => {
+    if (!rulePackId) {
+      setImmediate(() =>
+        setRulePackId(
+          rulePacks.find((rp) => !rp.system)?.id || rulePacks[0].id,
+        ),
+      );
+    }
+  }, [rulePackId, rulePacks, setRulePackId]);
 
   const getCurrentLocation = useCallback(async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -215,6 +236,20 @@ export default function PlansNew() {
             </Pressable>
           </View>
         </View>
+        <View className="mb-4 flex flex-row gap-2">
+          <RulePackSelectDialog
+            title="Select rules"
+            setRoutePackId={setRulePackId}
+          >
+            <Pressable className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-900">
+              <Navigation className="size-4 dark:text-gray-200" />
+              <Text className="text-sm dark:text-gray-200">
+                Routing rules:{" "}
+                {rulePacks.find((rp) => rp.id === rulePackId)?.name || "..."}
+              </Text>
+            </Pressable>
+          </RulePackSelectDialog>
+        </View>
         <View className="h-[400px] w-full overflow-hidden rounded-xl border-2 border-black dark:border-gray-700">
           <GeoMapCoordsSelector
             isRoundTrip={isRoundTrip || false}
@@ -248,8 +283,8 @@ export default function PlansNew() {
             onPress={getCurrentLocation}
             className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-900"
           >
-            <Navigation className="size-4 dark:text-gray-200" />
-            <Text className="text-sm dark:text-gray-200">My Location</Text>
+            <Locate className="size-4 dark:text-gray-200" />
+            <Text className="text-sm dark:text-gray-200">Me</Text>
           </Pressable>
           <Pressable
             onPress={() => setFindCoords((v) => !v)}
@@ -262,8 +297,8 @@ export default function PlansNew() {
               },
             )}
           >
-            <MapPin className="size-4 dark:text-gray-200" />
-            <Text className="text-sm dark:text-gray-200">Map Location</Text>
+            <MapPinned className="size-4 dark:text-gray-200" />
+            <Text className="text-sm dark:text-gray-200">Point on map</Text>
           </Pressable>
           {!searchPoints && (
             <Link

@@ -2,22 +2,22 @@
 
 import { Sql } from "postgres";
 
-export const rulePacksGetQuery = `-- name: rulePacksGet :many
+export const rulePacksGetQuery = `-- name: RulePacksGet :many
 select id, user_id, name from rule_packs
 where rule_packs.user_id = $1
   or rule_packs.user_id is null`;
 
-export interface rulePacksGetArgs {
+export interface RulePacksGetArgs {
     userId: string | null;
 }
 
-export interface rulePacksGetRow {
+export interface RulePacksGetRow {
     id: string;
     userId: string | null;
     name: string;
 }
 
-export async function rulePacksGet(sql: Sql, args: rulePacksGetArgs): Promise<rulePacksGetRow[]> {
+export async function rulePacksGet(sql: Sql, args: RulePacksGetArgs): Promise<RulePacksGetRow[]> {
     return (await sql.unsafe(rulePacksGetQuery, [args.userId]).values()).map(row => ({
         id: row[0],
         userId: row[1],
@@ -25,57 +25,60 @@ export async function rulePacksGet(sql: Sql, args: rulePacksGetArgs): Promise<ru
     }));
 }
 
-export const rulePackRoadTagsGetQuery = `-- name: rulePackRoadTagsGet :many
-select user_id, rule_set_id, tag_key, value from rule_pack_road_tags
+export const rulePackRoadTagsGetQuery = `-- name: RulePackRoadTagsGet :many
+select user_id, rule_pack_id, tag_key, value from rule_pack_road_tags
 where rule_pack_road_tags.user_id = $1
   or rule_pack_road_tags.user_id is null`;
 
-export interface rulePackRoadTagsGetArgs {
+export interface RulePackRoadTagsGetArgs {
     userId: string | null;
 }
 
-export interface rulePackRoadTagsGetRow {
+export interface RulePackRoadTagsGetRow {
     userId: string | null;
-    ruleSetId: string;
+    rulePackId: string;
     tagKey: string;
     value: number | null;
 }
 
-export async function rulePackRoadTagsGet(sql: Sql, args: rulePackRoadTagsGetArgs): Promise<rulePackRoadTagsGetRow[]> {
+export async function rulePackRoadTagsGet(sql: Sql, args: RulePackRoadTagsGetArgs): Promise<RulePackRoadTagsGetRow[]> {
     return (await sql.unsafe(rulePackRoadTagsGetQuery, [args.userId]).values()).map(row => ({
         userId: row[0],
-        ruleSetId: row[1],
+        rulePackId: row[1],
         tagKey: row[2],
         value: row[3]
     }));
 }
 
-export const rulePacksUpsertQuery = `-- name: rulePacksUpsert :one
+export const rulePacksUpsertQuery = `-- name: RulePacksUpsert :one
 insert into rule_packs (
+  id,
   user_id, 
   name
 )
 values (
   $1,
-  $2
+  $2,
+  $3
 )
 on conflict (id) do update
 set name = excluded.name
 returning id, user_id, name`;
 
-export interface rulePacksUpsertArgs {
-    userId: string | null;
-    name: string;
-}
-
-export interface rulePacksUpsertRow {
+export interface RulePacksUpsertArgs {
     id: string;
     userId: string | null;
     name: string;
 }
 
-export async function rulePacksUpsert(sql: Sql, args: rulePacksUpsertArgs): Promise<rulePacksUpsertRow | null> {
-    const rows = await sql.unsafe(rulePacksUpsertQuery, [args.userId, args.name]).values();
+export interface RulePacksUpsertRow {
+    id: string;
+    userId: string | null;
+    name: string;
+}
+
+export async function rulePacksUpsert(sql: Sql, args: RulePacksUpsertArgs): Promise<RulePacksUpsertRow | null> {
+    const rows = await sql.unsafe(rulePacksUpsertQuery, [args.id, args.userId, args.name]).values();
     if (rows.length !== 1) {
         return null;
     }
@@ -90,10 +93,10 @@ export async function rulePacksUpsert(sql: Sql, args: rulePacksUpsertArgs): Prom
     };
 }
 
-export const rulePackRoadTagsUpsertQuery = `-- name: rulePackRoadTagsUpsert :one
+export const rulePackRoadTagsUpsertQuery = `-- name: RulePackRoadTagsUpsert :one
 insert into rule_pack_road_tags (
   user_id,
-  rule_set_id,
+  rule_pack_id,
   tag_key,
   value
 )
@@ -103,26 +106,26 @@ values (
   $3,
   $4
 )
-on conflict (rule_set_id, tag_key) do update
+on conflict (rule_pack_id, tag_key) do update
 set value = excluded.value
-returning user_id, rule_set_id, tag_key, value`;
+returning user_id, rule_pack_id, tag_key, value`;
 
-export interface rulePackRoadTagsUpsertArgs {
+export interface RulePackRoadTagsUpsertArgs {
     userId: string | null;
-    ruleSetId: string;
+    rulePackId: string;
     tagKey: string;
     value: string | null;
 }
 
-export interface rulePackRoadTagsUpsertRow {
+export interface RulePackRoadTagsUpsertRow {
     userId: string | null;
-    ruleSetId: string;
+    rulePackId: string;
     tagKey: string;
     value: number | null;
 }
 
-export async function rulePackRoadTagsUpsert(sql: Sql, args: rulePackRoadTagsUpsertArgs): Promise<rulePackRoadTagsUpsertRow | null> {
-    const rows = await sql.unsafe(rulePackRoadTagsUpsertQuery, [args.userId, args.ruleSetId, args.tagKey, args.value]).values();
+export async function rulePackRoadTagsUpsert(sql: Sql, args: RulePackRoadTagsUpsertArgs): Promise<RulePackRoadTagsUpsertRow | null> {
+    const rows = await sql.unsafe(rulePackRoadTagsUpsertQuery, [args.userId, args.rulePackId, args.tagKey, args.value]).values();
     if (rows.length !== 1) {
         return null;
     }
@@ -132,9 +135,39 @@ export async function rulePackRoadTagsUpsert(sql: Sql, args: rulePackRoadTagsUps
     }
     return {
         userId: row[0],
-        ruleSetId: row[1],
+        rulePackId: row[1],
         tagKey: row[2],
         value: row[3]
+    };
+}
+
+export const rulePackGetByIdQuery = `-- name: RulePackGetById :one
+select id, user_id, name from rule_packs
+where rule_packs.id = $1`;
+
+export interface RulePackGetByIdArgs {
+    id: string;
+}
+
+export interface RulePackGetByIdRow {
+    id: string;
+    userId: string | null;
+    name: string;
+}
+
+export async function rulePackGetById(sql: Sql, args: RulePackGetByIdArgs): Promise<RulePackGetByIdRow | null> {
+    const rows = await sql.unsafe(rulePackGetByIdQuery, [args.id]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        userId: row[1],
+        name: row[2]
     };
 }
 
