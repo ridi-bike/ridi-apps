@@ -97,7 +97,7 @@ export type Database = {
             foreignKeyName: "plans_rule_set_id_fkey"
             columns: ["rule_set_id"]
             isOneToOne: false
-            referencedRelation: "rule_packs"
+            referencedRelation: "rule_sets"
             referencedColumns: ["id"]
           },
         ]
@@ -211,36 +211,36 @@ export type Database = {
           },
         ]
       }
-      rule_pack_road_tags: {
+      rule_set_road_tags: {
         Row: {
-          rule_pack_id: string
+          rule_set_id: string
           tag_key: string
           user_id: string | null
           value: number | null
         }
         Insert: {
-          rule_pack_id: string
+          rule_set_id: string
           tag_key: string
           user_id?: string | null
           value?: number | null
         }
         Update: {
-          rule_pack_id?: string
+          rule_set_id?: string
           tag_key?: string
           user_id?: string | null
           value?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "rule_pack_road_tags_rule_pack_id_fkey"
-            columns: ["rule_pack_id"]
+            foreignKeyName: "rule_set_road_tags_rule_set_id_fkey"
+            columns: ["rule_set_id"]
             isOneToOne: false
-            referencedRelation: "rule_packs"
+            referencedRelation: "rule_sets"
             referencedColumns: ["id"]
           },
         ]
       }
-      rule_packs: {
+      rule_sets: {
         Row: {
           id: string
           name: string

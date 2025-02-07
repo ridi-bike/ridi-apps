@@ -1,36 +1,36 @@
 
-create table rule_packs (
+create table rule_sets (
 	id text not null default ksuid() primary key,
 	user_id uuid references auth.users on delete cascade on update cascade,
   name text not null
 );
 
-insert into rule_packs (name) 
+insert into rule_sets (name) 
 values 
 ('Only Paved'), 
 ('Prefer Unpaved');
 
 create policy "select only on user_id match or user_id null"
-on public.rule_packs
+on public.rule_sets
 as permissive
 for select
 to public
 using ((( SELECT auth.uid() AS uid) = user_id or user_id is null));
 
-create table rule_pack_road_tags (
+create table rule_set_road_tags (
 	user_id uuid references auth.users on delete cascade on update cascade,
-  rule_pack_id text not null references public.rule_packs on delete cascade on update cascade,
+  rule_set_id text not null references public.rule_sets on delete cascade on update cascade,
   tag_key text not null,
   value smallint,
-  primary key (rule_pack_id, tag_key)
+  primary key (rule_set_id, tag_key)
 );
 
-insert into rule_pack_road_tags (
-  rule_pack_id,
+insert into rule_set_road_tags (
+  rule_set_id,
   tag_key,
   value
 )
-select id, tag, 0 from rule_packs, unnest(array[
+select id, tag, 0 from rule_sets, unnest(array[
   'motorway',
   'trunk',
   'primary',
@@ -87,18 +87,18 @@ select id, tag, 0 from rule_packs, unnest(array[
   'impassable'
 ]) tag;
 
-update rule_pack_road_tags
+update rule_set_road_tags
 set value = 255
 where tag_key in (
   'tertiary',
   'unclassified'
 )
-and rule_pack_id = (
-  select id from rule_packs
+and rule_set_id = (
+  select id from rule_sets
   where name = 'Only Paved' 
 );
 
-update rule_pack_road_tags
+update rule_set_road_tags
 set value = null
 where tag_key in (
   'track',
@@ -127,12 +127,12 @@ where tag_key in (
   'rubber',
   'tiles'
 )
-and rule_pack_id = (
-  select id from rule_packs
+and rule_set_id = (
+  select id from rule_sets
   where name = 'Only Paved' 
 );
 
-update rule_pack_road_tags
+update rule_set_road_tags
 set value = 255
 where tag_key in (
   'tertiary',
@@ -153,17 +153,17 @@ where tag_key in (
   'mud',
   'sand'
 )
-and rule_pack_id = (
-  select id from rule_packs
+and rule_set_id = (
+  select id from rule_sets
   where name = 'Prefer Unpaved' 
 );
 
 create policy "select only on user_id match or user_id null"
-on public.rule_pack_road_tags
+on public.rule_set_road_tags
 as permissive
 for select
 to public
 using ((( SELECT auth.uid() AS uid) = user_id or user_id is null));
 
 alter table plans
-  add column rule_set_id text not null references rule_packs;
+  add column rule_set_id text not null references rule_sets;

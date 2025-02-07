@@ -4,7 +4,7 @@ import superjson from "superjson";
 
 import { type Plan, type PlanNew } from "./stores/plans-store";
 import { type Route } from "./stores/routes-store";
-import { type RulePackNew, type RulePack } from "./stores/rules-store";
+import { type RuleSetNew, type RuleSet } from "./stores/rules-store";
 
 const mmkv = new MMKV();
 const storageVersion = "sv1";
@@ -54,11 +54,8 @@ export function getRouteStorage(routeId: string): Storage<Route, "v1"> {
   return routeStorages[routeId];
 }
 
-export const rulePacksStorage = new Storage<RulePack[], "v1">(
-  "rule-packs",
-  "v1",
-);
-export const rulePacksPendingStorage = new Storage<RulePackNew[], "v1">(
-  "rule-packs-pending",
+export const ruleSetsStorage = new Storage<RuleSet[], "v1">("rule-sets", "v1");
+export const ruleSetsPendingStorage = new Storage<RuleSetNew[], "v1">(
+  "rule-sets-pending",
   "v1",
 );

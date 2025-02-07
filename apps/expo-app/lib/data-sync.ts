@@ -3,28 +3,28 @@ import {
   getRouteStorage,
   plansPendingStorage,
   plansStorage,
-  rulePacksPendingStorage,
-  rulePacksStorage,
+  ruleSetsPendingStorage,
+  ruleSetsStorage,
 } from "./storage";
 import { getSuccessResponseOrThrow } from "./stores/util";
 
 export async function dataSyncPendingPush() {
-  const rulePacksPending = rulePacksPendingStorage.get();
-  if (rulePacksPending) {
-    while (rulePacksPending.length) {
-      const rulePack = rulePacksPending[0]!;
-      const result = await apiClient.rulePackUpdate({
+  const ruleSetsPending = ruleSetsPendingStorage.get();
+  if (ruleSetsPending) {
+    while (ruleSetsPending.length) {
+      const ruleSet = ruleSetsPending[0]!;
+      const result = await apiClient.ruleSetUpdate({
         body: {
-          version: rulePacksPendingStorage.dataVersion,
-          data: rulePack,
+          version: ruleSetsPendingStorage.dataVersion,
+          data: ruleSet,
         },
       });
       if (result.status !== 201) {
         console.error("Rule Pack Set Error", result.body);
         throw new Error(`Rule Pack Set Error`, { cause: result.body });
       }
-      rulePacksPending.shift();
-      rulePacksPendingStorage.set(rulePacksPending);
+      ruleSetsPending.shift();
+      ruleSetsPendingStorage.set(ruleSetsPending);
     }
   }
   const plansPending = plansPendingStorage.get();
@@ -48,15 +48,15 @@ export async function dataSyncPendingPush() {
 }
 
 export async function dataSyncPull() {
-  const rulePacks = getSuccessResponseOrThrow(
+  const ruleSets = getSuccessResponseOrThrow(
     200,
-    await apiClient.rulePacksList({
+    await apiClient.ruleSetsList({
       query: {
-        version: rulePacksStorage.dataVersion,
+        version: ruleSetsStorage.dataVersion,
       },
     }),
   );
-  rulePacksStorage.set(rulePacks.data);
+  ruleSetsStorage.set(ruleSets.data);
   const plans = getSuccessResponseOrThrow(
     200,
     await apiClient.plansList({

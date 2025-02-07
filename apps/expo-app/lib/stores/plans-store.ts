@@ -71,6 +71,7 @@ export function useStorePlans() {
       distance: number;
       bearing: number | null;
       tripType: "round-trip" | "start-finish";
+      ruleSetId: string;
     }): string => {
       const id = generate();
       const plansPendingUpdated = [
@@ -86,6 +87,7 @@ export function useStorePlans() {
           bearing: planNew.bearing,
           tripType: planNew.tripType,
           createdAt: new Date(),
+          ruleSetId: planNew.ruleSetId,
         },
       ];
       plansPendingStorage.set(plansPendingUpdated);

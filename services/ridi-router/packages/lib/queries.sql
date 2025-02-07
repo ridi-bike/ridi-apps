@@ -1,3 +1,7 @@
+-- name: RulePackRoadTagsGet :many
+select * from rule_set_road_tags
+where rule_set_id = $1;
+
 -- name: RegionInsertOrUpdate :one
 insert into regions
 (region, pbf_md5, version, geojson, polygon)
