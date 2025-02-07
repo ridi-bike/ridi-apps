@@ -31,6 +31,16 @@ insert into rule_pack_road_tags (
   value
 )
 select id, tag, 0 from rule_packs, unnest(array[
+  'motorway',
+  'trunk',
+  'primary',
+  'secondary',
+  'tertiary',
+  'unclassified',
+  'residential',
+  'living_street',
+  'track',
+  'path',
   'paved',
   'asphalt',
   'chipseal',
