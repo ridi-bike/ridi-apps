@@ -231,7 +231,9 @@ export const rulePacksListSchema = z.discriminatedUnion("version", [
     ),
   }),
 ]);
-export const rulePacksSetSchema = z.discriminatedUnion("version", [
+export type RulePacksListResponse = z.infer<typeof rulePacksListSchema>;
+
+export const rulePackSetSchema = z.discriminatedUnion("version", [
   z.object({
     version: z.literal("v1"),
     data: z.object({
@@ -241,6 +243,7 @@ export const rulePacksSetSchema = z.discriminatedUnion("version", [
     }),
   }),
 ]);
+export type RulePacksSetRequest = z.infer<typeof rulePackSetSchema>;
 
 export const apiContract = c.router({
   rulePacksList: {
@@ -263,7 +266,7 @@ export const apiContract = c.router({
   rulePackUpdate: {
     method: "POST",
     path: "/user/rules/packs",
-    body: rulePacksSetSchema,
+    body: rulePackSetSchema,
     responses: {
       201: z.object({
         version: z.literal("v1"),
