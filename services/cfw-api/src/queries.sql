@@ -1,15 +1,15 @@
 -- name: RulePacksGet :many 
-select * from rule_packs
-where rule_packs.user_id = $1
-  or rule_packs.user_id is null;
+select * from rule_sets
+where rule_sets.user_id = $1
+  or rule_sets.user_id is null;
 
 -- name: RulePackRoadTagsGet :many
-select * from rule_pack_road_tags
-where rule_pack_road_tags.user_id = $1
-  or rule_pack_road_tags.user_id is null;
+select * from rule_set_road_tags
+where rule_set_road_tags.user_id = $1
+  or rule_set_road_tags.user_id is null;
 
 -- name: RulePacksUpsert :one
-insert into rule_packs (
+insert into rule_sets (
   id,
   user_id, 
   name
@@ -24,9 +24,9 @@ set name = excluded.name
 returning *;
 
 -- name: RulePackRoadTagsUpsert :one
-insert into rule_pack_road_tags (
+insert into rule_set_road_tags (
   user_id,
-  rule_pack_id,
+  rule_set_id,
   tag_key,
   value
 )
@@ -36,13 +36,13 @@ values (
   $3,
   $4
 )
-on conflict (rule_pack_id, tag_key) do update
+on conflict (rule_set_id, tag_key) do update
 set value = excluded.value
 returning *;
 
 -- name: RulePackGetById :one
-select * from rule_packs
-where rule_packs.id = $1;
+select * from rule_sets
+where rule_sets.id = $1;
 
 -- name: RoutesGet :many
 with points_array as (
@@ -118,7 +118,8 @@ insert into plans (
   finish_desc, 
   trip_type,
   distance,
-  bearing
+  bearing,
+  rule_set_id
 )
 
 values (
@@ -133,6 +134,7 @@ values (
   $9, 
   $10,
   $11,
-  $12
+  $12,
+  $13
 )
 returning id;

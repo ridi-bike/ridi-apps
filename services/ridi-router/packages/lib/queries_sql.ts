@@ -2,6 +2,30 @@
 
 import { Sql } from "postgres";
 
+export const rulePackRoadTagsGetQuery = `-- name: RuleSetRoadTagsGet :many
+select user_id, rule_set_id, tag_key, value from rule_set_road_tags
+where rule_set_id = $1`;
+
+export interface RuleSetRoadTagsGetArgs {
+    ruleSetId: string;
+}
+
+export interface RuleSetRoadTagsGetRow {
+    userId: string | null;
+    ruleSetId: string;
+    tagKey: string;
+    value: number | null;
+}
+
+export async function rulePackRoadTagsGet(sql: Sql, args: RuleSetRoadTagsGetArgs): Promise<RuleSetRoadTagsGetRow[]> {
+    return (await sql.unsafe(rulePackRoadTagsGetQuery, [args.ruleSetId]).values()).map(row => ({
+        userId: row[0],
+        ruleSetId: row[1],
+        tagKey: row[2],
+        value: row[3]
+    }));
+}
+
 export const regionInsertOrUpdateQuery = `-- name: RegionInsertOrUpdate :one
 insert into regions
 (region, pbf_md5, version, geojson, polygon)

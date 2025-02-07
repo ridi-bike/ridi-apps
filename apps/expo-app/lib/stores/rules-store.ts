@@ -1,6 +1,6 @@
 import {
-  type RulePacksSetRequest,
-  type RulePacksListResponse,
+  type RuleSetsSetRequest,
+  type RuleSetsListResponse,
 } from "@ridi/api-contracts";
 import { useQuery } from "@tanstack/react-query";
 import { useFocusEffect } from "expo-router";
@@ -9,71 +9,71 @@ import { generate } from "xksuid";
 
 import { apiClient } from "../api";
 import { dataSyncPendingPush } from "../data-sync";
-import { rulePacksPendingStorage, rulePacksStorage } from "../storage";
+import { ruleSetsPendingStorage, ruleSetsStorage } from "../storage";
 import { supabase } from "../supabase";
 
 import { getSuccessResponseOrThrow } from "./util";
 
-export type RulePack = RulePacksListResponse["data"][number];
-export type RulePackNew = RulePacksSetRequest["data"];
+export type RuleSet = RuleSetsListResponse["data"][number];
+export type RuleSetNew = RuleSetsSetRequest["data"];
 
-export function useStoreRulePacks() {
-  const [rulePacksPending, setRulePacksPending] = useState(
-    rulePacksPendingStorage.get() || [],
+export function useStoreRuleSets() {
+  const [ruleSetsPending, setRuleSetsPending] = useState(
+    ruleSetsPendingStorage.get() || [],
   );
 
   const refresh = useCallback(() => {
-    setRulePacksPending(rulePacksPendingStorage.get() || []);
+    setRuleSetsPending(ruleSetsPendingStorage.get() || []);
   }, []);
 
   useFocusEffect(refresh);
 
   const { data, error, status, refetch } = useQuery({
-    queryKey: ["rule-packs"],
+    queryKey: ["rule-sets"],
     queryFn: () =>
       apiClient
-        .rulePacksList({ query: { version: rulePacksStorage.dataVersion } })
+        .ruleSetsList({ query: { version: ruleSetsStorage.dataVersion } })
         .then((r) => getSuccessResponseOrThrow(200, r)),
     initialData: {
-      version: rulePacksStorage.dataVersion,
-      data: rulePacksStorage.get() || [],
+      version: ruleSetsStorage.dataVersion,
+      data: ruleSetsStorage.get() || [],
     },
   });
 
   useEffect(() => {
     if (data) {
-      rulePacksStorage.set(data.data);
+      ruleSetsStorage.set(data.data);
     }
   }, [data]);
 
-  const dataWithPending = useMemo((): RulePack[] => {
-    const plans: RulePack[] = rulePacksPending.map((p) => ({
+  const dataWithPending = useMemo((): RuleSet[] => {
+    const plans: RuleSet[] = ruleSetsPending.map((p) => ({
       ...p,
       system: false,
     }));
 
     return [...data.data, ...plans];
-  }, [data.data, rulePacksPending]);
+  }, [data.data, ruleSetsPending]);
 
-  const rulePackSet = useCallback(
+  const ruleSetSet = useCallback(
     (
-      rulePackNewValues: Omit<RulePackNew, "id"> & { id: string | null },
+      ruleSetNewValues: Omit<RuleSetNew, "id"> & { id: string | null },
     ): string => {
-      rulePackNewValues.id = rulePackNewValues.id || generate();
-      const rulePacksPendingUpdated = [
-        ...rulePacksPending,
+      ruleSetNewValues.id = ruleSetNewValues.id || generate();
+      const ruleSetsPendingUpdated = [
+        ...ruleSetsPending,
         {
-          ...rulePackNewValues,
-        } as RulePackNew,
+          ...ruleSetNewValues,
+        } as RuleSetNew,
       ];
-      rulePacksPendingStorage.set(rulePacksPendingUpdated);
-      setRulePacksPending(rulePacksPendingUpdated);
+      ruleSetsPendingStorage.set(ruleSetsPendingUpdated);
+      setRuleSetsPending(ruleSetsPendingUpdated);
       dataSyncPendingPush()
         .then(() => console.log("Ad hoc push done"))
         .catch((err) => console.error("Ad hoc push error", err));
-      return rulePackNewValues.id;
+      return ruleSetNewValues.id;
     },
-    [rulePacksPending],
+    [ruleSetsPending],
   );
 
   useEffect(() => {
@@ -93,5 +93,5 @@ export function useStoreRulePacks() {
     };
   }, [refetch]);
 
-  return { data: dataWithPending, error, status, rulePackSet };
+  return { data: dataWithPending, error, status, ruleSetSet };
 }

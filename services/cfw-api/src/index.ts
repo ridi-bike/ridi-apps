@@ -14,7 +14,7 @@ import {
   apiContract,
   plansListResponseSchema,
   routeGetRespopnseSchema,
-  rulePacksListSchema,
+  ruleSetsListSchema,
 } from "@ridi/api-contracts";
 import { User, createClient } from "@supabase/supabase-js";
 import { Database } from "./supabase";
@@ -26,11 +26,11 @@ import {
   planList,
   routeStatsGet,
   routesGet,
-  rulePackGetById,
-  rulePackRoadTagsGet,
-  rulePackRoadTagsUpsert,
-  rulePacksGet,
-  rulePacksUpsert,
+  ruleSetGetById,
+  ruleSetRoadTagsGet,
+  ruleSetRoadTagsUpsert,
+  ruleSetsGet,
+  ruleSetsUpsert,
 } from "./queries_sql";
 import { lookupCooordsInfo } from "./maps/lookup";
 
@@ -51,7 +51,7 @@ const router = tsr
     logger: RidiLogger;
   }>()
   .routerWithMiddleware(apiContract)<{ user: User }>({
-  rulePacksList: async ({ query }, ctx) => {
+  ruleSetsList: async ({ query }, ctx) => {
     if (query.version !== "v1") {
       return {
         status: 400,
@@ -60,10 +60,10 @@ const router = tsr
         },
       };
     }
-    const rules = await rulePacksGet(ctx.db, {
+    const rules = await ruleSetsGet(ctx.db, {
       userId: ctx.request.user.id,
     });
-    const tags = await rulePackRoadTagsGet(ctx.db, {
+    const tags = await ruleSetRoadTagsGet(ctx.db, {
       userId: ctx.request.user.id,
     });
 
@@ -73,14 +73,14 @@ const router = tsr
         ...r,
         system: r.userId === null,
         roadTags: tags
-          .filter((t) => t.rulePackId === r.id)
+          .filter((t) => t.ruleSetId === r.id)
           .reduce(
             (all, curr) => ({ ...all, [curr.tagKey]: curr.value }),
             {} as Record<RoadTags, number | null>,
           ),
       })),
     };
-    const validated = rulePacksListSchema.safeParse(data);
+    const validated = ruleSetsListSchema.safeParse(data);
 
     if (!validated.success) {
       return {
@@ -96,7 +96,7 @@ const router = tsr
       body: validated.data,
     };
   },
-  rulePackUpdate: async ({ body }, ctx) => {
+  ruleSetUpdate: async ({ body }, ctx) => {
     if (body.version !== "v1") {
       return {
         status: 400,
@@ -106,19 +106,19 @@ const router = tsr
       };
     }
 
-    const rulePackCheck = await rulePackGetById(ctx.db, {
+    const ruleSetCheck = await ruleSetGetById(ctx.db, {
       id: body.data.id,
     });
 
-    if (rulePackCheck && !rulePackCheck.userId) {
+    if (ruleSetCheck && !ruleSetCheck.userId) {
       return {
         status: 400,
         body: {
-          message: "Cannot modify system rule packs",
+          message: "Cannot modify system rule sets",
         },
       };
     }
-    const updatedRec = await rulePacksUpsert(ctx.db, {
+    const updatedRec = await ruleSetsUpsert(ctx.db, {
       userId: ctx.request.user.id,
       id: body.data.id,
       name: body.data.name,
@@ -129,8 +129,8 @@ const router = tsr
 
     await Promise.all(
       Object.entries(body.data.roadTags).map(([tagKey, value]) =>
-        rulePackRoadTagsUpsert(ctx.db, {
-          rulePackId: updatedRec.id,
+        ruleSetRoadTagsUpsert(ctx.db, {
+          ruleSetId: updatedRec.id,
           tagKey,
           value: value as string | null, // it's number but sqlc incorrectly wants a string
           userId: ctx.request.user.id,
@@ -214,6 +214,7 @@ const router = tsr
       startDesc: startFinishDesc[0],
       finishDesc: startFinishDesc[1],
       userId: ctx.request.user.id,
+      ruleSetId:
     });
 
     if (!newPlan) {

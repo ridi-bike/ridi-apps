@@ -3,6 +3,8 @@ import { DenoCommand, pg } from "@ridi-router/lib";
 import { RidiLogger } from "@ridi-router/logging/main.ts";
 import { PgClient } from "@ridi-router/lib";
 import { EnvVariables } from "./env-variables.ts";
+import { ruleSetRoadTagsGet } from "../packages/lib/queries_sql.ts";
+import { getTagSection } from "./roadTags.ts";
 type RoadTagStats = Record<string, { len_m: number; percentage: number }>;
 type RidiRouterErr = { err: string };
 type RidiRouterOk = {
@@ -136,6 +138,25 @@ export class PlanProcessor {
 
     this.routerStore.startRegionReq(region.region, planId);
 
+    const rules = await ruleSetRoadTagsGet(this.pgClient, {
+      ruleSetId: planRecord.ruleSetId,
+    });
+
+    const ruleInput = rules.reduce(
+      (all, curr) => {
+        const tagSection = getTagSection(curr.tagKey);
+        const newRule: { action: string; value?: number } = {
+          action: curr.value === null ? "avoid" : "priority",
+        };
+        if (curr.value !== null) {
+          newRule.value = curr.value;
+        }
+        all[tagSection][curr.tagKey] = newRule;
+        return all;
+      },
+      {} as Record<string, Record<string, { action: string; value?: number }>>,
+    );
+
     const { code, stdout, stderr } = await this.denoCommand.executeWithStdin(
       this.env.routerBin,
       {
@@ -163,7 +184,7 @@ export class PlanProcessor {
                 "--distance",
                 planRecord.distance,
               ],
-        stdinContent: "{}",
+        stdinContent: JSON.stringify(ruleInput),
       },
     );
 

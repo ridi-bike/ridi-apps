@@ -85,6 +85,7 @@ export const plansListResponseSchema = z.discriminatedUnion("version", [
         tripType: planTypeSchema,
         distance: z.coerce.number(),
         bearing: bearingOut,
+        ruleSetId: z.string(),
         routes: z.array(
           z.object({
             routeId: z.string(),
@@ -113,6 +114,7 @@ export const planCreateRequestSchema = z.discriminatedUnion("version", [
       bearing: bearingIn,
       tripType: planTypeSchema,
       distance: z.number().transform((t) => (t ? t.toString() : null)),
+      ruleSetId: z.string(),
     }),
   }),
 ]);
@@ -218,7 +220,7 @@ const ruleRoadTagchema = z.object({
   ...createSchema(roadSmoothnessKeys),
 });
 
-export const rulePacksListSchema = z.discriminatedUnion("version", [
+export const ruleSetsListSchema = z.discriminatedUnion("version", [
   z.object({
     version: z.literal("v1"),
     data: z.array(
@@ -231,9 +233,9 @@ export const rulePacksListSchema = z.discriminatedUnion("version", [
     ),
   }),
 ]);
-export type RulePacksListResponse = z.infer<typeof rulePacksListSchema>;
+export type RuleSetsListResponse = z.infer<typeof ruleSetsListSchema>;
 
-export const rulePackSetSchema = z.discriminatedUnion("version", [
+export const ruleSetSetSchema = z.discriminatedUnion("version", [
   z.object({
     version: z.literal("v1"),
     data: z.object({
@@ -243,19 +245,19 @@ export const rulePackSetSchema = z.discriminatedUnion("version", [
     }),
   }),
 ]);
-export type RulePacksSetRequest = z.infer<typeof rulePackSetSchema>;
+export type RuleSetsSetRequest = z.infer<typeof ruleSetSetSchema>;
 
 export const apiContract = c.router({
-  rulePacksList: {
+  ruleSetsList: {
     method: "GET",
-    path: "/user/rules/packs",
+    path: "/user/rules",
     query: z.discriminatedUnion("version", [
       z.object({
         version: z.literal("v1"),
       }),
     ]),
     responses: {
-      200: rulePacksListSchema,
+      200: ruleSetsListSchema,
       400: z.object({ message: z.string() }),
       401: z.object({ message: z.string() }),
       404: z.object({ message: z.string() }),
@@ -263,10 +265,10 @@ export const apiContract = c.router({
     },
     summary: "Get a route by ID",
   },
-  rulePackUpdate: {
+  ruleSetUpdate: {
     method: "POST",
-    path: "/user/rules/packs",
-    body: rulePackSetSchema,
+    path: "/user/rules",
+    body: ruleSetSetSchema,
     responses: {
       201: z.object({
         version: z.literal("v1"),
