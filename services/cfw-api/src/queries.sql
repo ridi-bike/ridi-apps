@@ -99,6 +99,7 @@ select
   p.trip_type,
 	p.state,
 	p.created_at,
+  p.rule_set_id,
 	r.id as route_id,
 	r.name as route_name,
 	r.created_at as route_created_at

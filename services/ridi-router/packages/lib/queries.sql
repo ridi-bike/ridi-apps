@@ -1,4 +1,4 @@
--- name: RulePackRoadTagsGet :many
+-- name: RuleSetRoadTagsGet :many
 select * from rule_set_road_tags
 where rule_set_id = $1;
 
