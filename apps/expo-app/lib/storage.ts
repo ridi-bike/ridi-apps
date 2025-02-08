@@ -59,3 +59,7 @@ export const ruleSetsPendingStorage = new Storage<RuleSetNew[], "v1">(
   "rule-sets-pending",
   "v1",
 );
+export const ruleSetsDeletedStore = new Storage<string[], "v1">(
+  "rule-sets-deleted",
+  "v1",
+);

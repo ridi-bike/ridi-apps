@@ -3,6 +3,7 @@ import {
   getRouteStorage,
   plansPendingStorage,
   plansStorage,
+  ruleSetsDeletedStore,
   ruleSetsPendingStorage,
   ruleSetsStorage,
 } from "./storage";
@@ -13,7 +14,7 @@ export async function dataSyncPendingPush() {
   if (ruleSetsPending) {
     while (ruleSetsPending.length) {
       const ruleSet = ruleSetsPending[0]!;
-      const result = await apiClient.ruleSetUpdate({
+      const result = await apiClient.ruleSetSet({
         body: {
           version: ruleSetsPendingStorage.dataVersion,
           data: ruleSet,
@@ -25,6 +26,23 @@ export async function dataSyncPendingPush() {
       }
       ruleSetsPending.shift();
       ruleSetsPendingStorage.set(ruleSetsPending);
+    }
+  }
+  const ruleSetsDeleting = ruleSetsDeletedStore.get();
+  if (ruleSetsDeleting) {
+    while (ruleSetsDeleting.length) {
+      const ruleSetId = ruleSetsDeleting[0]!;
+      const result = await apiClient.ruleSetDelete({
+        body: {
+          id: ruleSetId,
+        },
+      });
+      if (result.status !== 204) {
+        console.error("Rule Pack Set Error", result.body);
+        throw new Error(`Rule Pack Set Error`, { cause: result.body });
+      }
+      ruleSetsDeleting.shift();
+      ruleSetsDeletedStore.set(ruleSetsDeleting);
     }
   }
   const plansPending = plansPendingStorage.get();

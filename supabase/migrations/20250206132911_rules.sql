@@ -2,14 +2,13 @@
 create table rule_sets (
 	id text not null default ksuid() primary key,
 	user_id uuid references auth.users on delete cascade on update cascade,
-  name text not null,
-  is_default boolean not null
+  name text not null
 );
 
-insert into rule_sets (name, is_default) 
+insert into rule_sets (name) 
 values 
-('Only Paved', true),
-('Prefer Unpaved', false);
+('Only Paved'),
+('Prefer Unpaved');
 
 create policy "select only on user_id match or user_id null"
 on public.rule_sets
@@ -168,3 +167,6 @@ using ((( SELECT auth.uid() AS uid) = user_id or user_id is null));
 
 alter table plans
   add column rule_set_id text not null;
+
+alter publication supabase_realtime add table public.rule_sets;
+alter publication supabase_realtime add table public.rule_set_road_tags;

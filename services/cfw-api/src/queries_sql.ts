@@ -3,7 +3,7 @@
 import { Sql } from "postgres";
 
 export const ruleSetsListQuery = `-- name: RuleSetsList :many
-select id, user_id, name, is_default from rule_sets
+select id, user_id, name from rule_sets
 where rule_sets.user_id = $1
   or rule_sets.user_id is null`;
 
@@ -15,15 +15,13 @@ export interface RuleSetsListRow {
     id: string;
     userId: string | null;
     name: string;
-    isDefault: boolean;
 }
 
 export async function ruleSetsList(sql: Sql, args: RuleSetsListArgs): Promise<RuleSetsListRow[]> {
     return (await sql.unsafe(ruleSetsListQuery, [args.userId]).values()).map(row => ({
         id: row[0],
         userId: row[1],
-        name: row[2],
-        isDefault: row[3]
+        name: row[2]
     }));
 }
 
@@ -65,7 +63,7 @@ values (
 )
 on conflict (id) do update
 set name = excluded.name
-returning id, user_id, name, is_default`;
+returning id, user_id, name`;
 
 export interface RuleSetUpsertArgs {
     id: string;
@@ -77,7 +75,6 @@ export interface RuleSetUpsertRow {
     id: string;
     userId: string | null;
     name: string;
-    isDefault: boolean;
 }
 
 export async function ruleSetUpsert(sql: Sql, args: RuleSetUpsertArgs): Promise<RuleSetUpsertRow | null> {
@@ -92,8 +89,7 @@ export async function ruleSetUpsert(sql: Sql, args: RuleSetUpsertArgs): Promise<
     return {
         id: row[0],
         userId: row[1],
-        name: row[2],
-        isDefault: row[3]
+        name: row[2]
     };
 }
 
@@ -146,7 +142,7 @@ export async function ruleSetRoadTagsUpsert(sql: Sql, args: RuleSetRoadTagsUpser
 }
 
 export const ruleSetGetQuery = `-- name: RuleSetGet :one
-select id, user_id, name, is_default from rule_sets
+select id, user_id, name from rule_sets
 where rule_sets.id = $1`;
 
 export interface RuleSetGetArgs {
@@ -157,7 +153,6 @@ export interface RuleSetGetRow {
     id: string;
     userId: string | null;
     name: string;
-    isDefault: boolean;
 }
 
 export async function ruleSetGet(sql: Sql, args: RuleSetGetArgs): Promise<RuleSetGetRow | null> {
@@ -172,22 +167,8 @@ export async function ruleSetGet(sql: Sql, args: RuleSetGetArgs): Promise<RuleSe
     return {
         id: row[0],
         userId: row[1],
-        name: row[2],
-        isDefault: row[3]
+        name: row[2]
     };
-}
-
-export const ruleSetClearDefaultExceptForIdQuery = `-- name: RuleSetClearDefaultExceptForId :exec
-update rule_sets
-set is_default = false
-where id != $1`;
-
-export interface RuleSetClearDefaultExceptForIdArgs {
-    id: string;
-}
-
-export async function ruleSetClearDefaultExceptForId(sql: Sql, args: RuleSetClearDefaultExceptForIdArgs): Promise<void> {
-    await sql.unsafe(ruleSetClearDefaultExceptForIdQuery, [args.id]);
 }
 
 export const ruleSetDeleteQuery = `-- name: RuleSetDelete :exec

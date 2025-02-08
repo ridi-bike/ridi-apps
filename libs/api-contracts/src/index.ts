@@ -228,7 +228,6 @@ export const ruleSetsListSchema = z.discriminatedUnion("version", [
         id: z.string(),
         name: z.string(),
         isSystem: z.boolean(),
-        isDefault: z.boolean(),
         roadTags: ruleRoadTagchema,
       }),
     ),
@@ -242,7 +241,6 @@ export const ruleSetSetSchema = z.discriminatedUnion("version", [
     data: z.object({
       id: z.string(),
       name: z.string(),
-      isDefault: z.boolean(),
       roadTags: ruleRoadTagchema,
     }),
   }),

@@ -31,7 +31,6 @@ import {
   ruleSetRoadTagsUpsert,
   ruleSetsList,
   ruleSetUpsert,
-  ruleSetClearDefaultExceptForId,
   ruleSetDelete,
 } from "./queries_sql";
 import { lookupCooordsInfo } from "./maps/lookup";
@@ -127,12 +126,6 @@ const router = tsr
     });
     if (!updatedRec) {
       throw new Error("can't happen");
-    }
-
-    if (body.data.isDefault) {
-      await ruleSetClearDefaultExceptForId(ctx.db, {
-        id: body.data.id,
-      });
     }
 
     await Promise.all(

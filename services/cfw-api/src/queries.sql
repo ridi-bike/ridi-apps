@@ -44,11 +44,6 @@ returning *;
 select * from rule_sets
 where rule_sets.id = $1;
 
--- name: RuleSetClearDefaultExceptForId :exec
-update rule_sets
-set is_default = false
-where id != $1;
-
 -- name: RuleSetDelete :exec
 delete from rule_sets
 where id = $1;

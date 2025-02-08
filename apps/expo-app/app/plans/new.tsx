@@ -80,7 +80,7 @@ export default function PlansNew() {
   const [ruleSetId, setRuleSetId] = useUrlParams("rule", z.string());
   const { data: ruleSets } = useStoreRuleSets();
   useEffect(() => {
-    if (!ruleSetId) {
+    if (!ruleSetId && ruleSets?.length) {
       setImmediate(() =>
         setRuleSetId(ruleSets.find((rp) => !rp.isSystem)?.id || ruleSets[0].id),
       );
