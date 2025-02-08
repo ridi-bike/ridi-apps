@@ -227,7 +227,8 @@ export const ruleSetsListSchema = z.discriminatedUnion("version", [
       z.object({
         id: z.string(),
         name: z.string(),
-        system: z.boolean(),
+        isSystem: z.boolean(),
+        isDefault: z.boolean(),
         roadTags: ruleRoadTagchema,
       }),
     ),
@@ -241,6 +242,7 @@ export const ruleSetSetSchema = z.discriminatedUnion("version", [
     data: z.object({
       id: z.string(),
       name: z.string(),
+      isDefault: z.boolean(),
       roadTags: ruleRoadTagchema,
     }),
   }),
@@ -265,7 +267,7 @@ export const apiContract = c.router({
     },
     summary: "Get a route by ID",
   },
-  ruleSetUpdate: {
+  ruleSetSet: {
     method: "POST",
     path: "/user/rules",
     body: ruleSetSetSchema,
@@ -281,7 +283,22 @@ export const apiContract = c.router({
       404: z.object({ message: z.string() }),
       500: z.object({ message: z.string() }),
     },
-    summary: "Get a route by ID",
+    summary: "Set a route by ID",
+  },
+  ruleSetDelete: {
+    method: "DELETE",
+    path: "/user/rules",
+    body: z.object({
+      id: z.string(),
+    }),
+    responses: {
+      204: z.undefined(),
+      400: z.object({ message: z.string() }),
+      401: z.object({ message: z.string() }),
+      404: z.object({ message: z.string() }),
+      500: z.object({ message: z.string() }),
+    },
+    summary: "Delete a route by ID",
   },
   routeGet: {
     method: "GET",

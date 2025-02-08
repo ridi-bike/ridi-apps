@@ -2,30 +2,32 @@
 
 import { Sql } from "postgres";
 
-export const rulePacksGetQuery = `-- name: RuleSetsGet :many
-select id, user_id, name from rule_sets
+export const ruleSetsListQuery = `-- name: RuleSetsList :many
+select id, user_id, name, is_default from rule_sets
 where rule_sets.user_id = $1
   or rule_sets.user_id is null`;
 
-export interface RuleSetsGetArgs {
+export interface RuleSetsListArgs {
     userId: string | null;
 }
 
-export interface RuleSetsGetRow {
+export interface RuleSetsListRow {
     id: string;
     userId: string | null;
     name: string;
+    isDefault: boolean;
 }
 
-export async function rulePacksGet(sql: Sql, args: RuleSetsGetArgs): Promise<RuleSetsGetRow[]> {
-    return (await sql.unsafe(rulePacksGetQuery, [args.userId]).values()).map(row => ({
+export async function ruleSetsList(sql: Sql, args: RuleSetsListArgs): Promise<RuleSetsListRow[]> {
+    return (await sql.unsafe(ruleSetsListQuery, [args.userId]).values()).map(row => ({
         id: row[0],
         userId: row[1],
-        name: row[2]
+        name: row[2],
+        isDefault: row[3]
     }));
 }
 
-export const rulePackRoadTagsGetQuery = `-- name: RuleSetRoadTagsGet :many
+export const ruleSetRoadTagsGetQuery = `-- name: RuleSetRoadTagsGet :many
 select user_id, rule_set_id, tag_key, value from rule_set_road_tags
 where rule_set_road_tags.user_id = $1
   or rule_set_road_tags.user_id is null`;
@@ -41,8 +43,8 @@ export interface RuleSetRoadTagsGetRow {
     value: number | null;
 }
 
-export async function rulePackRoadTagsGet(sql: Sql, args: RuleSetRoadTagsGetArgs): Promise<RuleSetRoadTagsGetRow[]> {
-    return (await sql.unsafe(rulePackRoadTagsGetQuery, [args.userId]).values()).map(row => ({
+export async function ruleSetRoadTagsGet(sql: Sql, args: RuleSetRoadTagsGetArgs): Promise<RuleSetRoadTagsGetRow[]> {
+    return (await sql.unsafe(ruleSetRoadTagsGetQuery, [args.userId]).values()).map(row => ({
         userId: row[0],
         ruleSetId: row[1],
         tagKey: row[2],
@@ -50,7 +52,7 @@ export async function rulePackRoadTagsGet(sql: Sql, args: RuleSetRoadTagsGetArgs
     }));
 }
 
-export const rulePacksUpsertQuery = `-- name: RuleSetsUpsert :one
+export const ruleSetUpsertQuery = `-- name: RuleSetUpsert :one
 insert into rule_sets (
   id,
   user_id, 
@@ -63,22 +65,23 @@ values (
 )
 on conflict (id) do update
 set name = excluded.name
-returning id, user_id, name`;
+returning id, user_id, name, is_default`;
 
-export interface RuleSetsUpsertArgs {
+export interface RuleSetUpsertArgs {
     id: string;
     userId: string | null;
     name: string;
 }
 
-export interface RuleSetsUpsertRow {
+export interface RuleSetUpsertRow {
     id: string;
     userId: string | null;
     name: string;
+    isDefault: boolean;
 }
 
-export async function rulePacksUpsert(sql: Sql, args: RuleSetsUpsertArgs): Promise<RuleSetsUpsertRow | null> {
-    const rows = await sql.unsafe(rulePacksUpsertQuery, [args.id, args.userId, args.name]).values();
+export async function ruleSetUpsert(sql: Sql, args: RuleSetUpsertArgs): Promise<RuleSetUpsertRow | null> {
+    const rows = await sql.unsafe(ruleSetUpsertQuery, [args.id, args.userId, args.name]).values();
     if (rows.length !== 1) {
         return null;
     }
@@ -89,11 +92,12 @@ export async function rulePacksUpsert(sql: Sql, args: RuleSetsUpsertArgs): Promi
     return {
         id: row[0],
         userId: row[1],
-        name: row[2]
+        name: row[2],
+        isDefault: row[3]
     };
 }
 
-export const rulePackRoadTagsUpsertQuery = `-- name: RuleSetRoadTagsUpsert :one
+export const ruleSetRoadTagsUpsertQuery = `-- name: RuleSetRoadTagsUpsert :one
 insert into rule_set_road_tags (
   user_id,
   rule_set_id,
@@ -124,8 +128,8 @@ export interface RuleSetRoadTagsUpsertRow {
     value: number | null;
 }
 
-export async function rulePackRoadTagsUpsert(sql: Sql, args: RuleSetRoadTagsUpsertArgs): Promise<RuleSetRoadTagsUpsertRow | null> {
-    const rows = await sql.unsafe(rulePackRoadTagsUpsertQuery, [args.userId, args.ruleSetId, args.tagKey, args.value]).values();
+export async function ruleSetRoadTagsUpsert(sql: Sql, args: RuleSetRoadTagsUpsertArgs): Promise<RuleSetRoadTagsUpsertRow | null> {
+    const rows = await sql.unsafe(ruleSetRoadTagsUpsertQuery, [args.userId, args.ruleSetId, args.tagKey, args.value]).values();
     if (rows.length !== 1) {
         return null;
     }
@@ -141,22 +145,23 @@ export async function rulePackRoadTagsUpsert(sql: Sql, args: RuleSetRoadTagsUpse
     };
 }
 
-export const rulePackGetByIdQuery = `-- name: RuleSetGetById :one
-select id, user_id, name from rule_sets
+export const ruleSetGetQuery = `-- name: RuleSetGet :one
+select id, user_id, name, is_default from rule_sets
 where rule_sets.id = $1`;
 
-export interface RuleSetGetByIdArgs {
+export interface RuleSetGetArgs {
     id: string;
 }
 
-export interface RuleSetGetByIdRow {
+export interface RuleSetGetRow {
     id: string;
     userId: string | null;
     name: string;
+    isDefault: boolean;
 }
 
-export async function rulePackGetById(sql: Sql, args: RuleSetGetByIdArgs): Promise<RuleSetGetByIdRow | null> {
-    const rows = await sql.unsafe(rulePackGetByIdQuery, [args.id]).values();
+export async function ruleSetGet(sql: Sql, args: RuleSetGetArgs): Promise<RuleSetGetRow | null> {
+    const rows = await sql.unsafe(ruleSetGetQuery, [args.id]).values();
     if (rows.length !== 1) {
         return null;
     }
@@ -167,8 +172,34 @@ export async function rulePackGetById(sql: Sql, args: RuleSetGetByIdArgs): Promi
     return {
         id: row[0],
         userId: row[1],
-        name: row[2]
+        name: row[2],
+        isDefault: row[3]
     };
+}
+
+export const ruleSetClearDefaultExceptForIdQuery = `-- name: RuleSetClearDefaultExceptForId :exec
+update rule_sets
+set is_default = false
+where id != $1`;
+
+export interface RuleSetClearDefaultExceptForIdArgs {
+    id: string;
+}
+
+export async function ruleSetClearDefaultExceptForId(sql: Sql, args: RuleSetClearDefaultExceptForIdArgs): Promise<void> {
+    await sql.unsafe(ruleSetClearDefaultExceptForIdQuery, [args.id]);
+}
+
+export const ruleSetDeleteQuery = `-- name: RuleSetDelete :exec
+delete from rule_sets
+where id = $1`;
+
+export interface RuleSetDeleteArgs {
+    id: string;
+}
+
+export async function ruleSetDelete(sql: Sql, args: RuleSetDeleteArgs): Promise<void> {
+    await sql.unsafe(ruleSetDeleteQuery, [args.id]);
 }
 
 export const routesGetQuery = `-- name: RoutesGet :many

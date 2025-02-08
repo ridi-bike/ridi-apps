@@ -6,7 +6,6 @@ import {
   Compass,
   Crosshair,
   Locate,
-  LocateFixed,
   MapPin,
   MapPinned,
   Navigation,
@@ -21,10 +20,9 @@ import * as z from "zod";
 import { GeoMapCoordsSelector } from "~/components/geo-map/geo-map-coords-selector";
 import { DIRECTIONS, getCardinalDirection } from "~/components/geo-map/util";
 import { LocationPermsNotGiven } from "~/components/LocationPermsNotGiven";
-import { RulePackSelectDialog } from "~/components/rule-pack-select-dialog";
 import { ScreenFrame } from "~/components/screen-frame";
 import { useStorePlans } from "~/lib/stores/plans-store";
-import { useStoreRulePacks } from "~/lib/stores/rules-store";
+import { useStoreRuleSets } from "~/lib/stores/rules-store";
 import { useUrlParams } from "~/lib/url-params";
 import { cn } from "~/lib/utils";
 
@@ -79,17 +77,15 @@ export default function PlansNew() {
     setSelectedDistance,
   ]);
 
-  const [rulePackId, setRulePackId] = useUrlParams("rule", z.string());
-  const { data: rulePacks } = useStoreRulePacks();
+  const [ruleSetId, setRuleSetId] = useUrlParams("rule", z.string());
+  const { data: ruleSets } = useStoreRuleSets();
   useEffect(() => {
-    if (!rulePackId) {
+    if (!ruleSetId) {
       setImmediate(() =>
-        setRulePackId(
-          rulePacks.find((rp) => !rp.system)?.id || rulePacks[0].id,
-        ),
+        setRuleSetId(ruleSets.find((rp) => !rp.isSystem)?.id || ruleSets[0].id),
       );
     }
-  }, [rulePackId, rulePacks, setRulePackId]);
+  }, [ruleSetId, ruleSets, setRuleSetId]);
 
   const getCurrentLocation = useCallback(async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -120,11 +116,12 @@ export default function PlansNew() {
           <Pressable
             onPress={() => {
               if (
-                (!isRoundTrip && startCoords && finishCoords) ||
+                (!isRoundTrip && startCoords && finishCoords && ruleSetId) ||
                 (isRoundTrip &&
                   startCoords &&
                   bearing !== undefined &&
-                  selectedDistance)
+                  selectedDistance &&
+                  ruleSetId)
               ) {
                 let distance = (selectedDistance || 0) * 1000;
                 if (!isRoundTrip && finishCoords) {
@@ -142,6 +139,7 @@ export default function PlansNew() {
                   bearing: isRoundTrip ? bearing || 0 : null,
                   distance,
                   tripType: isRoundTrip ? "round-trip" : "start-finish",
+                  ruleSetId,
                 });
                 router.replace({
                   pathname: "/plans/[planId]",
@@ -237,18 +235,21 @@ export default function PlansNew() {
           </View>
         </View>
         <View className="mb-4 flex flex-row gap-2">
-          <RulePackSelectDialog
-            title="Select rules"
-            setRoutePackId={setRulePackId}
+          <Pressable
+            onPress={() => {
+              router.navigate("/rules");
+              router.setParams({
+                "selected-rule-id": JSON.stringify(ruleSetId),
+              });
+            }}
+            className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-900"
           >
-            <Pressable className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-900">
-              <Navigation className="size-4 dark:text-gray-200" />
-              <Text className="text-sm dark:text-gray-200">
-                Routing rules:{" "}
-                {rulePacks.find((rp) => rp.id === rulePackId)?.name || "..."}
-              </Text>
-            </Pressable>
-          </RulePackSelectDialog>
+            <Navigation className="size-4 dark:text-gray-200" />
+            <Text className="text-sm dark:text-gray-200">
+              Routing rules:{" "}
+              {ruleSets.find((rp) => rp.id === ruleSetId)?.name || "..."}
+            </Text>
+          </Pressable>
         </View>
         <View className="h-[400px] w-full overflow-hidden rounded-xl border-2 border-black dark:border-gray-700">
           <GeoMapCoordsSelector

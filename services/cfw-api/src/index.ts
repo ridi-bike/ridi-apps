@@ -26,11 +26,13 @@ import {
   planList,
   routeStatsGet,
   routesGet,
-  ruleSetGetById,
+  ruleSetGet,
   ruleSetRoadTagsGet,
   ruleSetRoadTagsUpsert,
-  ruleSetsGet,
-  ruleSetsUpsert,
+  ruleSetsList,
+  ruleSetUpsert,
+  ruleSetClearDefaultExceptForId,
+  ruleSetDelete,
 } from "./queries_sql";
 import { lookupCooordsInfo } from "./maps/lookup";
 
@@ -60,7 +62,7 @@ const router = tsr
         },
       };
     }
-    const rules = await ruleSetsGet(ctx.db, {
+    const rules = await ruleSetsList(ctx.db, {
       userId: ctx.request.user.id,
     });
     const tags = await ruleSetRoadTagsGet(ctx.db, {
@@ -71,7 +73,7 @@ const router = tsr
       version: "v1" as const,
       data: rules.map((r) => ({
         ...r,
-        system: r.userId === null,
+        isSystem: r.userId === null,
         roadTags: tags
           .filter((t) => t.ruleSetId === r.id)
           .reduce(
@@ -96,7 +98,7 @@ const router = tsr
       body: validated.data,
     };
   },
-  ruleSetUpdate: async ({ body }, ctx) => {
+  ruleSetSet: async ({ body }, ctx) => {
     if (body.version !== "v1") {
       return {
         status: 400,
@@ -106,7 +108,7 @@ const router = tsr
       };
     }
 
-    const ruleSetCheck = await ruleSetGetById(ctx.db, {
+    const ruleSetCheck = await ruleSetGet(ctx.db, {
       id: body.data.id,
     });
 
@@ -118,13 +120,19 @@ const router = tsr
         },
       };
     }
-    const updatedRec = await ruleSetsUpsert(ctx.db, {
+    const updatedRec = await ruleSetUpsert(ctx.db, {
       userId: ctx.request.user.id,
       id: body.data.id,
       name: body.data.name,
     });
     if (!updatedRec) {
       throw new Error("can't happen");
+    }
+
+    if (body.data.isDefault) {
+      await ruleSetClearDefaultExceptForId(ctx.db, {
+        id: body.data.id,
+      });
     }
 
     await Promise.all(
@@ -145,6 +153,28 @@ const router = tsr
           id: updatedRec.id,
         },
       },
+    };
+  },
+  ruleSetDelete: async ({ body }, ctx) => {
+    const ruleSetCheck = await ruleSetGet(ctx.db, {
+      id: body.id,
+    });
+
+    if (ruleSetCheck && !ruleSetCheck.userId) {
+      return {
+        status: 400,
+        body: {
+          message: "Cannot modify system rule sets",
+        },
+      };
+    }
+
+    await ruleSetDelete(ctx.db, {
+      id: body.id,
+    });
+
+    return {
+      status: 204,
     };
   },
   coordsSelect: async ({ body: { version, lon, lat } }, ctx) => {
@@ -214,7 +244,6 @@ const router = tsr
       startDesc: startFinishDesc[0],
       finishDesc: startFinishDesc[1],
       userId: ctx.request.user.id,
-      ruleSetId:
     });
 
     if (!newPlan) {

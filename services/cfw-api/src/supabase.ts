@@ -92,15 +92,7 @@ export type Database = {
           trip_type?: Database["public"]["Enums"]["plan_type"]
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "plans_rule_set_id_fkey"
-            columns: ["rule_set_id"]
-            isOneToOne: false
-            referencedRelation: "rule_sets"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       regions: {
         Row: {
@@ -243,16 +235,19 @@ export type Database = {
       rule_sets: {
         Row: {
           id: string
+          is_default: boolean
           name: string
           user_id: string | null
         }
         Insert: {
           id?: string
+          is_default: boolean
           name: string
           user_id?: string | null
         }
         Update: {
           id?: string
+          is_default?: boolean
           name?: string
           user_id?: string | null
         }
