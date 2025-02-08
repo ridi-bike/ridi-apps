@@ -294,6 +294,7 @@ select
   p.trip_type,
 	p.state,
 	p.created_at,
+  p.rule_set_id,
 	r.id as route_id,
 	r.name as route_name,
 	r.created_at as route_created_at
@@ -322,6 +323,7 @@ export interface PlanListRow {
     tripType: "round-trip" | "start-finish";
     state: "new" | "planning" | "done" | "error";
     createdAt: Date;
+    ruleSetId: string;
     routeId: string | null;
     routeName: string | null;
     routeCreatedAt: Date | null;
@@ -342,9 +344,10 @@ export async function planList(sql: Sql, args: PlanListArgs): Promise<PlanListRo
         tripType: row[10],
         state: row[11],
         createdAt: row[12],
-        routeId: row[13],
-        routeName: row[14],
-        routeCreatedAt: row[15]
+        ruleSetId: row[13],
+        routeId: row[14],
+        routeName: row[15],
+        routeCreatedAt: row[16]
     }));
 }
 

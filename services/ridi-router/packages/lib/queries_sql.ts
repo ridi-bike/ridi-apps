@@ -2,23 +2,23 @@
 
 import { Sql } from "postgres";
 
-export const rulePackRoadTagsGetQuery = `-- name: RulePackRoadTagsGet :many
+export const ruleSetRoadTagsGetQuery = `-- name: RuleSetRoadTagsGet :many
 select user_id, rule_set_id, tag_key, value from rule_set_road_tags
 where rule_set_id = $1`;
 
-export interface RulePackRoadTagsGetArgs {
+export interface RuleSetRoadTagsGetArgs {
     ruleSetId: string;
 }
 
-export interface RulePackRoadTagsGetRow {
+export interface RuleSetRoadTagsGetRow {
     userId: string | null;
     ruleSetId: string;
     tagKey: string;
     value: number | null;
 }
 
-export async function rulePackRoadTagsGet(sql: Sql, args: RulePackRoadTagsGetArgs): Promise<RulePackRoadTagsGetRow[]> {
-    return (await sql.unsafe(rulePackRoadTagsGetQuery, [args.ruleSetId]).values()).map(row => ({
+export async function ruleSetRoadTagsGet(sql: Sql, args: RuleSetRoadTagsGetArgs): Promise<RuleSetRoadTagsGetRow[]> {
+    return (await sql.unsafe(ruleSetRoadTagsGetQuery, [args.ruleSetId]).values()).map(row => ({
         userId: row[0],
         ruleSetId: row[1],
         tagKey: row[2],

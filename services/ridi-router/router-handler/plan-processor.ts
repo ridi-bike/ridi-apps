@@ -151,6 +151,9 @@ export class PlanProcessor {
         if (curr.value !== null) {
           newRule.value = curr.value;
         }
+        if (!all[tagSection]) {
+          all[tagSection] = {};
+        }
         all[tagSection][curr.tagKey] = newRule;
         return all;
       },
