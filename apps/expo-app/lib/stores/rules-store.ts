@@ -9,7 +9,11 @@ import { generate } from "xksuid";
 
 import { apiClient } from "../api";
 import { dataSyncPendingPush } from "../data-sync";
-import { ruleSetsPendingStorage, ruleSetsStorage } from "../storage";
+import {
+  ruleSetsPendingStorage,
+  ruleSetsStorage,
+  ruleSetsDeletedStore,
+} from "../storage";
 import { supabase } from "../supabase";
 
 import { getSuccessResponseOrThrow } from "./util";
@@ -22,8 +26,13 @@ export function useStoreRuleSets() {
     ruleSetsPendingStorage.get() || [],
   );
 
+  const [ruleSetDeleted, setRuleSetDelted] = useState(
+    ruleSetsDeletedStore.get() || [],
+  );
+
   const refresh = useCallback(() => {
     setRuleSetsPending(ruleSetsPendingStorage.get() || []);
+    setRuleSetDelted(ruleSetsDeletedStore.get() || []);
   }, []);
 
   useFocusEffect(refresh);
@@ -47,13 +56,22 @@ export function useStoreRuleSets() {
   }, [data]);
 
   const dataWithPending = useMemo((): RuleSet[] => {
-    const plans: RuleSet[] = ruleSetsPending.map((p) => ({
-      ...p,
-      system: false,
-    }));
+    const ruleSets: RuleSet[] = ruleSetsPending
+      .filter((rs) => ruleSetDeleted.includes(rs.id))
+      .map((p) => ({
+        ...p,
+        isSystem: false,
+      }));
 
-    return [...data.data, ...plans];
-  }, [data.data, ruleSetsPending]);
+    return [
+      ...data.data.filter(
+        (existingData) =>
+          !ruleSets.find((pendingData) => pendingData.id === existingData.id) ||
+          ruleSetDeleted.includes(existingData.id),
+      ),
+      ...ruleSets,
+    ];
+  }, [data.data, ruleSetDeleted, ruleSetsPending]);
 
   const ruleSetSet = useCallback(
     (
@@ -76,12 +94,23 @@ export function useStoreRuleSets() {
     [ruleSetsPending],
   );
 
+  const ruleSetDelete = useCallback(
+    (id: string) => {
+      setRuleSetDelted([...ruleSetDeleted, id]);
+      ruleSetsDeletedStore.set([...ruleSetDeleted, id]);
+      dataSyncPendingPush()
+        .then(() => console.log("Ad hoc push done"))
+        .catch((err) => console.error("Ad hoc push error", err));
+    },
+    [ruleSetDeleted],
+  );
+
   useEffect(() => {
     const plansSub = supabase
-      .channel(`plans_routes_${Math.random()}`)
+      .channel(`rule_sets_${Math.random()}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "plans" },
+        { event: "*", schema: "public", table: "rule_sets" },
         (_payload) => {
           refetch();
         },
@@ -93,5 +122,11 @@ export function useStoreRuleSets() {
     };
   }, [refetch]);
 
-  return { data: dataWithPending, error, status, ruleSetSet };
+  return {
+    data: dataWithPending,
+    error,
+    status,
+    ruleSetSet,
+    ruleSetDelete,
+  };
 }

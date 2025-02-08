@@ -5,15 +5,13 @@ import {
 import { useRootNavigationState, useRouter } from "expo-router";
 import {
   Copy,
-  Edit,
   Eye,
   MoreVertical,
-  Plus,
   Trash2,
   Check,
   Settings,
   User,
-  Star,
+  Plus,
 } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { View, Text, Pressable } from "react-native";
@@ -21,6 +19,7 @@ import { generate } from "xksuid";
 import { z } from "zod";
 
 import { Button } from "~/components/button";
+import { ScreenFrame } from "~/components/screen-frame";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -66,24 +65,26 @@ function DeleteConfirmDialog({
             </Text>
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="flex w-full flex-col items-center justify-between gap-6">
-          <Button
-            variant="primary"
-            className="flex w-full flex-row items-center justify-center"
-            onPress={() => {
-              setOpen(false);
-              onDelete();
-            }}
-          >
-            <Text className="dark:text-gray-200">Delete</Text>
-          </Button>
-          <Button
-            variant="secondary"
-            className="flex w-full flex-row items-center justify-center"
-            onPress={() => setOpen(false)}
-          >
-            <Text className="dark:text-gray-200">Cancel</Text>
-          </Button>
+        <AlertDialogFooter className="flex w-full flex-col items-center justify-between">
+          <View className="flex w-full flex-col items-center justify-between gap-6">
+            <Button
+              variant="primary"
+              className="flex w-full flex-row items-center justify-center"
+              onPress={() => {
+                setOpen(false);
+                onDelete();
+              }}
+            >
+              <Text className="dark:text-gray-200">Delete</Text>
+            </Button>
+            <Button
+              variant="secondary"
+              className="flex w-full flex-row items-center justify-center"
+              onPress={() => setOpen(false)}
+            >
+              <Text className="dark:text-gray-200">Cancel</Text>
+            </Button>
+          </View>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
@@ -95,12 +96,10 @@ function ActionDialog({
   ruleSet,
   onDuplicate,
   onDelete,
-  onSetDefault,
 }: {
   children: React.ReactNode;
   ruleSet: RuleSet;
   onDuplicate: () => void;
-  onSetDefault: () => void;
   onDelete: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -118,7 +117,7 @@ function ActionDialog({
             {ruleSet.name}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            <View className="space-y-2">
+            <View className="flex w-full flex-col items-center justify-between gap-2">
               <Pressable
                 onPress={() => {
                   setOpen(false);
@@ -126,7 +125,7 @@ function ActionDialog({
                 }}
                 className="h-14 w-full flex-row items-center gap-3 rounded-xl border-[3px] border-black px-4 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
               >
-                <Eye className="size-5" />
+                <Eye className="size-4" />
                 <Text className="font-medium dark:text-gray-200">
                   {ruleSet.isSystem ? "View rules" : "Edit rules"}
                 </Text>
@@ -138,25 +137,11 @@ function ActionDialog({
                 }}
                 className="h-14 w-full flex-row items-center gap-3 rounded-xl border-[3px] border-black px-4 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
               >
-                <Copy className="size-5" />
+                <Copy className="size-4" />
                 <Text className="font-medium dark:text-gray-200">
                   Duplicate
                 </Text>
               </Pressable>
-              {!ruleSet.isDefault && (
-                <Pressable
-                  onPress={() => {
-                    setOpen(false);
-                    onSetDefault();
-                  }}
-                  className="h-14 w-full flex-row items-center gap-3 rounded-xl border-[3px] border-black px-4 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
-                >
-                  <Check className="size-5" />
-                  <Text className="font-medium dark:text-gray-200">
-                    Set as Default
-                  </Text>
-                </Pressable>
-              )}
               {!ruleSet.isSystem && (
                 <DeleteConfirmDialog
                   ruleSet={ruleSet}
@@ -170,7 +155,7 @@ function ActionDialog({
                       "dark:border-red-700 dark:hover:bg-red-950 w-full h-14 flex-row items-center px-4 gap-3 rounded-xl border-[3px] border-red-500 text-red-500 hover:bg-red-50 transition-colors",
                     )}
                   >
-                    <Trash2 className="size-5" />
+                    <Trash2 className="size-4" />
                     <Text className="font-medium text-red-500">Delete</Text>
                   </Pressable>
                 </DeleteConfirmDialog>
@@ -193,7 +178,7 @@ function ActionDialog({
 }
 
 export default function RuleSetList() {
-  const { data: ruleSets, ruleSetSet } = useStoreRuleSets();
+  const { data: ruleSets, ruleSetSet, ruleSetDelete } = useStoreRuleSets();
   const [selectedId, setSelectedId] = useUrlParams(
     "selected-rule-id",
     z.string(),
@@ -202,8 +187,7 @@ export default function RuleSetList() {
     const newRuleSet: RuleSetNew = {
       id: generate(),
       name: "New rule set",
-      isDefault: false,
-      roadTags: Object.keys(ruleSets[0]).reduce(
+      roadTags: Object.keys(ruleSets[0].roadTags).reduce(
         (all, curr) => ({
           ...all,
           [curr]: 0,
@@ -218,17 +202,8 @@ export default function RuleSetList() {
     (ruleSet: RuleSet) => {
       ruleSetSet({
         ...ruleSet,
+        name: `Copy of ${ruleSet.name}`,
         id: generate(),
-      });
-    },
-    [ruleSetSet],
-  );
-
-  const setDefaultRuleSet = useCallback(
-    (ruleSet: RuleSet) => {
-      ruleSetSet({
-        ...ruleSet,
-        isDefault: true,
       });
     },
     [ruleSetSet],
@@ -245,24 +220,22 @@ export default function RuleSetList() {
   }, [navState.index, navState.routes, router]);
 
   return (
-    <View role="main" className="min-h-screen w-full bg-white dark:bg-gray-900">
-      <View className="mx-auto max-w-[375px] p-4">
-        <View className="mb-6 flex-row items-center justify-between">
-          <Text
-            role="heading"
-            aria-level={1}
-            className="text-xl font-semibold dark:text-gray-100"
-          >
-            Rule Sets
-          </Text>
+    <ScreenFrame
+      title="Rule sets"
+      floating={
+        <View className="fixed bottom-0 w-full bg-white p-4 dark:bg-gray-800">
           <Pressable
+            aria-label="Create new rule set"
+            className="fixed bottom-8 right-8 flex size-24 items-center justify-center rounded-full bg-[#FF5937] shadow-lg transition-colors hover:bg-[#ff4a25]"
             onPress={addRuleSet}
-            className="size-12 flex-row items-center justify-center rounded-xl bg-[#FF5937] text-white transition-colors hover:bg-[#FF5937]/90"
           >
-            <Plus className="size-6" />
+            <Plus className="size-12 text-white dark:text-gray-900" />
           </Pressable>
         </View>
-        <View className="space-y-2">
+      }
+    >
+      <View className="mx-2 max-w-5xl flex-1">
+        <View className="grid grid-cols-1 gap-6 pb-12 md:grid-cols-3">
           {ruleSets.map((ruleSet) => (
             <View
               key={ruleSet.id}
@@ -280,9 +253,6 @@ export default function RuleSetList() {
                     )}
                   </View>
                   <View className="flex-row items-center gap-2">
-                    {ruleSet.isDefault && (
-                      <Star className="size-4 fill-[#FF5937] text-[#FF5937]" />
-                    )}
                     <Text className="font-medium dark:text-gray-200">
                       {ruleSet.name}
                     </Text>
@@ -291,12 +261,12 @@ export default function RuleSetList() {
                 <View className="flex-row gap-2">
                   <Pressable
                     onPress={() => {
-                      gotoNewScreen();
                       setSelectedId(ruleSet.id);
+                      gotoNewScreen();
                       router.setParams({ rule: JSON.stringify(ruleSet.id) });
                     }}
                     className={cn(
-                      "h-12 w-12 flex-row items-center justify-center rounded-xl border-[3px] transition-colors",
+                      "text-gray-400 dark:text-gray-500 h-12 w-12 flex-row items-center justify-center rounded-xl border-[3px] transition-colors",
                       {
                         "border-[#FF5937] bg-[#FF5937] text-white":
                           ruleSet.id === selectedId,
@@ -309,11 +279,15 @@ export default function RuleSetList() {
                   </Pressable>
                   <ActionDialog
                     ruleSet={ruleSet}
-                    onSetDefault={() => setDefaultRuleSet(ruleSet)}
                     onDuplicate={() => duplicateRuleSet(ruleSet)}
-                    onDelete={() => undefined}
+                    onDelete={() => {
+                      if (selectedId === ruleSet.id) {
+                        setSelectedId(ruleSets[0].id);
+                      }
+                      ruleSetDelete(ruleSet.id);
+                    }}
                   >
-                    <Pressable className="size-12 flex-row items-center justify-center rounded-xl border-[3px] border-gray-200 transition-colors hover:border-gray-300 dark:border-gray-700">
+                    <Pressable className="size-12 flex-row items-center justify-center rounded-xl border-[3px] border-gray-200 text-gray-400 transition-colors hover:border-gray-300 dark:border-gray-700 dark:text-gray-500">
                       <MoreVertical className="size-5" />
                     </Pressable>
                   </ActionDialog>
@@ -323,6 +297,6 @@ export default function RuleSetList() {
           ))}
         </View>
       </View>
-    </View>
+    </ScreenFrame>
   );
 }

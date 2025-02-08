@@ -13,11 +13,11 @@ import {
 import { useLocalSearchParams } from "expo-router";
 import { ChevronDown, ChevronUp, RotateCcw } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, TextInput } from "react-native";
 
 import { ScreenCard } from "~/components/screen-card";
 import { ScreenFrame } from "~/components/screen-frame";
-import { useStoreRulePacks } from "~/lib/stores/rules-store";
+import { useStoreRuleSets } from "~/lib/stores/rules-store";
 import { cn } from "~/lib/utils";
 
 const ruleGroups = [
@@ -39,17 +39,19 @@ function roadTagsDefined<T>(v: T | undefined): asserts v is T {
 }
 
 export default function RulePackDetails() {
-  const { rulePackId } = useLocalSearchParams();
-  const { data: rulePacks, error, rulePackSet, status } = useStoreRulePacks();
-  const rulePack = rulePacks.find((rp) => rp.id === rulePackId);
-  const [roadTags, setRoadTags] = useState(rulePack?.roadTags);
+  const { ruleSetId } = useLocalSearchParams();
+  const { data: ruleSets, error, ruleSetSet, status } = useStoreRuleSets();
+  const ruleSet = ruleSets.find((rp) => rp.id === ruleSetId);
+  const [roadTags, setRoadTags] = useState(ruleSet?.roadTags);
   const [groupsExpanded, setGroupsExpanded] = useState<number[]>([]);
+  const [ruleSetName, setRuleSetName] = useState(ruleSet?.name);
 
   useEffect(() => {
-    if (rulePack && !roadTags) {
-      setRoadTags(rulePack.roadTags);
+    if (ruleSet && !roadTags) {
+      setRoadTags(ruleSet.roadTags);
+      setRuleSetName(ruleSet.name);
     }
-  }, [roadTags, rulePack]);
+  }, [roadTags, ruleSet]);
 
   const toggleGroupExpanded = useCallback((groupIdx: number) => {
     setGroupsExpanded((ge) =>
@@ -154,17 +156,19 @@ export default function RulePackDetails() {
   );
 
   const unsavedChangesExist = useMemo(() => {
-    if (!rulePack || !roadTags) {
+    if (!ruleSet || !roadTags) {
       return false;
     }
-    const serverEntries = Object.entries(rulePack.roadTags);
+    const serverEntries = Object.entries(ruleSet.roadTags);
     const localEntries = Object.entries(roadTags);
-    return serverEntries.some(
-      (se) => localEntries.find((le) => le[0] === se[0])![1] !== se[1],
+    return (
+      serverEntries.some(
+        (se) => localEntries.find((le) => le[0] === se[0])![1] !== se[1],
+      ) || ruleSetName !== ruleSet.name
     );
-  }, [roadTags, rulePack]);
+  }, [roadTags, ruleSet, ruleSetName]);
 
-  if (!rulePack || !roadTags) {
+  if (!ruleSet || !roadTags) {
     return (
       <ScreenFrame title="Plan routes">
         <View className="mx-2 max-w-5xl flex-1">
@@ -173,8 +177,8 @@ export default function RulePackDetails() {
               <View className="flex w-full flex-row items-center justify-center">
                 <Text className="dark:text-gray-200">
                   Rules with id
-                  <Text className="px-2 text-gray-500">{rulePackId}</Text> is
-                  not found
+                  <Text className="px-2 text-gray-500">{ruleSetId}</Text> is not
+                  found
                 </Text>
               </View>
             }
@@ -188,13 +192,14 @@ export default function RulePackDetails() {
     <ScreenFrame
       title="Routing rules"
       floating={
-        !rulePack.system && (
+        !ruleSet.isSystem && (
           <View className="fixed bottom-0 w-full bg-white p-4 dark:bg-gray-800">
             <Pressable
               onPress={() => {
                 if (unsavedChangesExist) {
-                  rulePackSet({
-                    ...rulePack,
+                  ruleSetSet({
+                    ...ruleSet,
+                    name: ruleSetName || "",
                     roadTags: roadTags!,
                   });
                 }
@@ -216,7 +221,26 @@ export default function RulePackDetails() {
       }
     >
       <View className="mx-2 max-w-5xl flex-1">
-        <View className="grid grid-cols-1 gap-6 pb-12 md:grid-cols-3">
+        <View className="flex flex-col gap-6 pb-12">
+          <View
+            className={cn(
+              "border-black dark:border-gray-700 overflow-hidden rounded-2xl border-[3px]",
+            )}
+          >
+            {ruleSet.isSystem && (
+              <Text className="flex-1 rounded-xl border-2 border-black bg-white px-4 py-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200">
+                {ruleSetName}
+              </Text>
+            )}
+            {!ruleSet.isSystem && (
+              <TextInput
+                value={ruleSetName}
+                onChangeText={setRuleSetName}
+                placeholder="Rule set name..."
+                className="flex-1 rounded-xl border-2 border-black bg-white px-4 py-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
+              />
+            )}
+          </View>
           {ruleGroups.map((group, groupIdx) => (
             <View
               key={groupIdx}
