@@ -54,7 +54,7 @@ export default function PlansNew() {
   useEffect(() => {
     // set immediate is needed to let the stack mount first and then update params
     // this happens when reloading browser with isRoundTrip query param
-    setImmediate(() => {
+    setTimeout(() => {
       if (isRoundTrip) {
         if (finishCoords) {
           setFinishCoords();
@@ -66,7 +66,7 @@ export default function PlansNew() {
           setSelectedDistance(100);
         }
       }
-    });
+    }, 0);
   }, [
     bearing,
     finishCoords,
@@ -81,8 +81,12 @@ export default function PlansNew() {
   const { data: ruleSets } = useStoreRuleSets();
   useEffect(() => {
     if (!ruleSetId && ruleSets?.length) {
-      setImmediate(() =>
-        setRuleSetId(ruleSets.find((rp) => !rp.isSystem)?.id || ruleSets[0].id),
+      setTimeout(
+        () =>
+          setRuleSetId(
+            ruleSets.find((rp) => !rp.isSystem)?.id || ruleSets[0].id,
+          ),
+        0,
       );
     }
   }, [ruleSetId, ruleSets, setRuleSetId]);
