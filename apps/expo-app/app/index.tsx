@@ -22,7 +22,7 @@ export default function Index() {
   });
 
   return (
-    <View className="flex min-h-screen w-full flex-col items-center justify-center bg-white p-6">
+    <View className="flex min-h-screen w-full flex-col items-center justify-center bg-white p-6 dark:bg-gray-700">
       <Stack.Screen options={{ headerShown: false }} />
       <View className="flex w-full max-w-[375px] flex-col items-center">
         <View className="mb-16">

@@ -125,7 +125,7 @@ export default function LocationSearch() {
               disabled={locations.length === 0}
               className="mb-4 w-full flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-3 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-900"
             >
-              <MapIcon className="size-4" />
+              <MapIcon className="size-4 dark:text-gray-200" />
               <Text className="text-sm font-medium text-black dark:text-gray-200">
                 Show all on map
               </Text>
