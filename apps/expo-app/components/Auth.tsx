@@ -98,8 +98,14 @@ export default function Auth() {
       <Button variant="primary" fullWidth onPress={performOAuth}>
         <Text>Sign in</Text>
       </Button>
-      <Link variant="secondary" fullWidth href="/plans" replace>
-        <Text>Try it out</Text>
+      <Link
+        variant="secondary"
+        className="dark:border-gray-200 dark:bg-gray-700"
+        fullWidth
+        href="/plans"
+        replace
+      >
+        <Text className="dark:text-gray-200">Try it out</Text>
       </Link>
     </>
   );
