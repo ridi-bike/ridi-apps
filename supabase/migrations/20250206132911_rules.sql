@@ -165,6 +165,8 @@ for select
 to public
 using ((( SELECT auth.uid() AS uid) = user_id or user_id is null));
 
+truncate table plans cascade;
+
 alter table plans
   add column rule_set_id text not null;
 
