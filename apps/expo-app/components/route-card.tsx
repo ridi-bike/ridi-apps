@@ -83,37 +83,52 @@ export function RouteCard({ routeId, plan }: RouteCardProps) {
             </Text>
             <View className="flex flex-row gap-2 text-sm">
               <View className="flex-1">
-                <View
-                  className="mb-1 h-2 rounded-full bg-[#FF5937]"
-                  style={{
-                    width: `${Math.round(breakdown[0].percentage)}%`,
-                  }}
-                />
-                <Text className="dark:text-gray-200">
-                  {breakdown[0].statName} {Math.round(breakdown[0].percentage)}%
-                </Text>
+                {breakdown[0] && (
+                  <>
+                    <View
+                      className="mb-1 h-2 rounded-full bg-[#FF5937]"
+                      style={{
+                        width: `${Math.round(breakdown[0].percentage)}%`,
+                      }}
+                    />
+                    <Text className="dark:text-gray-200">
+                      {breakdown[0].statName}{" "}
+                      {Math.round(breakdown[0].percentage)}%
+                    </Text>
+                  </>
+                )}
               </View>
               <View className="flex-1">
-                <View
-                  className="mb-1 h-2 rounded-full bg-[#FFA37F]"
-                  style={{
-                    width: `${Math.round(breakdown[1].percentage)}%`,
-                  }}
-                />
-                <Text className="dark:text-gray-200">
-                  {breakdown[1].statName} {Math.round(breakdown[1].percentage)}%
-                </Text>
+                {breakdown[1] && (
+                  <>
+                    <View
+                      className="mb-1 h-2 rounded-full bg-[#FFA37F]"
+                      style={{
+                        width: `${Math.round(breakdown[1].percentage)}%`,
+                      }}
+                    />
+                    <Text className="dark:text-gray-200">
+                      {breakdown[1].statName}{" "}
+                      {Math.round(breakdown[1].percentage)}%
+                    </Text>
+                  </>
+                )}
               </View>
               <View className="flex-1">
-                <View
-                  className="mb-1 h-2 rounded-full bg-[#FFD7C9]"
-                  style={{
-                    width: `${Math.round(breakdown[2].percentage)}%`,
-                  }}
-                />
-                <Text className="dark:text-gray-200">
-                  {breakdown[2].statName} {Math.round(breakdown[2].percentage)}%
-                </Text>
+                {breakdown[2] && (
+                  <>
+                    <View
+                      className="mb-1 h-2 rounded-full bg-[#FFD7C9]"
+                      style={{
+                        width: `${Math.round(breakdown[2].percentage)}%`,
+                      }}
+                    />
+                    <Text className="dark:text-gray-200">
+                      {breakdown[2].statName}{" "}
+                      {Math.round(breakdown[2].percentage)}%
+                    </Text>
+                  </>
+                )}
               </View>
             </View>
           </View>
