@@ -2,107 +2,135 @@ import {
   type RuleSetsSetRequest,
   type RuleSetsListResponse,
 } from "@ridi/api-contracts";
-import { useQuery } from "@tanstack/react-query";
-import { useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect } from "react";
 import { generate } from "xksuid";
 
 import { apiClient } from "../api";
-import { dataSyncPendingPush } from "../data-sync";
-import {
-  ruleSetsPendingStorage,
-  ruleSetsStorage,
-  ruleSetsDeletedStore,
-} from "../storage";
 import { supabase } from "../supabase";
 
 import { getSuccessResponseOrThrow } from "./util";
 
+const DATA_VERSION = "v1";
+
 export type RuleSet = RuleSetsListResponse["data"][number];
 export type RuleSetNew = RuleSetsSetRequest["data"];
 
+type SyncStatus = {
+  isSyncPending: boolean;
+  isDeleted?: true;
+};
+
 export function useStoreRuleSets() {
-  const [ruleSetsPending, setRuleSetsPending] = useState(
-    ruleSetsPendingStorage.get() || [],
+  const queryClient = useQueryClient();
+
+  const updateLocalRuleSetsPending = useCallback(
+    (id: string, ruleSetIn: RuleSet | null, isDeleted?: true) => {
+      queryClient.setQueryData<(RuleSet & SyncStatus)[]>(
+        [DATA_VERSION, "rule-sets"],
+        (ruleSetList) => {
+          if (ruleSetList?.some((ruleSet) => ruleSet.id === id)) {
+            return ruleSetList.map((ruleSet) => {
+              if (ruleSet.id === id) {
+                return {
+                  ...(ruleSetIn || ruleSet),
+                  isSyncPending: true,
+                  isDeleted,
+                };
+              }
+              return ruleSet;
+            });
+          }
+          return ruleSetList;
+        },
+      );
+    },
+    [queryClient],
   );
 
-  const [ruleSetDeleted, setRuleSetDelted] = useState(
-    ruleSetsDeletedStore.get() || [],
+  const updateLocalRuleSetsSynced = useCallback(
+    (id: string, isDeleted?: true) => {
+      queryClient.setQueryData<(RuleSet & SyncStatus)[]>(
+        [DATA_VERSION, "rule-sets"],
+        (ruleSetList) => {
+          if (ruleSetList?.some((ruleSet) => ruleSet.id === id)) {
+            if (isDeleted) {
+              return ruleSetList.filter((ruleSet) => ruleSet.id !== id);
+            }
+            return ruleSetList.map((ruleSet) => {
+              if (ruleSet.id === id) {
+                return { ...ruleSet, isSyncPending: false };
+              }
+              return ruleSet;
+            });
+          }
+          return ruleSetList;
+        },
+      );
+    },
+    [queryClient],
   );
-
-  const refresh = useCallback(() => {
-    setRuleSetsPending(ruleSetsPendingStorage.get() || []);
-    setRuleSetDelted(ruleSetsDeletedStore.get() || []);
-  }, []);
-
-  useFocusEffect(refresh);
 
   const { data, error, status, refetch } = useQuery({
     queryKey: ["rule-sets"],
     queryFn: () =>
       apiClient
-        .ruleSetsList({ query: { version: ruleSetsStorage.dataVersion } })
-        .then((r) => getSuccessResponseOrThrow(200, r)),
-    initialData: {
-      version: ruleSetsStorage.dataVersion,
-      data: ruleSetsStorage.get() || [],
+        .ruleSetsList({ query: { version: DATA_VERSION } })
+        .then((r) => getSuccessResponseOrThrow(200, r).data),
+  });
+
+  const { mutate: mutateSet } = useMutation({
+    mutationKey: ["rule-sets"],
+    mutationFn: (ruleSet: RuleSet) =>
+      apiClient
+        .ruleSetSet({
+          body: {
+            version: DATA_VERSION,
+            data: ruleSet,
+          },
+        })
+        .then((r) => getSuccessResponseOrThrow(201, r).data),
+    onMutate: async (ruleSet: RuleSet) => {
+      await queryClient.cancelQueries({
+        queryKey: [DATA_VERSION, "plans"],
+      });
+      updateLocalRuleSetsPending(ruleSet.id, ruleSet);
+    },
+    onSuccess(data) {
+      updateLocalRuleSetsSynced(data.id);
     },
   });
 
-  useEffect(() => {
-    if (data) {
-      ruleSetsStorage.set(data.data);
-    }
-  }, [data]);
-
-  const dataWithPending = useMemo((): RuleSet[] => {
-    const ruleSets: RuleSet[] = ruleSetsPending
-      .filter((rs) => ruleSetDeleted.includes(rs.id))
-      .map((p) => ({
-        ...p,
-        isSystem: false,
-      }));
-
-    return [
-      ...data.data.filter(
-        (existingData) =>
-          !ruleSets.find((pendingData) => pendingData.id === existingData.id) ||
-          ruleSetDeleted.includes(existingData.id),
-      ),
-      ...ruleSets,
-    ];
-  }, [data.data, ruleSetDeleted, ruleSetsPending]);
+  const { mutate: mutateDelete } = useMutation({
+    mutationKey: ["rule-sets"],
+    mutationFn: (id: string) =>
+      apiClient
+        .ruleSetDelete({ body: { id } })
+        .then((r) => getSuccessResponseOrThrow(204, r)),
+    onMutate: async (id: string) => {
+      await queryClient.cancelQueries({
+        queryKey: [DATA_VERSION, "plans"],
+      });
+      updateLocalRuleSetsPending(id, null, true);
+    },
+    onSuccess(data) {
+      updateLocalRuleSetsSynced(data.id, true);
+    },
+  });
 
   const ruleSetSet = useCallback(
     (
       ruleSetNewValues: Omit<RuleSetNew, "id"> & { id: string | null },
     ): string => {
-      ruleSetNewValues.id = ruleSetNewValues.id || generate();
-      const ruleSetsPendingUpdated = [
-        ...ruleSetsPending,
-        {
-          ...ruleSetNewValues,
-        } as RuleSetNew,
-      ];
-      ruleSetsPendingStorage.set(ruleSetsPendingUpdated);
-      setRuleSetsPending(ruleSetsPendingUpdated);
-      dataSyncPendingPush()
-        .then(() => console.log("Ad hoc push done"))
-        .catch((err) => console.error("Ad hoc push error", err));
-      return ruleSetNewValues.id;
+      const id = ruleSetNewValues.id || generate();
+      mutateSet({
+        ...ruleSetNewValues,
+        isSystem: false,
+        id,
+      });
+      return id;
     },
-    [ruleSetsPending],
-  );
-
-  const ruleSetDelete = useCallback(
-    (id: string) => {
-      setRuleSetDelted([...ruleSetDeleted, id]);
-      ruleSetsDeletedStore.set([...ruleSetDeleted, id]);
-      dataSyncPendingPush()
-        .then(() => console.log("Ad hoc push done"))
-        .catch((err) => console.error("Ad hoc push error", err));
-    },
-    [ruleSetDeleted],
+    [mutateSet],
   );
 
   useEffect(() => {
@@ -123,10 +151,10 @@ export function useStoreRuleSets() {
   }, [refetch]);
 
   return {
-    data: dataWithPending,
+    data,
     error,
     status,
     ruleSetSet,
-    ruleSetDelete,
+    ruleSetDelete: mutateDelete,
   };
 }

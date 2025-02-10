@@ -13,7 +13,7 @@ import { useStoreRoute } from "~/lib/stores/routes-store";
 export default function RouteDetails() {
   const { routeId, planId } = useLocalSearchParams();
   const { data: plans, error: planError, status: planStatus } = useStorePlans();
-  const plan = plans.find((p) => p.id === planId);
+  const plan = plans?.find((p) => p.id === planId);
   const planRoute = plan?.routes.find((r) => r.routeId === routeId);
   const {
     data: route,

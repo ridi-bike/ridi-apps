@@ -168,6 +168,9 @@ const router = tsr
 
     return {
       status: 204,
+      body: {
+        id: body.id,
+      },
     };
   },
   coordsSelect: async ({ body: { version, lon, lat } }, ctx) => {

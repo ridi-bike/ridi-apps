@@ -251,7 +251,7 @@ export default function PlansNew() {
             <Navigation className="size-4 dark:text-gray-200" />
             <Text className="text-sm dark:text-gray-200">
               Routing rules:{" "}
-              {ruleSets.find((rp) => rp.id === ruleSetId)?.name || "..."}
+              {ruleSets?.find((rp) => rp.id === ruleSetId)?.name || "..."}
             </Text>
           </Pressable>
         </View>

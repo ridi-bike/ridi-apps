@@ -290,7 +290,7 @@ export const apiContract = c.router({
       id: z.string(),
     }),
     responses: {
-      204: z.undefined(),
+      204: z.object({ id: z.string() }),
       400: z.object({ message: z.string() }),
       401: z.object({ message: z.string() }),
       404: z.object({ message: z.string() }),

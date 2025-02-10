@@ -13,8 +13,8 @@ import { useStorePlans } from "~/lib/stores/plans-store";
 
 export default function PlanDetails() {
   const { planId } = useLocalSearchParams();
-  const { data: plans } = useStorePlans();
-  const plan = plans.find((p) => p.id === planId);
+  const { data: plans, error, status, isLoading } = useStorePlans();
+  const plan = plans?.find((p) => p.id === planId);
 
   if (!plan) {
     return (
