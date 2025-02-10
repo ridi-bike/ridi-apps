@@ -120,40 +120,52 @@ export default function RouteDetails() {
               </Text>
               <View className="flex flex-row gap-2 text-sm">
                 <View className="flex-1">
-                  <View
-                    className="mb-1 h-2 rounded-full bg-[#FF5937]"
-                    style={{
-                      width: `${Math.round(breakdownSurface[0].percentage)}%`,
-                    }}
-                  />
-                  <Text className="dark:text-gray-200">
-                    {breakdownSurface[0].statName}{" "}
-                    {Math.round(breakdownSurface[0].percentage)}%
-                  </Text>
+                  {breakdownSurface[0] && (
+                    <>
+                      <View
+                        className="mb-1 h-2 rounded-full bg-[#FF5937]"
+                        style={{
+                          width: `${Math.round(breakdownSurface[0].percentage)}%`,
+                        }}
+                      />
+                      <Text className="dark:text-gray-200">
+                        {breakdownSurface[0].statName}{" "}
+                        {Math.round(breakdownSurface[0].percentage)}%
+                      </Text>
+                    </>
+                  )}
                 </View>
                 <View className="flex-1">
-                  <View
-                    className="mb-1 h-2 rounded-full bg-[#FFA37F]"
-                    style={{
-                      width: `${Math.round(breakdownSurface[1].percentage)}%`,
-                    }}
-                  />
-                  <Text className="dark:text-gray-200">
-                    {breakdownSurface[1].statName}{" "}
-                    {Math.round(breakdownSurface[1].percentage)}%
-                  </Text>
+                  {breakdownSurface[1] && (
+                    <>
+                      <View
+                        className="mb-1 h-2 rounded-full bg-[#FFA37F]"
+                        style={{
+                          width: `${Math.round(breakdownSurface[1].percentage)}%`,
+                        }}
+                      />
+                      <Text className="dark:text-gray-200">
+                        {breakdownSurface[1].statName}{" "}
+                        {Math.round(breakdownSurface[1].percentage)}%
+                      </Text>
+                    </>
+                  )}
                 </View>
                 <View className="flex-1">
-                  <View
-                    className="mb-1 h-2 rounded-full bg-[#FFD7C9]"
-                    style={{
-                      width: `${Math.round(breakdownSurface[2].percentage)}%`,
-                    }}
-                  />
-                  <Text className="dark:text-gray-200">
-                    {breakdownSurface[2].statName}{" "}
-                    {Math.round(breakdownSurface[2].percentage)}%
-                  </Text>
+                  {breakdownSurface[2] && (
+                    <>
+                      <View
+                        className="mb-1 h-2 rounded-full bg-[#FFD7C9]"
+                        style={{
+                          width: `${Math.round(breakdownSurface[2].percentage)}%`,
+                        }}
+                      />
+                      <Text className="dark:text-gray-200">
+                        {breakdownSurface[2].statName}{" "}
+                        {Math.round(breakdownSurface[2].percentage)}%
+                      </Text>
+                    </>
+                  )}
                 </View>
               </View>
             </View>
@@ -169,40 +181,52 @@ export default function RouteDetails() {
               </Text>
               <View className="flex flex-row gap-2 text-sm">
                 <View className="flex-1">
-                  <View
-                    className="mb-1 h-2 rounded-full bg-[#FF5937]"
-                    style={{
-                      width: `${Math.round(breakdownRoadType[0].percentage)}%`,
-                    }}
-                  />
-                  <Text className="dark:text-gray-200">
-                    {breakdownRoadType[0].statName}{" "}
-                    {Math.round(breakdownRoadType[0].percentage)}%
-                  </Text>
+                  {breakdownRoadType[0] && (
+                    <>
+                      <View
+                        className="mb-1 h-2 rounded-full bg-[#FF5937]"
+                        style={{
+                          width: `${Math.round(breakdownRoadType[0].percentage)}%`,
+                        }}
+                      />
+                      <Text className="dark:text-gray-200">
+                        {breakdownRoadType[0].statName}{" "}
+                        {Math.round(breakdownRoadType[0].percentage)}%
+                      </Text>
+                    </>
+                  )}
                 </View>
                 <View className="flex-1">
-                  <View
-                    className="mb-1 h-2 rounded-full bg-[#FFA37F]"
-                    style={{
-                      width: `${Math.round(breakdownRoadType[1].percentage)}%`,
-                    }}
-                  />
-                  <Text className="dark:text-gray-200">
-                    {breakdownRoadType[1].statName}{" "}
-                    {Math.round(breakdownRoadType[1].percentage)}%
-                  </Text>
+                  {breakdownRoadType[1] && (
+                    <>
+                      <View
+                        className="mb-1 h-2 rounded-full bg-[#FFA37F]"
+                        style={{
+                          width: `${Math.round(breakdownRoadType[1].percentage)}%`,
+                        }}
+                      />
+                      <Text className="dark:text-gray-200">
+                        {breakdownRoadType[1].statName}{" "}
+                        {Math.round(breakdownRoadType[1].percentage)}%
+                      </Text>
+                    </>
+                  )}
                 </View>
                 <View className="flex-1">
-                  <View
-                    className="mb-1 h-2 rounded-full bg-[#FFD7C9]"
-                    style={{
-                      width: `${Math.round(breakdownRoadType[2].percentage)}%`,
-                    }}
-                  />
-                  <Text className="dark:text-gray-200">
-                    {breakdownRoadType[2].statName}{" "}
-                    {Math.round(breakdownRoadType[2].percentage)}%
-                  </Text>
+                  {breakdownRoadType[2] && (
+                    <>
+                      <View
+                        className="mb-1 h-2 rounded-full bg-[#FFD7C9]"
+                        style={{
+                          width: `${Math.round(breakdownRoadType[2].percentage)}%`,
+                        }}
+                      />
+                      <Text className="dark:text-gray-200">
+                        {breakdownRoadType[2].statName}{" "}
+                        {Math.round(breakdownRoadType[2].percentage)}%
+                      </Text>
+                    </>
+                  )}
                 </View>
               </View>
             </View>
