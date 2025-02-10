@@ -2,102 +2,134 @@ import {
   type PlanCreateRequest,
   type PlansListResponse,
 } from "@ridi/api-contracts";
-import { useQuery } from "@tanstack/react-query";
-import { useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect } from "react";
 import { generate } from "xksuid";
 
 import { apiClient } from "../api";
-import { dataSyncPendingPush } from "../data-sync";
-import { plansPendingStorage, plansStorage } from "../storage";
 import { supabase } from "../supabase";
 
 import { getSuccessResponseOrThrow } from "./util";
 
+const DATA_VERSION = "v1";
+
 export type Plan = PlansListResponse["data"][number];
 export type PlanNew = PlanCreateRequest["data"];
+type PlanPending = {
+  startLat: number;
+  startLon: number;
+  finishLat: number | null;
+  finishLon: number | null;
+  distance: number;
+  bearing: number | null;
+  tripType: "round-trip" | "start-finish";
+  ruleSetId: string;
+};
+type SyncStatus = {
+  isSyncPending: boolean;
+};
 
 export function useStorePlans() {
-  const [plansPending, setPlansPending] = useState(
-    plansPendingStorage.get() || [],
-  );
+  const queryClient = useQueryClient();
 
-  const refresh = useCallback(() => {
-    setPlansPending(plansPendingStorage.get() || []);
-  }, []);
-
-  useFocusEffect(refresh);
-
-  const { data, error, status, refetch } = useQuery({
-    queryKey: ["plans"],
+  const { data, status, isLoading, error, refetch } = useQuery({
+    queryKey: [DATA_VERSION, "plans"],
     queryFn: () =>
       apiClient
-        .plansList({ query: { version: plansStorage.dataVersion } })
-        .then((r) => getSuccessResponseOrThrow(200, r)),
-    initialData: {
-      version: plansStorage.dataVersion,
-      data: plansStorage.get() || [],
+        .plansList({ query: { version: DATA_VERSION } })
+        .then((r) => getSuccessResponseOrThrow(200, r).data),
+  });
+
+  const updateLocalPlansListPending = useCallback(
+    (planIn: Plan) => {
+      queryClient.setQueryData<(Plan & SyncStatus)[]>(
+        [DATA_VERSION, "plans"],
+        (planList) => {
+          if (planList?.some((plan) => plan.id === planIn.id)) {
+            return planList.map((plan) => {
+              if (plan.id === planIn.id) {
+                return { ...planIn, isSyncPending: true };
+              }
+              return plan;
+            });
+          }
+          return [...(planList || []), { ...planIn, isSyncPending: true }];
+        },
+      );
+    },
+    [queryClient],
+  );
+
+  const updateLocalPlansListSynced = useCallback(
+    (id: string) => {
+      queryClient.setQueryData<(Plan & SyncStatus)[]>(
+        [DATA_VERSION, "plans"],
+        (planList) => {
+          if (planList?.some((plan) => plan.id === id)) {
+            return planList.map((plan) => {
+              if (plan.id === id) {
+                return { ...plan, isSyncPending: false };
+              }
+              return plan;
+            });
+          }
+          return planList;
+        },
+      );
+    },
+    [queryClient],
+  );
+
+  const { mutate } = useMutation({
+    mutationKey: [],
+    mutationFn: (plan: Plan) =>
+      apiClient
+        .planCreate({
+          body: {
+            version: DATA_VERSION,
+            data: {
+              ...plan,
+              createdAt: new Date(plan.createdAt),
+            },
+          },
+        })
+        .then((r) => getSuccessResponseOrThrow(201, r).data),
+    onMutate: async (plan: Plan) => {
+      await queryClient.cancelQueries({
+        queryKey: [DATA_VERSION, "plans"],
+      });
+      updateLocalPlansListPending(plan);
+    },
+    onSuccess(data) {
+      updateLocalPlansListSynced(data.id);
     },
   });
 
-  useEffect(() => {
-    if (data) {
-      plansStorage.set(data.data);
-    }
-  }, [data]);
-
-  const dataWithPending = useMemo((): Plan[] => {
-    const plans: Plan[] = plansPending.map((p) => ({
-      ...p,
-      state: "new",
-      startDesc: `${Math.round(p.startLat * 10000) / 10000}, ${Math.round(p.startLon * 10000) / 10000}`,
-      finishDesc:
-        p.finishLat && p.finishLon
-          ? `${Math.round(p.finishLat * 10000) / 10000}, ${Math.round(p.finishLon * 10000) / 10000}`
-          : null,
-      createdAt: p.createdAt.toString(),
-      routes: [],
-    }));
-
-    return [...data.data, ...plans];
-  }, [data.data, plansPending]);
-
   const planAdd = useCallback(
-    (planNew: {
-      startLat: number;
-      startLon: number;
-      finishLat: number | null;
-      finishLon: number | null;
-      distance: number;
-      bearing: number | null;
-      tripType: "round-trip" | "start-finish";
-      ruleSetId: string;
-    }): string => {
+    (planNew: PlanPending) => {
       const id = generate();
-      const plansPendingUpdated = [
-        ...plansPending,
-        {
-          id,
-          name: `from ${planNew.startLat},${planNew.startLon} to ${planNew.finishLat},${planNew.finishLon}`,
-          startLat: planNew.startLat,
-          startLon: planNew.startLon,
-          finishLat: planNew.finishLat,
-          finishLon: planNew.finishLon,
-          distance: planNew.distance,
-          bearing: planNew.bearing,
-          tripType: planNew.tripType,
-          createdAt: new Date(),
-          ruleSetId: planNew.ruleSetId,
-        },
-      ];
-      plansPendingStorage.set(plansPendingUpdated);
-      setPlansPending(plansPendingUpdated);
-      dataSyncPendingPush()
-        .then(() => console.log("Ad hoc push done"))
-        .catch((err) => console.error("Ad hoc push error", err));
+
+      const plan: Plan = {
+        id,
+        name: `from ${planNew.startLat},${planNew.startLon} to ${planNew.finishLat},${planNew.finishLon}`,
+        startLat: planNew.startLat,
+        startLon: planNew.startLon,
+        startDesc: `${planNew.startLat},${planNew.startLon}`,
+        finishLat: planNew.finishLat,
+        finishDesc: `${planNew.finishLat},${planNew.finishLon}`,
+        finishLon: planNew.finishLon,
+        distance: planNew.distance,
+        bearing: planNew.bearing,
+        tripType: planNew.tripType,
+        createdAt: new Date().toString(),
+        ruleSetId: planNew.ruleSetId,
+        state: "new",
+        routes: [],
+      };
+      mutate(plan);
       return id;
     },
-    [plansPending],
+    [mutate],
   );
 
   useEffect(() => {
@@ -117,5 +149,5 @@ export function useStorePlans() {
     };
   }, [refetch]);
 
-  return { data: dataWithPending, error, status, planAdd };
+  return { data, status, isLoading, error, planAdd };
 }

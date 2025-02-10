@@ -1,6 +1,6 @@
 import { Link } from "expo-router";
 import { Plus } from "lucide-react-native";
-import { View } from "react-native";
+import { View, Text } from "react-native";
 
 import { PlanCard } from "~/components/plan-card";
 import { ScreenFrame } from "~/components/screen-frame";
@@ -8,6 +8,10 @@ import { useStorePlans } from "~/lib/stores/plans-store";
 
 export default function PlansPage() {
   const { data: plans, error, status } = useStorePlans();
+
+  if (!plans) {
+    return <Text>Loading</Text>;
+  }
 
   return (
     <ScreenFrame
