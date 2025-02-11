@@ -1,7 +1,6 @@
-import { MotiPressable } from "moti/interactions";
+import { MotiPressable as MotiPressableOrig } from "moti/interactions";
 import { remapProps } from "nativewind";
 
-// Call this once at the entry point of your app
-remapProps(MotiPressable, {
+export const MotiPressable = remapProps(MotiPressableOrig, {
   className: "style",
 });

@@ -14,7 +14,7 @@ export function Loading(props: ViewProps) {
       transition={{
         loop: true,
         type: "timing",
-        duration: 1500,
+        duration: 1000,
         delay: 200,
       }}
     >

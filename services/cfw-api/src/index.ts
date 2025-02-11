@@ -326,7 +326,12 @@ const router = tsr
       });
 
       if (!routesFlat.length) {
-        throw new Error("not found");
+        return {
+          status: 404,
+          body: {
+            message: `Id ${routeId} not found`,
+          },
+        };
       }
 
       const statsBreakdown = await routeStatsGet(ctx.db, {

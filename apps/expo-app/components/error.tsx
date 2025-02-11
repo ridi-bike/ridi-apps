@@ -1,9 +1,9 @@
 import * as Clipboard from "expo-clipboard";
 import { AlertCircle, Copy, RefreshCcw } from "lucide-react-native";
-import { MotiPressable } from "moti/interactions";
 import { useState } from "react";
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { generate } from "xksuid";
+import { MotiPressable } from "~/lib/nativewind";
 
 import { useEffectOnce } from "~/lib/utils";
 
@@ -15,7 +15,7 @@ export function ErrorBox({
   retry,
   error,
 }: {
-  retry: () => void;
+  retry?: () => void;
   error: Error;
 }) {
   const [errorId] = useState(generate());
@@ -75,24 +75,19 @@ export function ErrorBox({
           </View>
         </View>
       </View>
-      <MotiPressable
-        onPress={retry}
-        animate={({ hovered, pressed }) => {
-          "worklet";
-
-          return {
-            opacity: hovered || pressed ? 0.5 : 1,
-          };
-        }}
-        className={
-          "mt-4 flex w-full flex-row items-center justify-center gap-2 rounded-lg bg-[#FF5937] px-6 py-3 hover:bg-[#ff4720]"
-        }
-      >
-        <RefreshCcw className="size-5" />
-        <Text className={"font-bold text-white dark:text-gray-100"}>
-          Try Again
-        </Text>
-      </MotiPressable>
+      {retry && (
+        <Pressable
+          onPress={retry}
+          className={
+            "mt-4 flex w-full flex-row items-center justify-center gap-2 rounded-lg bg-[#FF5937] px-6 py-3 hover:bg-[#ff4720]"
+          }
+        >
+          <RefreshCcw className="size-5" />
+          <Text className={"font-bold text-white dark:text-gray-100"}>
+            Try Again
+          </Text>
+        </Pressable>
+      )}
     </View>
   );
 }
