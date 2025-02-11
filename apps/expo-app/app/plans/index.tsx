@@ -5,7 +5,6 @@ import {
   type MotiPressableTransitionProp,
   type MotiPressableProp,
 } from "moti/interactions";
-import { MotiPressable } from "moti/interactions";
 import { useMemo } from "react";
 import { View, Text } from "react-native";
 
@@ -13,6 +12,7 @@ import { ErrorBox } from "~/components/error";
 import { Loading } from "~/components/loading";
 import { PlanCard } from "~/components/plan-card";
 import { ScreenFrame } from "~/components/screen-frame";
+import { MotiPressable } from "~/lib/nativewind";
 import { useStorePlans } from "~/lib/stores/plans-store";
 
 export default function PlansPage() {
@@ -98,7 +98,7 @@ export default function PlansPage() {
               duration: 500,
             }}
           >
-            <View className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            <View className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {plans.map((plan, index) => (
                 <MotiPressable
                   key={index}

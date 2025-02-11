@@ -18,7 +18,7 @@ const queryClient = new QueryClient({
     queries: {
       gcTime: Infinity,
       staleTime: Infinity,
-      persister,
+      // persister,
     },
   },
 });

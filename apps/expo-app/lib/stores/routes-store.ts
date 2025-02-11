@@ -10,7 +10,7 @@ export type Route = RouteGetResponse["data"];
 const DATA_VERSION = "v1";
 
 export function useStoreRoute(routeId: string) {
-  const { data, error, status } = useQuery({
+  const { data, error, status, refetch } = useQuery({
     queryKey: [DATA_VERSION, "route", routeId],
     queryFn: () =>
       apiClient
@@ -18,5 +18,5 @@ export function useStoreRoute(routeId: string) {
         .then((r) => getSuccessResponseOrThrow(200, r)),
   });
 
-  return { data, error, status };
+  return { data, error, status, refetch };
 }
