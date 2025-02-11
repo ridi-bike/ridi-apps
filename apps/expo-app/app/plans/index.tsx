@@ -1,5 +1,6 @@
-import { Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { Plus } from "lucide-react-native";
+import { AnimatePresence, MotiView } from "moti";
 import {
   type MotiPressableTransitionProp,
   type MotiPressableProp,
@@ -8,12 +9,14 @@ import { MotiPressable } from "moti/interactions";
 import { useMemo } from "react";
 import { View, Text } from "react-native";
 
+import { ErrorBox } from "~/components/error";
+import { Loading } from "~/components/loading";
 import { PlanCard } from "~/components/plan-card";
 import { ScreenFrame } from "~/components/screen-frame";
 import { useStorePlans } from "~/lib/stores/plans-store";
 
 export default function PlansPage() {
-  const { data: plans, error, status } = useStorePlans();
+  const { data: plans, error, status, refetch } = useStorePlans();
   const router = useRouter();
   const animate: MotiPressableProp = useMemo(
     () =>
@@ -21,7 +24,8 @@ export default function PlansPage() {
         "worklet";
 
         return {
-          opacity: hovered || pressed ? 0.5 : 1,
+          opacity: pressed ? 0.5 : 1,
+          scale: hovered ? 1.01 : 1,
         };
       },
     [],
@@ -32,54 +36,95 @@ export default function PlansPage() {
         "worklet";
 
         return {
-          delay: hovered || pressed ? 0 : 100,
+          delay: hovered || pressed ? 0 : 50,
         };
       },
     [],
   );
-  if (!plans) {
-    return <Text>Loading</Text>;
-  }
 
   return (
     <ScreenFrame
       title="Ridi plans"
       floating={
-        <Link
-          className="fixed bottom-8 right-8 flex size-24 items-center justify-center rounded-full bg-[#FF5937] shadow-lg transition-colors hover:bg-[#ff4a25]"
-          aria-label="Create new plan"
-          href="/plans/new"
-        >
-          <Plus className="size-12 text-white dark:text-gray-900" />
-        </Link>
+        <AnimatePresence>
+          {!!plans && (
+            <MotiPressable
+              className="fixed bottom-8 right-8 flex size-24 items-center justify-center rounded-full bg-[#FF5937] shadow-lg transition-colors hover:bg-[#ff4a25]"
+              aria-label="Create new plan"
+              from={{
+                opacity: 0,
+              }}
+              animate={{
+                opacity: 1,
+              }}
+              exit={{
+                opacity: 0,
+              }}
+              transition={{
+                type: "timing",
+                delay: 100,
+                duration: 500,
+              }}
+              onPress={() => router.navigate("/plans/new")}
+            >
+              <Plus className="size-12 text-white dark:text-gray-900" />
+            </MotiPressable>
+          )}
+        </AnimatePresence>
       }
     >
-      <View className="mx-2 max-w-5xl flex-1">
-        <View className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {plans.map((plan, index) => (
-            <MotiPressable
-              key={index}
-              onPress={() => router.navigate(`/plans/${plan.id}`)}
-              animate={animate}
-              transition={transition}
-            >
-              <PlanCard
-                startDesc={plan.startDesc}
-                finishDesc={plan.finishDesc}
-                startCoords={{ lat: plan.startLat, lon: plan.startLon }}
-                finishCoords={
-                  plan.finishLat && plan.finishLon
-                    ? { lat: plan.finishLat, lon: plan.finishLon }
-                    : null
-                }
-                bearing={plan.bearing}
-                distance={plan.distance}
-                tripType={plan.tripType}
-              />
-            </MotiPressable>
-          ))}
-        </View>
-      </View>
+      <AnimatePresence>
+        {!!error && status !== "pending" && (
+          <View className="mx-2 max-w-5xl flex-1">
+            <ErrorBox error={error} retry={refetch} />
+          </View>
+        )}
+        {!plans && !error && <Loading className="size-12 text-[#ff4a25]" />}
+        {!!plans && (
+          <MotiView
+            className="mx-2 max-w-5xl flex-1"
+            from={{
+              opacity: 0,
+            }}
+            animate={{
+              opacity: 1,
+            }}
+            exit={{
+              opacity: 0,
+            }}
+            transition={{
+              type: "timing",
+              delay: 100,
+              duration: 500,
+            }}
+          >
+            <View className="grid grid-cols-1 gap-6 md:grid-cols-3">
+              {plans.map((plan, index) => (
+                <MotiPressable
+                  key={index}
+                  onPress={() => router.navigate(`/plans/${plan.id}`)}
+                  animate={animate}
+                  transition={transition}
+                >
+                  <PlanCard
+                    startDesc={plan.startDesc}
+                    finishDesc={plan.finishDesc}
+                    startCoords={{ lat: plan.startLat, lon: plan.startLon }}
+                    finishCoords={
+                      plan.finishLat && plan.finishLon
+                        ? { lat: plan.finishLat, lon: plan.finishLon }
+                        : null
+                    }
+                    bearing={plan.bearing}
+                    distance={plan.distance}
+                    tripType={plan.tripType}
+                  />
+                </MotiPressable>
+              ))}
+            </View>
+          </MotiView>
+        )}
+      </AnimatePresence>
     </ScreenFrame>
   );
 }
