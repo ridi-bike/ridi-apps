@@ -103,6 +103,13 @@ export default [
       "react-compiler/react-compiler": "error",
       "react/prop-types": "off",
       "react/jsx-no-leaked-render": "off",
+      "react-hooks/exhaustive-deps": [
+        "error",
+        {
+          additionalHooks:
+            "(useMotiPressableTransition|useMotiPressable|useMotiPressables|useMotiPressableAnimatedProps|useInterpolateMotiPressable)",
+        },
+      ],
     },
   },
   ...fixupConfigRules(

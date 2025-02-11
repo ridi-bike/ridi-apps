@@ -149,5 +149,5 @@ export function useStorePlans() {
     };
   }, [refetch]);
 
-  return { data, status, isLoading, error, planAdd };
+  return { data, status, isLoading, error, planAdd, refetch };
 }
