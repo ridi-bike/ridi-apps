@@ -1,5 +1,11 @@
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { Plus } from "lucide-react-native";
+import {
+  type MotiPressableTransitionProp,
+  type MotiPressableProp,
+} from "moti/interactions";
+import { MotiPressable } from "moti/interactions";
+import { useMemo } from "react";
 import { View, Text } from "react-native";
 
 import { PlanCard } from "~/components/plan-card";
@@ -8,7 +14,29 @@ import { useStorePlans } from "~/lib/stores/plans-store";
 
 export default function PlansPage() {
   const { data: plans, error, status } = useStorePlans();
+  const router = useRouter();
+  const animate: MotiPressableProp = useMemo(
+    () =>
+      ({ hovered, pressed }) => {
+        "worklet";
 
+        return {
+          opacity: hovered || pressed ? 0.5 : 1,
+        };
+      },
+    [],
+  );
+  const transition: MotiPressableTransitionProp = useMemo(
+    () =>
+      ({ hovered, pressed }) => {
+        "worklet";
+
+        return {
+          delay: hovered || pressed ? 0 : 100,
+        };
+      },
+    [],
+  );
   if (!plans) {
     return <Text>Loading</Text>;
   }
@@ -29,7 +57,12 @@ export default function PlansPage() {
       <View className="mx-2 max-w-5xl flex-1">
         <View className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {plans.map((plan, index) => (
-            <Link key={index} href={`/plans/${plan.id}`}>
+            <MotiPressable
+              key={index}
+              onPress={() => router.navigate(`/plans/${plan.id}`)}
+              animate={animate}
+              transition={transition}
+            >
               <PlanCard
                 startDesc={plan.startDesc}
                 finishDesc={plan.finishDesc}
@@ -43,7 +76,7 @@ export default function PlansPage() {
                 distance={plan.distance}
                 tripType={plan.tripType}
               />
-            </Link>
+            </MotiPressable>
           ))}
         </View>
       </View>
