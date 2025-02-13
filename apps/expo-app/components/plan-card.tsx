@@ -1,6 +1,9 @@
 import { MapPin, Navigation } from "lucide-react-native";
 import { View, Text } from "react-native";
 
+import { type Plan } from "~/lib/stores/plans-store";
+import { cn } from "~/lib/utils";
+
 import { GeoMapPlanView } from "./geo-map/geo-map-plan-view";
 import { type Coords } from "./geo-map/types";
 import { getCardinalDirection } from "./geo-map/util";
@@ -14,6 +17,7 @@ type RouteCardProps = {
   startCoords: Coords;
   finishCoords: Coords | null;
   tripType: "round-trip" | "start-finish";
+  state: Plan["state"];
 };
 
 export const PlanCard = ({
@@ -24,6 +28,7 @@ export const PlanCard = ({
   startCoords,
   finishCoords,
   tripType,
+  state,
 }: RouteCardProps) => {
   return (
     <ScreenCard
@@ -89,16 +94,30 @@ export const PlanCard = ({
         </>
       }
       bottom={
-        <>
-          <Text className="font-bold dark:text-gray-100">
-            {tripType === "start-finish"
-              ? "Straigt line Distance"
-              : "Target distance"}
-          </Text>
-          <Text className="font-medium dark:text-gray-200">
-            {Math.round(distance / 1000)}km
-          </Text>
-        </>
+        <View className="flex flex-row items-center justify-between">
+          <View className="flex flex-col items-start justify-start">
+            <Text className="font-bold dark:text-gray-100">
+              {tripType === "start-finish"
+                ? "Straigt line Distance"
+                : "Target distance"}
+            </Text>
+            <Text className="font-medium dark:text-gray-200">
+              {Math.round(distance / 1000)}km
+            </Text>
+          </View>
+          <View className="flex flex-col items-end justify-center">
+            <Text className="font-bold dark:text-gray-100">Status</Text>
+            <Text
+              className={cn("font-bold", {
+                "text-gray-600": state === "new" || state === "planning",
+                "text-green-500": state === "done",
+                "text-red-500": state === "error",
+              })}
+            >
+              {state}
+            </Text>
+          </View>
+        </View>
       }
     />
   );

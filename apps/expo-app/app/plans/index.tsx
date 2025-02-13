@@ -118,6 +118,7 @@ export default function PlansPage() {
                     bearing={plan.bearing}
                     distance={plan.distance}
                     tripType={plan.tripType}
+                    state={plan.state}
                   />
                 </MotiPressable>
               ))}

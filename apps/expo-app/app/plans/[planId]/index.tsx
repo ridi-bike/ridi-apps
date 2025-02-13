@@ -12,7 +12,9 @@ import { Loading } from "~/components/loading";
 import { RouteCard } from "~/components/route-card";
 import { ScreenCard } from "~/components/screen-card";
 import { ScreenFrame } from "~/components/screen-frame";
+import { MotiText } from "~/lib/nativewind";
 import { useStorePlans } from "~/lib/stores/plans-store";
+import { cn } from "~/lib/utils";
 
 export default function PlanDetails() {
   const { planId } = useLocalSearchParams();
@@ -84,35 +86,63 @@ export default function PlanDetails() {
                 </>
               }
               bottom={
-                <>
-                  <Text className="font-bold dark:text-gray-100">
-                    {plan.tripType === "round-trip"
-                      ? "Target distance"
-                      : "Straigt line distance"}
-                  </Text>
-                  <Text className="font-medium dark:text-gray-200">
-                    {metersToDisplay(plan.distance)}
-                  </Text>
-                </>
+                <View className="flex flex-row items-center justify-between">
+                  <View className="flex flex-col items-start justify-start">
+                    <Text className="font-bold dark:text-gray-100">
+                      {plan.tripType === "round-trip"
+                        ? "Target distance"
+                        : "Straigt line distance"}
+                    </Text>
+                    <Text className="font-medium dark:text-gray-200">
+                      {metersToDisplay(plan.distance)}
+                    </Text>
+                  </View>
+                  <View className="flex flex-col items-end justify-center">
+                    <Text className="font-bold dark:text-gray-100">Status</Text>
+                    <Text
+                      className={cn("font-bold", {
+                        "text-gray-600":
+                          plan.state === "new" || plan.state === "planning",
+                        "text-green-500": plan.state === "done",
+                        "text-red-500": plan.state === "error",
+                      })}
+                    >
+                      {plan.state}
+                    </Text>
+                  </View>
+                </View>
               }
             />
-            <Text
-              role="heading"
-              aria-level={2}
-              className="my-6 text-2xl font-bold dark:text-gray-100"
-            >
-              Available Routes
-            </Text>
-            <View className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {plan.routes.map((route) => (
-                <Link
-                  key={route.routeId}
-                  href={`/plans/${plan.id}/${route.routeId}`}
+            {plan.state === "done" && plan.routes.length === 0 && (
+              <MotiText
+                className="m-8 text-lg dark:text-gray-200"
+                from={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                No routes found, please check rules
+              </MotiText>
+            )}
+            {plan.state === "done" && plan.routes.length > 0 && (
+              <>
+                <Text
+                  role="heading"
+                  aria-level={2}
+                  className="my-6 text-2xl font-bold dark:text-gray-100"
                 >
-                  <RouteCard routeId={route.routeId} plan={plan} />
-                </Link>
-              ))}
-            </View>
+                  Available Routes
+                </Text>
+                <View className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {plan.routes.map((route) => (
+                    <Link
+                      key={route.routeId}
+                      href={`/plans/${plan.id}/${route.routeId}`}
+                    >
+                      <RouteCard routeId={route.routeId} plan={plan} />
+                    </Link>
+                  ))}
+                </View>
+              </>
+            )}
           </MotiView>
         )}
       </AnimatePresence>
