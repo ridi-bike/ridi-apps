@@ -1,7 +1,8 @@
 -- name: RuleSetsList :many 
 select * from rule_sets
 where rule_sets.user_id = $1
-  or rule_sets.user_id is null;
+  or rule_sets.user_id is null
+order by default_set desc;
 
 -- name: RuleSetRoadTagsGet :many
 select * from rule_set_road_tags

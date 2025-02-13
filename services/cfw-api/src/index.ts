@@ -73,6 +73,7 @@ const router = tsr
       data: rules.map((r) => ({
         ...r,
         isSystem: r.userId === null,
+        isDefault: r.defaultSet,
         roadTags: tags
           .filter((t) => t.ruleSetId === r.id)
           .reduce(

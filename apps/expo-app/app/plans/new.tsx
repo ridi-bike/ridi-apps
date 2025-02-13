@@ -84,7 +84,9 @@ export default function PlansNew() {
       setTimeout(
         () =>
           setRuleSetId(
-            ruleSets.find((rp) => !rp.isSystem)?.id || ruleSets[0].id,
+            ruleSets.find((rp) => !rp.isSystem)?.id ||
+              ruleSets.find((rp) => rp.isDefault)?.id ||
+              ruleSets[0].id,
           ),
         0,
       );
