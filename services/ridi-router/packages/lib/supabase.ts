@@ -234,16 +234,19 @@ export type Database = {
       }
       rule_sets: {
         Row: {
+          default_set: boolean
           id: string
           name: string
           user_id: string | null
         }
         Insert: {
+          default_set?: boolean
           id?: string
           name: string
           user_id?: string | null
         }
         Update: {
+          default_set?: boolean
           id?: string
           name?: string
           user_id?: string | null

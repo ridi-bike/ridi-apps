@@ -126,6 +126,7 @@ export function useStoreRuleSets() {
       mutateSet({
         ...ruleSetNewValues,
         isSystem: false,
+        isDefault: false,
         id,
       });
       return id;
@@ -156,5 +157,6 @@ export function useStoreRuleSets() {
     status,
     ruleSetSet,
     ruleSetDelete: mutateDelete,
+    refetch,
   };
 }
