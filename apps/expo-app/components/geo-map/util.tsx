@@ -19,19 +19,19 @@ export function createRoundTripPolygon(
   distance: number,
 ) {
   const start = turf.point(startPoint);
-  const leftBearing = (bearing - 40 + 360) % 360;
-  const rightBearing = (bearing + 40 + 360) % 360;
+  const leftBearing = (bearing - 90 + 360) % 360;
+  const rightBearing = (bearing + 90 + 360) % 360;
   const points = [];
   points.push(start.geometry.coordinates);
-  const rightPoint = turf.destination(start, distance / 5, rightBearing, {
+  const rightPoint = turf.destination(start, distance / 10, rightBearing, {
     units: "kilometers",
   });
   points.push(rightPoint.geometry.coordinates);
-  const apexPoint = turf.destination(start, distance / 5, bearing, {
+  const apexPoint = turf.destination(start, distance / 10, bearing, {
     units: "kilometers",
   });
   points.push(apexPoint.geometry.coordinates);
-  const leftPoint = turf.destination(start, distance / 5, leftBearing, {
+  const leftPoint = turf.destination(start, distance / 10, leftBearing, {
     units: "kilometers",
   });
   points.push(leftPoint.geometry.coordinates);

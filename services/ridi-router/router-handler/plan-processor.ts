@@ -225,7 +225,42 @@ export class PlanProcessor {
     }
 
     const okRoutes = (routes.result as RidiRouterOk).ok.routes;
-    for (const route of okRoutes) {
+    const distanceModifier = planRecord.tripType === "round-trip" ? 1 : 2;
+    const distance = Number(planRecord.distance);
+    const sort = (a: (typeof okRoutes)[number], b: (typeof okRoutes)[number]) =>
+      b.stats.score - a.stats.score;
+    const filter =
+      (fromMod: number | null, toMod: number | null) =>
+      (r: (typeof okRoutes)[number]) =>
+        (!fromMod || r.stats.len_m > distance * distanceModifier * fromMod) &&
+        (!toMod || r.stats.len_m <= distance * distanceModifier * toMod);
+    const filterBuckes = [
+      filter(0, 1),
+      filter(1, 1.5),
+      filter(1.5, 2),
+      filter(2, 2.5),
+      filter(2.5, 3),
+      filter(3, 0),
+    ];
+    const num_of_best_routes = 6;
+    const bestRoutes = [];
+    if (okRoutes.length <= num_of_best_routes) {
+      console.log("less than ", num_of_best_routes);
+      bestRoutes.push(...okRoutes);
+    } else {
+      let step = 0;
+      while (bestRoutes.length < num_of_best_routes) {
+        const bucket = step % num_of_best_routes;
+        const iter = Math.floor(step / num_of_best_routes);
+        console.log({ step, bucket, iter });
+        const route = okRoutes.filter(filterBuckes[bucket]).sort(sort)[iter];
+        if (route) {
+          bestRoutes.push(route);
+        }
+        step++;
+      }
+    }
+    for (const route of bestRoutes) {
       const routeRecord = await this.pgQueries.routeInsert(this.pgClient, {
         planId,
         name: "some name",
