@@ -5,6 +5,7 @@ import { PgClient } from "@ridi-router/lib";
 import { EnvVariables } from "./env-variables.ts";
 import { ruleSetRoadTagsGet } from "../packages/lib/queries_sql.ts";
 import { getTagSection } from "./roadTags.ts";
+import { NdJson } from "json-nd";
 type RoadTagStats = Record<string, { len_m: number; percentage: number }>;
 type RidiRouterErr = { err: string };
 type RidiRouterOk = {
@@ -71,6 +72,7 @@ export class PlanProcessor {
         throw this.logger.error(
           "Plan record validation failed for 'round-trip'",
           {
+            planId,
             ...planRecord,
           },
         );
@@ -85,6 +87,7 @@ export class PlanProcessor {
         throw this.logger.error(
           "Plan record validation failed for 'start-finish'",
           {
+            planId,
             ...planRecord,
           },
         );
@@ -160,44 +163,55 @@ export class PlanProcessor {
       {} as Record<string, Record<string, { action: string; value?: number }>>,
     );
 
-    const { code, stdout, stderr } = await this.denoCommand.executeWithStdin(
-      this.env.routerBin,
-      {
-        args:
-          planRecord.tripType === "start-finish"
-            ? [
-                "start-client",
-                "--socket-name",
-                region.region,
-                "--route-req-id",
-                `${planRecord.id}`,
-                "start-finish",
-                "--start",
-                `${planRecord.startLat},${planRecord.startLon}`,
-                "--finish",
-                `${planRecord.finishLat},${planRecord.finishLon}`,
-              ]
-            : [
-                "start-client",
-                "--socket-name",
-                region.region,
-                "--route-req-id",
-                `${planRecord.id}`,
-                "round-trip",
-                "--start-finish",
-                `${planRecord.startLat},${planRecord.startLon}`,
-                "--bearing",
-                planRecord.bearing as string,
-                "--distance",
-                planRecord.distance,
-              ],
-        stdinContent: JSON.stringify(ruleInput),
-      },
-    );
+    const {
+      code,
+      stdout,
+      stderr: stderrString,
+    } = await this.denoCommand.executeWithStdin(this.env.routerBin, {
+      args:
+        planRecord.tripType === "start-finish"
+          ? [
+              "start-client",
+              "--socket-name",
+              region.region,
+              "--route-req-id",
+              `${planRecord.id}`,
+              "start-finish",
+              "--start",
+              `${planRecord.startLat},${planRecord.startLon}`,
+              "--finish",
+              `${planRecord.finishLat},${planRecord.finishLon}`,
+            ]
+          : [
+              "start-client",
+              "--socket-name",
+              region.region,
+              "--route-req-id",
+              `${planRecord.id}`,
+              "round-trip",
+              "--start-finish",
+              `${planRecord.startLat},${planRecord.startLon}`,
+              "--bearing",
+              planRecord.bearing as string,
+              "--distance",
+              planRecord.distance,
+            ],
+      stdinContent: JSON.stringify(ruleInput),
+    });
+
+    let stderr: string | unknown[] = stderrString;
+    try {
+      stderr = NdJson.parse(stderrString);
+    } catch (err) {
+      this.logger.error("ridi-router-client unparsable", {
+        stderr,
+        err,
+      });
+    }
 
     this.routerStore.finishRegionReq(region.region, planId);
 
-    if (code !== 0) {
+    if (!code.success) {
       throw this.logger.error(
         "Error returned from router when generating routes",
         {
@@ -210,7 +224,7 @@ export class PlanProcessor {
       );
     }
 
-    this.logger.debug("router output", { planId, stdout, stderr });
+    this.logger.debug("router output", { planId, stderr });
     const routes = JSON.parse(stdout) as RidiRouterOutput;
 
     if (typeof (routes.result as RidiRouterErr).err === "string") {
@@ -245,14 +259,12 @@ export class PlanProcessor {
     const num_of_best_routes = 6;
     const bestRoutes = [];
     if (okRoutes.length <= num_of_best_routes) {
-      console.log("less than ", num_of_best_routes);
       bestRoutes.push(...okRoutes);
     } else {
       let step = 0;
       while (bestRoutes.length < num_of_best_routes) {
         const bucket = step % num_of_best_routes;
         const iter = Math.floor(step / num_of_best_routes);
-        console.log({ step, bucket, iter });
         const route = okRoutes.filter(filterBuckes[bucket]).sort(sort)[iter];
         if (route) {
           bestRoutes.push(route);

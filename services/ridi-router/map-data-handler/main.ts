@@ -1,6 +1,6 @@
 import { DenoCommand, getPgClient, Locations, pg } from "@ridi-router/lib";
 import { RidiLogger } from "@ridi-router/logging/main.ts";
-"@ridi-router/logging/main.ts";
+("@ridi-router/logging/main.ts");
 import { BaseEnvVariables } from "@ridi-router/env/main.ts";
 
 import { EnvVariables } from "./env-variables.ts";
@@ -13,15 +13,14 @@ import { FileDownloader, RegionDownloader } from "./region-downloader.ts";
 import { OsmLocations } from "./osm-locations.ts";
 
 const baseEnv = new BaseEnvVariables();
-RidiLogger.init(baseEnv.ridiEnvName);
+const ridiLogger = RidiLogger.init(baseEnv.ridiEnvName);
 const envVariables = EnvVariables.get();
-const ridiLogger = RidiLogger.get();
 const locations = new Locations(baseEnv);
 
-await pg.servicesCreateUpdate(
-  getPgClient(),
-  { name: "map-data", routerVersion: envVariables.routerVersion },
-);
+await pg.servicesCreateUpdate(getPgClient(), {
+  name: "map-data",
+  routerVersion: envVariables.routerVersion,
+});
 
 ridiLogger.debug("Initialized with configuration", {
   regions: envVariables.regions,
@@ -33,32 +32,27 @@ const handler = new Handler(
   pg,
   getPgClient(),
   envVariables,
-  ridiLogger,
+  ridiLogger.forModule("handler"),
 );
 const cacheGenerator = new CacheGenerator(
   pg,
   getPgClient(),
   new DenoCommand(),
-  ridiLogger,
+  ridiLogger.forModule("cache-generator"),
   envVariables,
-  new KmlProcessor(
-    pg,
-    getPgClient(),
-    new DenoFileReader(),
-    new KmlConverter(),
-  ),
+  new KmlProcessor(pg, getPgClient(), new DenoFileReader(), new KmlConverter()),
   handler,
   new DenoDirStat(),
 );
 const regionProcessor = new RegionListProcessor(
-  ridiLogger,
+  ridiLogger.forModule("region-list-processor"),
   envVariables,
   cacheGenerator,
   handler,
   new Cleaner(
     pg,
     getPgClient(),
-    ridiLogger,
+    ridiLogger.forModule("cleaner"),
     new DenoRemove(),
   ),
   new RegionDownloader(
@@ -66,14 +60,17 @@ const regionProcessor = new RegionListProcessor(
     envVariables,
     pg,
     getPgClient(),
-    ridiLogger,
-    new FileDownloader(ridiLogger),
+    ridiLogger.forModule("region-downloader"),
+    new FileDownloader(ridiLogger.forModule("file-downloader")),
     cacheGenerator,
     new OsmLocations(envVariables),
   ),
   pg,
   getPgClient(),
-  new Md5Downloader(ridiLogger, new OsmLocations(envVariables)),
+  new Md5Downloader(
+    ridiLogger.forModule("md5-downoader"),
+    new OsmLocations(envVariables),
+  ),
 );
 regionProcessor.process();
 
