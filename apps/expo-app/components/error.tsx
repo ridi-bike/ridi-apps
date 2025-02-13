@@ -3,8 +3,8 @@ import { AlertCircle, Copy, RefreshCcw } from "lucide-react-native";
 import { useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import { generate } from "xksuid";
-import { MotiPressable } from "~/lib/nativewind";
 
+import { MotiPressable } from "~/lib/nativewind";
 import { useEffectOnce } from "~/lib/utils";
 
 const copyToClipboard = async () => {
@@ -14,11 +14,13 @@ const copyToClipboard = async () => {
 export function ErrorBox({
   retry,
   error,
+  refId,
 }: {
   retry?: () => void;
-  error: Error;
+  error?: Error;
+  refId?: string;
 }) {
-  const [errorId] = useState(generate());
+  const [errorId] = useState(refId || generate());
   useEffectOnce(() => console.error(error));
 
   return (

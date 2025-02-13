@@ -1,6 +1,14 @@
 import { Link, useLocalSearchParams } from "expo-router";
-import { MapPin, Navigation } from "lucide-react-native";
+import {
+  Bell,
+  Bug,
+  Compass,
+  Map,
+  MapPin,
+  Navigation,
+} from "lucide-react-native";
 import { AnimatePresence, MotiView } from "moti";
+import { useEffect, useState } from "react";
 import { View, Text } from "react-native";
 
 import { ErrorBox } from "~/components/error";
@@ -16,6 +24,201 @@ import { MotiText } from "~/lib/nativewind";
 import { useStorePlans } from "~/lib/stores/plans-store";
 import { cn } from "~/lib/utils";
 
+const loadingMessages = [
+  "Teaching squirrels to navigate traffic...",
+  "Consulting local pigeons for shortcuts...",
+  "Calculating optimal coffee shop stops...",
+  "Measuring sidewalk cracks for smoothness...",
+  "Bribing traffic lights to stay green...",
+  "Interviewing street signs for directions...",
+  "Counting passing clouds for weather data...",
+  "Teaching GPS to speak dolphin...",
+  "Negotiating with potholes...",
+  "Measuring distance in bananas...",
+  "Recruiting snails as pace cars...",
+  "Polling local cats about sunbathing spots...",
+  "Converting distance to pizza slices...",
+  "Teaching raccoons proper crosswalk usage...",
+  "Synchronizing watches with subway rats...",
+  "Calculating detours based on ice cream trucks...",
+  "Mapping scenic routes for sleepwalkers...",
+  "Consulting wise old park benches...",
+  "Training pigeons in traffic control...",
+  "Measuring road width in rubber ducks...",
+  "Organizing flash mobs for street crossings...",
+  "Teaching trees to give better directions...",
+  "Calibrating route based on squirrel migrations...",
+  "Interviewing fire hydrants about foot traffic...",
+  "Negotiating right of way with bike messengers...",
+  "Converting travel time to coffee cups...",
+  "Analyzing sidewalk chalk art for secret paths...",
+  "Teaching parking meters to moonwalk...",
+  "Calculating shortcuts through parallel universes...",
+  "Recruiting local dogs as pace setters...",
+];
+
+function NoRoutes() {
+  return (
+    <MotiView
+      from={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="flex size-full flex-col items-center justify-start"
+    >
+      <View className="flex flex-col items-center justify-start p-8 text-center">
+        <View className="mb-6 animate-pulse">
+          <Map className="size-12 text-[#FF5937]" />
+        </View>
+
+        <View className="p-4">
+          <Text
+            role="heading"
+            aria-level={2}
+            className="mb-3 text-xl font-bold dark:text-gray-100"
+          >
+            Our Squirrels Could Not Find a Route
+          </Text>
+
+          <Text className="mb-3 text-lg leading-6 dark:text-gray-200">
+            Our highly trained squirrels searched every tree, alley, and
+            shortcut, but couldn&apos;t find a path that matches your
+            requirements. This usually happens when some route rules are playing
+            too hard to get!
+          </Text>
+
+          <Text className="mb-3 text-lg leading-6 dark:text-gray-200">
+            Try relaxing some of your preferences - for example, if you&apos;re
+            avoiding paved roads while also steering clear of unpaved ones, even
+            our most acrobatic squirrels can&apos;t help. Consider:
+          </Text>
+
+          <View className="mb-3 ml-2">
+            <Text className="mb-2 text-lg leading-6 dark:text-gray-200">
+              • Allowing some road types you previously excluded
+            </Text>
+            <Text className="mb-2 text-lg leading-6 dark:text-gray-200">
+              • Expanding your permitted surface types
+            </Text>
+            <Text className="mb-2 text-lg leading-6 dark:text-gray-200">
+              • Adjusting your start and finish points
+            </Text>
+          </View>
+
+          <Text className="text-lg leading-6 dark:text-gray-200">
+            Remember: Our squirrels are talented, but they can&apos;t defy
+            geography... yet.
+          </Text>
+        </View>
+      </View>
+    </MotiView>
+  );
+}
+function RouteGenError({ planId }: { planId: string }) {
+  return (
+    <MotiView
+      from={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="flex size-full flex-col items-center justify-start"
+    >
+      <View className="flex flex-col items-center justify-start p-8 text-center">
+        <View className="mb-6 animate-spin">
+          <Bug className="size-12 text-[#FF5937]" />
+        </View>
+        <Text
+          role="heading"
+          aria-level={2}
+          className="mb-4 text-2xl font-bold dark:text-gray-100"
+        >
+          Our Squirrels Took a Wrong Turn
+        </Text>
+        <Text className="animate-pulse text-lg text-gray-600 dark:text-gray-200">
+          Looks like our navigation squirrels got distracted by some
+          particularly shiny acorns. Don&apos;t worry - we&apos;ve already sent
+          our most experienced squirrel squad to investigate!
+        </Text>
+      </View>
+
+      <ErrorBox refId={planId} />
+    </MotiView>
+  );
+}
+function GeneratingRoutes({ createdAt }: { createdAt: Date }) {
+  const [messageIndex, setMessageIndex] = useState(0);
+  const [showExplanation, setShowExplanation] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMessageIndex(Math.floor(Math.random() * loadingMessages.length));
+      if (Date.now() > createdAt.getTime() + 10000) {
+        setShowExplanation(true);
+      }
+    }, 3000);
+    return () => {
+      clearInterval(interval);
+    };
+  }, [createdAt]);
+
+  return (
+    <MotiView
+      from={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="flex size-full flex-col items-center justify-start"
+    >
+      <View className="flex flex-col items-center justify-start p-8 text-center">
+        <View className="mb-6 animate-spin">
+          <Compass className="size-12 text-[#FF5937]" />
+        </View>
+        <Text
+          role="heading"
+          aria-level={2}
+          className="mb-4 text-2xl font-bold dark:text-gray-100"
+        >
+          Generating Your Routes
+        </Text>
+        <Text className="animate-pulse text-lg text-gray-600 dark:text-gray-200">
+          {loadingMessages[messageIndex]}
+        </Text>
+      </View>
+
+      <AnimatePresence>
+        {showExplanation && (
+          <MotiView
+            from={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-8 rounded-2xl border-2 border-[#FF5937] bg-[#FFF5F3] p-6 dark:bg-gray-700"
+          >
+            <Text
+              role="heading"
+              aria-level={3}
+              className="mb-4 text-xl font-bold text-[#FF5937]"
+            >
+              Why is it taking so long?
+            </Text>
+            <View className="space-y-4">
+              <Text className="text-lg text-gray-700 dark:text-gray-200">
+                We&apos;re currently in beta, which means our route-finding
+                squirrels are still in training! While they&apos;re working hard
+                to find the perfect routes for you, it might take a little
+                longer.
+              </Text>
+              <View className="flex flex-row items-center gap-2">
+                <Bell className="size-8 p-4 text-[#FF5937]" />
+                <Text className="text-lg font-medium text-[#FF5937]">
+                  Don&apos;t worry - we&apos;ll send you a notification when
+                  your routes are ready! Feel free to create more plans in the
+                  meantime.
+                </Text>
+              </View>
+            </View>
+          </MotiView>
+        )}
+      </AnimatePresence>
+    </MotiView>
+  );
+}
+
 export default function PlanDetails() {
   const { planId } = useLocalSearchParams();
   const { data: plans, error, status, refetch } = useStorePlans();
@@ -23,7 +226,7 @@ export default function PlanDetails() {
 
   return (
     <ScreenFrame title="Plan routes">
-      <AnimatePresence>
+      <AnimatePresence exitBeforeEnter>
         {!plans && !error && <Loading className="size-12 text-[#ff4a25]" />}
         {!!error && status !== "pending" && (
           <MotiView
@@ -113,15 +316,11 @@ export default function PlanDetails() {
                 </View>
               }
             />
-            {plan.state === "done" && plan.routes.length === 0 && (
-              <MotiText
-                className="m-8 text-lg dark:text-gray-200"
-                from={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
-                No routes found, please check rules
-              </MotiText>
+            {plan.state !== "done" && plan.state !== "error" && (
+              <GeneratingRoutes createdAt={new Date(plan.createdAt)} />
             )}
+            {plan.state === "error" && <RouteGenError planId={plan.id} />}
+            {plan.state === "done" && plan.routes.length === 0 && <NoRoutes />}
             {plan.state === "done" && plan.routes.length > 0 && (
               <>
                 <Text
