@@ -1,5 +1,11 @@
 import { useRootNavigationState, useRouter } from "expo-router";
-import { Search, MapPin, Map as MapIcon, Pin } from "lucide-react-native";
+import {
+  Search,
+  MapPin,
+  Map as MapIcon,
+  Pin,
+  Hourglass,
+} from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { View, Text, TextInput, Pressable } from "react-native";
 
@@ -7,6 +13,7 @@ import { GeoMapStatic } from "~/components/geo-map/geo-map-static";
 import { PointSelectDialog } from "~/components/point-select-dialog";
 import { ScreenCard } from "~/components/screen-card";
 import { ScreenFrame } from "~/components/screen-frame";
+import { cn } from "~/lib/utils";
 
 type Location = {
   display_name: string;
@@ -82,8 +89,10 @@ export default function LocationSearch() {
   const navState = useRootNavigationState();
   const [searchQuery, setSearchQuery] = useState("");
   const [locations, setLocations] = useState<Location[]>([]);
+  const [searching, setSearching] = useState(false);
 
   const handleSearch = async () => {
+    setSearching(true);
     if (!searchQuery.trim()) return;
     try {
       const response = await fetch(
@@ -91,6 +100,7 @@ export default function LocationSearch() {
       );
       const data = await response.json();
       setLocations(data);
+      setSearching(false);
     } catch (error) {
       console.error("Search error:", error);
     }
@@ -139,9 +149,16 @@ export default function LocationSearch() {
               />
               <Pressable
                 onPress={handleSearch}
-                className="flex-row items-center justify-center rounded-xl bg-[#FF5937] px-6 py-3"
+                className={cn(
+                  "flex-row items-center justify-center rounded-xl bg-[#FF5937] px-6 py-3",
+                  {
+                    "bg-[#FF5937]/70": searching,
+                  },
+                )}
+                disabled={searching}
               >
-                <Search className="size-5 text-white" />
+                {!searching && <Search className="size-5 text-white" />}
+                {searching && <Hourglass className="size-5 text-white" />}
               </Pressable>
             </View>
           </View>
