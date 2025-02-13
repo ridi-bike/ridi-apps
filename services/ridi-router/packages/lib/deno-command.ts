@@ -1,7 +1,10 @@
 export class DenoCommand {
   async executeWithStdin(
     command: string,
-    { args, stdinContent }: {
+    {
+      args,
+      stdinContent,
+    }: {
       args: string[];
       stdinContent: string;
     },
@@ -14,16 +17,35 @@ export class DenoCommand {
     });
     const child = denoCommand.spawn();
     const writer = child.stdin.getWriter();
-    writer
-      .write(new TextEncoder().encode(stdinContent));
+    writer.write(new TextEncoder().encode(stdinContent));
     writer.releaseLock();
     child.stdin.close();
-    const { code, stdout, stderr } = await child.output();
+
+    let stdout = "";
+    let stderr = "";
+    const stdoutPiping = child.stdout.pipeTo(
+      new WritableStream({
+        write: (chunk) => {
+          stdout += new TextDecoder().decode(chunk);
+        },
+      }),
+    );
+    const stderrPiping = child.stderr.pipeTo(
+      new WritableStream({
+        write: (chunk) => {
+          stderr += new TextDecoder().decode(chunk);
+        },
+      }),
+    );
+
+    const code = await child.status;
+    await stderrPiping;
+    await stdoutPiping;
 
     return {
       code,
-      stdout: new TextDecoder().decode(stdout),
-      stderr: new TextDecoder().decode(stderr),
+      stdout,
+      stderr,
     };
   }
   async execute(command: string, args: string[]) {

@@ -4,6 +4,7 @@
     "jsr:@valibot/valibot@0.42": "0.42.1",
     "jsr:@valibot/valibot@0.42.1": "0.42.1",
     "npm:@tmcw/togeojson@6": "6.0.0_@types+geojson@7946.0.16_@xmldom+xmldom@0.9.7",
+    "npm:json-nd@*": "1.0.0",
     "npm:p-queue@8": "8.1.0",
     "npm:pino@9": "9.6.0",
     "npm:xmldom@0.6": "0.6.0"
@@ -84,6 +85,9 @@
     },
     "fast-redact@3.5.0": {
       "integrity": "sha512-dwsoQlS7h9hMeYUq1W++23NDcBLV4KqONnITDV9DjfS3q1SgDGVrBdvvTLUotWtPSD7asWDV9/CmsZPy8Hf70A=="
+    },
+    "json-nd@1.0.0": {
+      "integrity": "sha512-8TIp0HZAY0VVrwRQJJPb4+nOTSPoOWZeEKBTLizUfQO4oym5Fc/MKqN8vEbLCxcyxDf2vwNxOQ1q84O49GWPyQ=="
     },
     "on-exit-leak-free@2.1.2": {
       "integrity": "sha512-0eJJY6hXLGf1udHwfNftBqH+g73EU4B504nZeKpz1sYRKafAghwxEJunB2O7rDZkL4PGfsMVnTXZ2EjibbqcsA=="
@@ -508,7 +512,8 @@
       },
       "router-handler": {
         "dependencies": [
-          "jsr:@valibot/valibot@0.42.1"
+          "jsr:@valibot/valibot@0.42.1",
+          "npm:json-nd@*"
         ]
       }
     }

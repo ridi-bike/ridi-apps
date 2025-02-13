@@ -7,20 +7,23 @@ import { Messaging } from "@ridi-router/messaging/main.ts";
 import { RidiLogger } from "@ridi-router/logging/main.ts";
 
 const env = new EnvVariables();
-RidiLogger.init(env.ridiEnvName);
-const ridiLogger = RidiLogger.get();
-ridiLogger.debug("omg test");
+const ridiLogger = RidiLogger.init(env.ridiEnvName);
 const runner = new Runner(
   env,
-  ridiLogger,
+  ridiLogger.forModule("runner"),
   getPgClient(),
   pg,
-  new Messaging(getPgClient(), ridiLogger),
+  new Messaging(getPgClient(), ridiLogger.forModule("messaging")),
   new PlanProcessor(
-    ridiLogger,
+    ridiLogger.forModule("plan-processor"),
     getPgClient(),
     pg,
-    new RouterServerManager(env, pg, getPgClient(), ridiLogger),
+    new RouterServerManager(
+      env,
+      pg,
+      getPgClient(),
+      ridiLogger.forModule("router-server-manager"),
+    ),
     new DenoCommand(),
     env,
   ),
