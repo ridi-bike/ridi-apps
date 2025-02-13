@@ -30,6 +30,9 @@ export interface Address {
   house_number?: string;
   isolated_dwelling?: string;
   neighbourhood?: string;
+  village?: string;
+  municipality?: string;
+  county?: string;
 }
 
 export interface Extratags {
@@ -40,14 +43,15 @@ export interface Extratags {
   population: string;
 }
 
-function formatCountryDiff(coords: ReverseGeocodingResponse): string {
-  return `${coords.address.city || coords.address.state || coords.address.state_district}, ${coords.address.country}`;
+function getCityLoc(coords: ReverseGeocodingResponse): string {
+  return `${coords.address.city || coords.address.town || coords.address.state || coords.address.state_district || coords.address.village || coords.address.municipality}`;
 }
+
 function formatCityDiff(coords: ReverseGeocodingResponse): string {
-  return `${coords.address.city || coords.address.town}, ${coords.address.state_district}`;
+  return `${getCityLoc(coords)}, ${coords.address.country}`;
 }
 function formatCitySame(coords: ReverseGeocodingResponse): string {
-  return `${coords.address.isolated_dwelling || coords.address.road}, ${coords.address.city || coords.address.town}`;
+  return `${coords.address.isolated_dwelling || coords.address.road || coords.address.postcode}, ${getCityLoc(coords)}`;
 }
 export async function lookupCooordsInfo(
   coords: [[string, string], null | [string, string]],
@@ -70,13 +74,7 @@ export async function lookupCooordsInfo(
   if (!coordsTwo) {
     return [formatCitySame(coordsOne), null];
   }
-  if (coordsOne.address.country !== coordsTwo.address.country) {
-    return [formatCountryDiff(coordsOne), formatCountryDiff(coordsTwo)];
-  }
-  if (
-    (coordsOne.address.city || coordsOne.address.town) !==
-    (coordsTwo.address.city || coordsTwo.address.town)
-  ) {
+  if (getCityLoc(coordsOne) !== getCityLoc(coordsTwo)) {
     return [formatCityDiff(coordsOne), formatCityDiff(coordsTwo)];
   }
   return [formatCitySame(coordsOne), formatCitySame(coordsTwo)];
