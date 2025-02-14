@@ -48,33 +48,21 @@ export class Runner {
         regions: nextMapData.map((r) => r.region),
       });
       if (
-        !nextMapData.every((r) => r.routerVersion === this.env.routerVersion)
+        nextMapData.every((r) => r.routerVersion === this.env.routerVersion)
       ) {
-        this.logger.error(
-          "Some 'next' map data records do not have the correct router version",
-          {
-            routerVersion: this.env.routerVersion,
-            nextMapData: nextMapData.map((n) => ({
-              id: n.id,
-              routerVersion: n.routerVersion,
-              region: n.region,
-            })),
-          },
-        );
-        throw new Error("Critical failure");
-      }
-
-      const allNext = await this.pgQueries.mapDataGetRecordsAllCurrent(
-        this.pgClient,
-      );
-      if (allNext.every((rec) => rec.status === "ready")) {
-        this.logger.info("All next records are ready, promoting", { allNext });
+        this.logger.info("All next records are ready, promoting", {
+          nextMapData,
+        });
         await this.pgQueries.mapDataUpdateRecordsDemoteCurrent(this.pgClient);
 
         await this.pgQueries.mapDataUpdateRecordsPromoteNext(this.pgClient);
 
         await this.pgQueries.regionSetAllPrevious(this.pgClient);
         for (const nextRec of nextMapData) {
+          this.logger.debug("Promoting region", {
+            region: nextRec.region,
+            pbfMd5: nextRec.pbfMd5,
+          });
           await this.pgQueries.regionSetCurrent(this.pgClient, {
             region: nextRec.region,
             pbfMd5: nextRec.pbfMd5,
@@ -82,7 +70,7 @@ export class Runner {
         }
       } else {
         this.logger.info("Not all next records are ready, promotion skipped", {
-          allNext: allNext.map((r) => ({
+          nextMapData: nextMapData.map((r) => ({
             id: r.id,
             region: r.region,
             routerVersion: r.routerVersion,

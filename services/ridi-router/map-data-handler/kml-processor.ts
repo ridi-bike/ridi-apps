@@ -26,6 +26,16 @@ export class KmlProcessor {
   ) {}
 
   async processKml(mapData: MapDataRecord): Promise<void> {
+    const allCurrRegions = await this.pgQueries.regionGetAllCurrent(
+      this.pgClient,
+    );
+    if (
+      allCurrRegions.find(
+        (r) => r.region === mapData.region && r.pbfMd5 === mapData.pbfMd5,
+      )
+    ) {
+      return;
+    }
     const kmlFileContents = await this.fileReader.readTextFile(
       mapData.kmlLocation,
     );
@@ -36,7 +46,8 @@ export class KmlProcessor {
       throw new Error("unexpected geometry type");
     }
     const polygonCoordsList = polygon.coordinates[0]
-      .map((c) => `${c[0]} ${c[1]}`).join(",");
+      .map((c) => `${c[0]} ${c[1]}`)
+      .join(",");
 
     await this.pgQueries.regionInsertOrUpdate(this.pgClient, {
       region: mapData.region,
