@@ -261,10 +261,18 @@ export class RouterServerManager {
     );
     const process = this.regionsRunning[region];
     if (!process) {
-      this.logger.error(`region "{region}" is not running`, { region });
+      this.logger.error(`region is not running`, { region });
       return;
     }
-    process.kill();
+    try {
+      process.kill();
+    } catch (err) {
+      this.logger.error("Error stopping process", {
+        region,
+        err,
+        status: process.status,
+      });
+    }
 
     delete this.regionsRunning[region];
     this.currentFreeMemoryMb += Math.ceil(
