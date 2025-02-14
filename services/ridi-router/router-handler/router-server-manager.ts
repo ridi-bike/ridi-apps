@@ -148,7 +148,12 @@ export class RouterServerManager {
 
   async startRegion(region: string) {
     if (this.regionsRunning[region]) {
-      this.logger.error(`region "{region}" already running`, { region });
+      this.logger.info(`region already running`, { region });
+      return;
+    }
+
+    if (this.regionsStarting.has(region)) {
+      this.logger.info(`region already starting`, { region });
       return;
     }
 
