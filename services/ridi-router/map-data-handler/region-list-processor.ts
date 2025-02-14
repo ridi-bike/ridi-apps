@@ -125,7 +125,7 @@ export class RegionListProcessor {
       } else if (currentMapData.routerVersion !== this.env.routerVersion) {
         const newNextRecord = await this.createNextMapDataRecord(
           region,
-          remoteMd5,
+          currentMapData.pbfMd5,
         );
         this.logger.debug("Router version changed, reporcessing");
         await this.cacheGenerator.schedule(newNextRecord);
