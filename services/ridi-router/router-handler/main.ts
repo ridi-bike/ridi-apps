@@ -5,9 +5,25 @@ import { PlanProcessor } from "./plan-processor.ts";
 import { RouterServerManager } from "./router-server-manager.ts";
 import { Messaging } from "@ridi-router/messaging/main.ts";
 import { RidiLogger } from "@ridi-router/logging/main.ts";
+import { Initializer } from "./init.ts";
 
 const env = new EnvVariables();
 const ridiLogger = RidiLogger.init(env.ridiEnvName);
+
+const initializer = new Initializer(
+  env,
+  ridiLogger.withCOntext({
+    module: "initializer",
+    routerVersion: env.routerVersion,
+  }),
+  getPgClient(),
+  pg,
+);
+await initializer.start();
+
+const mapDataRecordsAllCurrent =
+  await pg.mapDataGetRecordsAllCurrent(getPgClient());
+
 const runner = new Runner(
   env,
   ridiLogger.withCOntext({
@@ -32,15 +48,14 @@ const runner = new Runner(
     pg,
     new RouterServerManager(
       env,
-      pg,
-      getPgClient(),
       ridiLogger.withCOntext({
         module: "router-server-manager",
         routerVersion: env.routerVersion,
       }),
+      mapDataRecordsAllCurrent,
     ),
     new DenoCommand(),
     env,
   ),
 );
-await runner.start();
+runner.listen();

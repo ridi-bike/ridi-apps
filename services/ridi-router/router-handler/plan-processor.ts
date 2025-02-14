@@ -134,6 +134,7 @@ export class PlanProcessor {
       id: planId,
       state: "planning",
     });
+
     if (!this.routerStore.isRegionRunning(region.region)) {
       this.routerStore.registerRegionReq(region.region, planId);
       return 1;

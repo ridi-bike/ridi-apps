@@ -1,212 +1,111 @@
-import jsonnd, { NdJson } from "json-nd";
-import { pg, PgClient } from "../packages/lib/main.ts";
+import { NdJson } from "json-nd";
 import { RidiLogger } from "@ridi-router/logging/main.ts";
 import { EnvVariables } from "./env-variables.ts";
+import { MapDataGetRecordCurrentRow } from "../packages/lib/queries_sql.ts";
 
-type RegionReq = {
-  reqId: string;
-  createdAt: number;
-};
+class RidiRouterServerProcess {
+  private readonly logger: RidiLogger;
+  private readonly env: EnvVariables;
 
-export class RouterServerManager {
-  private regionsRunning: Record<string, Deno.ChildProcess> = {};
-  private regionsStarting: Set<string> = new Set();
-  private currentFreeMemoryMb: number;
-  private regionRequestsRunning: Record<string, RegionReq[]> = {};
-  private regionRequestsWaiting: Record<string, RegionReq[]> = {};
+  private state: "not-running" | "starting" | "running" = "not-running";
+  private readonly memoryReqRunningMb: number;
+  private process: Deno.ChildProcess | null = null;
+  private readonly mapDataRecord: MapDataGetRecordCurrentRow;
+  private readonly requestsWaiting = new Set<string>();
+  private readonly requestsRunning = new Set<string>();
+  private readonly requestsQueue: { refId: string; createdAt: Date }[] = [];
 
   constructor(
-    private readonly env: EnvVariables,
-    private readonly db: typeof pg,
-    private readonly pgClient: PgClient,
-    private readonly logger: RidiLogger,
+    mapDataRecord: MapDataGetRecordCurrentRow,
+    logger: RidiLogger,
+    env: EnvVariables,
   ) {
-    this.currentFreeMemoryMb = env.serverAvailMemoryMb;
+    this.logger = logger;
+    this.env = env;
 
-    setInterval(
-      () =>
-        this.manageRouterServers().catch((error) => {
-          logger.error(
-            "Error while running Router Server Management, unrecoverable",
-            { error },
-          );
-        }),
-      500,
+    this.mapDataRecord = mapDataRecord;
+    this.memoryReqRunningMb =
+      Number(this.mapDataRecord.cacheSize || 0) / 1024 / 1024;
+  }
+
+  addRequest(refId: string) {
+    this.requestsWaiting.add(refId);
+    this.requestsQueue.push({ refId, createdAt: new Date() });
+  }
+
+  processRequest(refId: string) {
+    this.requestsWaiting.delete(refId);
+    this.requestsRunning.add(refId);
+    const idx = this.requestsQueue.findIndex((p) => p.refId === refId);
+    if (idx === -1) {
+      this.requestsQueue.push({ refId, createdAt: new Date() });
+    }
+  }
+
+  finishRequest(refId: string) {
+    this.requestsRunning.delete(refId);
+    const idx = this.requestsQueue.findIndex((p) => p.refId === refId);
+    if (idx !== -1) {
+      this.requestsQueue.splice(idx, 1);
+    }
+  }
+
+  canBeStopped() {
+    return (
+      this.state === "running" &&
+      !this.requestsWaiting.size &&
+      !this.requestsRunning.size
     );
   }
 
-  private async manageRouterServers() {
-    const neededRegion: string | undefined = Object.entries(
-      this.regionRequestsWaiting,
-    )
-      .filter((w) => !!w[1].length)
-      .sort((r1, r2) => r1[1].at(-1)!.createdAt - r2[1].at(-1)!.createdAt)
-      .map((w) => w[0])
-      .filter((r) => !this.regionsStarting.has(r))[0];
-
-    if (!neededRegion) {
-      return;
-    }
-
-    const neededRegionData = await this.db.mapDataGetRecordCurrent(
-      this.pgClient,
-      { region: neededRegion },
-    );
-    if (!neededRegionData) {
-      throw this.logger.error("Missing region data", { neededRegion });
-    }
-    const neededMemory = Math.ceil(
-      (Number(neededRegionData.cacheSize || 0) * 2) / 1024 / 1024,
-    );
-
-    this.logger.debug("Need to start region", {
-      neededRegion,
-      neededMemory,
-      currentFreeMemoryM: this.currentFreeMemoryMb,
-    });
-
-    const allRegions = await this.db.mapDataGetRecordsAllCurrent(this.pgClient);
-
-    while (neededMemory > this.currentFreeMemoryMb) {
-      const canStopRegions = Object.entries(this.regionsRunning)
-        .filter(
-          (r) =>
-            !this.regionRequestsRunning[r[0]]?.length &&
-            !this.regionRequestsWaiting[r[0]]?.length,
-        )
-        .map((r) => ({
-          region: r[0],
-          regionMemory: Math.ceil(
-            Number(
-              allRegions.find((rr) => rr.region === r[0])!.cacheSize || 0,
-            ) /
-              1024 /
-              1024,
-          ),
-        }))
-        .sort((r1, r2) => r1.regionMemory - r2.regionMemory);
-
-      const regionToStop = canStopRegions[0];
-      if (!regionToStop) {
-        break;
-      }
-
-      this.logger.debug("Stopping region to free memory", {
-        region: regionToStop.region,
-      });
-
-      await this.stopRegion(regionToStop.region);
-
-      this.logger.debug("Region stopped", { region: regionToStop.region });
-    }
-
-    if (neededMemory <= this.currentFreeMemoryMb) {
-      this.logger.debug("Starting region from manager", { neededRegion });
-      await this.startRegion(neededRegion).catch((error) =>
-        this.logger.error("Unable to start region", {
-          error,
-        }),
-      );
-    } else {
-      this.logger.info("All routers busy, can't stop and free memory", {
-        reqWaiting: this.regionRequestsWaiting,
-        reqRunning: this.regionRequestsRunning,
-        regionsRunning: this.regionsRunning,
-      });
-    }
+  mustBeStarted() {
+    return this.state === "not-running" && !!this.requestsWaiting.size;
   }
 
-  registerRegionReq(region: string, reqId: string) {
-    if (!this.regionRequestsWaiting[region]) {
-      this.regionRequestsWaiting[region] = [];
+  maxQueueWaitTime() {
+    const firstReq = this.requestsQueue[0];
+    if (!firstReq) {
+      return 0;
     }
-
-    if (
-      !this.regionRequestsWaiting[region].find((req) => req.reqId === reqId)
-    ) {
-      this.regionRequestsWaiting[region].push({
-        reqId,
-        createdAt: Date.now(),
-      });
-    }
+    return Date.now() - firstReq.createdAt.getTime();
   }
 
-  startRegionReq(region: string, reqId: string): void {
-    if (!this.regionRequestsRunning[region]) {
-      this.regionRequestsRunning[region] = [];
+  getMemoryCurr() {
+    if (this.state === "not-running") {
+      return 0;
     }
-    const waitingReq = this.regionRequestsWaiting[region]?.find(
-      (req) => req.reqId === reqId,
-    );
-    if (
-      !this.regionRequestsRunning[region].find((req) => req.reqId === reqId)
-    ) {
-      this.regionRequestsRunning[region].push({
-        reqId,
-        createdAt: waitingReq?.createdAt || Date.now(),
-      });
+    if (this.state === "starting") {
+      return this.getMemoryStartup();
     }
-    if (waitingReq) {
-      this.regionRequestsWaiting[region] = this.regionRequestsWaiting[
-        region
-      ].filter((req) => req.reqId !== waitingReq.reqId);
-    }
+    return this.memoryReqRunningMb;
   }
 
-  finishRegionReq(region: string, reqId: string): void {
-    if (!this.regionRequestsRunning[region]) {
-      throw this.logger.error("Running Region set missing, unrecoverable", {
-        regionRequests: this.regionRequestsRunning,
-      });
-    }
-    this.regionRequestsRunning[region] = this.regionRequestsRunning[
-      region
-    ].filter((req) => req.reqId !== reqId);
+  getMemoryStartup() {
+    return this.memoryReqRunningMb * 2;
   }
 
-  async startRegion(region: string) {
-    if (this.regionsRunning[region]) {
-      this.logger.info(`region already running`, { region });
-      return;
-    }
+  isRunning() {
+    return this.state === "running";
+  }
 
-    if (this.regionsStarting.has(region)) {
-      this.logger.info(`region already starting`, { region });
-      return;
-    }
-
-    const mapData = await this.db.mapDataGetRecordCurrent(this.pgClient, {
-      region,
-    });
-
-    if (!mapData) {
-      throw this.logger.error(`missing prepared 'current' record for region`, {
-        region,
-      });
-    }
-
-    this.regionsStarting.add(region);
-
-    const cacheSizeMb = Number(mapData.cacheSize || 0) / 1024 / 1024;
-
-    this.currentFreeMemoryMb -= cacheSizeMb + cacheSizeMb; // double the size for startup as it needs to read and parse the cache to load in memory
-
+  async start() {
+    this.state = "starting";
     this.logger.debug("Starting server", {
-      region: mapData.region,
+      region: this.mapDataRecord.region,
     });
 
-    const process = new Deno.Command(this.env.routerBin, {
+    this.process = new Deno.Command(this.env.routerBin, {
       stdout: "piped",
       stderr: "piped",
       stdin: "piped",
       args: [
         "start-server",
         "--input",
-        mapData.pbfLocation,
+        this.mapDataRecord.pbfLocation,
         "--cache-dir",
-        mapData.cacheLocation,
+        this.mapDataRecord.cacheLocation,
         "--socket-name",
-        region,
+        this.mapDataRecord.region,
       ],
     }).spawn();
 
@@ -223,8 +122,8 @@ export class RouterServerManager {
       },
     });
 
-    process.stdout.pipeTo(writableStream);
-    process.stderr.pipeTo(
+    this.process.stdout.pipeTo(writableStream);
+    this.process.stderr.pipeTo(
       new WritableStream({
         write: (chunk) => {
           const decoded = new TextDecoder().decode(chunk);
@@ -246,41 +145,144 @@ export class RouterServerManager {
     await readinessPromise;
 
     this.logger.debug("Startup finished", {
-      region: mapData.region,
+      region: this.mapDataRecord.region,
     });
 
-    this.currentFreeMemoryMb += cacheSizeMb; // when server started, leave only running memory
-    this.regionsRunning[region] = process;
-    this.regionsStarting.delete(region);
+    this.state = "running";
   }
 
-  async stopRegion(region: string) {
-    const neededRegionData = await this.db.mapDataGetRecordCurrent(
-      this.pgClient,
-      { region },
+  stop() {
+    if (this.process) {
+      this.process.kill();
+      this.process = null;
+    }
+    if (this.requestsRunning.size) {
+      for (const refId of this.requestsRunning.values()) {
+        this.requestsWaiting.add(refId);
+      }
+      this.requestsRunning.clear();
+    }
+    this.state = "not-running";
+  }
+}
+
+export class RouterServerManager {
+  private readonly env: EnvVariables;
+  private readonly logger: RidiLogger;
+  private readonly serverProcesses: Record<string, RidiRouterServerProcess>;
+
+  private managerRunning = false;
+  constructor(
+    env: EnvVariables,
+    logger: RidiLogger,
+    mapDataRecordsAllCurrent: MapDataGetRecordCurrentRow[],
+  ) {
+    this.env = env;
+    this.logger = logger;
+
+    this.serverProcesses = this.env.regions.reduce(
+      (processes, region) => {
+        const mapDataRecord = mapDataRecordsAllCurrent.find(
+          (rec) => rec.region === region,
+        )!;
+        processes[region] = new RidiRouterServerProcess(
+          mapDataRecord,
+          this.logger.withCOntext({
+            module: "ridi-router-server-process",
+            region: mapDataRecord.region,
+          }),
+          this.env,
+        );
+        return processes;
+      },
+      {} as Record<string, RidiRouterServerProcess>,
     );
-    const process = this.regionsRunning[region];
-    if (!process) {
-      this.logger.error(`region is not running`, { region });
+
+    setInterval(
+      () =>
+        this.manageRouterServers().catch((error) => {
+          logger.error(
+            "Error while running Router Server Management, unrecoverable",
+            { error },
+          );
+        }),
+      500,
+    );
+  }
+
+  private isEnoughMemoryFor(serverProcess: RidiRouterServerProcess) {
+    const currentMemoryMb = Object.values(this.serverProcesses).reduce(
+      (mem, proc) => mem + proc.getMemoryCurr(),
+      0,
+    );
+    const availMemoryMb = this.env.serverAvailMemoryMb - currentMemoryMb;
+    return availMemoryMb > serverProcess.getMemoryStartup();
+  }
+
+  private async manageRouterServers() {
+    if (this.managerRunning) {
       return;
     }
-    try {
-      process.kill();
-    } catch (err) {
-      this.logger.error("Error stopping process", {
-        region,
-        err,
-        status: process.status,
-      });
+
+    this.managerRunning = true;
+
+    const neededRegions = Object.values(this.serverProcesses)
+      .filter((region) => region.mustBeStarted())
+      .sort((a, b) => b.maxQueueWaitTime() - a.maxQueueWaitTime());
+
+    if (!neededRegions.length) {
+      this.managerRunning = false;
+      return;
     }
 
-    delete this.regionsRunning[region];
-    this.currentFreeMemoryMb += Math.ceil(
-      Number(neededRegionData?.cacheSize || 0) / 1024 / 1024,
-    );
+    this.logger.info("Need to start regions");
+
+    for (const neededRegion of neededRegions) {
+      if (this.isEnoughMemoryFor(neededRegion)) {
+        this.logger.info("Starting region");
+
+        await neededRegion.start();
+
+        this.logger.info("Region started");
+      } else {
+        const canBeStoppedRegions = Object.values(this.serverProcesses)
+          .filter((proc) => proc.canBeStopped())
+          .sort((a, b) => a.getMemoryCurr() - b.getMemoryCurr());
+
+        for (const canBestoppedRegion of canBeStoppedRegions) {
+          this.logger.info("Stopping region");
+
+          canBestoppedRegion.stop();
+
+          if (this.isEnoughMemoryFor(neededRegion)) {
+            this.logger.info("Starting region");
+
+            await neededRegion.start();
+
+            this.logger.info("Region started");
+
+            break;
+          }
+        }
+      }
+    }
+
+    this.managerRunning = false;
+  }
+
+  registerRegionReq(region: string, reqId: string): void {
+    this.serverProcesses[region].addRequest(reqId);
+  }
+
+  startRegionReq(region: string, reqId: string): void {
+    this.serverProcesses[region].processRequest(reqId);
+  }
+
+  finishRegionReq(region: string, reqId: string): void {
+    this.serverProcesses[region].finishRequest(reqId);
   }
 
   isRegionRunning(region: string) {
-    return !!this.regionsRunning[region];
+    return !!this.serverProcesses[region].isRunning();
   }
 }
