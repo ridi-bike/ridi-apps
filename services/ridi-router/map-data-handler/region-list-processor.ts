@@ -123,8 +123,12 @@ export class RegionListProcessor {
         this.logger.debug("MD5 differs, downloading");
         await this.downloader.downloadRegion(region, remoteMd5, newNextRecord);
       } else if (currentMapData.routerVersion !== this.env.routerVersion) {
+        const newNextRecord = await this.createNextMapDataRecord(
+          region,
+          remoteMd5,
+        );
         this.logger.debug("Router version changed, reporcessing");
-        await this.cacheGenerator.schedule(currentMapData);
+        await this.cacheGenerator.schedule(newNextRecord);
       }
     } else {
       const newNextRecord = await this.createNextMapDataRecord(
