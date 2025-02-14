@@ -491,6 +491,7 @@
         "dependencies": [
           "jsr:@valibot/valibot@0.42.1",
           "npm:@tmcw/togeojson@6",
+          "npm:json-nd@*",
           "npm:p-queue@8",
           "npm:xmldom@0.6"
         ]

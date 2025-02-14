@@ -68,8 +68,6 @@ const regionProcessor = new RegionListProcessor(
     new DenoRemove(),
   ),
   new RegionDownloader(
-    locations,
-    envVariables,
     pg,
     getPgClient(),
     ridiLogger.withCOntext({
@@ -94,6 +92,7 @@ const regionProcessor = new RegionListProcessor(
     }),
     new OsmLocations(envVariables),
   ),
+  locations,
 );
 regionProcessor.process();
 
