@@ -59,6 +59,12 @@ export class RouterServerManager {
       (Number(neededRegionData.cacheSize || 0) * 2) / 1024 / 1024,
     );
 
+    this.logger.debug("Need to start region", {
+      neededRegion,
+      neededMemory,
+      currentFreeMemoryM: this.currentFreeMemoryMb,
+    });
+
     const allRegions = await this.db.mapDataGetRecordsAllCurrent(this.pgClient);
 
     while (neededMemory > this.currentFreeMemoryMb) {
@@ -85,10 +91,17 @@ export class RouterServerManager {
         break;
       }
 
+      this.logger.debug("Stopping region to free memory", {
+        region: regionToStop.region,
+      });
+
       await this.stopRegion(regionToStop.region);
+
+      this.logger.debug("Region stopped", { region: regionToStop.region });
     }
 
     if (neededMemory <= this.currentFreeMemoryMb) {
+      this.logger.debug("Starting region from manager", { neededRegion });
       await this.startRegion(neededRegion).catch((error) =>
         this.logger.error("Unable to start region", {
           error,
@@ -178,6 +191,10 @@ export class RouterServerManager {
 
     this.currentFreeMemoryMb -= cacheSizeMb + cacheSizeMb; // double the size for startup as it needs to read and parse the cache to load in memory
 
+    this.logger.debug("Starting server", {
+      region: mapData.region,
+    });
+
     const process = new Deno.Command(this.env.routerBin, {
       stdout: "piped",
       stderr: "piped",
@@ -227,6 +244,10 @@ export class RouterServerManager {
     );
 
     await readinessPromise;
+
+    this.logger.debug("Startup finished", {
+      region: mapData.region,
+    });
 
     this.currentFreeMemoryMb += cacheSizeMb; // when server started, leave only running memory
     this.regionsRunning[region] = process;
