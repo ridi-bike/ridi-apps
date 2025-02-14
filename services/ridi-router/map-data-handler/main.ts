@@ -32,27 +32,39 @@ const handler = new Handler(
   pg,
   getPgClient(),
   envVariables,
-  ridiLogger.forModule("handler"),
+  ridiLogger.withCOntext({
+    module: "handler",
+    routerVersion: envVariables.routerVersion,
+  }),
 );
 const cacheGenerator = new CacheGenerator(
   pg,
   getPgClient(),
   new DenoCommand(),
-  ridiLogger.forModule("cache-generator"),
+  ridiLogger.withCOntext({
+    module: "cache-generator",
+    routerVersion: envVariables.routerVersion,
+  }),
   envVariables,
   new KmlProcessor(pg, getPgClient(), new DenoFileReader(), new KmlConverter()),
   handler,
   new DenoDirStat(),
 );
 const regionProcessor = new RegionListProcessor(
-  ridiLogger.forModule("region-list-processor"),
+  ridiLogger.withCOntext({
+    module: "region-list-processor",
+    routerVersion: envVariables.routerVersion,
+  }),
   envVariables,
   cacheGenerator,
   handler,
   new Cleaner(
     pg,
     getPgClient(),
-    ridiLogger.forModule("cleaner"),
+    ridiLogger.withCOntext({
+      module: "cleaner",
+      routerVersion: envVariables.routerVersion,
+    }),
     new DenoRemove(),
   ),
   new RegionDownloader(
@@ -60,15 +72,26 @@ const regionProcessor = new RegionListProcessor(
     envVariables,
     pg,
     getPgClient(),
-    ridiLogger.forModule("region-downloader"),
-    new FileDownloader(ridiLogger.forModule("file-downloader")),
+    ridiLogger.withCOntext({
+      module: "region-downloader",
+      routerVersion: envVariables.routerVersion,
+    }),
+    new FileDownloader(
+      ridiLogger.withCOntext({
+        module: "file-downloader",
+        routerVersion: envVariables.routerVersion,
+      }),
+    ),
     cacheGenerator,
     new OsmLocations(envVariables),
   ),
   pg,
   getPgClient(),
   new Md5Downloader(
-    ridiLogger.forModule("md5-downoader"),
+    ridiLogger.withCOntext({
+      module: "md5-downoader",
+      routerVersion: envVariables.routerVersion,
+    }),
     new OsmLocations(envVariables),
   ),
 );

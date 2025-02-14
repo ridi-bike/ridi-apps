@@ -10,19 +10,34 @@ const env = new EnvVariables();
 const ridiLogger = RidiLogger.init(env.ridiEnvName);
 const runner = new Runner(
   env,
-  ridiLogger.forModule("runner"),
+  ridiLogger.withCOntext({
+    module: "runner",
+    routerVersion: env.routerVersion,
+  }),
   getPgClient(),
   pg,
-  new Messaging(getPgClient(), ridiLogger.forModule("messaging")),
+  new Messaging(
+    getPgClient(),
+    ridiLogger.withCOntext({
+      module: "messaging",
+      routerVersion: env.routerVersion,
+    }),
+  ),
   new PlanProcessor(
-    ridiLogger.forModule("plan-processor"),
+    ridiLogger.withCOntext({
+      module: "plan-processor",
+      routerVersion: env.routerVersion,
+    }),
     getPgClient(),
     pg,
     new RouterServerManager(
       env,
       pg,
       getPgClient(),
-      ridiLogger.forModule("router-server-manager"),
+      ridiLogger.withCOntext({
+        module: "router-server-manager",
+        routerVersion: env.routerVersion,
+      }),
     ),
     new DenoCommand(),
     env,

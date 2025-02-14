@@ -22,7 +22,10 @@ const deployChecker = new DeployChecker(
   pgClient,
   new CoolifyClient(envVariables),
   envVariables,
-  ridiLogger.forModule("deploy-checker"),
+  ridiLogger.withCOntext({
+    module: "deploy-checker",
+    routerVersion: envVariables.routerVersion,
+  }),
 );
 deployChecker.start();
 deployChecker.checkDeploy();
