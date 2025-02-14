@@ -163,6 +163,11 @@ export class PlanProcessor {
       {} as Record<string, Record<string, { action: string; value?: number }>>,
     );
 
+    this.logger.debug("Starting client for plan", {
+      planId,
+      region: region.region,
+    });
+
     const {
       code,
       stdout,
@@ -198,6 +203,8 @@ export class PlanProcessor {
             ],
       stdinContent: JSON.stringify(ruleInput),
     });
+
+    this.logger.debug("Client finished", { planId, region: region.region });
 
     let stderr: string | unknown[] = stderrString;
     try {
