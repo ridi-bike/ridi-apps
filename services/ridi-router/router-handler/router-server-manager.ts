@@ -53,7 +53,7 @@ export class RouterServerManager {
       { region: neededRegion },
     );
     if (!neededRegionData) {
-      throw new Error("missing region data");
+      throw this.logger.error("Missing region data", { neededRegion });
     }
     const neededMemory = Math.ceil(
       (Number(neededRegionData.cacheSize || 0) * 2) / 1024 / 1024,
