@@ -153,6 +153,8 @@ class RidiRouterServerProcess {
 
   stop() {
     this.logger.info("Stopping region");
+    this.state = "not-running";
+
     if (this.process) {
       this.process.kill();
       this.process = null;
@@ -163,7 +165,6 @@ class RidiRouterServerProcess {
       }
       this.requestsRunning.clear();
     }
-    this.state = "not-running";
   }
 }
 
@@ -226,6 +227,8 @@ export class RouterServerManager {
     }
 
     this.managerRunning = true;
+
+    this.logger.debug("Checking for regions to start");
 
     const neededRegions = Object.values(this.serverProcesses)
       .filter((region) => region.mustBeStarted())
