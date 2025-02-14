@@ -84,15 +84,17 @@ class RidiRouterServerProcess {
     return this.memoryReqRunningMb * 2;
   }
 
+  getRegionId() {
+    return this.mapDataRecord.region;
+  }
+
   isRunning() {
     return this.state === "running";
   }
 
   async start() {
     this.state = "starting";
-    this.logger.debug("Starting server", {
-      region: this.mapDataRecord.region,
-    });
+    this.logger.info("Starting server");
 
     this.process = new Deno.Command(this.env.routerBin, {
       stdout: "piped",
@@ -144,14 +146,13 @@ class RidiRouterServerProcess {
 
     await readinessPromise;
 
-    this.logger.debug("Startup finished", {
-      region: this.mapDataRecord.region,
-    });
+    this.logger.info("Startup finished");
 
     this.state = "running";
   }
 
   stop() {
+    this.logger.info("Stopping region");
     if (this.process) {
       this.process.kill();
       this.process = null;
@@ -239,28 +240,16 @@ export class RouterServerManager {
 
     for (const neededRegion of neededRegions) {
       if (this.isEnoughMemoryFor(neededRegion)) {
-        this.logger.info("Starting region");
-
         await neededRegion.start();
-
-        this.logger.info("Region started");
       } else {
         const canBeStoppedRegions = Object.values(this.serverProcesses)
           .filter((proc) => proc.canBeStopped())
           .sort((a, b) => a.getMemoryCurr() - b.getMemoryCurr());
 
         for (const canBestoppedRegion of canBeStoppedRegions) {
-          this.logger.info("Stopping region");
-
           canBestoppedRegion.stop();
-
           if (this.isEnoughMemoryFor(neededRegion)) {
-            this.logger.info("Starting region");
-
             await neededRegion.start();
-
-            this.logger.info("Region started");
-
             break;
           }
         }
@@ -268,6 +257,10 @@ export class RouterServerManager {
     }
 
     this.managerRunning = false;
+  }
+
+  forceStopRegion(region: string) {
+    this.serverProcesses[region].stop();
   }
 
   registerRegionReq(region: string, reqId: string): void {

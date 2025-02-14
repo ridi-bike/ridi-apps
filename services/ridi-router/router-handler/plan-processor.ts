@@ -212,6 +212,8 @@ export class PlanProcessor {
       stderr = NdJson.parse(stderrString);
     } catch (err) {
       this.logger.error("ridi-router-client unparsable", {
+        region: region.region,
+        planId,
         stderr,
         err,
       });
@@ -220,6 +222,7 @@ export class PlanProcessor {
     this.routerStore.finishRegionReq(region.region, planId);
 
     if (!code.success) {
+      this.routerStore.forceStopRegion(region.region);
       throw this.logger.error(
         "Error returned from router when generating routes",
         {
