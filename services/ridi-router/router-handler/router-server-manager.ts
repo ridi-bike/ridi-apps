@@ -59,6 +59,8 @@ export class RouterServerManager {
       (Number(neededRegionData.cacheSize || 0) * 2) / 1024 / 1024,
     );
 
+    const allRegions = await this.db.mapDataGetRecordsAllCurrent(this.pgClient);
+
     while (neededMemory > this.currentFreeMemoryMb) {
       const canStopRegions = Object.entries(this.regionsRunning)
         .filter(
@@ -69,7 +71,11 @@ export class RouterServerManager {
         .map((r) => ({
           region: r[0],
           regionMemory: Math.ceil(
-            Number(neededRegionData.cacheSize || 0) / 1024 / 1024,
+            Number(
+              allRegions.find((rr) => rr.region === r[0])!.cacheSize || 0,
+            ) /
+              1024 /
+              1024,
           ),
         }))
         .sort((r1, r2) => r1.regionMemory - r2.regionMemory);
@@ -136,10 +142,9 @@ export class RouterServerManager {
 
   finishRegionReq(region: string, reqId: string): void {
     if (!this.regionRequestsRunning[region]) {
-      this.logger.error("Running Region set missing, unrecoverable", {
+      throw this.logger.error("Running Region set missing, unrecoverable", {
         regionRequests: this.regionRequestsRunning,
       });
-      throw new Error("Unrecoverable");
     }
     this.regionRequestsRunning[region] = this.regionRequestsRunning[
       region
@@ -162,11 +167,9 @@ export class RouterServerManager {
     });
 
     if (!mapData) {
-      this.logger.error(
-        `missing prepared 'current' record for region "{region}"`,
-        { region },
-      );
-      return;
+      throw this.logger.error(`missing prepared 'current' record for region`, {
+        region,
+      });
     }
 
     this.regionsStarting.add(region);
