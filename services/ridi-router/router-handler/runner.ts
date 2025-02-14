@@ -12,11 +12,10 @@ export class Runner {
     private readonly pgQueries: typeof pg,
     private readonly messaging: Messaging,
     private readonly planProcessor: PlanProcessor,
-  ) {
-  }
+  ) {}
 
   async start() {
-    this.logger.debug("Start triggered");
+    this.logger.info("Start triggered");
 
     const handlerRecord = await this.pgQueries.servicesGet(this.pgClient, {
       name: "router",
@@ -28,7 +27,7 @@ export class Runner {
         routerVersion: this.env.routerVersion,
       });
 
-      this.logger.debug("New router version", {
+      this.logger.info("New router version", {
         old: handlerRecord?.routerVersion,
         new: this.env.routerVersion,
       });
@@ -39,12 +38,13 @@ export class Runner {
     );
 
     if (
-      this.env.regions.every((region) =>
-        nextMapData.find((mapData) => mapData.region === region)?.status ===
-          "ready"
+      this.env.regions.every(
+        (region) =>
+          nextMapData.find((mapData) => mapData.region === region)?.status ===
+          "ready",
       )
     ) {
-      this.logger.debug("Next records found", {
+      this.logger.info("Next records found", {
         regions: nextMapData.map((r) => r.region),
       });
       if (
@@ -52,7 +52,14 @@ export class Runner {
       ) {
         this.logger.error(
           "Some 'next' map data records do not have the correct router version",
-          { routerVersion: this.env.routerVersion, nextMapData },
+          {
+            routerVersion: this.env.routerVersion,
+            nextMapData: nextMapData.map((n) => ({
+              id: n.id,
+              routerVersion: n.routerVersion,
+              region: n.region,
+            })),
+          },
         );
         throw new Error("Critical failure");
       }
@@ -75,7 +82,11 @@ export class Runner {
         }
       } else {
         this.logger.info("Not all next records are ready, promotion skipped", {
-          allNext,
+          allNext: allNext.map((r) => ({
+            id: r.id,
+            region: r.region,
+            routerVersion: r.routerVersion,
+          })),
         });
       }
     }
@@ -88,16 +99,17 @@ export class Runner {
     );
     if (
       this.env.regions.every((region) => {
-        const mapData = currentMapData.find((mapData) =>
-          mapData.region === region
+        const mapData = currentMapData.find(
+          (mapData) => mapData.region === region,
         );
-        return mapData?.status ===
-            "ready" &&
+        return (
+          mapData?.status === "ready" &&
           currentRegions.find((reg) => reg.region === region)?.pbfMd5 ===
-            mapData.pbfMd5;
+            mapData.pbfMd5
+        );
       })
     ) {
-      this.logger.debug("Current records found", {
+      this.logger.info("Current records found", {
         regions: currentMapData.map((r) => r.region),
       });
       if (
@@ -105,7 +117,16 @@ export class Runner {
       ) {
         throw this.logger.error(
           "Some 'current' map data records do not have the correct router version",
-          { routerVersion: this.env.routerVersion, nextMapData },
+          {
+            routerVersion: this.env.routerVersion,
+            nextMapData: currentMapData
+              .filter((r) => r.routerVersion !== this.env.routerVersion)
+              .map((r) => ({
+                routerVersion: r.routerVersion,
+                id: r.id,
+                region: r.region,
+              })),
+          },
         );
       }
     } else {
@@ -113,17 +134,27 @@ export class Runner {
         "Map data or region records not found, critical failure",
         {
           regions: this.env.regions,
-          currentMapData,
-          currentRegions,
+          currentMapData: currentMapData.map((r) => ({
+            id: r.id,
+            routerVersion: r.routerVersion,
+            region: r.region,
+          })),
+          currentRegions: currentRegions.map((r) => ({
+            id: r.id,
+            pbfMd5: r.pbfMd5,
+            region: r.region,
+          })),
         },
       );
     }
 
     this.messaging.listen(
       "new-plan",
-      async (
-        { message, data, actions: { deleteMessage, setVisibilityTimeout } },
-      ) => {
+      async ({
+        message,
+        data,
+        actions: { deleteMessage, setVisibilityTimeout },
+      }) => {
         const beat = setInterval(() => setVisibilityTimeout(5), 4000);
         try {
           const retryIn = await this.planProcessor.handlePlanNotification(
