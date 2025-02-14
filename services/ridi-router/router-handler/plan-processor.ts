@@ -167,6 +167,7 @@ export class PlanProcessor {
     this.logger.debug("Starting client for plan", {
       planId,
       region: region.region,
+      ruleInput,
     });
 
     const {
