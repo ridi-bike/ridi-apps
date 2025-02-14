@@ -20,8 +20,8 @@ export class RidiLogger {
     return logger;
   }
 
-  public forModule(module: string) {
-    return new RidiLogger(this.logger.child({ module }));
+  public withCOntext(context: Record<string, unknown>) {
+    return new RidiLogger(this.logger.child(context));
   }
 
   public debug(message: string, properties?: Record<string, unknown>) {
