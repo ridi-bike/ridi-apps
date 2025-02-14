@@ -154,26 +154,18 @@ export class Runner {
             await deleteMessage();
           }
         } catch (err) {
-          if (message.readCt < 6) {
-            const retryInSecs = 30;
-            this.logger.error("New Plan message error, retry", {
-              message,
-              data,
-              retryInSecs,
-              err,
-            });
-            await setVisibilityTimeout(retryInSecs);
-            await this.pgQueries.planSetState(this.pgClient, {
-              id: data.planId,
-              state: "error",
-            });
-          } else {
-            this.logger.error("New Plan message error", {
-              message,
-              data,
-            });
-            await deleteMessage();
-          }
+          const retryInSecs = 30;
+          this.logger.error("New Plan message error, retry", {
+            message,
+            data,
+            retryInSecs,
+            err,
+          });
+          await setVisibilityTimeout(retryInSecs);
+          await this.pgQueries.planSetState(this.pgClient, {
+            id: data.planId,
+            state: "error",
+          });
         }
         clearInterval(beat);
       },
