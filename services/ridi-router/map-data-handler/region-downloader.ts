@@ -1,6 +1,5 @@
-import { Locations, pg, PgClient } from "@ridi-router/lib";
+import { pg, PgClient } from "@ridi-router/lib";
 import type { RidiLogger } from "@ridi-router/logging/main.ts";
-import { EnvVariables } from "./env-variables.ts";
 import { CacheGenerator } from "./cache-generator.ts";
 import { OsmLocations } from "./osm-locations.ts";
 import { MapDataRecord } from "./types.ts";
@@ -17,9 +16,7 @@ class ProgressTrack extends TransformStream {
 }
 
 export class FileDownloader {
-  constructor(
-    private readonly logger: RidiLogger,
-  ) {}
+  constructor(private readonly logger: RidiLogger) {}
 
   async downloadFile(
     url: string,
@@ -42,11 +39,13 @@ export class FileDownloader {
       });
 
       if (logChunkSize) {
-        await fileResponse.body.pipeThrough(
-          new ProgressTrack((chunkSize) =>
-            logChunkSize && logChunkSize(chunkSize)
-          ),
-        ).pipeTo(file.writable);
+        await fileResponse.body
+          .pipeThrough(
+            new ProgressTrack(
+              (chunkSize) => logChunkSize && logChunkSize(chunkSize),
+            ),
+          )
+          .pipeTo(file.writable);
       } else {
         await fileResponse.body.pipeTo(file.writable);
       }
@@ -60,57 +59,39 @@ export class FileDownloader {
 
 export class RegionDownloader {
   constructor(
-    private readonly locations: Locations,
-    private readonly env: EnvVariables,
     private readonly db: typeof pg,
     private readonly pgClient: PgClient,
     private readonly logger: RidiLogger,
     private readonly fileDownloader: FileDownloader,
     private readonly cacheGenerator: CacheGenerator,
     private readonly osmLocations: OsmLocations,
-  ) {
-  }
+  ) {}
 
   async downloadRegion(
     region: string,
     md5: string,
-    nextMapDataRecord: MapDataRecord | null,
+    mapDataRecord: MapDataRecord,
   ): Promise<void> {
     this.logger.debug("Starting region download", { region, md5 });
 
-    const remotePbfUrl = this.osmLocations.getPbfFileLocRemote(
-      region,
-    );
+    const remotePbfUrl = this.osmLocations.getPbfFileLocRemote(region);
     const remoteKmlUrl = this.osmLocations.getKmlFileLocRemote(region);
-
-    const pbfLocation = await this.locations.getPbfFileLoc(region, md5);
-    const kmlLocation = await this.locations.getKmlLocation(region, md5);
-    const mapDataRecord = nextMapDataRecord ||
-      (await this.db.mapDataCreateNextRecord(this.pgClient, {
-        region,
-        pbfMd5: md5,
-        pbfLocation,
-        routerVersion: this.env.routerVersion,
-        cacheLocation: await this.locations.getCacheDirLoc(
-          region,
-          this.env.routerVersion,
-          md5,
-        ),
-        kmlLocation,
-      }))!;
 
     this.logger.debug("Downloading PBF file", {
       region,
       remotePbfUrl,
-      pbfLocation,
-      kmlLocation,
+      pbfLocation: mapDataRecord.pbfLocation,
+      kmlLocation: mapDataRecord.kmlLocation,
     });
 
     try {
-      await this.fileDownloader.downloadFile(remoteKmlUrl, kmlLocation);
+      await this.fileDownloader.downloadFile(
+        remoteKmlUrl,
+        mapDataRecord.kmlLocation,
+      );
       await this.fileDownloader.downloadFile(
         remotePbfUrl,
-        pbfLocation,
+        mapDataRecord.pbfLocation,
         (size) =>
           this.db.mapDataUpdateRecordPbfSize(this.pgClient, {
             id: mapDataRecord.id,

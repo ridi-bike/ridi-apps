@@ -1,4 +1,4 @@
-import { pg, PgClient } from "@ridi-router/lib";
+import { Locations, pg, PgClient } from "@ridi-router/lib";
 
 import type { RidiLogger } from "@ridi-router/logging/main.ts";
 import { type Cleaner } from "./cleaner.ts";
@@ -13,8 +13,7 @@ export class Md5Downloader {
   constructor(
     private readonly logger: RidiLogger,
     private readonly osmLocations: OsmLocations,
-  ) {
-  }
+  ) {}
 
   async getRemoteMd5(region: string) {
     const remoteMd5Url = this.osmLocations.getMd5FileLocRemote(region);
@@ -41,8 +40,8 @@ export class RegionListProcessor {
     private readonly pgQueries: typeof pg,
     private readonly pgClient: PgClient,
     private readonly mdfDownloader: Md5Downloader,
-  ) {
-  }
+    private readonly locations: Locations,
+  ) {}
   private async handleNextRecord(
     region: string,
     remoteMd5: string,
@@ -53,6 +52,10 @@ export class RegionListProcessor {
         nextMapData.nextDownloadAfter.getTime() < Date.now()) ||
       nextMapData.status === "error"
     ) {
+      const newNextRecord = await this.createNextMapDataRecord(
+        region,
+        remoteMd5,
+      );
       this.logger.debug("discarding and downloading region", {
         remoteMd5,
         routerVersion: this.env.routerVersion,
@@ -64,7 +67,7 @@ export class RegionListProcessor {
         region: nextMapData.region,
         pbfMd5: nextMapData.pbfMd5,
       });
-      await this.downloader.downloadRegion(region, remoteMd5, null);
+      await this.downloader.downloadRegion(region, remoteMd5, newNextRecord);
     } else if (nextMapData.status === "new") {
       this.logger.debug("Status new, downloading region");
       await this.downloader.downloadRegion(region, remoteMd5, nextMapData);
@@ -73,11 +76,33 @@ export class RegionListProcessor {
       nextMapData.status === "processing" ||
       nextMapData.routerVersion !== this.env.routerVersion
     ) {
-      this.logger.debug("Status {status}, processing", {
+      this.logger.debug("Status processing", {
         status: nextMapData.status,
       });
       await this.cacheGenerator.schedule(nextMapData);
     }
+  }
+
+  private async createNextMapDataRecord(region: string, remoteMd5: string) {
+    const pbfLocation = await this.locations.getPbfFileLoc(region, remoteMd5);
+    const kmlLocation = await this.locations.getKmlLocation(region, remoteMd5);
+    const nextRecord = await this.pgQueries.mapDataCreateNextRecord(
+      this.pgClient,
+      {
+        region,
+        pbfMd5: remoteMd5,
+        pbfLocation,
+        routerVersion: this.env.routerVersion,
+        cacheLocation: await this.locations.getCacheDirLoc(
+          region,
+          this.env.routerVersion,
+          remoteMd5,
+        ),
+        kmlLocation,
+      },
+    )!;
+    this.logger.debug("Create new next record", { nextRecord });
+    return nextRecord!;
   }
 
   private async handleCurrentRecord(
@@ -85,23 +110,29 @@ export class RegionListProcessor {
     remoteMd5: string,
     currentMapData: MapDataRecord | null,
   ) {
-    this.logger.debug("Current Map Data Record", { ...currentMapData });
+    this.logger.debug("Current Map Data Record", { currentMapData });
     if (currentMapData) {
       if (
         remoteMd5 !== currentMapData.pbfMd5 &&
         currentMapData.nextDownloadAfter.getTime() < Date.now()
       ) {
+        const newNextRecord = await this.createNextMapDataRecord(
+          region,
+          remoteMd5,
+        );
         this.logger.debug("MD5 differs, downloading");
-        await this.downloader.downloadRegion(region, remoteMd5, null);
-      } else if (
-        currentMapData.routerVersion !== this.env.routerVersion
-      ) {
+        await this.downloader.downloadRegion(region, remoteMd5, newNextRecord);
+      } else if (currentMapData.routerVersion !== this.env.routerVersion) {
         this.logger.debug("Router version changed, reporcessing");
         await this.cacheGenerator.schedule(currentMapData);
       }
     } else {
+      const newNextRecord = await this.createNextMapDataRecord(
+        region,
+        remoteMd5,
+      );
       this.logger.debug("no current record, downloading");
-      await this.downloader.downloadRegion(region, remoteMd5, null);
+      await this.downloader.downloadRegion(region, remoteMd5, newNextRecord);
     }
   }
   async process() {
@@ -121,7 +152,7 @@ export class RegionListProcessor {
         { region },
       );
 
-      this.logger.debug("Next Map Data Record", { ...nextMapData });
+      this.logger.debug("Next Map Data Record", { nextMapData });
 
       if (nextMapData) {
         await this.handleNextRecord(region, remoteMd5, nextMapData);

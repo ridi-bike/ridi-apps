@@ -1,4 +1,5 @@
 import { DenoCommand, pg, PgClient } from "@ridi-router/lib";
+import { NdJson } from "json-nd";
 import type { RidiLogger } from "@ridi-router/logging/main.ts";
 import PQueue from "p-queue";
 import { type EnvVariables } from "./env-variables.ts";
@@ -28,8 +29,7 @@ export class CacheGenerator {
     private readonly kml: KmlProcessor,
     private readonly handler: Handler,
     private readonly dirStat: DenoDirStat,
-  ) {
-  }
+  ) {}
 
   public async schedule(mapDataRecord: MapDataRecord) {
     await this.queue.add(() => this.generateCache(mapDataRecord));
@@ -52,22 +52,39 @@ export class CacheGenerator {
       60 * 1000,
     );
 
-    const { code, stdout: stdoutOutput, stderr: stderrOutput } = await this
-      .denoCommand.execute(
-        this.env.routerBin,
-        [
-          "prep-cache",
-          "--input",
-          mapDataRecord.pbfLocation,
-          "--cache-dir",
-          mapDataRecord.cacheLocation,
-        ],
-      );
+    const {
+      code,
+      stdout: stdoutOutput,
+      stderr: stderrOutput,
+    } = await this.denoCommand.execute(this.env.routerBin, [
+      "prep-cache",
+      "--input",
+      mapDataRecord.pbfLocation,
+      "--cache-dir",
+      mapDataRecord.cacheLocation,
+    ]);
+
+    let stdout: unknown = stdoutOutput;
+    let stderr: unknown = stderrOutput;
+    let err1: unknown;
+    let err2: unknown;
+    try {
+      stdout = NdJson.parse(stdoutOutput);
+    } catch (error) {
+      err1 = error;
+    }
+    try {
+      stderr = NdJson.parse(stderrOutput);
+    } catch (error) {
+      err2 = error;
+    }
 
     this.logger.debug("Cache generation process output", {
       id: mapDataRecord.id,
-      stdout: stdoutOutput,
-      stderr: stderrOutput,
+      stdout,
+      stderr,
+      err1,
+      err2,
     });
 
     const cacheSize = await this.dirStat.getDirSize(
@@ -77,6 +94,8 @@ export class CacheGenerator {
     const serverStartMoment = Date.now();
     const process = new Deno.Command(this.env.routerBin, {
       stdout: "piped",
+      stderr: "piped",
+      stdin: "piped",
       args: [
         "start-server",
         "--input",
@@ -88,21 +107,40 @@ export class CacheGenerator {
       ],
     }).spawn();
 
-    await new Promise<void>((resolve) => {
-      const writableStream = new WritableStream({
-        write: (chunk, _controller) => {
-          const text = new TextDecoder().decode(chunk);
-          if (
-            text.split(";").find((t) => t === "RIDI_ROUTER SERVER READY")
-          ) {
-            resolve();
+    let resolve: (_: void | PromiseLike<void>) => void = () => undefined;
+    const readinessPromise = new Promise<void>((resolveInner) => {
+      resolve = resolveInner;
+    });
+    const writableStream = new WritableStream({
+      write: (chunk, _controller) => {
+        const text = new TextDecoder().decode(chunk);
+        if (text.split(";").find((t) => t === "RIDI_ROUTER SERVER READY")) {
+          resolve();
+        }
+      },
+    });
+
+    process.stdout.pipeTo(writableStream);
+    process.stderr.pipeTo(
+      new WritableStream({
+        write: (chunk) => {
+          const decoded = new TextDecoder().decode(chunk);
+          try {
+            const parsed = NdJson.parse(decoded);
+            this.logger.info("ridi-router-server output", {
+              output: parsed,
+            });
+          } catch (err) {
+            this.logger.error("ridi-router-server unparsable output", {
+              decoded,
+              err,
+            });
           }
         },
-      });
-      process.stdout.pipeTo(
-        writableStream,
-      );
-    });
+      }),
+    );
+
+    await readinessPromise;
 
     process.kill();
 
