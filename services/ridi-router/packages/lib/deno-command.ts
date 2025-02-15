@@ -9,12 +9,6 @@ export class DenoCommand {
       stdinContent: string;
     },
   ) {
-    console.log(
-      "=============== execute with args",
-      command,
-      JSON.stringify(args),
-      JSON.stringify(stdinContent),
-    );
     const denoCommand = new Deno.Command(command, {
       args: args,
       stdin: "piped",
