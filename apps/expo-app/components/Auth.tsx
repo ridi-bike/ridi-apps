@@ -95,9 +95,9 @@ export default function Auth() {
 
   return (
     <>
-      <Button variant="primary" fullWidth onPress={performOAuth}>
-        <Text>Sign in</Text>
-      </Button>
+      {/* <Button variant="primary" fullWidth onPress={performOAuth}> */}
+      {/*   <Text>Sign in</Text> */}
+      {/* </Button> */}
       <Link
         variant="secondary"
         className="dark:border-gray-200 dark:bg-gray-700"
