@@ -14,9 +14,7 @@ type MessageHandler<TName extends keyof Messages> = (args: {
   actions: {
     deleteMessage: () => Promise<void>;
     archiveMessage: () => Promise<void>;
-    setVisibilityTimeout: (
-      visibilityTimeoutSecs: number,
-    ) => Promise<void>;
+    setVisibilityTimeout: (visibilityTimeoutSecs: number) => Promise<void>;
   };
 }) => Promise<void>;
 
@@ -37,8 +35,7 @@ export class Messaging {
   constructor(
     readonly db: ReturnType<typeof postgres>,
     private readonly logger: Logger,
-  ) {
-  }
+  ) {}
 
   async send<TName extends keyof Messages>(
     queueName: TName,
@@ -100,13 +97,14 @@ export class Messaging {
               });
             },
           },
-        }).then(() => this.logger.info("Message processed", { message })).catch(
-          (error) =>
+        })
+          .then(() => this.logger.info("Message processed", { message }))
+          .catch((error) =>
             this.logger.error("Failed to process message unexpectedly", {
               message,
               error,
             }),
-        )
+          ),
       );
     }
   }

@@ -1,28 +1,27 @@
 import { pino } from "pino";
 
 export class RidiLogger {
-  private static instance: RidiLogger;
-
-  private constructor(
-    private readonly logger: pino.Logger,
-  ) {
-  }
+  constructor(private readonly logger: pino.Logger) {}
 
   static init(service: string) {
     const innerLogger = pino({
+      formatters: {
+        level: (label) => {
+          return {
+            level: label.toUpperCase(),
+          };
+        },
+      },
       level: "trace",
     }).child({
       service,
     });
     const logger = new RidiLogger(innerLogger);
-    RidiLogger.instance = logger;
+    return logger;
   }
 
-  public static get(): RidiLogger {
-    if (!RidiLogger.instance) {
-      throw new Error("need to call init first");
-    }
-    return RidiLogger.instance;
+  public withContext(context: Record<string, unknown>) {
+    return new RidiLogger(this.logger.child(context));
   }
 
   public debug(message: string, properties?: Record<string, unknown>) {

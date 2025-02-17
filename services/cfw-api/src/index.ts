@@ -19,8 +19,8 @@ import {
 import { User, createClient } from "@supabase/supabase-js";
 import { Database } from "./supabase";
 import postgres from "postgres";
-import { Messaging } from "./messaging";
-import { RidiLogger } from "./logging";
+import { Messaging } from "@ridi/messaging";
+import { RidiLogger } from "@ridi/logger";
 import {
   planCreate,
   planList,

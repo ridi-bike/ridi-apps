@@ -1,10 +1,13 @@
 import Fastify from "fastify";
 import { initServer } from "@ts-rest/fastify";
 import { ridiRouterContract } from "@ridi/ridi-router-contracts";
+import { RouterServer } from "./router-server";
 
 const app = Fastify();
 
 const s = initServer();
+
+const routerServer = new RouterServer();
 
 const router = s.router(ridiRouterContract, {
   healthcheck: () => {
