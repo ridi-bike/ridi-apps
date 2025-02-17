@@ -374,6 +374,18 @@ importers:
         specifier: ^3.24.1
         version: 3.24.2
 
+  libs/logger:
+    dependencies:
+      pino:
+        specifier: ^9.6.0
+        version: 9.6.0
+
+  libs/messaging:
+    dependencies:
+      pino:
+        specifier: ^9.6.0
+        version: 9.6.0
+
   libs/ridi-router-contracts:
     dependencies:
       '@ridi/api-contracts':
@@ -391,6 +403,12 @@ importers:
       '@ridi/api-contracts':
         specifier: workspace:^
         version: link:../../libs/api-contracts
+      '@ridi/logger':
+        specifier: workspace:^
+        version: link:../../libs/logger
+      '@ridi/messaging':
+        specifier: workspace:^
+        version: link:../../libs/messaging
       '@supabase/supabase-js':
         specifier: ^2.48.1
         version: 2.48.1
@@ -422,6 +440,12 @@ importers:
 
   services/ridi-router:
     dependencies:
+      '@ridi/logger':
+        specifier: workspace:^
+        version: link:../../libs/logger
+      '@ridi/messaging':
+        specifier: workspace:^
+        version: link:../../libs/messaging
       '@ridi/ridi-router-contracts':
         specifier: workspace:^
         version: link:../../libs/ridi-router-contracts
@@ -431,9 +455,15 @@ importers:
       fastify:
         specifier: ^5.2.1
         version: 5.2.1
+      json-nd:
+        specifier: ^1.0.0
+        version: 1.0.0
       typescript:
         specifier: ^5.8.1-rc
         version: 5.8.1-rc
+      zod:
+        specifier: ^3.24.1
+        version: 3.24.2
 
 packages:
 
@@ -6959,6 +6989,9 @@ packages:
 
   json-buffer@3.0.1:
     resolution: {integrity: sha512-4bV5BfR2mqfQTJm+V5tPPdf+ZpuhiIvTuAB5g8kcrXOZpTT/QwwVRWBywX1ozr6lEuPdbHxwaJlm9G6mI2sfSQ==}
+
+  json-nd@1.0.0:
+    resolution: {integrity: sha512-8TIp0HZAY0VVrwRQJJPb4+nOTSPoOWZeEKBTLizUfQO4oym5Fc/MKqN8vEbLCxcyxDf2vwNxOQ1q84O49GWPyQ==}
 
   json-parse-better-errors@1.0.2:
     resolution: {integrity: sha512-mrqyZKfX5EhL7hvqcV6WG1yYjnjeuYDzDhhcAAUrq8Po85NBQBJP+ZDUT75qZQ98IkUoBqdkExkukOU7Ts2wrw==}
@@ -19702,6 +19735,8 @@ snapshots:
   jsesc@3.1.0: {}
 
   json-buffer@3.0.1: {}
+
+  json-nd@1.0.0: {}
 
   json-parse-better-errors@1.0.2: {}
 
