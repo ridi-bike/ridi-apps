@@ -1,16 +1,13 @@
 import { NdJson } from "json-nd";
-import { env } from "./env";
 import { RidiLogger } from "@ridi/logger";
-import {
-  type RouteReqResponse,
-  type RouteReq,
-} from "@ridi/ridi-router-contracts";
+import { type RouteReq } from "@ridi/ridi-router-contracts";
 
 import { spawn } from "node:child_process";
+import { env } from "./env.ts";
 
 type RoadTagStats = Record<string, { len_m: number; percentage: number }>;
-type RidiRouterErr = { err: string };
-type RidiRouterOk = {
+export type RidiRouterErr = { err: string };
+export type RidiRouterOk = {
   ok: {
     routes: {
       coords: {
@@ -48,36 +45,43 @@ type RidiRouterOutput = {
 };
 export class RouterClient {
   private logger: RidiLogger;
+  private req: RouteReq;
 
-  constructor(logger: RidiLogger) {
-    this.logger = logger;
+  constructor(logger: RidiLogger, req: RouteReq) {
+    this.logger = logger.withContext({
+      module: "router-client",
+      reqId: req.reqId,
+    });
+    this.req = req;
   }
 
-  async execReq(req: RouteReq): Promise<RouteReqResponse> {
+  async execReq() {
+    this.logger.info("Router client starting");
+
     const process = spawn(
-      "./ridi-router",
-      req.req.tripType === "start-finish"
+      env.ROUTER_BIN,
+      this.req.req.tripType === "start-finish"
         ? [
             "start-client",
             "--route-req-id",
-            `${req.reqId}`,
+            `${this.req.reqId}`,
             "start-finish",
             "--start",
-            `${req.req.start.lat},${req.req.start.lon}`,
+            `${this.req.req.start.lat},${this.req.req.start.lon}`,
             "--finish",
-            `${req.req.finish.lat},${req.req.finish.lon}`,
+            `${this.req.req.finish.lat},${this.req.req.finish.lon}`,
           ]
         : [
             "start-client",
             "--route-req-id",
-            `${req.reqId}`,
+            `${this.req.reqId}`,
             "round-trip",
             "--start-finish",
-            `${req.req.startFinish.lat},${req.req.startFinish.lon}`,
+            `${this.req.req.startFinish.lat},${this.req.req.startFinish.lon}`,
             "--bearing",
-            req.req.brearing.toString(),
+            this.req.req.brearing.toString(),
             "--distance",
-            req.req.distance.toString(),
+            this.req.req.distance.toString(),
           ],
     );
 
@@ -85,23 +89,35 @@ export class RouterClient {
       let stdout = "";
 
       process.stdout.on("data", (data) => {
-        if (typeof data !== "string") {
-          throw new Error("stdout not a string");
+        if (!(data instanceof Buffer)) {
+          throw this.logger.error(
+            "Data received from router client process on stdout is not a Buffer",
+            { name: `${data}` },
+          );
         }
-        stdout += data;
+
+        const buf: Buffer = data;
+        const text = buf.toString("utf8");
+        stdout += text;
       });
 
       process.stderr.on("data", (data) => {
-        if (typeof data !== "string") {
-          throw new Error("stderr not a string");
+        if (!(data instanceof Buffer)) {
+          throw this.logger.error(
+            "Data received from router client process on stderr is not a Buffer",
+            { name: `${data}` },
+          );
         }
+
+        const buf: Buffer = data;
+        const text = buf.toString("utf8");
         try {
-          const output = NdJson.parse(data);
+          const output = NdJson.parse(text);
           this.logger.info("ridi-router-output", {
             output: output,
           });
         } catch (error) {
-          this.logger.error("ridi-server-output-error", {
+          this.logger.error("Router client process output", {
             data,
             error,
           });
@@ -113,18 +129,21 @@ export class RouterClient {
           resolve(stdout);
         } else {
           reject(
-            this.logger.error("ridi-router-client-nonzero-exit-code", {
-              exitCode,
-            }),
+            this.logger.error(
+              "Router client process closed with nonzero code",
+              {
+                exitCode,
+              },
+            ),
           );
         }
       });
     });
 
     try {
-      return JSON.parse(response);
+      return JSON.parse(response) as RidiRouterOutput;
     } catch (error) {
-      throw this.logger.error("ridi-router-client-result-parse", {
+      throw this.logger.error("Router client result not parsable", {
         response,
         error,
       });
