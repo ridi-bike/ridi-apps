@@ -2,8 +2,9 @@
   "name": "ridi-router",
   "version": "1.0.0",
   "main": "src/index.ts",
+  "type": "module",
   "scripts": {
-    "dev": "tsc src/index.ts && node src/index.ts",
+    "dev": "node src/index.ts",
     "tsc": "tsc",
     "v": "tsc --version"
   },
