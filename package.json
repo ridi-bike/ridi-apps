@@ -6,12 +6,15 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "scripts": {
+    "container:build:ridi-router": "podman build -f ./services/ridi-router/Containerfile --build-arg-file=./services/ridi-router/.env -t=ridi-router-service .",
+    "container:run:ridi-router": "podman run --env-file=./services/ridi-router/.env ridi-router-service"
+  },
   "devDependencies": {
     "@eslint/compat": "^1.2.5",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.19.0",
     "@total-typescript/tsconfig": "^1.0.4",
-    "@types/bun": "^1.1.9",
     "@types/eslint": "^9.6.1",
     "@types/node": "^22.5.4",
     "@typescript-eslint/eslint-plugin": "^8.22.0",
@@ -29,12 +32,6 @@
     "prettier": "^3.4.2",
     "prettier-plugin-astro": "^0.14.1"
   },
-  "workspaces": [
-    "apps/*",
-    "services/*",
-    "libs/*",
-    "infra"
-  ],
   "resolutions": {
     "react": "18.2.0"
   },

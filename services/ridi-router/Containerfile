@@ -2,18 +2,23 @@ FROM node:23-alpine as build
 
 WORKDIR /app
 
-ARG RIDI_ROUTER_VERSION
+ARG ROUTER_VERSION
 
-RUN curl -L "https://github.com/tomsjansons/ridi-router/releases/download/${RIDI_ROUTER_VERSION}/ridi-router-linux-amd64.zip" -o ridi-router-linux-amd64.zip \
-		&& unzip ridi-router-linux-amd64.zip \
-		&& mv ridi-router-linux-amd64 ridi-router \
-    && chmod +x ridi-router
+RUN apk add --no-cache curl unzip coreutils gcompat
 
-COPY . .
-RUN pnpm install
+RUN curl -L "https://github.com/tomsjansons/ridi-router/releases/download/${ROUTER_VERSION}/ridi-router-linux-amd64.zip" -o ridi-router-linux-amd64.zip \
+  && unzip ridi-router-linux-amd64.zip \
+  && mv ridi-router-linux-amd64 ridi-router \
+  && chmod +x ridi-router
 
-RUN chmod +x startup.sh
+RUN npm install -g pnpm
 
-RUN pnpm run tsc
+COPY ./libs/ ./libs
+COPY ./services/ridi-router ./services/ridi-router
+COPY ./package.json ./package.json
+COPY ./pnpm-workspace.yaml ./pnpm-workspace.yaml
 
-CMD ["node", "./src/index.ts"]
+RUN ls -la
+RUN pnpm install --prod
+
+CMD ["node", "./services/ridi-router/src/index.ts"]
