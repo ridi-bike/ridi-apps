@@ -4,7 +4,7 @@
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "dev": "node src/index.ts",
+    "dev": "node --env-file=./.env src/index.ts | pino-pretty",
     "tsc": "tsc",
     "v": "tsc --version"
   },
@@ -12,13 +12,16 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@ridi/ridi-router-contracts": "workspace:^",
     "@ridi/logger": "workspace:^",
     "@ridi/messaging": "workspace:^",
+    "@ridi/ridi-router-contracts": "workspace:^",
     "@ts-rest/fastify": "^3.52.0",
     "fastify": "^5.2.1",
     "json-nd": "^1.0.0",
     "typescript": "^5.8.1-rc",
     "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "pino-pretty": "^13.0.0"
   }
 }

@@ -1,9 +1,12 @@
 import { pino } from "pino";
 
 export class RidiLogger {
-  constructor(private readonly logger: pino.Logger) {}
+  private readonly logger: pino.Logger;
+  constructor(logger: pino.Logger) {
+    this.logger = logger;
+  }
 
-  static init(service: string) {
+  static init(context: Record<string, unknown>) {
     const innerLogger = pino({
       formatters: {
         level: (label) => {
@@ -13,9 +16,7 @@ export class RidiLogger {
         },
       },
       level: "trace",
-    }).child({
-      service,
-    });
+    }).child(context);
     const logger = new RidiLogger(innerLogger);
     return logger;
   }

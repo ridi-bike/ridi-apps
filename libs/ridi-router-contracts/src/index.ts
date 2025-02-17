@@ -29,7 +29,7 @@ const reqSchema = z.object({
 
 export type RouteReq = z.infer<typeof reqSchema>;
 
-const respSchema = z.object({
+export const respSchema = z.object({
   reqId: z.string(),
   routes: z.array(
     z.object({
@@ -74,8 +74,8 @@ export const ridiRouterContract = c.router({
     body: reqSchema,
     responses: {
       200: respSchema,
-      400: z.object({}),
-      500: z.object({}),
+      400: z.object({ message: z.string() }),
+      500: z.object({ message: z.string() }),
     },
   },
 });
