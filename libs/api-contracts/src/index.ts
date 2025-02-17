@@ -208,7 +208,7 @@ function createSchema<TKeysList extends readonly string[]>(
   );
 }
 
-const ruleRoadTagchema = z.object({
+export const ruleRoadTagchema = z.object({
   ...createSchema(roadTypeLargeKeys),
   ...createSchema(roadTypeMedKeys),
   ...createSchema(roadTypeSmallKeys),

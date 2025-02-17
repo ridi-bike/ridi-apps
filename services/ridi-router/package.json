@@ -1,0 +1,19 @@
+{
+  "name": "ridi-router",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "tsc src/index.ts && node src/index.ts",
+    "tsc": "tsc",
+    "v": "tsc --version"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@ridi/ridi-router-contracts": "workspace:^",
+    "@ts-rest/fastify": "^3.52.0",
+    "fastify": "^5.2.1",
+    "typescript": "^5.8.1-rc"
+  }
+}
