@@ -1,0 +1,22 @@
+{
+  "name": "@ridi/map-data-init",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "node --env-file=./.env src/index.ts | pino-pretty",
+    "tsc": "tsc",
+    "v": "tsc --version"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@ridi/logger": "workspace:^",
+    "@ridi/messaging": "workspace:^",
+    "typescript": "^5.8.1-rc"
+  },
+  "devDependencies": {
+    "pino-pretty": "^13.0.0"
+  }
+}

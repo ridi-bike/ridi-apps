@@ -3,6 +3,7 @@ import * as docker_build from "@pulumi/docker-build";
 
 import * as k8s from "@pulumi/kubernetes";
 import { ridiNamespace } from "../k8s";
+import { getMapDataInitContainer } from "../map-data-init";
 
 const projectName = pulumi.getProject();
 const config = new pulumi.Config();
@@ -31,7 +32,9 @@ const routerServiceImage = new docker_build.Image(routerServiceName, {
   ],
   cacheTo: [
     {
-      inline: {},
+      registry: {
+        ref: latestTag,
+      },
     },
   ],
   platforms: ["linux/amd64"],
@@ -73,6 +76,7 @@ for (const region of regions) {
             },
           },
           spec: {
+            initContainers: [getMapDataInitContainer(region)],
             containers: [
               {
                 name: regionServiceName,
@@ -91,8 +95,8 @@ for (const region of regions) {
                 ],
                 volumeMounts: [
                   {
-                    mountPath: "/tmp",
-                    name: "tmp-volume",
+                    mountPath: "/ridi-data",
+                    name: "ridi-data volume",
                   },
                 ],
               },
