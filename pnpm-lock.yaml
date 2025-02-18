@@ -27,9 +27,6 @@ importers:
       '@total-typescript/tsconfig':
         specifier: ^1.0.4
         version: 1.0.4
-      '@types/bun':
-        specifier: ^1.1.9
-        version: 1.2.2
       '@types/eslint':
         specifier: ^9.6.1
         version: 9.6.1
@@ -358,6 +355,9 @@ importers:
 
   infra:
     dependencies:
+      '@pulumi/docker-build':
+        specifier: ^0.0.10
+        version: 0.0.10(typescript@5.8.1-rc)
       '@pulumi/kubernetes':
         specifier: ^4.0.0
         version: 4.21.1(typescript@5.8.1-rc)
@@ -2296,6 +2296,9 @@ packages:
   '@protobufjs/utf8@1.1.0':
     resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
 
+  '@pulumi/docker-build@0.0.10':
+    resolution: {integrity: sha512-b+IrUIFzMr9fOEkZPTT7GvVjtG3r8uUVjYkHwg+1yuFGXSQ33z+7Pd/qqoe8sPitJepRJSq1WMUJ9vJ9eMpK0w==}
+
   '@pulumi/kubernetes@4.21.1':
     resolution: {integrity: sha512-+mhO7xM4+Sy7Bqu9DKsmJEpqn34qb3ZQxPqGgrphYqiYnUiS8SWL6pDvecZWYFWBlr85KcGdaCoHRLg2paa8Ng==}
 
@@ -3541,9 +3544,6 @@ packages:
   '@types/bonjour@3.5.13':
     resolution: {integrity: sha512-z9fJ5Im06zvUL548KvYNecEVlA7cVDkGUi6kZusb04mpyEFKCIZJvloCcmpmLaIahDpOQGHaHmG6imtPMmPXGQ==}
 
-  '@types/bun@1.2.2':
-    resolution: {integrity: sha512-tr74gdku+AEDN5ergNiBnplr7hpDp3V1h7fqI2GcR/rsUaM39jpSeKH0TFibRvU0KwniRx5POgaYnaXbk0hU+w==}
-
   '@types/cacheable-request@6.0.3':
     resolution: {integrity: sha512-IQ3EbTzGxIigb1I3qPZc1rWJnH0BmSKv5QYTalEwweFvyBDLSAe24zP0le/hyi7ecGfZVlIVAg4BZqb8WBwKqw==}
 
@@ -4401,9 +4401,6 @@ packages:
 
   builtins@1.0.3:
     resolution: {integrity: sha512-uYBjakWipfaO/bXI7E8rq6kpwHRZK5cNYrUv2OzZSI/FvmdMyXJ2tG9dKcjEC5YHmHpUAwsargWIZNWdxb/bnQ==}
-
-  bun-types@1.2.2:
-    resolution: {integrity: sha512-RCbMH5elr9gjgDGDhkTTugA21XtJAy/9jkKe/G3WR2q17VPGhcquf9Sir6uay9iW+7P/BV0CAHA1XlHXMAVKHg==}
 
   bytes@3.1.2:
     resolution: {integrity: sha512-/Nf7TyzTx6S3yRJObOAV7956r8cr2+Oj8AC5dt8wSP3BQAoeX58NoHyCU8P8zGkNXStjTSi6fzO6F0pBdcYbEg==}
@@ -13114,6 +13111,15 @@ snapshots:
 
   '@protobufjs/utf8@1.1.0': {}
 
+  '@pulumi/docker-build@0.0.10(typescript@5.8.1-rc)':
+    dependencies:
+      '@pulumi/pulumi': 3.150.0(typescript@5.8.1-rc)
+    transitivePeerDependencies:
+      - bluebird
+      - supports-color
+      - ts-node
+      - typescript
+
   '@pulumi/kubernetes@4.21.1(typescript@5.8.1-rc)':
     dependencies:
       '@pulumi/pulumi': 3.150.0(typescript@5.8.1-rc)
@@ -15379,10 +15385,6 @@ snapshots:
     dependencies:
       '@types/node': 22.13.4
 
-  '@types/bun@1.2.2':
-    dependencies:
-      bun-types: 1.2.2
-
   '@types/cacheable-request@6.0.3':
     dependencies:
       '@types/http-cache-semantics': 4.0.4
@@ -16525,11 +16527,6 @@ snapshots:
       ieee754: 1.2.1
 
   builtins@1.0.3: {}
-
-  bun-types@1.2.2:
-    dependencies:
-      '@types/node': 22.13.4
-      '@types/ws': 8.5.14
 
   bytes@3.1.2: {}
 

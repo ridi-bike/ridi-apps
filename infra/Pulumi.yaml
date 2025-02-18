@@ -1,5 +1,5 @@
-name: ridi-infra
-description: Ridi infra
+name: ridi
+description: Ridi
 runtime:
   name: nodejs
   options:
