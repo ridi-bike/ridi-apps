@@ -2,13 +2,11 @@ import * as pulumi from "@pulumi/pulumi";
 import * as docker_build from "@pulumi/docker-build";
 import * as k8s from "@pulumi/kubernetes";
 import {
-  getKmlLocation,
-  getKmlRemoteUrl,
-  getMapDataLocation,
+  getCacheLocation,
   getPbfLocation,
-  getPbfRemoteUrl,
   ridiDataRootPath,
-} from "../constants";
+  routerVersion,
+} from "../constants.ts";
 
 const projectName = pulumi.getProject();
 const config = new pulumi.Config();
@@ -16,6 +14,7 @@ const config = new pulumi.Config();
 // const prevVersion = new pulumi.StackReference(stack).getOutput("version");
 // export const version = prevVersion || 0;
 //
+const mapDataDate = "2025-02-19";
 
 const containerRegistryUrl = pulumi.interpolate`${config.require("container_registry_url")}/${config.require("container_registry_namespace")}`;
 const mapDataInitName = "map-data-init";
@@ -28,6 +27,9 @@ const mapDataInitImage = new docker_build.Image(mapDataInitName, {
   },
   dockerfile: {
     location: "./map-data-init/Containerfile",
+  },
+  buildArgs: {
+    ROUTER_VERSION: routerVersion,
   },
   cacheFrom: [
     {
@@ -66,24 +68,16 @@ export const getMapDataInitContainer = (
         value: region,
       },
       {
-        name: "MAP_DATA_LOCATION",
-        value: getMapDataLocation(region),
-      },
-      {
-        name: "PBF_REMOTE_URL",
-        value: getPbfRemoteUrl(region),
-      },
-      {
-        name: "KML_REMOTE_URL",
-        value: getKmlRemoteUrl(region),
-      },
-      {
         name: "PBF_LOCATION",
         value: getPbfLocation(region),
       },
       {
-        name: "KML_LOCATION",
-        value: getKmlLocation(region),
+        name: "CACHE_LOCATION",
+        value: getCacheLocation(region),
+      },
+      {
+        name: "ROUTER_VERSION",
+        value: routerVersion,
       },
     ],
     volumeMounts: [
