@@ -1,5 +1,12 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as docker_build from "@pulumi/docker-build";
+import {
+  getCacheLocation,
+  getPbfLocation,
+  getPbfRemoteUrl,
+  ridiDataRootPath,
+  routerVersion,
+} from "../constants";
 
 import * as k8s from "@pulumi/kubernetes";
 import { ridiNamespace } from "../k8s";
@@ -21,7 +28,7 @@ const routerServiceImage = new docker_build.Image(routerServiceName, {
     location: "./router-service/Containerfile",
   },
   buildArgs: {
-    ROUTER_VERSION: "v0.6.20",
+    ROUTER_VERSION: routerVersion,
   },
   cacheFrom: [
     {
@@ -86,6 +93,18 @@ for (const region of regions) {
                     name: "REGION",
                     value: region,
                   },
+                  {
+                    name: "PBF_LOCATION",
+                    value: getPbfLocation(region),
+                  },
+                  {
+                    name: "CACHE_LOCATION",
+                    value: getCacheLocation(region),
+                  },
+                  {
+                    name: "ROUTER_VERSION",
+                    value: routerVersion,
+                  },
                 ],
                 ports: [
                   {
@@ -95,7 +114,7 @@ for (const region of regions) {
                 ],
                 volumeMounts: [
                   {
-                    mountPath: "/ridi-data",
+                    mountPath: ridiDataRootPath,
                     name: "ridi-data volume",
                   },
                 ],
