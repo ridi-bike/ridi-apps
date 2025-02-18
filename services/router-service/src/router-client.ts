@@ -84,6 +84,26 @@ export class RouterClient {
             this.req.req.distance.toString(),
           ],
     );
+    const ruleInput = Object.entries(this.req.rules).reduce(
+      (rules, [key, value]) => {
+        rules[key] =
+          value === null
+            ? {
+                action: "avoid",
+              }
+            : {
+                action: "priority",
+                value,
+              };
+        return rules;
+      },
+      {} as Record<
+        string,
+        { action: "avoid" } | { action: "priority"; value: number }
+      >,
+    );
+    process.stdin.write(JSON.stringify(ruleInput));
+    process.stdin.end();
 
     const response = await new Promise<string>((resolve, reject) => {
       let stdout = "";
