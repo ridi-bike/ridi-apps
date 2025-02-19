@@ -16,7 +16,7 @@ ENV ROUTER_BIN=/app/ridi-router
 RUN npm install -g pnpm
 
 COPY ./libs/ ./libs
-COPY ./services/ridi-router ./services/ridi-router
+COPY ./services/router-service ./services/router-service
 COPY ./package.json ./package.json
 COPY ./pnpm-workspace.yaml ./pnpm-workspace.yaml
 

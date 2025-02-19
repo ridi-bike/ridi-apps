@@ -3,7 +3,7 @@ import * as docker_build from "@pulumi/docker-build";
 import {
   getCacheLocation,
   getPbfLocation,
-  getPbfRemoteUrl,
+  regions,
   ridiDataRootPath,
   routerVersion,
 } from "../constants";
@@ -11,6 +11,8 @@ import {
 import * as k8s from "@pulumi/kubernetes";
 import { ridiNamespace } from "../k8s";
 import { getMapDataInitContainer } from "../map-data-init";
+import { getRouterCacheInitContainer } from "../router-cache-init";
+import { regionVolumeClaims } from "../longhorn-storage";
 
 const projectName = pulumi.getProject();
 const config = new pulumi.Config();
@@ -55,10 +57,9 @@ const routerServiceImage = new docker_build.Image(routerServiceName, {
   ],
 });
 
-const regions = ["europe/latvia", "europe/greece"];
-
 for (const region of regions) {
-  const regionServiceName = `${routerServiceName}-${region.replace("/", "-")}`;
+  const storage = regionVolumeClaims[region.name];
+  const regionServiceName = `${routerServiceName}-${region.name.replace("/", "-")}`;
   const routerServiceDeployment = new k8s.apps.v1.Deployment(
     regionServiceName,
     {
@@ -83,7 +84,10 @@ for (const region of regions) {
             },
           },
           spec: {
-            initContainers: [getMapDataInitContainer(region)],
+            initContainers: [
+              getMapDataInitContainer(region),
+              getRouterCacheInitContainer(region),
+            ],
             containers: [
               {
                 name: regionServiceName,
@@ -91,21 +95,26 @@ for (const region of regions) {
                 env: [
                   {
                     name: "REGION",
-                    value: region,
+                    value: region.name,
                   },
                   {
                     name: "PBF_LOCATION",
-                    value: getPbfLocation(region),
+                    value: getPbfLocation(region.name),
                   },
                   {
                     name: "CACHE_LOCATION",
-                    value: getCacheLocation(region),
+                    value: getCacheLocation(region.name),
                   },
                   {
                     name: "ROUTER_VERSION",
                     value: routerVersion,
                   },
                 ],
+                resources: {
+                  requests: {
+                    memory: `${region.memory}Mi`,
+                  },
+                },
                 ports: [
                   {
                     name: "api",
@@ -122,9 +131,9 @@ for (const region of regions) {
             ],
             volumes: [
               {
-                name: "tmp-volume",
-                emptyDir: {
-                  medium: "Memory",
+                name: storage.name,
+                persistentVolumeClaim: {
+                  claimName: storage.claim.metadata.name,
                 },
               },
             ],

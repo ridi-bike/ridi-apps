@@ -7,15 +7,14 @@ import {
   getMapDataLocation,
   getPbfLocation,
   getPbfRemoteUrl,
+  getRegionNameSafe,
   ridiDataRootPath,
 } from "../constants";
+import { Region } from "../types";
+import { regionVolumeClaims } from "../longhorn-storage";
 
 const projectName = pulumi.getProject();
 const config = new pulumi.Config();
-// const stack = pulumi.getStack();
-// const prevVersion = new pulumi.StackReference(stack).getOutput("version");
-// export const version = prevVersion || 0;
-//
 
 const containerRegistryUrl = pulumi.interpolate`${config.require("container_registry_url")}/${config.require("container_registry_namespace")}`;
 const mapDataInitName = "map-data-init";
@@ -55,41 +54,48 @@ const mapDataInitImage = new docker_build.Image(mapDataInitName, {
 });
 
 export const getMapDataInitContainer = (
-  region: string,
+  region: Region,
 ): pulumi.Input<k8s.types.input.core.v1.Container> => {
+  const storage = regionVolumeClaims[region.name];
+  const containerName = `${mapDataInitName}-${getRegionNameSafe(region)}`;
   return {
-    name: mapDataInitName,
+    name: containerName,
     image: mapDataInitImage.ref,
     env: [
       {
         name: "REGION",
-        value: region,
+        value: region.name,
       },
       {
         name: "MAP_DATA_LOCATION",
-        value: getMapDataLocation(region),
+        value: getMapDataLocation(region.name),
       },
       {
         name: "PBF_REMOTE_URL",
-        value: getPbfRemoteUrl(region),
+        value: getPbfRemoteUrl(region.name),
       },
       {
         name: "KML_REMOTE_URL",
-        value: getKmlRemoteUrl(region),
+        value: getKmlRemoteUrl(region.name),
       },
       {
         name: "PBF_LOCATION",
-        value: getPbfLocation(region),
+        value: getPbfLocation(region.name),
       },
       {
         name: "KML_LOCATION",
-        value: getKmlLocation(region),
+        value: getKmlLocation(region.name),
       },
     ],
+    resources: {
+      requests: {
+        memory: `${region.memory}Mi`,
+      },
+    },
     volumeMounts: [
       {
         mountPath: ridiDataRootPath,
-        name: "ridi-data volume",
+        name: storage.name,
       },
     ],
   };

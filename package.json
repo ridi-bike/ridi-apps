@@ -7,8 +7,8 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "container:build:ridi-router": "podman build -f ./services/ridi-router/Containerfile --build-arg-file=./services/ridi-router/.env -t=ridi-router-service .",
-    "container:run:ridi-router": "podman run --env-file=./services/ridi-router/.env ridi-router-service"
+    "container:build:ridi-router": "podman build -f ./infra/router-service/Containerfile --build-arg-file=./services/router-service/.env -t=ridi-router-service .",
+    "container:run:ridi-router": "podman run --env-file=./services/router-service/.env ridi-router-service"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.5",
