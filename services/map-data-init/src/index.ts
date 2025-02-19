@@ -10,6 +10,10 @@ const logger = RidiLogger.init({
 
 logger.info("Starting Map Data init");
 
+await fs.promises.mkdir(env.MAP_DATA_LOCATION, {
+  recursive: true,
+});
+
 const kmlDownloadFilename = `${env.KML_LOCATION}.download`;
 if (!fs.existsSync(env.KML_LOCATION)) {
   logger.info("KML download started");
@@ -18,7 +22,9 @@ if (!fs.existsSync(env.KML_LOCATION)) {
   if (!kmlResp.body) {
     throw logger.error("KML fetch response body null", { kmlResp });
   }
-  await fs.promises.writeFile(kmlDownloadFilename, kmlResp.body);
+  await fs.promises.writeFile(kmlDownloadFilename, kmlResp.body, {
+    flag: "w+",
+  });
   fs.renameSync(kmlDownloadFilename, env.KML_LOCATION);
 
   logger.info("KML download done");
@@ -36,7 +42,9 @@ if (!fs.existsSync(env.PBF_LOCATION)) {
   if (!pbfResp.body) {
     throw logger.error("PBF fetch response body null", { pbfResp });
   }
-  await fs.promises.writeFile(pbfDownloadFileName, pbfResp.body);
+  await fs.promises.writeFile(pbfDownloadFileName, pbfResp.body, {
+    flag: "w+",
+  });
   fs.renameSync(pbfDownloadFileName, env.PBF_LOCATION);
   logger.info("PBF download done");
 }

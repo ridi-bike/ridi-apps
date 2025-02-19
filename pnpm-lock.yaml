@@ -438,7 +438,42 @@ importers:
         specifier: ^3.107.2
         version: 3.109.1(@cloudflare/workers-types@4.20250214.0)
 
-  services/ridi-router:
+  services/map-data-init:
+    dependencies:
+      '@ridi/logger':
+        specifier: workspace:^
+        version: link:../../libs/logger
+      '@ridi/messaging':
+        specifier: workspace:^
+        version: link:../../libs/messaging
+      typescript:
+        specifier: ^5.8.1-rc
+        version: 5.8.1-rc
+    devDependencies:
+      pino-pretty:
+        specifier: ^13.0.0
+        version: 13.0.0
+
+  services/router-cache-init:
+    dependencies:
+      '@ridi/logger':
+        specifier: workspace:^
+        version: link:../../libs/logger
+      '@ridi/messaging':
+        specifier: workspace:^
+        version: link:../../libs/messaging
+      json-nd:
+        specifier: ^1.0.0
+        version: 1.0.0
+      typescript:
+        specifier: ^5.8.1-rc
+        version: 5.8.1-rc
+    devDependencies:
+      pino-pretty:
+        specifier: ^13.0.0
+        version: 13.0.0
+
+  services/router-service:
     dependencies:
       '@ridi/logger':
         specifier: workspace:^
@@ -16964,7 +16999,7 @@ snapshots:
       postcss-modules-scope: 3.2.1(postcss@8.5.2)
       postcss-modules-values: 4.0.0(postcss@8.5.2)
       postcss-value-parser: 4.2.0
-      semver: 7.5.4
+      semver: 7.7.1
     optionalDependencies:
       webpack: 5.98.0
 
