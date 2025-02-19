@@ -1,6 +1,6 @@
 import Fastify from "fastify";
 import { initServer } from "@ts-rest/fastify";
-import { respSchema, ridiRouterContract } from "@ridi/ridi-router-contracts";
+import { respSchema, ridiRouterContract } from "@ridi/router-service-contracts";
 import { RouterServer } from "./router-server.ts";
 import { RidiLogger } from "@ridi/logger";
 import { env } from "./env.ts";

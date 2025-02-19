@@ -1,6 +1,10 @@
 import { RidiLogger } from "@ridi/logger";
 import { env } from "./env.ts";
 import fs from "node:fs";
+import { regionInsertOrUpdate } from "@ridi/db-queries";
+import { kml } from "@tmcw/togeojson";
+import { DOMParser } from "xmldom";
+import postgres from "postgres";
 
 const logger = RidiLogger.init({
   service: "map-data-init",
@@ -28,6 +32,36 @@ if (!fs.existsSync(env.KML_LOCATION)) {
   fs.renameSync(kmlDownloadFilename, env.KML_LOCATION);
 
   logger.info("KML download done");
+
+  const kmlFileContents = await fs.promises.readFile(env.KML_LOCATION, {
+    encoding: "utf8",
+  });
+
+  const kmlDom = new DOMParser().parseFromString(kmlFileContents);
+  const converted = kml(kmlDom);
+  const polygon = converted.features[0]?.geometry;
+  if (polygon?.type !== "Polygon") {
+    throw logger.error("Unexpected polygon geometry", { type: polygon?.type });
+  }
+
+  const poligonCoordinates = polygon.coordinates[0];
+  if (!poligonCoordinates) {
+    throw logger.error("Missing polygon coordinates", {
+      polygon,
+    });
+  }
+
+  const polygonCoordsList = poligonCoordinates
+    .map((c) => `${c[0]} ${c[1]}`)
+    .join(",");
+
+  const pgClient = postgres(env.SUPABASE_DB_URL);
+  await regionInsertOrUpdate(pgClient, {
+    region: env.REGION,
+    geojson: converted,
+    polygon: `POLYGON((${polygonCoordsList}))`,
+  });
+  logger.info("KML saved to db");
 }
 
 const pbfDownloadFileName = `${env.PBF_LOCATION}.download`;

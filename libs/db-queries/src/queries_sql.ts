@@ -2,6 +2,42 @@
 
 import { Sql } from "postgres";
 
+export const regionInsertOrUpdateQuery = `-- name: RegionInsertOrUpdate :one
+insert into regions (region, geojson, polygon)
+values ($1, $2, $3)
+on conflict (region) do update
+set geojson = excluded.geojson,
+  polygon = excluded.polygon
+returning region, geojson, polygon`;
+
+export interface RegionInsertOrUpdateArgs {
+    region: string;
+    geojson: any;
+    polygon: string | null;
+}
+
+export interface RegionInsertOrUpdateRow {
+    region: string;
+    geojson: any;
+    polygon: string | null;
+}
+
+export async function regionInsertOrUpdate(sql: Sql, args: RegionInsertOrUpdateArgs): Promise<RegionInsertOrUpdateRow | null> {
+    const rows = await sql.unsafe(regionInsertOrUpdateQuery, [args.region, args.geojson, args.polygon]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        region: row[0],
+        geojson: row[1],
+        polygon: row[2]
+    };
+}
+
 export const ruleSetsListQuery = `-- name: RuleSetsList :many
 select id, user_id, name, default_set from rule_sets
 where rule_sets.user_id = $1

@@ -1,3 +1,11 @@
+-- name: RegionInsertOrUpdate :one
+insert into regions (region, geojson, polygon)
+values ($1, $2, $3)
+on conflict (region) do update
+set geojson = excluded.geojson,
+  polygon = excluded.polygon
+returning *;
+
 -- name: RuleSetsList :many 
 select * from rule_sets
 where rule_sets.user_id = $1

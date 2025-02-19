@@ -1,5 +1,5 @@
 {
-  "name": "@ridi/ridi-router-contracts",
+  "name": "@ridi/router-service-contracts",
   "version": "1.0.0",
   "main": "src/index.ts",
   "type": "module",
