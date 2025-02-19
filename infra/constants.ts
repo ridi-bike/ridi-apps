@@ -43,6 +43,7 @@ export const nodes: K8sNode[] = [
       "node-role.kubernetes.io/control-plane": "true",
       "node-role.kubernetes.io/master": "true",
       "node-role.kubernetes.io/worker": "true",
+      "node.longhorn.io/create-default-disk": "true",
     },
   },
 ];
