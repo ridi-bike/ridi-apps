@@ -7,13 +7,13 @@
   },
   "dependencies": {
     "@ridi/api-contracts": "workspace:^",
+    "@ridi/db-queries": "workspace:^",
     "@ridi/logger": "workspace:^",
     "@ridi/messaging": "workspace:^",
     "@supabase/supabase-js": "^2.48.1",
     "@ts-rest/serverless": "^3.51.0",
     "@turf/turf": "^7.2.0",
     "pino": "^9.6.0",
-    "postgres": "^3.4.5",
     "remeda": "^2.20.0",
     "zod": "^3.24.1"
   },

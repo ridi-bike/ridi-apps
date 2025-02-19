@@ -14,7 +14,7 @@
   "dependencies": {
     "@ridi/logger": "workspace:^",
     "@ridi/messaging": "workspace:^",
-    "@ridi/ridi-router-contracts": "workspace:^",
+    "@ridi/router-service-contracts": "workspace:^",
     "@ts-rest/fastify": "^3.52.0",
     "fastify": "^5.2.1",
     "json-nd": "^1.0.0",

@@ -17,7 +17,6 @@ import {
   ruleSetsListSchema,
 } from "@ridi/api-contracts";
 import { User, createClient } from "@supabase/supabase-js";
-import { Database } from "./supabase";
 import postgres from "postgres";
 import { Messaging } from "@ridi/messaging";
 import { RidiLogger } from "@ridi/logger";
@@ -32,7 +31,7 @@ import {
   ruleSetsList,
   ruleSetUpsert,
   ruleSetDelete,
-} from "./queries_sql";
+} from "@ridi/db-queries";
 import { lookupCooordsInfo } from "./maps/lookup";
 
 export type FieldsNotNull<T extends object> = {
@@ -44,9 +43,7 @@ const router = tsr
     workerRequest: WorkerRequest;
     workerEnv: CloudflareBindings;
     workerContext: ExecutionContext;
-    supabaseClient: ReturnType<
-      typeof createClient<Database, "public", Database["public"]>
-    >;
+    supabaseClient: ReturnType<typeof createClient>;
     db: ReturnType<typeof postgres>;
     messaging: Messaging;
     logger: RidiLogger;
