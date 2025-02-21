@@ -475,6 +475,34 @@ importers:
         specifier: ^13.0.0
         version: 13.0.0
 
+  services/queue-service:
+    dependencies:
+      '@ridi/db-queries':
+        specifier: workspace:^
+        version: link:../../libs/db-queries
+      '@ridi/logger':
+        specifier: workspace:^
+        version: link:../../libs/logger
+      '@ridi/messaging':
+        specifier: workspace:^
+        version: link:../../libs/messaging
+      '@ridi/router-service-contracts':
+        specifier: workspace:^
+        version: link:../../libs/router-service-contracts
+      postgres:
+        specifier: ^3.4.5
+        version: 3.4.5
+      typescript:
+        specifier: ^5.8.1-rc
+        version: 5.8.1-rc
+    devDependencies:
+      '@types/xmldom':
+        specifier: ^0.1.34
+        version: 0.1.34
+      pino-pretty:
+        specifier: ^13.0.0
+        version: 13.0.0
+
   services/router-cache-init:
     dependencies:
       '@ridi/logger':

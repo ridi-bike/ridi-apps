@@ -39,13 +39,15 @@ export async function regionInsertOrUpdate(sql: Sql, args: RegionInsertOrUpdateA
 }
 
 export const ruleSetsListQuery = `-- name: RuleSetsList :many
-select id, user_id, name, default_set from rule_sets
-where rule_sets.user_id = $1
-  or rule_sets.user_id is null
+select id, user_id, name, default_set, is_deleted from rule_sets
+where (rule_sets.user_id = $1
+  or rule_sets.user_id is null)
+  and (not $2::boolean and is_deleted = false)
 order by default_set desc`;
 
 export interface RuleSetsListArgs {
     userId: string | null;
+    includeDeleted: boolean;
 }
 
 export interface RuleSetsListRow {
@@ -53,35 +55,79 @@ export interface RuleSetsListRow {
     userId: string | null;
     name: string;
     defaultSet: boolean;
+    isDeleted: boolean | null;
 }
 
 export async function ruleSetsList(sql: Sql, args: RuleSetsListArgs): Promise<RuleSetsListRow[]> {
-    return (await sql.unsafe(ruleSetsListQuery, [args.userId]).values()).map(row => ({
+    return (await sql.unsafe(ruleSetsListQuery, [args.userId, args.includeDeleted]).values()).map(row => ({
         id: row[0],
         userId: row[1],
         name: row[2],
-        defaultSet: row[3]
+        defaultSet: row[3],
+        isDeleted: row[4]
     }));
 }
 
-export const ruleSetRoadTagsGetQuery = `-- name: RuleSetRoadTagsGet :many
+export const ruleSetRoadTagsListQuery = `-- name: RuleSetRoadTagsList :many
 select user_id, rule_set_id, tag_key, value from rule_set_road_tags
-where rule_set_road_tags.user_id = $1
-  or rule_set_road_tags.user_id is null`;
+where (rule_set_road_tags.user_id = $1
+  or rule_set_road_tags.user_id is null)
+  and rule_set_road_tags.rule_set_id in (
+    select id from rule_sets
+    where (rule_sets.user_id = $1
+      or rule_sets.user_id is null)
+      and (not $2::boolean and rule_sets.is_deleted = false)
+  )`;
 
-export interface RuleSetRoadTagsGetArgs {
+export interface RuleSetRoadTagsListArgs {
     userId: string | null;
+    includeDeleted: boolean;
 }
 
-export interface RuleSetRoadTagsGetRow {
+export interface RuleSetRoadTagsListRow {
     userId: string | null;
     ruleSetId: string;
     tagKey: string;
     value: number | null;
 }
 
-export async function ruleSetRoadTagsGet(sql: Sql, args: RuleSetRoadTagsGetArgs): Promise<RuleSetRoadTagsGetRow[]> {
-    return (await sql.unsafe(ruleSetRoadTagsGetQuery, [args.userId]).values()).map(row => ({
+export async function ruleSetRoadTagsList(sql: Sql, args: RuleSetRoadTagsListArgs): Promise<RuleSetRoadTagsListRow[]> {
+    return (await sql.unsafe(ruleSetRoadTagsListQuery, [args.userId, args.includeDeleted]).values()).map(row => ({
+        userId: row[0],
+        ruleSetId: row[1],
+        tagKey: row[2],
+        value: row[3]
+    }));
+}
+
+export const ruleSetRoadTagsListByRuleSetIdQuery = `-- name: RuleSetRoadTagsListByRuleSetId :many
+select user_id, rule_set_id, tag_key, value from rule_set_road_tags
+where (rule_set_road_tags.user_id = $1
+  or rule_set_road_tags.user_id is null)
+  and rule_set_road_tags.rule_set_id = $3
+  and rule_set_road_tags.rule_set_id in (
+    select id from rule_sets
+    where (rule_sets.user_id = $1
+      or rule_sets.user_id is null)
+      and (not $2::boolean and rule_sets.is_deleted = false)
+      and rule_sets.id =  $3
+  )`;
+
+export interface RuleSetRoadTagsListByRuleSetIdArgs {
+    userId: string | null;
+    includeDeleted: boolean;
+    ruleSetId: string;
+}
+
+export interface RuleSetRoadTagsListByRuleSetIdRow {
+    userId: string | null;
+    ruleSetId: string;
+    tagKey: string;
+    value: number | null;
+}
+
+export async function ruleSetRoadTagsListByRuleSetId(sql: Sql, args: RuleSetRoadTagsListByRuleSetIdArgs): Promise<RuleSetRoadTagsListByRuleSetIdRow[]> {
+    return (await sql.unsafe(ruleSetRoadTagsListByRuleSetIdQuery, [args.userId, args.includeDeleted, args.ruleSetId]).values()).map(row => ({
         userId: row[0],
         ruleSetId: row[1],
         tagKey: row[2],
@@ -102,7 +148,7 @@ values (
 )
 on conflict (id) do update
 set name = excluded.name
-returning id, user_id, name, default_set`;
+returning id, user_id, name, default_set, is_deleted`;
 
 export interface RuleSetUpsertArgs {
     id: string;
@@ -115,6 +161,7 @@ export interface RuleSetUpsertRow {
     userId: string | null;
     name: string;
     defaultSet: boolean;
+    isDeleted: boolean | null;
 }
 
 export async function ruleSetUpsert(sql: Sql, args: RuleSetUpsertArgs): Promise<RuleSetUpsertRow | null> {
@@ -130,7 +177,8 @@ export async function ruleSetUpsert(sql: Sql, args: RuleSetUpsertArgs): Promise<
         id: row[0],
         userId: row[1],
         name: row[2],
-        defaultSet: row[3]
+        defaultSet: row[3],
+        isDeleted: row[4]
     };
 }
 
@@ -183,11 +231,13 @@ export async function ruleSetRoadTagsUpsert(sql: Sql, args: RuleSetRoadTagsUpser
 }
 
 export const ruleSetGetQuery = `-- name: RuleSetGet :one
-select id, user_id, name, default_set from rule_sets
-where rule_sets.id = $1`;
+select id, user_id, name, default_set, is_deleted from rule_sets
+where rule_sets.id = $1
+  and (not $2::boolean and rule_sets.is_deleted = false)`;
 
 export interface RuleSetGetArgs {
     id: string;
+    includeDeleted: boolean;
 }
 
 export interface RuleSetGetRow {
@@ -195,10 +245,11 @@ export interface RuleSetGetRow {
     userId: string | null;
     name: string;
     defaultSet: boolean;
+    isDeleted: boolean | null;
 }
 
 export async function ruleSetGet(sql: Sql, args: RuleSetGetArgs): Promise<RuleSetGetRow | null> {
-    const rows = await sql.unsafe(ruleSetGetQuery, [args.id]).values();
+    const rows = await sql.unsafe(ruleSetGetQuery, [args.id, args.includeDeleted]).values();
     if (rows.length !== 1) {
         return null;
     }
@@ -210,20 +261,22 @@ export async function ruleSetGet(sql: Sql, args: RuleSetGetArgs): Promise<RuleSe
         id: row[0],
         userId: row[1],
         name: row[2],
-        defaultSet: row[3]
+        defaultSet: row[3],
+        isDeleted: row[4]
     };
 }
 
-export const ruleSetDeleteQuery = `-- name: RuleSetDelete :exec
-delete from rule_sets
+export const ruleSetSetDeletedQuery = `-- name: RuleSetSetDeleted :exec
+update rule_sets
+set is_deleted = true
 where id = $1`;
 
-export interface RuleSetDeleteArgs {
+export interface RuleSetSetDeletedArgs {
     id: string;
 }
 
-export async function ruleSetDelete(sql: Sql, args: RuleSetDeleteArgs): Promise<void> {
-    await sql.unsafe(ruleSetDeleteQuery, [args.id]);
+export async function ruleSetSetDeleted(sql: Sql, args: RuleSetSetDeletedArgs): Promise<void> {
+    await sql.unsafe(ruleSetSetDeletedQuery, [args.id]);
 }
 
 export const routesGetQuery = `-- name: RoutesGet :many
@@ -459,6 +512,318 @@ export async function planCreate(sql: Sql, args: PlanCreateArgs): Promise<PlanCr
     }
     return {
         id: row[0]
+    };
+}
+
+export const regionGetQuery = `-- name: RegionGet :many
+select region, geojson, polygon from regions`;
+
+export interface RegionGetRow {
+    region: string;
+    geojson: any;
+    polygon: string | null;
+}
+
+export async function regionGet(sql: Sql): Promise<RegionGetRow[]> {
+    return (await sql.unsafe(regionGetQuery, []).values()).map(row => ({
+        region: row[0],
+        geojson: row[1],
+        polygon: row[2]
+    }));
+}
+
+export const regionFindFromCoordsQuery = `-- name: RegionFindFromCoords :many
+select region, geojson, polygon from public.regions
+where postgis.st_within(postgis.st_point($1, $2), regions.polygon)`;
+
+export interface RegionFindFromCoordsArgs {
+    lon: string;
+    lat: string;
+}
+
+export interface RegionFindFromCoordsRow {
+    region: string;
+    geojson: any;
+    polygon: string | null;
+}
+
+export async function regionFindFromCoords(sql: Sql, args: RegionFindFromCoordsArgs): Promise<RegionFindFromCoordsRow[]> {
+    return (await sql.unsafe(regionFindFromCoordsQuery, [args.lon, args.lat]).values()).map(row => ({
+        region: row[0],
+        geojson: row[1],
+        polygon: row[2]
+    }));
+}
+
+export const regionGetCountQuery = `-- name: RegionGetCount :one
+select count(*) from regions`;
+
+export interface RegionGetCountRow {
+    count: string;
+}
+
+export async function regionGetCount(sql: Sql): Promise<RegionGetCountRow | null> {
+    const rows = await sql.unsafe(regionGetCountQuery, []).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        count: row[0]
+    };
+}
+
+export const planGetByIdQuery = `-- name: PlanGetById :one
+select id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc, rule_set_id from plans
+where plans.id = $1`;
+
+export interface PlanGetByIdArgs {
+    id: string;
+}
+
+export interface PlanGetByIdRow {
+    id: string;
+    userId: string;
+    createdAt: Date;
+    modifiedAt: Date | null;
+    startLat: string;
+    startLon: string;
+    finishLat: string | null;
+    finishLon: string | null;
+    state: "new" | "planning" | "done" | "error";
+    name: string;
+    error: string | null;
+    tripType: "round-trip" | "start-finish";
+    distance: string;
+    bearing: string | null;
+    startDesc: string;
+    finishDesc: string | null;
+    ruleSetId: string;
+}
+
+export async function planGetById(sql: Sql, args: PlanGetByIdArgs): Promise<PlanGetByIdRow | null> {
+    const rows = await sql.unsafe(planGetByIdQuery, [args.id]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        userId: row[1],
+        createdAt: row[2],
+        modifiedAt: row[3],
+        startLat: row[4],
+        startLon: row[5],
+        finishLat: row[6],
+        finishLon: row[7],
+        state: row[8],
+        name: row[9],
+        error: row[10],
+        tripType: row[11],
+        distance: row[12],
+        bearing: row[13],
+        startDesc: row[14],
+        finishDesc: row[15],
+        ruleSetId: row[16]
+    };
+}
+
+export const plansGetNewQuery = `-- name: PlansGetNew :many
+select id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc, rule_set_id from plans
+where state = 'new'`;
+
+export interface PlansGetNewRow {
+    id: string;
+    userId: string;
+    createdAt: Date;
+    modifiedAt: Date | null;
+    startLat: string;
+    startLon: string;
+    finishLat: string | null;
+    finishLon: string | null;
+    state: "new" | "planning" | "done" | "error";
+    name: string;
+    error: string | null;
+    tripType: "round-trip" | "start-finish";
+    distance: string;
+    bearing: string | null;
+    startDesc: string;
+    finishDesc: string | null;
+    ruleSetId: string;
+}
+
+export async function plansGetNew(sql: Sql): Promise<PlansGetNewRow[]> {
+    return (await sql.unsafe(plansGetNewQuery, []).values()).map(row => ({
+        id: row[0],
+        userId: row[1],
+        createdAt: row[2],
+        modifiedAt: row[3],
+        startLat: row[4],
+        startLon: row[5],
+        finishLat: row[6],
+        finishLon: row[7],
+        state: row[8],
+        name: row[9],
+        error: row[10],
+        tripType: row[11],
+        distance: row[12],
+        bearing: row[13],
+        startDesc: row[14],
+        finishDesc: row[15],
+        ruleSetId: row[16]
+    }));
+}
+
+export const planSetStateQuery = `-- name: PlanSetState :exec
+update plans
+set 
+	state = $1, 
+	modified_at = now()
+where plans.id = $2`;
+
+export interface PlanSetStateArgs {
+    state: "new" | "planning" | "done" | "error";
+    id: string;
+}
+
+export async function planSetState(sql: Sql, args: PlanSetStateArgs): Promise<void> {
+    await sql.unsafe(planSetStateQuery, [args.state, args.id]);
+}
+
+export const routeInsertQuery = `-- name: RouteInsert :one
+insert into routes (
+	name, 
+	user_id, 
+	plan_id, 
+  stats_len_m,
+  stats_junction_count,
+  stats_score,
+	linestring
+)
+values (
+	$1, 
+	$2, 
+	$3, 
+  $4,
+  $5,
+  $6,
+	postgis.st_makeline(
+		array(
+			select 
+				postgis.st_point((p->>1)::numeric, (p->>0)::numeric)
+			from (
+				select jsonb_array_elements($7::jsonb) p
+			) arrayPoints
+		)
+	)
+)
+returning id, user_id, created_at, plan_id, name, linestring, stats_len_m, stats_score, stats_junction_count`;
+
+export interface RouteInsertArgs {
+    name: string;
+    userId: string;
+    planId: string;
+    statsLenM: string;
+    statsJunctionCount: string;
+    statsScore: string;
+    latLonArray: any;
+}
+
+export interface RouteInsertRow {
+    id: string;
+    userId: string;
+    createdAt: Date;
+    planId: string;
+    name: string;
+    linestring: string | null;
+    statsLenM: string;
+    statsScore: string;
+    statsJunctionCount: string;
+}
+
+export async function routeInsert(sql: Sql, args: RouteInsertArgs): Promise<RouteInsertRow | null> {
+    const rows = await sql.unsafe(routeInsertQuery, [args.name, args.userId, args.planId, args.statsLenM, args.statsJunctionCount, args.statsScore, args.latLonArray]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        userId: row[1],
+        createdAt: row[2],
+        planId: row[3],
+        name: row[4],
+        linestring: row[5],
+        statsLenM: row[6],
+        statsScore: row[7],
+        statsJunctionCount: row[8]
+    };
+}
+
+export const routeBreakdownStatsInsertQuery = `-- name: RouteBreakdownStatsInsert :one
+insert into route_breakdown_stats (
+  user_id,
+  route_id,
+  stat_type,
+  stat_name,
+  len_m,
+  percentage
+)
+values (
+  $1,
+  $2,
+  $3,
+  $4,
+  $5,
+  $6
+)
+returning id, user_id, route_id, stat_type, stat_name, len_m, percentage`;
+
+export interface RouteBreakdownStatsInsertArgs {
+    userId: string;
+    routeId: string;
+    statType: "type" | "surface" | "smoothness";
+    statName: string;
+    lenM: string;
+    percentage: string;
+}
+
+export interface RouteBreakdownStatsInsertRow {
+    id: string;
+    userId: string;
+    routeId: string;
+    statType: "type" | "surface" | "smoothness";
+    statName: string;
+    lenM: string;
+    percentage: string;
+}
+
+export async function routeBreakdownStatsInsert(sql: Sql, args: RouteBreakdownStatsInsertArgs): Promise<RouteBreakdownStatsInsertRow | null> {
+    const rows = await sql.unsafe(routeBreakdownStatsInsertQuery, [args.userId, args.routeId, args.statType, args.statName, args.lenM, args.percentage]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        userId: row[1],
+        routeId: row[2],
+        statType: row[3],
+        statName: row[4],
+        lenM: row[5],
+        percentage: row[6]
     };
 }
 

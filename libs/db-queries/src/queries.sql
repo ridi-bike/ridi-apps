@@ -8,14 +8,34 @@ returning *;
 
 -- name: RuleSetsList :many 
 select * from rule_sets
-where rule_sets.user_id = $1
-  or rule_sets.user_id is null
+where (rule_sets.user_id = $1
+  or rule_sets.user_id is null)
+  and (not sqlc.arg(include_deleted)::boolean and is_deleted = false)
 order by default_set desc;
 
--- name: RuleSetRoadTagsGet :many
+-- name: RuleSetRoadTagsList :many
 select * from rule_set_road_tags
-where rule_set_road_tags.user_id = $1
-  or rule_set_road_tags.user_id is null;
+where (rule_set_road_tags.user_id = $1
+  or rule_set_road_tags.user_id is null)
+  and rule_set_road_tags.rule_set_id in (
+    select id from rule_sets
+    where (rule_sets.user_id = $1
+      or rule_sets.user_id is null)
+      and (not sqlc.arg(include_deleted)::boolean and rule_sets.is_deleted = false)
+  );
+
+-- name: RuleSetRoadTagsListByRuleSetId :many
+select * from rule_set_road_tags
+where (rule_set_road_tags.user_id = $1
+  or rule_set_road_tags.user_id is null)
+  and rule_set_road_tags.rule_set_id = $3
+  and rule_set_road_tags.rule_set_id in (
+    select id from rule_sets
+    where (rule_sets.user_id = $1
+      or rule_sets.user_id is null)
+      and (not sqlc.arg(include_deleted)::boolean and rule_sets.is_deleted = false)
+      and rule_sets.id =  $3
+  );
 
 -- name: RuleSetUpsert :one
 insert into rule_sets (
@@ -51,10 +71,12 @@ returning *;
 
 -- name: RuleSetGet :one
 select * from rule_sets
-where rule_sets.id = $1;
+where rule_sets.id = $1
+  and (not sqlc.arg(include_deleted)::boolean and rule_sets.is_deleted = false);
 
--- name: RuleSetDelete :exec
-delete from rule_sets
+-- name: RuleSetSetDeleted :exec
+update rule_sets
+set is_deleted = true
 where id = $1;
 
 -- name: RoutesGet :many
@@ -152,3 +174,77 @@ values (
   $13
 )
 returning id;
+
+-- name: RegionGet :many
+select * from regions;
+
+-- name: RegionFindFromCoords :many
+select * from public.regions
+where postgis.st_within(postgis.st_point(sqlc.arg(lon), sqlc.arg(lat)), regions.polygon);
+
+-- name: RegionGetCount :one
+select count(*) from regions;
+
+-- name: PlanGetById :one
+select * from plans
+where plans.id = $1;
+
+-- name: PlansGetNew :many
+select * from plans
+where state = 'new';
+
+-- name: PlanSetState :exec
+update plans
+set 
+	state = $1, 
+	modified_at = now()
+where plans.id = $2;
+
+-- name: RouteInsert :one
+-- select postgis.st_point(( el->>'a' )::numeric, ( el->>'b' )::numeric) from (select jsonb_array_elements('[{"a":1,"b":2},{"a":3,"b":4}]'::jsonb) el) arrayEl
+insert into routes (
+	name, 
+	user_id, 
+	plan_id, 
+  stats_len_m,
+  stats_junction_count,
+  stats_score,
+	linestring
+)
+values (
+	$1, 
+	$2, 
+	$3, 
+  $4,
+  $5,
+  $6,
+	postgis.st_makeline(
+		array(
+			select 
+				postgis.st_point((p->>1)::numeric, (p->>0)::numeric)
+			from (
+				select jsonb_array_elements(sqlc.arg(lat_lon_array)::jsonb) p
+			) arrayPoints
+		)
+	)
+)
+returning *;
+
+-- name: RouteBreakdownStatsInsert :one
+insert into route_breakdown_stats (
+  user_id,
+  route_id,
+  stat_type,
+  stat_name,
+  len_m,
+  percentage
+)
+values (
+  $1,
+  $2,
+  $3,
+  $4,
+  $5,
+  $6
+)
+returning *;
