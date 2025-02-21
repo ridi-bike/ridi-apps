@@ -94,10 +94,9 @@ export class MessageHandlerNewPlan {
       });
     }
 
-    const rules = await pgQueries.ruleSetRoadTagsListByRuleSetId(
+    const rules = await pgQueries.ruleSetRoadTagsListByRuleSetIdWithDeleted(
       this.pgClient,
       {
-        includeDeleted: true,
         ruleSetId: planRecord.ruleSetId,
         userId: planRecord.userId,
       },

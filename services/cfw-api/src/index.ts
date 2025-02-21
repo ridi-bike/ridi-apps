@@ -60,11 +60,9 @@ const router = tsr
     }
     const rules = await ruleSetsList(ctx.db, {
       userId: ctx.request.user.id,
-      includeDeleted: false,
     });
     const tags = await ruleSetRoadTagsList(ctx.db, {
       userId: ctx.request.user.id,
-      includeDeleted: false,
     });
 
     const data = {
@@ -109,7 +107,6 @@ const router = tsr
 
     const ruleSetCheck = await ruleSetGet(ctx.db, {
       id: body.data.id,
-      includeDeleted: false,
     });
 
     if (ruleSetCheck && !ruleSetCheck.userId) {
@@ -152,7 +149,6 @@ const router = tsr
   ruleSetDelete: async ({ body }, ctx) => {
     const ruleSetCheck = await ruleSetGet(ctx.db, {
       id: body.id,
-      includeDeleted: false,
     });
 
     if (ruleSetCheck && !ruleSetCheck.userId) {

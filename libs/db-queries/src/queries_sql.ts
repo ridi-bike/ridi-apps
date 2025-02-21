@@ -42,12 +42,11 @@ export const ruleSetsListQuery = `-- name: RuleSetsList :many
 select id, user_id, name, default_set, is_deleted from rule_sets
 where (rule_sets.user_id = $1
   or rule_sets.user_id is null)
-  and (not $2::boolean and is_deleted = false)
+  and is_deleted = false
 order by default_set desc`;
 
 export interface RuleSetsListArgs {
     userId: string | null;
-    includeDeleted: boolean;
 }
 
 export interface RuleSetsListRow {
@@ -55,11 +54,11 @@ export interface RuleSetsListRow {
     userId: string | null;
     name: string;
     defaultSet: boolean;
-    isDeleted: boolean | null;
+    isDeleted: boolean;
 }
 
 export async function ruleSetsList(sql: Sql, args: RuleSetsListArgs): Promise<RuleSetsListRow[]> {
-    return (await sql.unsafe(ruleSetsListQuery, [args.userId, args.includeDeleted]).values()).map(row => ({
+    return (await sql.unsafe(ruleSetsListQuery, [args.userId]).values()).map(row => ({
         id: row[0],
         userId: row[1],
         name: row[2],
@@ -76,12 +75,11 @@ where (rule_set_road_tags.user_id = $1
     select id from rule_sets
     where (rule_sets.user_id = $1
       or rule_sets.user_id is null)
-      and (not $2::boolean and rule_sets.is_deleted = false)
+      and rule_sets.is_deleted = false
   )`;
 
 export interface RuleSetRoadTagsListArgs {
     userId: string | null;
-    includeDeleted: boolean;
 }
 
 export interface RuleSetRoadTagsListRow {
@@ -92,7 +90,7 @@ export interface RuleSetRoadTagsListRow {
 }
 
 export async function ruleSetRoadTagsList(sql: Sql, args: RuleSetRoadTagsListArgs): Promise<RuleSetRoadTagsListRow[]> {
-    return (await sql.unsafe(ruleSetRoadTagsListQuery, [args.userId, args.includeDeleted]).values()).map(row => ({
+    return (await sql.unsafe(ruleSetRoadTagsListQuery, [args.userId]).values()).map(row => ({
         userId: row[0],
         ruleSetId: row[1],
         tagKey: row[2],
@@ -100,34 +98,26 @@ export async function ruleSetRoadTagsList(sql: Sql, args: RuleSetRoadTagsListArg
     }));
 }
 
-export const ruleSetRoadTagsListByRuleSetIdQuery = `-- name: RuleSetRoadTagsListByRuleSetId :many
+export const ruleSetRoadTagsListByRuleSetIdWithDeletedQuery = `-- name: RuleSetRoadTagsListByRuleSetIdWithDeleted :many
 select user_id, rule_set_id, tag_key, value from rule_set_road_tags
 where (rule_set_road_tags.user_id = $1
   or rule_set_road_tags.user_id is null)
-  and rule_set_road_tags.rule_set_id = $3
-  and rule_set_road_tags.rule_set_id in (
-    select id from rule_sets
-    where (rule_sets.user_id = $1
-      or rule_sets.user_id is null)
-      and (not $2::boolean and rule_sets.is_deleted = false)
-      and rule_sets.id =  $3
-  )`;
+  and rule_set_road_tags.rule_set_id = $2`;
 
-export interface RuleSetRoadTagsListByRuleSetIdArgs {
+export interface RuleSetRoadTagsListByRuleSetIdWithDeletedArgs {
     userId: string | null;
-    includeDeleted: boolean;
     ruleSetId: string;
 }
 
-export interface RuleSetRoadTagsListByRuleSetIdRow {
+export interface RuleSetRoadTagsListByRuleSetIdWithDeletedRow {
     userId: string | null;
     ruleSetId: string;
     tagKey: string;
     value: number | null;
 }
 
-export async function ruleSetRoadTagsListByRuleSetId(sql: Sql, args: RuleSetRoadTagsListByRuleSetIdArgs): Promise<RuleSetRoadTagsListByRuleSetIdRow[]> {
-    return (await sql.unsafe(ruleSetRoadTagsListByRuleSetIdQuery, [args.userId, args.includeDeleted, args.ruleSetId]).values()).map(row => ({
+export async function ruleSetRoadTagsListByRuleSetIdWithDeleted(sql: Sql, args: RuleSetRoadTagsListByRuleSetIdWithDeletedArgs): Promise<RuleSetRoadTagsListByRuleSetIdWithDeletedRow[]> {
+    return (await sql.unsafe(ruleSetRoadTagsListByRuleSetIdWithDeletedQuery, [args.userId, args.ruleSetId]).values()).map(row => ({
         userId: row[0],
         ruleSetId: row[1],
         tagKey: row[2],
@@ -161,7 +151,7 @@ export interface RuleSetUpsertRow {
     userId: string | null;
     name: string;
     defaultSet: boolean;
-    isDeleted: boolean | null;
+    isDeleted: boolean;
 }
 
 export async function ruleSetUpsert(sql: Sql, args: RuleSetUpsertArgs): Promise<RuleSetUpsertRow | null> {
@@ -233,11 +223,10 @@ export async function ruleSetRoadTagsUpsert(sql: Sql, args: RuleSetRoadTagsUpser
 export const ruleSetGetQuery = `-- name: RuleSetGet :one
 select id, user_id, name, default_set, is_deleted from rule_sets
 where rule_sets.id = $1
-  and (not $2::boolean and rule_sets.is_deleted = false)`;
+  and rule_sets.is_deleted = false`;
 
 export interface RuleSetGetArgs {
     id: string;
-    includeDeleted: boolean;
 }
 
 export interface RuleSetGetRow {
@@ -245,11 +234,11 @@ export interface RuleSetGetRow {
     userId: string | null;
     name: string;
     defaultSet: boolean;
-    isDeleted: boolean | null;
+    isDeleted: boolean;
 }
 
 export async function ruleSetGet(sql: Sql, args: RuleSetGetArgs): Promise<RuleSetGetRow | null> {
-    const rows = await sql.unsafe(ruleSetGetQuery, [args.id, args.includeDeleted]).values();
+    const rows = await sql.unsafe(ruleSetGetQuery, [args.id]).values();
     if (rows.length !== 1) {
         return null;
     }

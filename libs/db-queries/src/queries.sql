@@ -10,7 +10,7 @@ returning *;
 select * from rule_sets
 where (rule_sets.user_id = $1
   or rule_sets.user_id is null)
-  and (not sqlc.arg(include_deleted)::boolean and is_deleted = false)
+  and is_deleted = false
 order by default_set desc;
 
 -- name: RuleSetRoadTagsList :many
@@ -21,21 +21,14 @@ where (rule_set_road_tags.user_id = $1
     select id from rule_sets
     where (rule_sets.user_id = $1
       or rule_sets.user_id is null)
-      and (not sqlc.arg(include_deleted)::boolean and rule_sets.is_deleted = false)
+      and rule_sets.is_deleted = false
   );
 
--- name: RuleSetRoadTagsListByRuleSetId :many
+-- name: RuleSetRoadTagsListByRuleSetIdWithDeleted :many
 select * from rule_set_road_tags
 where (rule_set_road_tags.user_id = $1
   or rule_set_road_tags.user_id is null)
-  and rule_set_road_tags.rule_set_id = $3
-  and rule_set_road_tags.rule_set_id in (
-    select id from rule_sets
-    where (rule_sets.user_id = $1
-      or rule_sets.user_id is null)
-      and (not sqlc.arg(include_deleted)::boolean and rule_sets.is_deleted = false)
-      and rule_sets.id =  $3
-  );
+  and rule_set_road_tags.rule_set_id = $2;
 
 -- name: RuleSetUpsert :one
 insert into rule_sets (
@@ -72,7 +65,7 @@ returning *;
 -- name: RuleSetGet :one
 select * from rule_sets
 where rule_sets.id = $1
-  and (not sqlc.arg(include_deleted)::boolean and rule_sets.is_deleted = false);
+  and rule_sets.is_deleted = false;
 
 -- name: RuleSetSetDeleted :exec
 update rule_sets
