@@ -142,7 +142,7 @@ export class RouterClient {
           });
         } catch (error) {
           this.logger.error("Router client process output", {
-            data,
+            text,
             error,
           });
         }
