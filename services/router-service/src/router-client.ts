@@ -1,6 +1,7 @@
 import { NdJson } from "json-nd";
 import { RidiLogger } from "@ridi/logger";
 import { type RouteReq } from "@ridi/router-service-contracts";
+import { getTagSection } from "./roadTags.ts";
 
 import { spawn } from "node:child_process";
 import { env } from "./env.ts";
@@ -10,10 +11,7 @@ export type RidiRouterErr = { err: string };
 export type RidiRouterOk = {
   ok: {
     routes: {
-      coords: {
-        lat: number;
-        lon: number;
-      }[];
+      coords: [number, number];
       stats: {
         len_m: number;
         junction_count: number;
@@ -58,39 +56,13 @@ export class RouterClient {
   async execReq() {
     this.logger.info("Router client starting");
 
-    const process = spawn(
-      env.ROUTER_BIN,
-      this.req.req.tripType === "start-finish"
-        ? [
-            "--socket-name",
-            env.REGION,
-            "start-client",
-            "--route-req-id",
-            `${this.req.reqId}`,
-            "start-finish",
-            "--start",
-            `${this.req.req.start.lat},${this.req.req.start.lon}`,
-            "--finish",
-            `${this.req.req.finish.lat},${this.req.req.finish.lon}`,
-          ]
-        : [
-            "--socket-name",
-            env.REGION,
-            "start-client",
-            "--route-req-id",
-            `${this.req.reqId}`,
-            "round-trip",
-            "--start-finish",
-            `${this.req.req.startFinish.lat},${this.req.req.startFinish.lon}`,
-            "--bearing",
-            this.req.req.brearing.toString(),
-            "--distance",
-            this.req.req.distance.toString(),
-          ],
-    );
     const ruleInput = Object.entries(this.req.rules).reduce(
       (rules, [key, value]) => {
-        rules[key] =
+        const group = getTagSection(key);
+        if (!rules[group]) {
+          rules[group] = {};
+        }
+        rules[group][key] =
           value === null
             ? {
                 action: "avoid",
@@ -105,6 +77,37 @@ export class RouterClient {
         string,
         { action: "avoid" } | { action: "priority"; value: number }
       >,
+    );
+
+    const process = spawn(
+      env.ROUTER_BIN,
+      this.req.req.tripType === "start-finish"
+        ? [
+            "start-client",
+            "--socket-name",
+            env.REGION,
+            "--route-req-id",
+            `${this.req.reqId}`,
+            "start-finish",
+            "--start",
+            `${this.req.req.start.lat},${this.req.req.start.lon}`,
+            "--finish",
+            `${this.req.req.finish.lat},${this.req.req.finish.lon}`,
+          ]
+        : [
+            "start-client",
+            "--socket-name",
+            env.REGION,
+            "--route-req-id",
+            `${this.req.reqId}`,
+            "round-trip",
+            "--start-finish",
+            `${this.req.req.startFinish.lat},${this.req.req.startFinish.lon}`,
+            "--bearing",
+            this.req.req.brearing.toString(),
+            "--distance",
+            this.req.req.distance.toString(),
+          ],
     );
     process.stdin.write(JSON.stringify(ruleInput));
     process.stdin.end();
@@ -165,6 +168,7 @@ export class RouterClient {
     });
 
     try {
+      console.log("=======================", response);
       return JSON.parse(response) as RidiRouterOutput;
     } catch (error) {
       throw this.logger.error("Router client result not parsable", {

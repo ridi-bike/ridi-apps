@@ -110,5 +110,21 @@ const start = async () => {
     process.exit(1);
   }
 };
+const handleExit = () => {
+  routerServer.stopServer();
+};
+// do something when app is closing
+process.on("exit", handleExit);
+// catches ctrl+c event
+process.on("SIGINT", handleExit);
+// catches "kill pid" (for example: nodemon restart)
+process.on("SIGUSR1", handleExit);
+process.on("SIGUSR2", handleExit);
+process.on("uncaughtException", (error, origin) => {
+  logger.error("uncaughtException", { error, origin });
+});
+process.on("unhandledRejection", (reason, promise) => {
+  logger.error("unhandledRejection", { reason, promise });
+});
 
 start();

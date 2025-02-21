@@ -5,6 +5,7 @@ import { Messaging } from "@ridi/messaging";
 import { RidiLogger } from "@ridi/logger";
 import { MessageHandlerNewPlan } from "./message-handler-new-plan.ts";
 import { RouterServiceLookup } from "./router-service-lookup.ts";
+import { promises } from "readline";
 
 const pgClient = postgres(env.SUPABASE_DB_URL);
 
@@ -55,8 +56,10 @@ process.on("SIGUSR1", handleExit);
 process.on("SIGUSR2", handleExit);
 // catches uncaught exceptions
 process.on("uncaughtException", (error, origin) => {
-  logger.error("Unhandled exception in promise", { error, origin });
-  process.exit();
+  logger.error("uncaughtException", { error, origin });
+});
+process.on("unhandledRejection", (reason, promise) => {
+  logger.error("unhandledRejection", { reason, promise });
 });
 
 const server = createServer(async (_req, res) => {

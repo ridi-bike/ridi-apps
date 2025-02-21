@@ -194,7 +194,7 @@ export class MessageHandlerNewPlan {
         planId,
         name: "some name",
         userId: planRecord.userId,
-        latLonArray: route.route.map((p) => [p.lat, p.lon]),
+        latLonArray: route.route,
         statsLenM: route.stats.lenM.toString(),
         statsJunctionCount: route.stats.junctionCount.toString(),
         statsScore: route.stats.score.toString(),
