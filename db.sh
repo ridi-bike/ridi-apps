@@ -28,10 +28,12 @@ case "$1" in
   rm -rf ./services/ridi-router/.ridi-data/db
   # supabase gen types --lang=typescript --local >./services/ridi-router/packages/lib/supabase.ts
   # supabase gen types --lang=typescript --local >./services/cfw-api/src/supabase.ts
-  sqlc generate
+  ./db.sh sqlc
   ;;
 "sqlc")
   sqlc generate
+  sed -i 's/import/import type /g' ./libs/db-queries/src/queries_sql.ts
+  sed -i 's/import/import type /g' ./libs/messaging/src/messaging_sql.ts
   ;;
 *)
   display_help

@@ -3,12 +3,10 @@
   "version": "1.0.0",
   "main": "src/index.ts",
   "type": "module",
-  "scripts": {
-    "dev": "node --env-file=./.env src/index.ts | pino-pretty",
-    "tsc": "tsc",
-    "v": "tsc --version"
-  },
   "author": "",
+  "scripts": {
+    "tsc": "tsc"
+  },
   "license": "ISC",
   "description": "",
   "dependencies": {
