@@ -1,6 +1,6 @@
 import { NdJson } from "json-nd";
 import { RidiLogger } from "@ridi/logger";
-import { type RouteReq } from "@ridi/ridi-router-contracts";
+import { type RouteReq } from "@ridi/router-service-contracts";
 
 import { spawn } from "node:child_process";
 import { env } from "./env.ts";
@@ -62,6 +62,8 @@ export class RouterClient {
       env.ROUTER_BIN,
       this.req.req.tripType === "start-finish"
         ? [
+            "--socket-name",
+            env.REGION,
             "start-client",
             "--route-req-id",
             `${this.req.reqId}`,
@@ -72,6 +74,8 @@ export class RouterClient {
             `${this.req.req.finish.lat},${this.req.req.finish.lon}`,
           ]
         : [
+            "--socket-name",
+            env.REGION,
             "start-client",
             "--route-req-id",
             `${this.req.reqId}`,

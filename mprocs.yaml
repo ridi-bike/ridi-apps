@@ -14,16 +14,16 @@ procs:
     shell: "pnpm run tsc"
     cwd: "./apps/expo-app"
   queue-service:
-    shell: "node --watch --env-file=.env.base src/index.ts | pino-pretty"
+    shell: "node --import=tsx --watch-path=./src --env-file=.env.base src/index.ts | pino-pretty"
     cwd: "./services/queue-service/"
   queue-service-tsc:
     shell: "pnpm run tsc --watch"
     cwd: "./services/queue-service/"
   router-service-latvia:
-    shell: "node --watch --env-file=.env.latvia src/index.ts | pino-pretty"
+    shell: "node --import=tsx --watch-path=./src --env-file=.env.latvia src/index.ts | pino-pretty"
     cwd: "./services/router-service/"
   router-service-greece:
-    shell: "node --watch --env-file=.env.greece src/index.ts | pino-pretty"
+    shell: "node --import=tsx --watch-path=./src --env-file=.env.greece src/index.ts | pino-pretty"
     cwd: "./services/router-service/"
   router-service-tsc:
     shell: "pnpm run tsc --watch"

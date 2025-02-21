@@ -6,7 +6,8 @@ import {
   type ReadMessagesWithLongPollRow,
   sendMessage,
   updateVisibilityTimeout,
-} from "./messaging_sql";
+} from "./messaging_sql.ts";
+import type { RidiLogger } from "@ridi/logger";
 
 type MessageHandler<TName extends keyof Messages> = (args: {
   message: ReadMessagesWithLongPollRow;
@@ -24,18 +25,16 @@ type Messages = {
   "new-plan": { planId: string };
 };
 
-interface Logger {
-  info(message: string, properties?: Record<string, unknown>): void;
-  error(message: string, properties?: Record<string, unknown>): void;
-}
-
 export class Messaging {
   private stopped = false;
 
-  constructor(
-    readonly db: ReturnType<typeof postgres>,
-    private readonly logger: Logger,
-  ) {}
+  private readonly db: ReturnType<typeof postgres>;
+  private readonly logger: RidiLogger;
+
+  constructor(db: ReturnType<typeof postgres>, logger: RidiLogger) {
+    this.db = db;
+    this.logger = logger.withContext({ module: "messaging" });
+  }
 
   async send<TName extends keyof Messages>(
     queueName: TName,

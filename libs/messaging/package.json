@@ -4,6 +4,7 @@
   "main": "src/index.ts",
   "type": "module",
   "dependencies": {
+    "@ridi/logger": "workspace:^",
     "postgres": "^3.4.5"
   }
 }

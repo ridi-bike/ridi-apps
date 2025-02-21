@@ -28,6 +28,8 @@ export class RouterServer {
       env.PBF_LOCATION,
       "--cache-dir",
       env.CACHE_LOCATION,
+      "--socket-name",
+      env.REGION,
     ]);
 
     this.process.stdout.on("data", (data) => {

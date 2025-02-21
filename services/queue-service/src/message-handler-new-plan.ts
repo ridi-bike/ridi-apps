@@ -105,7 +105,7 @@ export class MessageHandlerNewPlan {
 
     const ruleInput = rules.reduce(
       (all, curr) => {
-        all[curr.tagKey] = curr.value;
+        all[curr.tagKey as keyof RouteReq["rules"]] = curr.value;
         return all;
       },
       {} as RouteReq["rules"],
@@ -183,7 +183,7 @@ export class MessageHandlerNewPlan {
       while (bestRoutes.length < num_of_best_routes) {
         const bucket = step % num_of_best_routes;
         const iter = Math.floor(step / num_of_best_routes);
-        const route = okRoutes.filter(filterBuckes[bucket]).sort(sort)[iter];
+        const route = okRoutes.filter(filterBuckes[bucket]!).sort(sort)[iter];
         if (route) {
           bestRoutes.push(route);
         }
