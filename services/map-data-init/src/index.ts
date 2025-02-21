@@ -1,11 +1,13 @@
-import { RidiLogger } from "@ridi/logger";
-import type { ReadableStream } from "node:stream/web";
-import { env } from "./env.ts";
 import fs from "node:fs";
+import { type ReadableStream } from "node:stream/web";
+
 import { regionInsertOrUpdate } from "@ridi/db-queries";
+import { RidiLogger } from "@ridi/logger";
 import { kml } from "@tmcw/togeojson";
-import { DOMParser } from "xmldom";
 import postgres from "postgres";
+import { DOMParser } from "xmldom";
+
+import { env } from "./env.ts";
 
 const logger = RidiLogger.init({
   service: "map-data-init",

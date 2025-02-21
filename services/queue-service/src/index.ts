@@ -1,11 +1,12 @@
-import postgres from "postgres";
 import { createServer } from "http";
-import { env } from "./env.ts";
-import { Messaging } from "@ridi/messaging";
+
 import { RidiLogger } from "@ridi/logger";
+import { Messaging } from "@ridi/messaging";
+import postgres from "postgres";
+
+import { env } from "./env.ts";
 import { MessageHandlerNewPlan } from "./message-handler-new-plan.ts";
 import { RouterServiceLookup } from "./router-service-lookup.ts";
-import { promises } from "readline";
 
 const pgClient = postgres(env.SUPABASE_DB_URL);
 

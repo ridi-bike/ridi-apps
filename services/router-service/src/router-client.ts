@@ -1,10 +1,11 @@
-import { NdJson } from "json-nd";
-import { RidiLogger } from "@ridi/logger";
-import { type RouteReq } from "@ridi/router-service-contracts";
-import { getTagSection } from "./roadTags.ts";
-
 import { spawn } from "node:child_process";
+
+import { type RidiLogger } from "@ridi/logger";
+import { type RouteReq } from "@ridi/router-service-contracts";
+import { NdJson } from "json-nd";
+
 import { env } from "./env.ts";
+import { getTagSection } from "./roadTags.ts";
 
 type RoadTagStats = Record<string, { len_m: number; percentage: number }>;
 export type RidiRouterErr = { err: string };

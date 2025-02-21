@@ -1,8 +1,9 @@
-import { NdJson } from "json-nd";
-import { env } from "./env.ts";
-import { RidiLogger } from "@ridi/logger";
-
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+
+import { type RidiLogger } from "@ridi/logger";
+import { NdJson } from "json-nd";
+
+import { env } from "./env.ts";
 
 export class RouterServer {
   private logger: RidiLogger;

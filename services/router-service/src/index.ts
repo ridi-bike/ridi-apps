@@ -1,15 +1,17 @@
-import Fastify from "fastify";
-import { initServer } from "@ts-rest/fastify";
-import { respSchema, ridiRouterContract } from "@ridi/router-service-contracts";
-import { RouterServer } from "./router-server.ts";
 import { RidiLogger } from "@ridi/logger";
+import { type respSchema } from "@ridi/router-service-contracts";
+import { ridiRouterContract } from "@ridi/router-service-contracts";
+import { initServer } from "@ts-rest/fastify";
+import Fastify from "fastify";
+import { type z } from "zod";
+
 import { env } from "./env.ts";
 import {
   RouterClient,
   type RidiRouterErr,
   type RidiRouterOk,
 } from "./router-client.ts";
-import type { z } from "zod";
+import { RouterServer } from "./router-server.ts";
 
 const logger = RidiLogger.init({
   service: "ridi-router",

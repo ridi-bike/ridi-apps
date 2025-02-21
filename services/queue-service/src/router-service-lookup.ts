@@ -1,6 +1,10 @@
-import type { RidiLogger } from "@ridi/logger";
-import { ridiRouterContract, type RouteReq } from "@ridi/ridi-router-contracts";
+import { type RidiLogger } from "@ridi/logger";
+import {
+  ridiRouterContract,
+  type RouteReq,
+} from "@ridi/router-service-contracts";
 import { initClient } from "@ts-rest/core";
+
 import { env } from "./env";
 
 export class RouterServiceLookup {

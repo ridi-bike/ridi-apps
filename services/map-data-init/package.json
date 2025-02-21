@@ -16,7 +16,8 @@
     "@tmcw/togeojson": "git+https://github.com/tmcw/togeojson.git",
     "postgres": "^3.4.5",
     "typescript": "^5.8.1-rc",
-    "xmldom": "^0.6.0"
+    "xmldom": "^0.6.0",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/xmldom": "^0.1.34",
