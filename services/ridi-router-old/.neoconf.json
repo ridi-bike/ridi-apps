@@ -1,7 +1,0 @@
-{
-  "lspconfig": {
-    "vtsls": { "disable": true },
-    "eslint": { "disable": true },
-    "tailwindcss": { "disable": true }
-  }
-}
