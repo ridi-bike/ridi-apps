@@ -26,11 +26,11 @@ import {
   routeStatsGet,
   routesGet,
   ruleSetGet,
-  ruleSetRoadTagsGet,
   ruleSetRoadTagsUpsert,
   ruleSetsList,
   ruleSetUpsert,
-  ruleSetDelete,
+  ruleSetRoadTagsList,
+  ruleSetSetDeleted,
 } from "@ridi/db-queries";
 import { lookupCooordsInfo } from "./maps/lookup";
 
@@ -43,7 +43,7 @@ const router = tsr
     workerRequest: WorkerRequest;
     workerEnv: CloudflareBindings;
     workerContext: ExecutionContext;
-    supabaseClient: ReturnType<typeof createClient>;
+    supabaseClient: ReturnType<typeof createClient<any, "public", any>>;
     db: ReturnType<typeof postgres>;
     messaging: Messaging;
     logger: RidiLogger;
@@ -60,9 +60,11 @@ const router = tsr
     }
     const rules = await ruleSetsList(ctx.db, {
       userId: ctx.request.user.id,
+      includeDeleted: false,
     });
-    const tags = await ruleSetRoadTagsGet(ctx.db, {
+    const tags = await ruleSetRoadTagsList(ctx.db, {
       userId: ctx.request.user.id,
+      includeDeleted: false,
     });
 
     const data = {
@@ -107,6 +109,7 @@ const router = tsr
 
     const ruleSetCheck = await ruleSetGet(ctx.db, {
       id: body.data.id,
+      includeDeleted: false,
     });
 
     if (ruleSetCheck && !ruleSetCheck.userId) {
@@ -149,6 +152,7 @@ const router = tsr
   ruleSetDelete: async ({ body }, ctx) => {
     const ruleSetCheck = await ruleSetGet(ctx.db, {
       id: body.id,
+      includeDeleted: false,
     });
 
     if (ruleSetCheck && !ruleSetCheck.userId) {
@@ -160,7 +164,7 @@ const router = tsr
       };
     }
 
-    await ruleSetDelete(ctx.db, {
+    await ruleSetSetDeleted(ctx.db, {
       id: body.id,
     });
 
@@ -378,8 +382,7 @@ const router = tsr
   },
 });
 
-RidiLogger.init("cfw-api");
-const ridiLogger = RidiLogger.get();
+const ridiLogger = RidiLogger.init({ service: "cfw-api" });
 
 export default {
   async fetch(
@@ -402,7 +405,7 @@ export default {
       return new Response();
     }
 
-    const supabaseClient = createClient<Database, "public", Database["public"]>(
+    const supabaseClient = createClient(
       env.SUPABASE_URL,
       env.SUPABASE_SERVICE_ROLE_KEY,
     );
