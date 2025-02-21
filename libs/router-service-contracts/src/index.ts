@@ -33,7 +33,7 @@ export const respSchema = z.object({
   reqId: z.string(),
   routes: z.array(
     z.object({
-      route: z.array(latLonSchema),
+      route: z.array(z.tuple([z.number(), z.number()])),
       stats: z.object({
         lenM: z.number(),
         score: z.number(),

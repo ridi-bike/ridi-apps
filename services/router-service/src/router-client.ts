@@ -11,7 +11,7 @@ export type RidiRouterErr = { err: string };
 export type RidiRouterOk = {
   ok: {
     routes: {
-      coords: [number, number];
+      coords: [number, number][];
       stats: {
         len_m: number;
         junction_count: number;
