@@ -103,8 +103,8 @@ app.register(s.plugin(router));
 
 const start = async () => {
   try {
-    logger.info("Service listening", { port: 3000 });
-    await app.listen({ port: 3000 });
+    logger.info("Service listening", { port: env.PORT });
+    await app.listen({ port: env.PORT });
   } catch (err) {
     app.log.error(err);
     process.exit(1);

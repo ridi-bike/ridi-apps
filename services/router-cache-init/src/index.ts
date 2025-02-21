@@ -30,7 +30,7 @@ if (fs.existsSync(env.CACHE_LOCATION)) {
       router_version: string;
     };
 
-    if (metadata.router_version === env.ROUTER_VERSION) {
+    if (`v${metadata.router_version}` === env.ROUTER_VERSION) {
       generateCache = false;
     } else {
       logger.warn("Cache exists, overwriting", {

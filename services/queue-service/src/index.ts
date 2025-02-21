@@ -1,16 +1,21 @@
 import postgres from "postgres";
 import { createServer } from "http";
-import { env } from "./env";
+import { env } from "./env.ts";
 import { Messaging } from "@ridi/messaging";
 import { RidiLogger } from "@ridi/logger";
-import { MessageHandlerNewPlan } from "./message-handler-new-plan";
+import { MessageHandlerNewPlan } from "./message-handler-new-plan.ts";
+import { RouterServiceLookup } from "./router-service-lookup.ts";
 
 const pgClient = postgres(env.SUPABASE_DB_URL);
 
 const logger = RidiLogger.init({ service: "queue-service" });
 
 const messaging = new Messaging(pgClient, logger);
-const messageHandlerNewPlan = new MessageHandlerNewPlan(logger, pgClient);
+const messageHandlerNewPlan = new MessageHandlerNewPlan(
+  logger,
+  pgClient,
+  new RouterServiceLookup(logger),
+);
 
 messaging.listen(
   "new-plan",
