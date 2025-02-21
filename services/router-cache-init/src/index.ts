@@ -1,8 +1,10 @@
-import { RidiLogger } from "@ridi/logger";
-import fs from "node:fs";
-import { env } from "./env.ts";
 import { spawn } from "node:child_process";
+import fs from "node:fs";
+
+import { RidiLogger } from "@ridi/logger";
 import { NdJson } from "json-nd";
+
+import { env } from "./env.ts";
 
 const logger = RidiLogger.init({
   service: "router-cache-init",

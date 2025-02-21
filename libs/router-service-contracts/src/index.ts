@@ -1,6 +1,6 @@
+import { ruleRoadTagchema } from "@ridi/api-contracts";
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
-import { ruleRoadTagchema } from "@ridi/api-contracts";
 
 const c = initContract();
 

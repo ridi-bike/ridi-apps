@@ -1,18 +1,18 @@
-import { RidiLogger } from "@ridi/logger";
-import { type RouteReq } from "@ridi/router-service-contracts";
 import * as pgQueries from "@ridi/db-queries";
-
+import { type RidiLogger } from "@ridi/logger";
+import { type RouteReq } from "@ridi/router-service-contracts";
 import type postgres from "postgres";
-import type { RouterServiceLookup } from "./router-service-lookup";
+
+import { type RouterServiceLookup } from "./router-service-lookup";
 
 export class MessageHandlerNewPlan {
   private readonly logger: RidiLogger;
-  private readonly pgClient: postgres.Sql<{}>;
+  private readonly pgClient: postgres.Sql;
   private readonly routerServiceLookup: RouterServiceLookup;
 
   constructor(
     logger: RidiLogger,
-    pgClient: postgres.Sql<{}>,
+    pgClient: postgres.Sql,
     routerServiceLookup: RouterServiceLookup,
   ) {
     this.logger = logger.withContext({ module: "message-handler-new-plan" });

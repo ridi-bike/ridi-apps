@@ -1,4 +1,6 @@
-import postgres from "postgres";
+import { type RidiLogger } from "@ridi/logger";
+import type postgres from "postgres";
+
 import {
   archiveMessage,
   deleteMessage,
@@ -7,7 +9,6 @@ import {
   sendMessage,
   updateVisibilityTimeout,
 } from "./messaging_sql.ts";
-import type { RidiLogger } from "@ridi/logger";
 
 type MessageHandler<TName extends keyof Messages> = (args: {
   message: ReadMessagesWithLongPollRow;
