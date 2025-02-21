@@ -65,7 +65,7 @@ export class RouterServer {
         });
       } catch (error) {
         this.logger.error("Router server output unparsable", {
-          data,
+          text,
           error,
         });
       }
@@ -75,6 +75,10 @@ export class RouterServer {
       this.state = exitCode === 0 ? "not-running" : "error";
       this.logger.error("Router server stopped", { exitCode });
     });
+  }
+
+  public stopServer() {
+    this.process.kill();
   }
 
   public getState() {

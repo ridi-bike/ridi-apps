@@ -393,7 +393,7 @@ export default {
           "Access-Control-Allow-Credentials": "true",
           "Access-Control-Allow-Headers":
             "authorization, origin, content-type, accept",
-          "Access-Control-Request-Method": "GET, POST",
+          "Access-Control-Allow-Methods": "GET, POST, DELETE",
         },
       });
     }
