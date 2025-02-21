@@ -1,4 +1,5 @@
 import { RidiLogger } from "@ridi/logger";
+import type { ReadableStream } from "node:stream/web";
 import { env } from "./env.ts";
 import fs from "node:fs";
 import { regionInsertOrUpdate } from "@ridi/db-queries";
@@ -26,9 +27,13 @@ if (!fs.existsSync(env.KML_LOCATION)) {
   if (!kmlResp.body) {
     throw logger.error("KML fetch response body null", { kmlResp });
   }
-  await fs.promises.writeFile(kmlDownloadFilename, kmlResp.body, {
-    flag: "w+",
-  });
+  await fs.promises.writeFile(
+    kmlDownloadFilename,
+    kmlResp.body as ReadableStream<Uint8Array>,
+    {
+      flag: "w+",
+    },
+  );
   fs.renameSync(kmlDownloadFilename, env.KML_LOCATION);
 
   logger.info("KML download done");
@@ -76,9 +81,13 @@ if (!fs.existsSync(env.PBF_LOCATION)) {
   if (!pbfResp.body) {
     throw logger.error("PBF fetch response body null", { pbfResp });
   }
-  await fs.promises.writeFile(pbfDownloadFileName, pbfResp.body, {
-    flag: "w+",
-  });
+  await fs.promises.writeFile(
+    pbfDownloadFileName,
+    pbfResp.body as ReadableStream<Uint8Array>,
+    {
+      flag: "w+",
+    },
+  );
   fs.renameSync(pbfDownloadFileName, env.PBF_LOCATION);
   logger.info("PBF download done");
 }
