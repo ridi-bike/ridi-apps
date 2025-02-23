@@ -1,17 +1,18 @@
-import * as pulumi from "@pulumi/pulumi";
 import * as docker_build from "@pulumi/docker-build";
-import * as k8s from "@pulumi/kubernetes";
+import type * as k8s from "@pulumi/kubernetes";
+import * as pulumi from "@pulumi/pulumi";
+
+import { type Region } from "../config";
 import {
   getKmlLocation,
   getKmlRemoteUrl,
   getMapDataLocation,
   getPbfLocation,
   getPbfRemoteUrl,
-  getRegionNameSafe,
   ridiDataRootPath,
-} from "../constants";
-import { Region } from "../types";
+} from "../config";
 import { regionVolumeClaims } from "../longhorn-storage";
+import { getNameSafe } from "../util";
 
 const projectName = pulumi.getProject();
 const config = new pulumi.Config();
@@ -56,40 +57,40 @@ const mapDataInitImage = new docker_build.Image(mapDataInitName, {
 export const getMapDataInitContainer = (
   region: Region,
 ): pulumi.Input<k8s.types.input.core.v1.Container> => {
-  const storage = regionVolumeClaims[region.name];
-  const containerName = `${mapDataInitName}-${getRegionNameSafe(region)}`;
+  const storage = regionVolumeClaims[region.region];
+  const containerName = `${mapDataInitName}-${getNameSafe(region.region)}`;
   return {
     name: containerName,
     image: mapDataInitImage.ref,
     env: [
       {
         name: "REGION",
-        value: region.name,
+        value: region.region,
       },
       {
         name: "MAP_DATA_LOCATION",
-        value: getMapDataLocation(region.name),
+        value: getMapDataLocation(region.region),
       },
       {
         name: "PBF_REMOTE_URL",
-        value: getPbfRemoteUrl(region.name),
+        value: getPbfRemoteUrl(region.region),
       },
       {
         name: "KML_REMOTE_URL",
-        value: getKmlRemoteUrl(region.name),
+        value: getKmlRemoteUrl(region.region),
       },
       {
         name: "PBF_LOCATION",
-        value: getPbfLocation(region.name),
+        value: getPbfLocation(region.region),
       },
       {
         name: "KML_LOCATION",
-        value: getKmlLocation(region.name),
+        value: getKmlLocation(region.region),
       },
     ],
     resources: {
       requests: {
-        memory: `${region.memory}Mi`,
+        memory: `${region.peakMemoryUsageMb}Mi`,
       },
     },
     volumeMounts: [

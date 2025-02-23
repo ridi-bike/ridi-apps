@@ -1,6 +1,6 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as k8s from "@pulumi/kubernetes";
-import { nodes } from "../constants";
+import { nodes } from "../config";
 
 const projectName = pulumi.getProject();
 const stackName = pulumi.getStack();
