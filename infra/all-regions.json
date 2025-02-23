@@ -1,0 +1,2299 @@
+[
+  {
+    "region": "europe/france",
+    "serverStartupS": 53,
+    "pbfSizeMb": 4512,
+    "cacheSizeMb": 4950,
+    "cacheGenS": 873,
+    "peakMemoryUsageMb": 12430
+  },
+  {
+    "region": "north-america/canada/british-columbia",
+    "serverStartupS": 45,
+    "pbfSizeMb": 1157,
+    "cacheSizeMb": 373,
+    "cacheGenS": 102,
+    "peakMemoryUsageMb": 892
+  },
+  {
+    "region": "europe/germany",
+    "serverStartupS": 44,
+    "pbfSizeMb": 4271,
+    "cacheSizeMb": 4005,
+    "cacheGenS": 768,
+    "peakMemoryUsageMb": 10298
+  },
+  {
+    "region": "europe/czech-republic",
+    "serverStartupS": 39,
+    "pbfSizeMb": 840,
+    "cacheSizeMb": 593,
+    "cacheGenS": 90,
+    "peakMemoryUsageMb": 1172
+  },
+  {
+    "region": "asia/japan",
+    "serverStartupS": 37,
+    "pbfSizeMb": 2066,
+    "cacheSizeMb": 4016,
+    "cacheGenS": 485,
+    "peakMemoryUsageMb": 10057
+  },
+  {
+    "region": "north-america/canada/quebec",
+    "serverStartupS": 37,
+    "pbfSizeMb": 857,
+    "cacheSizeMb": 368,
+    "cacheGenS": 52,
+    "peakMemoryUsageMb": 708
+  },
+  {
+    "region": "south-america/brazil",
+    "serverStartupS": 34,
+    "pbfSizeMb": 1779,
+    "cacheSizeMb": 6295,
+    "cacheGenS": 489,
+    "peakMemoryUsageMb": 16032
+  },
+  {
+    "region": "europe/alps",
+    "serverStartupS": 31,
+    "pbfSizeMb": 2043,
+    "cacheSizeMb": 2777,
+    "cacheGenS": 382,
+    "peakMemoryUsageMb": 6838
+  },
+  {
+    "region": "north-america/us-midwest",
+    "serverStartupS": 30,
+    "pbfSizeMb": 2079,
+    "cacheSizeMb": 3069,
+    "cacheGenS": 445,
+    "peakMemoryUsageMb": 7738
+  },
+  {
+    "region": "asia/indonesia",
+    "serverStartupS": 29,
+    "pbfSizeMb": 1560,
+    "cacheSizeMb": 3793,
+    "cacheGenS": 368,
+    "peakMemoryUsageMb": 9679
+  },
+  {
+    "region": "europe/spain",
+    "serverStartupS": 27,
+    "pbfSizeMb": 1244,
+    "cacheSizeMb": 3868,
+    "cacheGenS": 327,
+    "peakMemoryUsageMb": 10042
+  },
+  {
+    "region": "asia/china/hebei",
+    "serverStartupS": 27,
+    "pbfSizeMb": 88,
+    "cacheSizeMb": 363,
+    "cacheGenS": 24,
+    "peakMemoryUsageMb": 941
+  },
+  {
+    "region": "europe/belgium",
+    "serverStartupS": 27,
+    "pbfSizeMb": 599,
+    "cacheSizeMb": 364,
+    "cacheGenS": 75,
+    "peakMemoryUsageMb": 738
+  },
+  {
+    "region": "europe/italy",
+    "serverStartupS": 26,
+    "pbfSizeMb": 1940,
+    "cacheSizeMb": 3127,
+    "cacheGenS": 394,
+    "peakMemoryUsageMb": 7821
+  },
+  {
+    "region": "europe/poland",
+    "serverStartupS": 23,
+    "pbfSizeMb": 1814,
+    "cacheSizeMb": 1577,
+    "cacheGenS": 309,
+    "peakMemoryUsageMb": 3774
+  },
+  {
+    "region": "north-america/us-northeast",
+    "serverStartupS": 20,
+    "pbfSizeMb": 1574,
+    "cacheSizeMb": 1871,
+    "cacheGenS": 253,
+    "peakMemoryUsageMb": 4477
+  },
+  {
+    "region": "europe/great-britain",
+    "serverStartupS": 20,
+    "pbfSizeMb": 1796,
+    "cacheSizeMb": 1555,
+    "cacheGenS": 320,
+    "peakMemoryUsageMb": 3829
+  },
+  {
+    "region": "europe/austria",
+    "serverStartupS": 17,
+    "pbfSizeMb": 730,
+    "cacheSizeMb": 1159,
+    "cacheGenS": 123,
+    "peakMemoryUsageMb": 2947
+  },
+  {
+    "region": "europe/hungary",
+    "serverStartupS": 17,
+    "pbfSizeMb": 270,
+    "cacheSizeMb": 432,
+    "cacheGenS": 42,
+    "peakMemoryUsageMb": 804
+  },
+  {
+    "region": "africa/tanzania",
+    "serverStartupS": 16,
+    "pbfSizeMb": 662,
+    "cacheSizeMb": 2135,
+    "cacheGenS": 170,
+    "peakMemoryUsageMb": 5536
+  },
+  {
+    "region": "asia/vietnam",
+    "serverStartupS": 15,
+    "pbfSizeMb": 294,
+    "cacheSizeMb": 1971,
+    "cacheGenS": 128,
+    "peakMemoryUsageMb": 5037
+  },
+  {
+    "region": "australia-oceania/australia",
+    "serverStartupS": 15,
+    "pbfSizeMb": 783,
+    "cacheSizeMb": 1400,
+    "cacheGenS": 134,
+    "peakMemoryUsageMb": 3480
+  },
+  {
+    "region": "north-america/us/california",
+    "serverStartupS": 15,
+    "pbfSizeMb": 1173,
+    "cacheSizeMb": 1332,
+    "cacheGenS": 157,
+    "peakMemoryUsageMb": 2980
+  },
+  {
+    "region": "north-america/us/arkansas",
+    "serverStartupS": 15,
+    "pbfSizeMb": 81,
+    "cacheSizeMb": 238,
+    "cacheGenS": 18,
+    "peakMemoryUsageMb": 548
+  },
+  {
+    "region": "north-america/mexico",
+    "serverStartupS": 14,
+    "pbfSizeMb": 561,
+    "cacheSizeMb": 2799,
+    "cacheGenS": 197,
+    "peakMemoryUsageMb": 6866
+  },
+  {
+    "region": "asia/india/southern-zone",
+    "serverStartupS": 14,
+    "pbfSizeMb": 495,
+    "cacheSizeMb": 2035,
+    "cacheGenS": 145,
+    "peakMemoryUsageMb": 5068
+  },
+  {
+    "region": "europe/norway",
+    "serverStartupS": 14,
+    "pbfSizeMb": 1275,
+    "cacheSizeMb": 795,
+    "cacheGenS": 108,
+    "peakMemoryUsageMb": 2032
+  },
+  {
+    "region": "europe/turkey",
+    "serverStartupS": 12,
+    "pbfSizeMb": 548,
+    "cacheSizeMb": 2169,
+    "cacheGenS": 150,
+    "peakMemoryUsageMb": 5212
+  },
+  {
+    "region": "asia/india/central-zone",
+    "serverStartupS": 12,
+    "pbfSizeMb": 324,
+    "cacheSizeMb": 2003,
+    "cacheGenS": 118,
+    "peakMemoryUsageMb": 4948
+  },
+  {
+    "region": "europe/netherlands",
+    "serverStartupS": 12,
+    "pbfSizeMb": 1262,
+    "cacheSizeMb": 416,
+    "cacheGenS": 119,
+    "peakMemoryUsageMb": 662
+  },
+  {
+    "region": "europe/ukraine",
+    "serverStartupS": 11,
+    "pbfSizeMb": 770,
+    "cacheSizeMb": 1254,
+    "cacheGenS": 141,
+    "peakMemoryUsageMb": 3260
+  },
+  {
+    "region": "europe/sweden",
+    "serverStartupS": 11,
+    "pbfSizeMb": 718,
+    "cacheSizeMb": 1188,
+    "cacheGenS": 106,
+    "peakMemoryUsageMb": 2844
+  },
+  {
+    "region": "north-america/canada/ontario",
+    "serverStartupS": 11,
+    "pbfSizeMb": 805,
+    "cacheSizeMb": 373,
+    "cacheGenS": 61,
+    "peakMemoryUsageMb": 736
+  },
+  {
+    "region": "south-america/ecuador",
+    "serverStartupS": 11,
+    "pbfSizeMb": 107,
+    "cacheSizeMb": 420,
+    "cacheGenS": 27,
+    "peakMemoryUsageMb": 673
+  },
+  {
+    "region": "north-america/us/south-carolina",
+    "serverStartupS": 11,
+    "pbfSizeMb": 144,
+    "cacheSizeMb": 284,
+    "cacheGenS": 23,
+    "peakMemoryUsageMb": 457
+  },
+  {
+    "region": "africa/nigeria",
+    "serverStartupS": 10,
+    "pbfSizeMb": 602,
+    "cacheSizeMb": 1581,
+    "cacheGenS": 130,
+    "peakMemoryUsageMb": 3826
+  },
+  {
+    "region": "africa/algeria",
+    "serverStartupS": 10,
+    "pbfSizeMb": 275,
+    "cacheSizeMb": 547,
+    "cacheGenS": 39,
+    "peakMemoryUsageMb": 1169
+  },
+  {
+    "region": "asia/india/eastern-zone",
+    "serverStartupS": 9,
+    "pbfSizeMb": 221,
+    "cacheSizeMb": 1659,
+    "cacheGenS": 97,
+    "peakMemoryUsageMb": 4204
+  },
+  {
+    "region": "africa/south-africa-and-lesotho",
+    "serverStartupS": 9,
+    "pbfSizeMb": 453,
+    "cacheSizeMb": 1615,
+    "cacheGenS": 125,
+    "peakMemoryUsageMb": 3808
+  },
+  {
+    "region": "europe/finland",
+    "serverStartupS": 9,
+    "pbfSizeMb": 631,
+    "cacheSizeMb": 978,
+    "cacheGenS": 103,
+    "peakMemoryUsageMb": 2359
+  },
+  {
+    "region": "asia/philippines",
+    "serverStartupS": 9,
+    "pbfSizeMb": 543,
+    "cacheSizeMb": 975,
+    "cacheGenS": 90,
+    "peakMemoryUsageMb": 2283
+  },
+  {
+    "region": "europe/lithuania",
+    "serverStartupS": 9,
+    "pbfSizeMb": 198,
+    "cacheSizeMb": 212,
+    "cacheGenS": 26,
+    "peakMemoryUsageMb": 477
+  },
+  {
+    "region": "asia/thailand",
+    "serverStartupS": 8,
+    "pbfSizeMb": 281,
+    "cacheSizeMb": 1538,
+    "cacheGenS": 107,
+    "peakMemoryUsageMb": 3831
+  },
+  {
+    "region": "europe/greece",
+    "serverStartupS": 8,
+    "pbfSizeMb": 304,
+    "cacheSizeMb": 1444,
+    "cacheGenS": 98,
+    "peakMemoryUsageMb": 3377
+  },
+  {
+    "region": "north-america/us/texas",
+    "serverStartupS": 8,
+    "pbfSizeMb": 606,
+    "cacheSizeMb": 1038,
+    "cacheGenS": 99,
+    "peakMemoryUsageMb": 2425
+  },
+  {
+    "region": "asia/nepal",
+    "serverStartupS": 8,
+    "pbfSizeMb": 380,
+    "cacheSizeMb": 645,
+    "cacheGenS": 58,
+    "peakMemoryUsageMb": 1543
+  },
+  {
+    "region": "europe/switzerland",
+    "serverStartupS": 8,
+    "pbfSizeMb": 465,
+    "cacheSizeMb": 643,
+    "cacheGenS": 65,
+    "peakMemoryUsageMb": 1414
+  },
+  {
+    "region": "asia/india/western-zone",
+    "serverStartupS": 7,
+    "pbfSizeMb": 183,
+    "cacheSizeMb": 1030,
+    "cacheGenS": 64,
+    "peakMemoryUsageMb": 2668
+  },
+  {
+    "region": "europe/portugal",
+    "serverStartupS": 7,
+    "pbfSizeMb": 346,
+    "cacheSizeMb": 1051,
+    "cacheGenS": 73,
+    "peakMemoryUsageMb": 2655
+  },
+  {
+    "region": "europe/romania",
+    "serverStartupS": 7,
+    "pbfSizeMb": 278,
+    "cacheSizeMb": 733,
+    "cacheGenS": 60,
+    "peakMemoryUsageMb": 1601
+  },
+  {
+    "region": "north-america/us/georgia",
+    "serverStartupS": 7,
+    "pbfSizeMb": 316,
+    "cacheSizeMb": 475,
+    "cacheGenS": 41,
+    "peakMemoryUsageMb": 1227
+  },
+  {
+    "region": "north-america/us/florida",
+    "serverStartupS": 7,
+    "pbfSizeMb": 589,
+    "cacheSizeMb": 530,
+    "cacheGenS": 71,
+    "peakMemoryUsageMb": 1210
+  },
+  {
+    "region": "europe/denmark",
+    "serverStartupS": 7,
+    "pbfSizeMb": 438,
+    "cacheSizeMb": 231,
+    "cacheGenS": 38,
+    "peakMemoryUsageMb": 506
+  },
+  {
+    "region": "asia/india/northern-zone",
+    "serverStartupS": 6,
+    "pbfSizeMb": 201,
+    "cacheSizeMb": 1423,
+    "cacheGenS": 87,
+    "peakMemoryUsageMb": 3334
+  },
+  {
+    "region": "africa/morocco",
+    "serverStartupS": 6,
+    "pbfSizeMb": 226,
+    "cacheSizeMb": 1235,
+    "cacheGenS": 78,
+    "peakMemoryUsageMb": 3005
+  },
+  {
+    "region": "asia/iran",
+    "serverStartupS": 6,
+    "pbfSizeMb": 207,
+    "cacheSizeMb": 966,
+    "cacheGenS": 72,
+    "peakMemoryUsageMb": 2439
+  },
+  {
+    "region": "asia/pakistan",
+    "serverStartupS": 6,
+    "pbfSizeMb": 129,
+    "cacheSizeMb": 928,
+    "cacheGenS": 56,
+    "peakMemoryUsageMb": 2370
+  },
+  {
+    "region": "south-america/colombia",
+    "serverStartupS": 6,
+    "pbfSizeMb": 277,
+    "cacheSizeMb": 844,
+    "cacheGenS": 58,
+    "peakMemoryUsageMb": 2192
+  },
+  {
+    "region": "asia/myanmar",
+    "serverStartupS": 6,
+    "pbfSizeMb": 199,
+    "cacheSizeMb": 935,
+    "cacheGenS": 62,
+    "peakMemoryUsageMb": 2167
+  },
+  {
+    "region": "south-america/chile",
+    "serverStartupS": 6,
+    "pbfSizeMb": 302,
+    "cacheSizeMb": 801,
+    "cacheGenS": 58,
+    "peakMemoryUsageMb": 2112
+  },
+  {
+    "region": "africa/kenya",
+    "serverStartupS": 6,
+    "pbfSizeMb": 300,
+    "cacheSizeMb": 851,
+    "cacheGenS": 56,
+    "peakMemoryUsageMb": 2010
+  },
+  {
+    "region": "north-america/us/virginia",
+    "serverStartupS": 6,
+    "pbfSizeMb": 383,
+    "cacheSizeMb": 738,
+    "cacheGenS": 61,
+    "peakMemoryUsageMb": 1837
+  },
+  {
+    "region": "asia/malaysia-singapore-brunei",
+    "serverStartupS": 6,
+    "pbfSizeMb": 218,
+    "cacheSizeMb": 830,
+    "cacheGenS": 62,
+    "peakMemoryUsageMb": 1796
+  },
+  {
+    "region": "africa/congo-democratic-republic",
+    "serverStartupS": 6,
+    "pbfSizeMb": 379,
+    "cacheSizeMb": 672,
+    "cacheGenS": 59,
+    "peakMemoryUsageMb": 1721
+  },
+  {
+    "region": "north-america/us/north-carolina",
+    "serverStartupS": 6,
+    "pbfSizeMb": 378,
+    "cacheSizeMb": 584,
+    "cacheGenS": 53,
+    "peakMemoryUsageMb": 1518
+  },
+  {
+    "region": "north-america/canada/newfoundland-and-labrador",
+    "serverStartupS": 6,
+    "pbfSizeMb": 242,
+    "cacheSizeMb": 50,
+    "cacheGenS": 14,
+    "peakMemoryUsageMb": 85
+  },
+  {
+    "region": "north-america/canada/nunavut",
+    "serverStartupS": 6,
+    "pbfSizeMb": 711,
+    "cacheSizeMb": 5,
+    "cacheGenS": 24,
+    "peakMemoryUsageMb": 12
+  },
+  {
+    "region": "north-america/us/ohio",
+    "serverStartupS": 5,
+    "pbfSizeMb": 256,
+    "cacheSizeMb": 404,
+    "cacheGenS": 37,
+    "peakMemoryUsageMb": 968
+  },
+  {
+    "region": "south-america/peru",
+    "serverStartupS": 5,
+    "pbfSizeMb": 218,
+    "cacheSizeMb": 1060,
+    "cacheGenS": 60,
+    "peakMemoryUsageMb": 2416
+  },
+  {
+    "region": "south-america/bolivia",
+    "serverStartupS": 5,
+    "pbfSizeMb": 150,
+    "cacheSizeMb": 797,
+    "cacheGenS": 60,
+    "peakMemoryUsageMb": 1983
+  },
+  {
+    "region": "asia/gcc-states",
+    "serverStartupS": 5,
+    "pbfSizeMb": 222,
+    "cacheSizeMb": 745,
+    "cacheGenS": 56,
+    "peakMemoryUsageMb": 1892
+  },
+  {
+    "region": "africa/egypt",
+    "serverStartupS": 5,
+    "pbfSizeMb": 163,
+    "cacheSizeMb": 781,
+    "cacheGenS": 57,
+    "peakMemoryUsageMb": 1877
+  },
+  {
+    "region": "south-america/argentina",
+    "serverStartupS": 5,
+    "pbfSizeMb": 362,
+    "cacheSizeMb": 713,
+    "cacheGenS": 63,
+    "peakMemoryUsageMb": 1385
+  },
+  {
+    "region": "africa/uganda",
+    "serverStartupS": 5,
+    "pbfSizeMb": 325,
+    "cacheSizeMb": 577,
+    "cacheGenS": 52,
+    "peakMemoryUsageMb": 1243
+  },
+  {
+    "region": "asia/bangladesh",
+    "serverStartupS": 5,
+    "pbfSizeMb": 311,
+    "cacheSizeMb": 450,
+    "cacheGenS": 48,
+    "peakMemoryUsageMb": 1112
+  },
+  {
+    "region": "europe/serbia",
+    "serverStartupS": 5,
+    "pbfSizeMb": 203,
+    "cacheSizeMb": 519,
+    "cacheGenS": 38,
+    "peakMemoryUsageMb": 1099
+  },
+  {
+    "region": "europe/ireland-and-northern-ireland",
+    "serverStartupS": 5,
+    "pbfSizeMb": 335,
+    "cacheSizeMb": 453,
+    "cacheGenS": 47,
+    "peakMemoryUsageMb": 1056
+  },
+  {
+    "region": "europe/slovakia",
+    "serverStartupS": 5,
+    "pbfSizeMb": 293,
+    "cacheSizeMb": 377,
+    "cacheGenS": 37,
+    "peakMemoryUsageMb": 888
+  },
+  {
+    "region": "north-america/us/colorado",
+    "serverStartupS": 5,
+    "pbfSizeMb": 304,
+    "cacheSizeMb": 390,
+    "cacheGenS": 37,
+    "peakMemoryUsageMb": 853
+  },
+  {
+    "region": "africa/madagascar",
+    "serverStartupS": 5,
+    "pbfSizeMb": 356,
+    "cacheSizeMb": 434,
+    "cacheGenS": 43,
+    "peakMemoryUsageMb": 756
+  },
+  {
+    "region": "europe/slovenia",
+    "serverStartupS": 5,
+    "pbfSizeMb": 285,
+    "cacheSizeMb": 305,
+    "cacheGenS": 29,
+    "peakMemoryUsageMb": 492
+  },
+  {
+    "region": "north-america/canada/northwest-territories",
+    "serverStartupS": 5,
+    "pbfSizeMb": 401,
+    "cacheSizeMb": 6,
+    "cacheGenS": 13,
+    "peakMemoryUsageMb": 14
+  },
+  {
+    "region": "africa/somalia",
+    "serverStartupS": 4,
+    "pbfSizeMb": 147,
+    "cacheSizeMb": 652,
+    "cacheGenS": 41,
+    "peakMemoryUsageMb": 1594
+  },
+  {
+    "region": "asia/south-korea",
+    "serverStartupS": 4,
+    "pbfSizeMb": 228,
+    "cacheSizeMb": 637,
+    "cacheGenS": 50,
+    "peakMemoryUsageMb": 1352
+  },
+  {
+    "region": "north-america/us/oregon",
+    "serverStartupS": 4,
+    "pbfSizeMb": 224,
+    "cacheSizeMb": 519,
+    "cacheGenS": 43,
+    "peakMemoryUsageMb": 1322
+  },
+  {
+    "region": "africa/zambia",
+    "serverStartupS": 4,
+    "pbfSizeMb": 237,
+    "cacheSizeMb": 607,
+    "cacheGenS": 45,
+    "peakMemoryUsageMb": 1298
+  },
+  {
+    "region": "africa/mozambique",
+    "serverStartupS": 4,
+    "pbfSizeMb": 193,
+    "cacheSizeMb": 512,
+    "cacheGenS": 33,
+    "peakMemoryUsageMb": 1088
+  },
+  {
+    "region": "north-america/us/arizona",
+    "serverStartupS": 4,
+    "pbfSizeMb": 260,
+    "cacheSizeMb": 420,
+    "cacheGenS": 43,
+    "peakMemoryUsageMb": 1056
+  },
+  {
+    "region": "north-america/us/michigan",
+    "serverStartupS": 4,
+    "pbfSizeMb": 265,
+    "cacheSizeMb": 372,
+    "cacheGenS": 43,
+    "peakMemoryUsageMb": 956
+  },
+  {
+    "region": "north-america/us/illinois",
+    "serverStartupS": 4,
+    "pbfSizeMb": 289,
+    "cacheSizeMb": 326,
+    "cacheGenS": 37,
+    "peakMemoryUsageMb": 768
+  },
+  {
+    "region": "north-america/us/washington",
+    "serverStartupS": 4,
+    "pbfSizeMb": 308,
+    "cacheSizeMb": 448,
+    "cacheGenS": 42,
+    "peakMemoryUsageMb": 746
+  },
+  {
+    "region": "europe/belarus",
+    "serverStartupS": 4,
+    "pbfSizeMb": 305,
+    "cacheSizeMb": 285,
+    "cacheGenS": 38,
+    "peakMemoryUsageMb": 727
+  },
+  {
+    "region": "africa/cameroon",
+    "serverStartupS": 4,
+    "pbfSizeMb": 201,
+    "cacheSizeMb": 313,
+    "cacheGenS": 24,
+    "peakMemoryUsageMb": 597
+  },
+  {
+    "region": "north-america/us/indiana",
+    "serverStartupS": 4,
+    "pbfSizeMb": 162,
+    "cacheSizeMb": 251,
+    "cacheGenS": 22,
+    "peakMemoryUsageMb": 594
+  },
+  {
+    "region": "asia/taiwan",
+    "serverStartupS": 4,
+    "pbfSizeMb": 283,
+    "cacheSizeMb": 231,
+    "cacheGenS": 36,
+    "peakMemoryUsageMb": 569
+  },
+  {
+    "region": "north-america/us/wisconsin",
+    "serverStartupS": 4,
+    "pbfSizeMb": 256,
+    "cacheSizeMb": 295,
+    "cacheGenS": 28,
+    "peakMemoryUsageMb": 563
+  },
+  {
+    "region": "australia-oceania/new-zealand",
+    "serverStartupS": 4,
+    "pbfSizeMb": 346,
+    "cacheSizeMb": 325,
+    "cacheGenS": 37,
+    "peakMemoryUsageMb": 527
+  },
+  {
+    "region": "asia/china/sichuan",
+    "serverStartupS": 3,
+    "pbfSizeMb": 87,
+    "cacheSizeMb": 577,
+    "cacheGenS": 33,
+    "peakMemoryUsageMb": 1314
+  },
+  {
+    "region": "africa/tunisia",
+    "serverStartupS": 3,
+    "pbfSizeMb": 78,
+    "cacheSizeMb": 467,
+    "cacheGenS": 31,
+    "peakMemoryUsageMb": 1188
+  },
+  {
+    "region": "north-america/us/idaho",
+    "serverStartupS": 3,
+    "pbfSizeMb": 107,
+    "cacheSizeMb": 419,
+    "cacheGenS": 25,
+    "peakMemoryUsageMb": 1098
+  },
+  {
+    "region": "north-america/us/kentucky",
+    "serverStartupS": 3,
+    "pbfSizeMb": 140,
+    "cacheSizeMb": 463,
+    "cacheGenS": 26,
+    "peakMemoryUsageMb": 1060
+  },
+  {
+    "region": "asia/china/yunnan",
+    "serverStartupS": 3,
+    "pbfSizeMb": 74,
+    "cacheSizeMb": 565,
+    "cacheGenS": 29,
+    "peakMemoryUsageMb": 1051
+  },
+  {
+    "region": "africa/malawi",
+    "serverStartupS": 3,
+    "pbfSizeMb": 135,
+    "cacheSizeMb": 520,
+    "cacheGenS": 31,
+    "peakMemoryUsageMb": 1044
+  },
+  {
+    "region": "asia/afghanistan",
+    "serverStartupS": 3,
+    "pbfSizeMb": 99,
+    "cacheSizeMb": 386,
+    "cacheGenS": 24,
+    "peakMemoryUsageMb": 996
+  },
+  {
+    "region": "africa/mali",
+    "serverStartupS": 3,
+    "pbfSizeMb": 161,
+    "cacheSizeMb": 455,
+    "cacheGenS": 37,
+    "peakMemoryUsageMb": 953
+  },
+  {
+    "region": "asia/india/north-eastern-zone",
+    "serverStartupS": 3,
+    "pbfSizeMb": 86,
+    "cacheSizeMb": 460,
+    "cacheGenS": 26,
+    "peakMemoryUsageMb": 943
+  },
+  {
+    "region": "africa/sudan",
+    "serverStartupS": 3,
+    "pbfSizeMb": 116,
+    "cacheSizeMb": 354,
+    "cacheGenS": 24,
+    "peakMemoryUsageMb": 906
+  },
+  {
+    "region": "north-america/us/alabama",
+    "serverStartupS": 3,
+    "pbfSizeMb": 124,
+    "cacheSizeMb": 393,
+    "cacheGenS": 24,
+    "peakMemoryUsageMb": 871
+  },
+  {
+    "region": "asia/china/guangdong",
+    "serverStartupS": 3,
+    "pbfSizeMb": 132,
+    "cacheSizeMb": 424,
+    "cacheGenS": 31,
+    "peakMemoryUsageMb": 869
+  },
+  {
+    "region": "europe/bulgaria",
+    "serverStartupS": 3,
+    "pbfSizeMb": 144,
+    "cacheSizeMb": 361,
+    "cacheGenS": 23,
+    "peakMemoryUsageMb": 853
+  },
+  {
+    "region": "africa/zimbabwe",
+    "serverStartupS": 3,
+    "pbfSizeMb": 166,
+    "cacheSizeMb": 388,
+    "cacheGenS": 29,
+    "peakMemoryUsageMb": 789
+  },
+  {
+    "region": "north-america/us/tennessee",
+    "serverStartupS": 3,
+    "pbfSizeMb": 156,
+    "cacheSizeMb": 307,
+    "cacheGenS": 25,
+    "peakMemoryUsageMb": 788
+  },
+  {
+    "region": "africa/ethiopia",
+    "serverStartupS": 3,
+    "pbfSizeMb": 99,
+    "cacheSizeMb": 422,
+    "cacheGenS": 25,
+    "peakMemoryUsageMb": 783
+  },
+  {
+    "region": "north-america/us/new-mexico",
+    "serverStartupS": 3,
+    "pbfSizeMb": 118,
+    "cacheSizeMb": 303,
+    "cacheGenS": 22,
+    "peakMemoryUsageMb": 732
+  },
+  {
+    "region": "asia/kazakhstan",
+    "serverStartupS": 3,
+    "pbfSizeMb": 186,
+    "cacheSizeMb": 325,
+    "cacheGenS": 30,
+    "peakMemoryUsageMb": 716
+  },
+  {
+    "region": "europe/bosnia-herzegovina",
+    "serverStartupS": 3,
+    "pbfSizeMb": 140,
+    "cacheSizeMb": 323,
+    "cacheGenS": 21,
+    "peakMemoryUsageMb": 709
+  },
+  {
+    "region": "north-america/us/missouri",
+    "serverStartupS": 3,
+    "pbfSizeMb": 159,
+    "cacheSizeMb": 404,
+    "cacheGenS": 29,
+    "peakMemoryUsageMb": 707
+  },
+  {
+    "region": "europe/croatia",
+    "serverStartupS": 3,
+    "pbfSizeMb": 172,
+    "cacheSizeMb": 314,
+    "cacheGenS": 25,
+    "peakMemoryUsageMb": 687
+  },
+  {
+    "region": "africa/senegal-and-gambia",
+    "serverStartupS": 3,
+    "pbfSizeMb": 97,
+    "cacheSizeMb": 299,
+    "cacheGenS": 19,
+    "peakMemoryUsageMb": 651
+  },
+  {
+    "region": "south-america/venezuela",
+    "serverStartupS": 3,
+    "pbfSizeMb": 89,
+    "cacheSizeMb": 375,
+    "cacheGenS": 24,
+    "peakMemoryUsageMb": 604
+  },
+  {
+    "region": "north-america/us/kansas",
+    "serverStartupS": 3,
+    "pbfSizeMb": 93,
+    "cacheSizeMb": 187,
+    "cacheGenS": 15,
+    "peakMemoryUsageMb": 477
+  },
+  {
+    "region": "north-america/us/minnesota",
+    "serverStartupS": 3,
+    "pbfSizeMb": 246,
+    "cacheSizeMb": 241,
+    "cacheGenS": 27,
+    "peakMemoryUsageMb": 391
+  },
+  {
+    "region": "south-america/paraguay",
+    "serverStartupS": 3,
+    "pbfSizeMb": 142,
+    "cacheSizeMb": 166,
+    "cacheGenS": 15,
+    "peakMemoryUsageMb": 273
+  },
+  {
+    "region": "north-america/canada/alberta",
+    "serverStartupS": 3,
+    "pbfSizeMb": 294,
+    "cacheSizeMb": 148,
+    "cacheGenS": 22,
+    "peakMemoryUsageMb": 246
+  },
+  {
+    "region": "asia/china/gansu",
+    "serverStartupS": 2,
+    "pbfSizeMb": 44,
+    "cacheSizeMb": 282,
+    "cacheGenS": 14,
+    "peakMemoryUsageMb": 673
+  },
+  {
+    "region": "asia/china/shandong",
+    "serverStartupS": 2,
+    "pbfSizeMb": 60,
+    "cacheSizeMb": 237,
+    "cacheGenS": 14,
+    "peakMemoryUsageMb": 566
+  },
+  {
+    "region": "north-america/us/nevada",
+    "serverStartupS": 2,
+    "pbfSizeMb": 105,
+    "cacheSizeMb": 344,
+    "cacheGenS": 22,
+    "peakMemoryUsageMb": 560
+  },
+  {
+    "region": "africa/ghana",
+    "serverStartupS": 2,
+    "pbfSizeMb": 87,
+    "cacheSizeMb": 312,
+    "cacheGenS": 18,
+    "peakMemoryUsageMb": 536
+  },
+  {
+    "region": "asia/iraq",
+    "serverStartupS": 2,
+    "pbfSizeMb": 80,
+    "cacheSizeMb": 336,
+    "cacheGenS": 21,
+    "peakMemoryUsageMb": 533
+  },
+  {
+    "region": "africa/burkina-faso",
+    "serverStartupS": 2,
+    "pbfSizeMb": 74,
+    "cacheSizeMb": 280,
+    "cacheGenS": 16,
+    "peakMemoryUsageMb": 527
+  },
+  {
+    "region": "africa/angola",
+    "serverStartupS": 2,
+    "pbfSizeMb": 72,
+    "cacheSizeMb": 272,
+    "cacheGenS": 15,
+    "peakMemoryUsageMb": 506
+  },
+  {
+    "region": "asia/laos",
+    "serverStartupS": 2,
+    "pbfSizeMb": 48,
+    "cacheSizeMb": 206,
+    "cacheGenS": 11,
+    "peakMemoryUsageMb": 504
+  },
+  {
+    "region": "africa/guinea",
+    "serverStartupS": 2,
+    "pbfSizeMb": 107,
+    "cacheSizeMb": 304,
+    "cacheGenS": 20,
+    "peakMemoryUsageMb": 492
+  },
+  {
+    "region": "asia/china/zhejiang",
+    "serverStartupS": 2,
+    "pbfSizeMb": 75,
+    "cacheSizeMb": 260,
+    "cacheGenS": 15,
+    "peakMemoryUsageMb": 482
+  },
+  {
+    "region": "central-america/honduras",
+    "serverStartupS": 2,
+    "pbfSizeMb": 66,
+    "cacheSizeMb": 186,
+    "cacheGenS": 11,
+    "peakMemoryUsageMb": 482
+  },
+  {
+    "region": "central-america/guatemala",
+    "serverStartupS": 2,
+    "pbfSizeMb": 122,
+    "cacheSizeMb": 295,
+    "cacheGenS": 21,
+    "peakMemoryUsageMb": 475
+  },
+  {
+    "region": "africa/libya",
+    "serverStartupS": 2,
+    "pbfSizeMb": 70,
+    "cacheSizeMb": 232,
+    "cacheGenS": 18,
+    "peakMemoryUsageMb": 474
+  },
+  {
+    "region": "north-america/us/montana",
+    "serverStartupS": 2,
+    "pbfSizeMb": 89,
+    "cacheSizeMb": 283,
+    "cacheGenS": 20,
+    "peakMemoryUsageMb": 463
+  },
+  {
+    "region": "asia/china/hunan",
+    "serverStartupS": 2,
+    "pbfSizeMb": 42,
+    "cacheSizeMb": 220,
+    "cacheGenS": 14,
+    "peakMemoryUsageMb": 462
+  },
+  {
+    "region": "asia/china/guangxi",
+    "serverStartupS": 2,
+    "pbfSizeMb": 40,
+    "cacheSizeMb": 209,
+    "cacheGenS": 12,
+    "peakMemoryUsageMb": 451
+  },
+  {
+    "region": "asia/uzbekistan",
+    "serverStartupS": 2,
+    "pbfSizeMb": 89,
+    "cacheSizeMb": 242,
+    "cacheGenS": 16,
+    "peakMemoryUsageMb": 448
+  },
+  {
+    "region": "asia/azerbaijan",
+    "serverStartupS": 2,
+    "pbfSizeMb": 40,
+    "cacheSizeMb": 196,
+    "cacheGenS": 13,
+    "peakMemoryUsageMb": 440
+  },
+  {
+    "region": "north-america/us/utah",
+    "serverStartupS": 2,
+    "pbfSizeMb": 135,
+    "cacheSizeMb": 264,
+    "cacheGenS": 29,
+    "peakMemoryUsageMb": 430
+  },
+  {
+    "region": "asia/north-korea",
+    "serverStartupS": 2,
+    "pbfSizeMb": 74,
+    "cacheSizeMb": 214,
+    "cacheGenS": 13,
+    "peakMemoryUsageMb": 416
+  },
+  {
+    "region": "europe/georgia",
+    "serverStartupS": 2,
+    "pbfSizeMb": 86,
+    "cacheSizeMb": 215,
+    "cacheGenS": 14,
+    "peakMemoryUsageMb": 416
+  },
+  {
+    "region": "asia/sri-lanka",
+    "serverStartupS": 2,
+    "pbfSizeMb": 131,
+    "cacheSizeMb": 251,
+    "cacheGenS": 18,
+    "peakMemoryUsageMb": 404
+  },
+  {
+    "region": "asia/lebanon",
+    "serverStartupS": 2,
+    "pbfSizeMb": 48,
+    "cacheSizeMb": 197,
+    "cacheGenS": 11,
+    "peakMemoryUsageMb": 401
+  },
+  {
+    "region": "asia/china/jiangxi",
+    "serverStartupS": 2,
+    "pbfSizeMb": 41,
+    "cacheSizeMb": 154,
+    "cacheGenS": 10,
+    "peakMemoryUsageMb": 400
+  },
+  {
+    "region": "north-america/us/oklahoma",
+    "serverStartupS": 2,
+    "pbfSizeMb": 150,
+    "cacheSizeMb": 243,
+    "cacheGenS": 21,
+    "peakMemoryUsageMb": 395
+  },
+  {
+    "region": "europe/albania",
+    "serverStartupS": 2,
+    "pbfSizeMb": 46,
+    "cacheSizeMb": 183,
+    "cacheGenS": 11,
+    "peakMemoryUsageMb": 394
+  },
+  {
+    "region": "north-america/us/west-virginia",
+    "serverStartupS": 2,
+    "pbfSizeMb": 86,
+    "cacheSizeMb": 184,
+    "cacheGenS": 12,
+    "peakMemoryUsageMb": 393
+  },
+  {
+    "region": "north-america/canada/nova-scotia",
+    "serverStartupS": 2,
+    "pbfSizeMb": 92,
+    "cacheSizeMb": 170,
+    "cacheGenS": 11,
+    "peakMemoryUsageMb": 387
+  },
+  {
+    "region": "africa/botswana",
+    "serverStartupS": 2,
+    "pbfSizeMb": 83,
+    "cacheSizeMb": 232,
+    "cacheGenS": 14,
+    "peakMemoryUsageMb": 383
+  },
+  {
+    "region": "north-america/us/wyoming",
+    "serverStartupS": 2,
+    "pbfSizeMb": 72,
+    "cacheSizeMb": 230,
+    "cacheGenS": 13,
+    "peakMemoryUsageMb": 378
+  },
+  {
+    "region": "africa/niger",
+    "serverStartupS": 2,
+    "pbfSizeMb": 67,
+    "cacheSizeMb": 231,
+    "cacheGenS": 13,
+    "peakMemoryUsageMb": 376
+  },
+  {
+    "region": "central-america/haiti-and-domrep",
+    "serverStartupS": 2,
+    "pbfSizeMb": 81,
+    "cacheSizeMb": 198,
+    "cacheGenS": 18,
+    "peakMemoryUsageMb": 375
+  },
+  {
+    "region": "asia/israel-and-palestine",
+    "serverStartupS": 2,
+    "pbfSizeMb": 110,
+    "cacheSizeMb": 228,
+    "cacheGenS": 16,
+    "peakMemoryUsageMb": 366
+  },
+  {
+    "region": "africa/ivory-coast",
+    "serverStartupS": 2,
+    "pbfSizeMb": 65,
+    "cacheSizeMb": 225,
+    "cacheGenS": 16,
+    "peakMemoryUsageMb": 364
+  },
+  {
+    "region": "asia/syria",
+    "serverStartupS": 2,
+    "pbfSizeMb": 67,
+    "cacheSizeMb": 219,
+    "cacheGenS": 16,
+    "peakMemoryUsageMb": 351
+  },
+  {
+    "region": "north-america/us/north-dakota",
+    "serverStartupS": 2,
+    "pbfSizeMb": 118,
+    "cacheSizeMb": 204,
+    "cacheGenS": 15,
+    "peakMemoryUsageMb": 337
+  },
+  {
+    "region": "north-america/us/mississippi",
+    "serverStartupS": 2,
+    "pbfSizeMb": 85,
+    "cacheSizeMb": 206,
+    "cacheGenS": 13,
+    "peakMemoryUsageMb": 333
+  },
+  {
+    "region": "asia/china/jiangsu",
+    "serverStartupS": 2,
+    "pbfSizeMb": 67,
+    "cacheSizeMb": 166,
+    "cacheGenS": 12,
+    "peakMemoryUsageMb": 320
+  },
+  {
+    "region": "africa/chad",
+    "serverStartupS": 2,
+    "pbfSizeMb": 98,
+    "cacheSizeMb": 151,
+    "cacheGenS": 11,
+    "peakMemoryUsageMb": 311
+  },
+  {
+    "region": "north-america/us/louisiana",
+    "serverStartupS": 2,
+    "pbfSizeMb": 131,
+    "cacheSizeMb": 193,
+    "cacheGenS": 14,
+    "peakMemoryUsageMb": 311
+  },
+  {
+    "region": "north-america/us/maryland",
+    "serverStartupS": 2,
+    "pbfSizeMb": 186,
+    "cacheSizeMb": 188,
+    "cacheGenS": 19,
+    "peakMemoryUsageMb": 303
+  },
+  {
+    "region": "europe/moldova",
+    "serverStartupS": 2,
+    "pbfSizeMb": 74,
+    "cacheSizeMb": 169,
+    "cacheGenS": 13,
+    "peakMemoryUsageMb": 299
+  },
+  {
+    "region": "africa/rwanda",
+    "serverStartupS": 2,
+    "pbfSizeMb": 52,
+    "cacheSizeMb": 178,
+    "cacheGenS": 10,
+    "peakMemoryUsageMb": 298
+  },
+  {
+    "region": "north-america/us/iowa",
+    "serverStartupS": 2,
+    "pbfSizeMb": 120,
+    "cacheSizeMb": 159,
+    "cacheGenS": 16,
+    "peakMemoryUsageMb": 261
+  },
+  {
+    "region": "north-america/us/nebraska",
+    "serverStartupS": 2,
+    "pbfSizeMb": 80,
+    "cacheSizeMb": 143,
+    "cacheGenS": 10,
+    "peakMemoryUsageMb": 258
+  },
+  {
+    "region": "africa/south-sudan",
+    "serverStartupS": 2,
+    "pbfSizeMb": 110,
+    "cacheSizeMb": 125,
+    "cacheGenS": 12,
+    "peakMemoryUsageMb": 243
+  },
+  {
+    "region": "europe/latvia",
+    "serverStartupS": 2,
+    "pbfSizeMb": 122,
+    "cacheSizeMb": 145,
+    "cacheGenS": 15,
+    "peakMemoryUsageMb": 239
+  },
+  {
+    "region": "europe/estonia",
+    "serverStartupS": 2,
+    "pbfSizeMb": 109,
+    "cacheSizeMb": 108,
+    "cacheGenS": 11,
+    "peakMemoryUsageMb": 210
+  },
+  {
+    "region": "south-america/uruguay",
+    "serverStartupS": 2,
+    "pbfSizeMb": 50,
+    "cacheSizeMb": 94,
+    "cacheGenS": 8,
+    "peakMemoryUsageMb": 205
+  },
+  {
+    "region": "africa/central-african-republic",
+    "serverStartupS": 2,
+    "pbfSizeMb": 92,
+    "cacheSizeMb": 119,
+    "cacheGenS": 12,
+    "peakMemoryUsageMb": 193
+  },
+  {
+    "region": "north-america/us/puerto-rico",
+    "serverStartupS": 2,
+    "pbfSizeMb": 67,
+    "cacheSizeMb": 89,
+    "cacheGenS": 10,
+    "peakMemoryUsageMb": 172
+  },
+  {
+    "region": "north-america/us-pacific",
+    "serverStartupS": 2,
+    "pbfSizeMb": 153,
+    "cacheSizeMb": 88,
+    "cacheGenS": 12,
+    "peakMemoryUsageMb": 146
+  },
+  {
+    "region": "africa/lesotho",
+    "serverStartupS": 2,
+    "pbfSizeMb": 116,
+    "cacheSizeMb": 85,
+    "cacheGenS": 12,
+    "peakMemoryUsageMb": 139
+  },
+  {
+    "region": "north-america/us/alaska",
+    "serverStartupS": 2,
+    "pbfSizeMb": 131,
+    "cacheSizeMb": 57,
+    "cacheGenS": 7,
+    "peakMemoryUsageMb": 96
+  },
+  {
+    "region": "north-america/canada/manitoba",
+    "serverStartupS": 2,
+    "pbfSizeMb": 183,
+    "cacheSizeMb": 53,
+    "cacheGenS": 8,
+    "peakMemoryUsageMb": 91
+  },
+  {
+    "region": "asia/china/hubei",
+    "serverStartupS": 1,
+    "pbfSizeMb": 44,
+    "cacheSizeMb": 200,
+    "cacheGenS": 11,
+    "peakMemoryUsageMb": 325
+  },
+  {
+    "region": "asia/china/henan",
+    "serverStartupS": 1,
+    "pbfSizeMb": 40,
+    "cacheSizeMb": 191,
+    "cacheGenS": 13,
+    "peakMemoryUsageMb": 308
+  },
+  {
+    "region": "asia/china/guizhou",
+    "serverStartupS": 1,
+    "pbfSizeMb": 24,
+    "cacheSizeMb": 188,
+    "cacheGenS": 9,
+    "peakMemoryUsageMb": 307
+  },
+  {
+    "region": "asia/china/fujian",
+    "serverStartupS": 1,
+    "pbfSizeMb": 33,
+    "cacheSizeMb": 187,
+    "cacheGenS": 9,
+    "peakMemoryUsageMb": 303
+  },
+  {
+    "region": "asia/yemen",
+    "serverStartupS": 1,
+    "pbfSizeMb": 41,
+    "cacheSizeMb": 184,
+    "cacheGenS": 10,
+    "peakMemoryUsageMb": 298
+  },
+  {
+    "region": "asia/china/shaanxi",
+    "serverStartupS": 1,
+    "pbfSizeMb": 53,
+    "cacheSizeMb": 174,
+    "cacheGenS": 10,
+    "peakMemoryUsageMb": 285
+  },
+  {
+    "region": "africa/namibia",
+    "serverStartupS": 1,
+    "pbfSizeMb": 46,
+    "cacheSizeMb": 153,
+    "cacheGenS": 8,
+    "peakMemoryUsageMb": 252
+  },
+  {
+    "region": "asia/china/chongqing",
+    "serverStartupS": 1,
+    "pbfSizeMb": 25,
+    "cacheSizeMb": 151,
+    "cacheGenS": 9,
+    "peakMemoryUsageMb": 246
+  },
+  {
+    "region": "asia/china/inner-mongolia",
+    "serverStartupS": 1,
+    "pbfSizeMb": 34,
+    "cacheSizeMb": 143,
+    "cacheGenS": 8,
+    "peakMemoryUsageMb": 238
+  },
+  {
+    "region": "asia/china/shanxi",
+    "serverStartupS": 1,
+    "pbfSizeMb": 23,
+    "cacheSizeMb": 144,
+    "cacheGenS": 9,
+    "peakMemoryUsageMb": 237
+  },
+  {
+    "region": "asia/jordan",
+    "serverStartupS": 1,
+    "pbfSizeMb": 29,
+    "cacheSizeMb": 146,
+    "cacheGenS": 8,
+    "peakMemoryUsageMb": 236
+  },
+  {
+    "region": "asia/china/tibet",
+    "serverStartupS": 1,
+    "pbfSizeMb": 38,
+    "cacheSizeMb": 140,
+    "cacheGenS": 7,
+    "peakMemoryUsageMb": 231
+  },
+  {
+    "region": "asia/cambodia",
+    "serverStartupS": 1,
+    "pbfSizeMb": 34,
+    "cacheSizeMb": 130,
+    "cacheGenS": 11,
+    "peakMemoryUsageMb": 214
+  },
+  {
+    "region": "asia/mongolia",
+    "serverStartupS": 1,
+    "pbfSizeMb": 55,
+    "cacheSizeMb": 125,
+    "cacheGenS": 8,
+    "peakMemoryUsageMb": 210
+  },
+  {
+    "region": "asia/china/anhui",
+    "serverStartupS": 1,
+    "pbfSizeMb": 36,
+    "cacheSizeMb": 127,
+    "cacheGenS": 9,
+    "peakMemoryUsageMb": 208
+  },
+  {
+    "region": "asia/china/xinjiang",
+    "serverStartupS": 1,
+    "pbfSizeMb": 40,
+    "cacheSizeMb": 120,
+    "cacheGenS": 7,
+    "peakMemoryUsageMb": 202
+  },
+  {
+    "region": "australia-oceania/papua-new-guinea",
+    "serverStartupS": 1,
+    "pbfSizeMb": 47,
+    "cacheSizeMb": 123,
+    "cacheGenS": 7,
+    "peakMemoryUsageMb": 202
+  },
+  {
+    "region": "north-america/us/south-dakota",
+    "serverStartupS": 1,
+    "pbfSizeMb": 39,
+    "cacheSizeMb": 117,
+    "cacheGenS": 7,
+    "peakMemoryUsageMb": 193
+  },
+  {
+    "region": "africa/benin",
+    "serverStartupS": 1,
+    "pbfSizeMb": 42,
+    "cacheSizeMb": 116,
+    "cacheGenS": 10,
+    "peakMemoryUsageMb": 189
+  },
+  {
+    "region": "africa/burundi",
+    "serverStartupS": 1,
+    "pbfSizeMb": 44,
+    "cacheSizeMb": 113,
+    "cacheGenS": 7,
+    "peakMemoryUsageMb": 184
+  },
+  {
+    "region": "asia/armenia",
+    "serverStartupS": 1,
+    "pbfSizeMb": 47,
+    "cacheSizeMb": 110,
+    "cacheGenS": 7,
+    "peakMemoryUsageMb": 180
+  },
+  {
+    "region": "africa/togo",
+    "serverStartupS": 1,
+    "pbfSizeMb": 57,
+    "cacheSizeMb": 110,
+    "cacheGenS": 8,
+    "peakMemoryUsageMb": 179
+  },
+  {
+    "region": "europe/cyprus",
+    "serverStartupS": 1,
+    "pbfSizeMb": 31,
+    "cacheSizeMb": 109,
+    "cacheGenS": 8,
+    "peakMemoryUsageMb": 177
+  },
+  {
+    "region": "central-america/cuba",
+    "serverStartupS": 1,
+    "pbfSizeMb": 53,
+    "cacheSizeMb": 109,
+    "cacheGenS": 7,
+    "peakMemoryUsageMb": 176
+  },
+  {
+    "region": "asia/tajikistan",
+    "serverStartupS": 1,
+    "pbfSizeMb": 44,
+    "cacheSizeMb": 102,
+    "cacheGenS": 6,
+    "peakMemoryUsageMb": 168
+  },
+  {
+    "region": "central-america/costa-rica",
+    "serverStartupS": 1,
+    "pbfSizeMb": 35,
+    "cacheSizeMb": 99,
+    "cacheGenS": 7,
+    "peakMemoryUsageMb": 163
+  },
+  {
+    "region": "central-america/nicaragua",
+    "serverStartupS": 1,
+    "pbfSizeMb": 52,
+    "cacheSizeMb": 98,
+    "cacheGenS": 8,
+    "peakMemoryUsageMb": 162
+  },
+  {
+    "region": "asia/china/liaoning",
+    "serverStartupS": 1,
+    "pbfSizeMb": 23,
+    "cacheSizeMb": 92,
+    "cacheGenS": 5,
+    "peakMemoryUsageMb": 153
+  },
+  {
+    "region": "europe/montenegro",
+    "serverStartupS": 1,
+    "pbfSizeMb": 30,
+    "cacheSizeMb": 93,
+    "cacheGenS": 9,
+    "peakMemoryUsageMb": 153
+  },
+  {
+    "region": "asia/china/jilin",
+    "serverStartupS": 1,
+    "pbfSizeMb": 21,
+    "cacheSizeMb": 90,
+    "cacheGenS": 5,
+    "peakMemoryUsageMb": 150
+  },
+  {
+    "region": "europe/macedonia",
+    "serverStartupS": 1,
+    "pbfSizeMb": 25,
+    "cacheSizeMb": 91,
+    "cacheGenS": 5,
+    "peakMemoryUsageMb": 150
+  },
+  {
+    "region": "africa/canary-islands",
+    "serverStartupS": 1,
+    "pbfSizeMb": 53,
+    "cacheSizeMb": 90,
+    "cacheGenS": 7,
+    "peakMemoryUsageMb": 147
+  },
+  {
+    "region": "europe/kosovo",
+    "serverStartupS": 1,
+    "pbfSizeMb": 28,
+    "cacheSizeMb": 89,
+    "cacheGenS": 7,
+    "peakMemoryUsageMb": 145
+  },
+  {
+    "region": "africa/sierra-leone",
+    "serverStartupS": 1,
+    "pbfSizeMb": 38,
+    "cacheSizeMb": 87,
+    "cacheGenS": 6,
+    "peakMemoryUsageMb": 144
+  },
+  {
+    "region": "asia/china/heilongjiang",
+    "serverStartupS": 1,
+    "pbfSizeMb": 31,
+    "cacheSizeMb": 87,
+    "cacheGenS": 5,
+    "peakMemoryUsageMb": 144
+  },
+  {
+    "region": "asia/china/beijing",
+    "serverStartupS": 1,
+    "pbfSizeMb": 32,
+    "cacheSizeMb": 86,
+    "cacheGenS": 6,
+    "peakMemoryUsageMb": 140
+  },
+  {
+    "region": "central-america/el-salvador",
+    "serverStartupS": 1,
+    "pbfSizeMb": 33,
+    "cacheSizeMb": 84,
+    "cacheGenS": 5,
+    "peakMemoryUsageMb": 138
+  },
+  {
+    "region": "asia/china/qinghai",
+    "serverStartupS": 1,
+    "pbfSizeMb": 28,
+    "cacheSizeMb": 81,
+    "cacheGenS": 8,
+    "peakMemoryUsageMb": 136
+  },
+  {
+    "region": "asia/kyrgyzstan",
+    "serverStartupS": 1,
+    "pbfSizeMb": 44,
+    "cacheSizeMb": 83,
+    "cacheGenS": 8,
+    "peakMemoryUsageMb": 136
+  },
+  {
+    "region": "north-america/canada/saskatchewan",
+    "serverStartupS": 1,
+    "pbfSizeMb": 100,
+    "cacheSizeMb": 69,
+    "cacheGenS": 8,
+    "peakMemoryUsageMb": 120
+  },
+  {
+    "region": "central-america/panama",
+    "serverStartupS": 1,
+    "pbfSizeMb": 28,
+    "cacheSizeMb": 64,
+    "cacheGenS": 4,
+    "peakMemoryUsageMb": 106
+  },
+  {
+    "region": "africa/gabon",
+    "serverStartupS": 1,
+    "pbfSizeMb": 22,
+    "cacheSizeMb": 62,
+    "cacheGenS": 5,
+    "peakMemoryUsageMb": 104
+  },
+  {
+    "region": "asia/bhutan",
+    "serverStartupS": 1,
+    "pbfSizeMb": 23,
+    "cacheSizeMb": 62,
+    "cacheGenS": 4,
+    "peakMemoryUsageMb": 103
+  },
+  {
+    "region": "africa/mauritania",
+    "serverStartupS": 1,
+    "pbfSizeMb": 26,
+    "cacheSizeMb": 61,
+    "cacheGenS": 5,
+    "peakMemoryUsageMb": 102
+  },
+  {
+    "region": "europe/iceland",
+    "serverStartupS": 1,
+    "pbfSizeMb": 60,
+    "cacheSizeMb": 61,
+    "cacheGenS": 7,
+    "peakMemoryUsageMb": 102
+  },
+  {
+    "region": "africa/swaziland",
+    "serverStartupS": 1,
+    "pbfSizeMb": 29,
+    "cacheSizeMb": 60,
+    "cacheGenS": 4,
+    "peakMemoryUsageMb": 100
+  },
+  {
+    "region": "africa/congo-brazzaville",
+    "serverStartupS": 1,
+    "pbfSizeMb": 28,
+    "cacheSizeMb": 56,
+    "cacheGenS": 5,
+    "peakMemoryUsageMb": 94
+  },
+  {
+    "region": "africa/liberia",
+    "serverStartupS": 1,
+    "pbfSizeMb": 35,
+    "cacheSizeMb": 56,
+    "cacheGenS": 4,
+    "peakMemoryUsageMb": 94
+  },
+  {
+    "region": "central-america/jamaica",
+    "serverStartupS": 1,
+    "pbfSizeMb": 36,
+    "cacheSizeMb": 57,
+    "cacheGenS": 6,
+    "peakMemoryUsageMb": 94
+  },
+  {
+    "region": "north-america/canada/new-brunswick",
+    "serverStartupS": 1,
+    "pbfSizeMb": 61,
+    "cacheSizeMb": 50,
+    "cacheGenS": 4,
+    "peakMemoryUsageMb": 84
+  },
+  {
+    "region": "europe/luxembourg",
+    "serverStartupS": 1,
+    "pbfSizeMb": 42,
+    "cacheSizeMb": 45,
+    "cacheGenS": 5,
+    "peakMemoryUsageMb": 76
+  },
+  {
+    "region": "asia/turkmenistan",
+    "serverStartupS": 1,
+    "pbfSizeMb": 20,
+    "cacheSizeMb": 44,
+    "cacheGenS": 4,
+    "peakMemoryUsageMb": 74
+  },
+  {
+    "region": "australia-oceania/fiji",
+    "serverStartupS": 1,
+    "pbfSizeMb": 17,
+    "cacheSizeMb": 43,
+    "cacheGenS": 3,
+    "peakMemoryUsageMb": 73
+  },
+  {
+    "region": "africa/eritrea",
+    "serverStartupS": 1,
+    "pbfSizeMb": 26,
+    "cacheSizeMb": 42,
+    "cacheGenS": 4,
+    "peakMemoryUsageMb": 69
+  },
+  {
+    "region": "asia/china/shanghai",
+    "serverStartupS": 1,
+    "pbfSizeMb": 22,
+    "cacheSizeMb": 39,
+    "cacheGenS": 3,
+    "peakMemoryUsageMb": 65
+  },
+  {
+    "region": "asia/china/hainan",
+    "serverStartupS": 1,
+    "pbfSizeMb": 9,
+    "cacheSizeMb": 37,
+    "cacheGenS": 2,
+    "peakMemoryUsageMb": 64
+  },
+  {
+    "region": "australia-oceania/new-caledonia",
+    "serverStartupS": 1,
+    "pbfSizeMb": 13,
+    "cacheSizeMb": 36,
+    "cacheGenS": 2,
+    "peakMemoryUsageMb": 61
+  },
+  {
+    "region": "africa/guinea-bissau",
+    "serverStartupS": 1,
+    "pbfSizeMb": 10,
+    "cacheSizeMb": 33,
+    "cacheGenS": 2,
+    "peakMemoryUsageMb": 57
+  },
+  {
+    "region": "asia/china/ningxia",
+    "serverStartupS": 1,
+    "pbfSizeMb": 8,
+    "cacheSizeMb": 32,
+    "cacheGenS": 3,
+    "peakMemoryUsageMb": 55
+  },
+  {
+    "region": "north-america/us/delaware",
+    "serverStartupS": 1,
+    "pbfSizeMb": 19,
+    "cacheSizeMb": 32,
+    "cacheGenS": 3,
+    "peakMemoryUsageMb": 55
+  },
+  {
+    "region": "north-america/us/hawaii",
+    "serverStartupS": 1,
+    "pbfSizeMb": 22,
+    "cacheSizeMb": 32,
+    "cacheGenS": 3,
+    "peakMemoryUsageMb": 54
+  },
+  {
+    "region": "europe/azores",
+    "serverStartupS": 1,
+    "pbfSizeMb": 16,
+    "cacheSizeMb": 29,
+    "cacheGenS": 2,
+    "peakMemoryUsageMb": 50
+  },
+  {
+    "region": "asia/china/tianjin",
+    "serverStartupS": 1,
+    "pbfSizeMb": 10,
+    "cacheSizeMb": 25,
+    "cacheGenS": 2,
+    "peakMemoryUsageMb": 44
+  },
+  {
+    "region": "south-america/suriname",
+    "serverStartupS": 1,
+    "pbfSizeMb": 20,
+    "cacheSizeMb": 22,
+    "cacheGenS": 2,
+    "peakMemoryUsageMb": 39
+  },
+  {
+    "region": "asia/china/hong-kong",
+    "serverStartupS": 1,
+    "pbfSizeMb": 33,
+    "cacheSizeMb": 18,
+    "cacheGenS": 3,
+    "peakMemoryUsageMb": 33
+  },
+  {
+    "region": "australia-oceania/polynesie-francaise",
+    "serverStartupS": 1,
+    "pbfSizeMb": 14,
+    "cacheSizeMb": 18,
+    "cacheGenS": 3,
+    "peakMemoryUsageMb": 33
+  },
+  {
+    "region": "central-america/belize",
+    "serverStartupS": 1,
+    "pbfSizeMb": 17,
+    "cacheSizeMb": 18,
+    "cacheGenS": 2,
+    "peakMemoryUsageMb": 32
+  },
+  {
+    "region": "australia-oceania/solomon-islands",
+    "serverStartupS": 1,
+    "pbfSizeMb": 9,
+    "cacheSizeMb": 17,
+    "cacheGenS": 2,
+    "peakMemoryUsageMb": 31
+  },
+  {
+    "region": "south-america/guyana",
+    "serverStartupS": 1,
+    "pbfSizeMb": 13,
+    "cacheSizeMb": 15,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 28
+  },
+  {
+    "region": "africa/cape-verde",
+    "serverStartupS": 1,
+    "pbfSizeMb": 11,
+    "cacheSizeMb": 14,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 27
+  },
+  {
+    "region": "africa/mauritius",
+    "serverStartupS": 1,
+    "pbfSizeMb": 8,
+    "cacheSizeMb": 15,
+    "cacheGenS": 2,
+    "peakMemoryUsageMb": 27
+  },
+  {
+    "region": "central-america/bahamas",
+    "serverStartupS": 1,
+    "pbfSizeMb": 13,
+    "cacheSizeMb": 15,
+    "cacheGenS": 2,
+    "peakMemoryUsageMb": 27
+  },
+  {
+    "region": "north-america/canada/yukon",
+    "serverStartupS": 1,
+    "pbfSizeMb": 70,
+    "cacheSizeMb": 14,
+    "cacheGenS": 3,
+    "peakMemoryUsageMb": 27
+  },
+  {
+    "region": "africa/equatorial-guinea",
+    "serverStartupS": 1,
+    "pbfSizeMb": 6,
+    "cacheSizeMb": 12,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 24
+  },
+  {
+    "region": "europe/malta",
+    "serverStartupS": 1,
+    "pbfSizeMb": 7,
+    "cacheSizeMb": 9,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 19
+  },
+  {
+    "region": "north-america/canada/prince-edward-island",
+    "serverStartupS": 1,
+    "pbfSizeMb": 10,
+    "cacheSizeMb": 9,
+    "cacheGenS": 2,
+    "peakMemoryUsageMb": 19
+  },
+  {
+    "region": "africa/djibouti",
+    "serverStartupS": 1,
+    "pbfSizeMb": 7,
+    "cacheSizeMb": 9,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 18
+  },
+  {
+    "region": "australia-oceania/american-oceania",
+    "serverStartupS": 1,
+    "pbfSizeMb": 5,
+    "cacheSizeMb": 8,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 17
+  },
+  {
+    "region": "australia-oceania/vanuatu",
+    "serverStartupS": 1,
+    "pbfSizeMb": 8,
+    "cacheSizeMb": 8,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 17
+  },
+  {
+    "region": "north-america/us/district-of-columbia",
+    "serverStartupS": 1,
+    "pbfSizeMb": 19,
+    "cacheSizeMb": 8,
+    "cacheGenS": 2,
+    "peakMemoryUsageMb": 17
+  },
+  {
+    "region": "europe/faroe-islands",
+    "serverStartupS": 1,
+    "pbfSizeMb": 7,
+    "cacheSizeMb": 7,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 16
+  },
+  {
+    "region": "africa/comores",
+    "serverStartupS": 1,
+    "pbfSizeMb": 4,
+    "cacheSizeMb": 5,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 13
+  },
+  {
+    "region": "north-america/us/us-virgin-islands",
+    "serverStartupS": 1,
+    "pbfSizeMb": 3,
+    "cacheSizeMb": 6,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 13
+  },
+  {
+    "region": "australia-oceania/samoa",
+    "serverStartupS": 1,
+    "pbfSizeMb": 3,
+    "cacheSizeMb": 5,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 11
+  },
+  {
+    "region": "europe/guernsey-jersey",
+    "serverStartupS": 1,
+    "pbfSizeMb": 4,
+    "cacheSizeMb": 5,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 11
+  },
+  {
+    "region": "europe/isle-of-man",
+    "serverStartupS": 1,
+    "pbfSizeMb": 6,
+    "cacheSizeMb": 5,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 11
+  },
+  {
+    "region": "australia-oceania/tonga",
+    "serverStartupS": 1,
+    "pbfSizeMb": 4,
+    "cacheSizeMb": 4,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 10
+  },
+  {
+    "region": "europe/andorra",
+    "serverStartupS": 1,
+    "pbfSizeMb": 4,
+    "cacheSizeMb": 4,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 10
+  },
+  {
+    "region": "north-america/greenland",
+    "serverStartupS": 1,
+    "pbfSizeMb": 17,
+    "cacheSizeMb": 4,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 10
+  },
+  {
+    "region": "africa/seychelles",
+    "serverStartupS": 1,
+    "pbfSizeMb": 3,
+    "cacheSizeMb": 3,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 9
+  },
+  {
+    "region": "asia/maldives",
+    "serverStartupS": 1,
+    "pbfSizeMb": 4,
+    "cacheSizeMb": 3,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 9
+  },
+  {
+    "region": "europe/liechtenstein",
+    "serverStartupS": 1,
+    "pbfSizeMb": 3,
+    "cacheSizeMb": 4,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 9
+  },
+  {
+    "region": "africa/sao-tome-and-principe",
+    "serverStartupS": 1,
+    "pbfSizeMb": 2,
+    "cacheSizeMb": 3,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 8
+  },
+  {
+    "region": "asia/china/macau",
+    "serverStartupS": 1,
+    "pbfSizeMb": 3,
+    "cacheSizeMb": 3,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 8
+  },
+  {
+    "region": "australia-oceania/kiribati",
+    "serverStartupS": 1,
+    "pbfSizeMb": 3,
+    "cacheSizeMb": 3,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 8
+  },
+  {
+    "region": "africa/saint-helena-ascension-and-tristan-da-cunha",
+    "serverStartupS": 1,
+    "pbfSizeMb": 1,
+    "cacheSizeMb": 2,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 7
+  },
+  {
+    "region": "australia-oceania/micronesia",
+    "serverStartupS": 1,
+    "pbfSizeMb": 2,
+    "cacheSizeMb": 2,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 7
+  },
+  {
+    "region": "australia-oceania/cook-islands",
+    "serverStartupS": 1,
+    "pbfSizeMb": 1,
+    "cacheSizeMb": 2,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 6
+  },
+  {
+    "region": "australia-oceania/marshall-islands",
+    "serverStartupS": 1,
+    "pbfSizeMb": 2,
+    "cacheSizeMb": 1,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 6
+  },
+  {
+    "region": "australia-oceania/niue",
+    "serverStartupS": 1,
+    "pbfSizeMb": 1,
+    "cacheSizeMb": 1,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 6
+  },
+  {
+    "region": "australia-oceania/palau",
+    "serverStartupS": 1,
+    "pbfSizeMb": 1,
+    "cacheSizeMb": 1,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 6
+  },
+  {
+    "region": "australia-oceania/wallis-et-futuna",
+    "serverStartupS": 1,
+    "pbfSizeMb": 1,
+    "cacheSizeMb": 1,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 6
+  },
+  {
+    "region": "australia-oceania/ile-de-clipperton",
+    "serverStartupS": 1,
+    "pbfSizeMb": 1,
+    "cacheSizeMb": 1,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 5
+  },
+  {
+    "region": "australia-oceania/nauru",
+    "serverStartupS": 1,
+    "pbfSizeMb": 1,
+    "cacheSizeMb": 1,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 5
+  },
+  {
+    "region": "australia-oceania/pitcairn-islands",
+    "serverStartupS": 1,
+    "pbfSizeMb": 1,
+    "cacheSizeMb": 1,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 5
+  },
+  {
+    "region": "australia-oceania/tokelau",
+    "serverStartupS": 1,
+    "pbfSizeMb": 1,
+    "cacheSizeMb": 1,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 5
+  },
+  {
+    "region": "australia-oceania/tuvalu",
+    "serverStartupS": 1,
+    "pbfSizeMb": 1,
+    "cacheSizeMb": 1,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 5
+  },
+  {
+    "region": "europe/monaco",
+    "serverStartupS": 1,
+    "pbfSizeMb": 1,
+    "cacheSizeMb": 1,
+    "cacheGenS": 1,
+    "peakMemoryUsageMb": 5
+  }
+]
+

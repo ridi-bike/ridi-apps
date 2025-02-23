@@ -1,8 +1,3 @@
-export type Region = {
-  name: string;
-  memory: number;
-};
-
 export type K8sNode = {
   name: string;
   labels: {

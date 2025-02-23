@@ -1,10 +1,7 @@
 import * as k8s from "@pulumi/kubernetes";
 
-import {
-  getRegionNameSafe,
-  regions,
-  volumeSizeMemoryMultiplier,
-} from "../constants";
+import { regions, volumeSizeMemoryMultiplier } from "../config";
+import { getNameSafe } from "../util";
 
 const longhornNamespace = new k8s.core.v1.Namespace("longhorn-namespace", {
   metadata: {
@@ -12,7 +9,7 @@ const longhornNamespace = new k8s.core.v1.Namespace("longhorn-namespace", {
   },
 });
 
-const longhornChart = new k8s.helm.v4.Chart("longhorn", {
+new k8s.helm.v4.Chart("longhorn", {
   chart: "longhorn",
   namespace: longhornNamespace.metadata.name,
   repositoryOpts: {
@@ -26,9 +23,9 @@ const regionVolumeClaims: Record<
 > = {};
 
 for (const region of regions) {
-  const size = `${region.memory * volumeSizeMemoryMultiplier}Mi`;
+  const size = `${(region.pbfSizeMb + region.cacheSizeMb) * volumeSizeMemoryMultiplier}Mi`;
 
-  const volumeName = `longhorn-${getRegionNameSafe(region)}-persistant-volume`;
+  const volumeName = `longhorn-${getNameSafe(region.region)}-persistant-volume`;
   const longhornPV = new k8s.core.v1.PersistentVolume(volumeName, {
     metadata: {
       name: volumeName,
@@ -46,7 +43,7 @@ for (const region of regions) {
     },
   });
 
-  const claimName = `longhorn-${getRegionNameSafe(region)}-persistant-volume-claim`;
+  const claimName = `longhorn-${getNameSafe(region.region)}-persistant-volume-claim`;
   const longhornPVC = new k8s.core.v1.PersistentVolumeClaim(claimName, {
     metadata: {
       name: claimName,
@@ -62,8 +59,8 @@ for (const region of regions) {
     },
   });
 
-  regionVolumeClaims[region.name] = {
-    name: `longhorn-storage-${getRegionNameSafe(region)}`,
+  regionVolumeClaims[region.region] = {
+    name: `longhorn-storage-${getNameSafe(region.region)}`,
     claim: longhornPVC,
   };
 }

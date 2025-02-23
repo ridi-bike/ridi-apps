@@ -1,15 +1,11 @@
-import * as pulumi from "@pulumi/pulumi";
 import * as docker_build from "@pulumi/docker-build";
-import * as k8s from "@pulumi/kubernetes";
-import {
-  getCacheLocation,
-  getPbfLocation,
-  getRegionNameSafe,
-  ridiDataRootPath,
-  routerVersion,
-} from "../constants";
-import { Region } from "../types";
+import type * as k8s from "@pulumi/kubernetes";
+import * as pulumi from "@pulumi/pulumi";
+
+import { routerVersionNext, type Region } from "../config";
+import { getCacheLocation, getPbfLocation, ridiDataRootPath } from "../config";
 import { regionVolumeClaims } from "../longhorn-storage";
+import { getNameSafe } from "../util";
 
 const projectName = pulumi.getProject();
 const config = new pulumi.Config();
@@ -27,7 +23,7 @@ const routerCacheInitImage = new docker_build.Image(routerCacheInitName, {
     location: "./map-data-init/Containerfile",
   },
   buildArgs: {
-    ROUTER_VERSION: routerVersion,
+    ROUTER_VERSION: routerVersionNext,
   },
   cacheFrom: [
     {
@@ -57,32 +53,32 @@ const routerCacheInitImage = new docker_build.Image(routerCacheInitName, {
 export const getRouterCacheInitContainer = (
   region: Region,
 ): pulumi.Input<k8s.types.input.core.v1.Container> => {
-  const storage = regionVolumeClaims[region.name];
-  const containerName = `${routerCacheInitName}-${getRegionNameSafe(region)}`;
+  const storage = regionVolumeClaims[region.region];
+  const containerName = `${routerCacheInitName}-${getNameSafe(region.region)}`;
   return {
     name: containerName,
     image: routerCacheInitImage.ref,
     env: [
       {
         name: "REGION",
-        value: region.name,
+        value: region.region,
       },
       {
         name: "PBF_LOCATION",
-        value: getPbfLocation(region.name),
+        value: getPbfLocation(region.region),
       },
       {
         name: "CACHE_LOCATION",
-        value: getCacheLocation(region.name),
+        value: getCacheLocation(region.region),
       },
       {
         name: "ROUTER_VERSION",
-        value: routerVersion,
+        value: routerVersionNext,
       },
     ],
     resources: {
       requests: {
-        memory: `${region.memory}Mi`,
+        memory: `${region.peakMemoryUsageMb}Mi`,
       },
     },
     volumeMounts: [

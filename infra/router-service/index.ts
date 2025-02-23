@@ -1,18 +1,19 @@
-import * as pulumi from "@pulumi/pulumi";
 import * as docker_build from "@pulumi/docker-build";
+import * as k8s from "@pulumi/kubernetes";
+import * as pulumi from "@pulumi/pulumi";
+
 import {
   getCacheLocation,
   getPbfLocation,
   regions,
   ridiDataRootPath,
   routerVersion,
-} from "../constants";
-
-import * as k8s from "@pulumi/kubernetes";
+} from "../config";
 import { ridiNamespace } from "../k8s";
+import { regionVolumeClaims } from "../longhorn-storage";
 import { getMapDataInitContainer } from "../map-data-init";
 import { getRouterCacheInitContainer } from "../router-cache-init";
-import { regionVolumeClaims } from "../longhorn-storage";
+import { getNameSafe } from "../util";
 
 const projectName = pulumi.getProject();
 const config = new pulumi.Config();
@@ -58,8 +59,8 @@ const routerServiceImage = new docker_build.Image(routerServiceName, {
 });
 
 for (const region of regions) {
-  const storage = regionVolumeClaims[region.name];
-  const regionServiceName = `${routerServiceName}-${region.name.replace("/", "-")}`;
+  const storage = regionVolumeClaims[region.region];
+  const regionServiceName = `${routerServiceName}-${getNameSafe(region.region)}`;
   const routerServiceDeployment = new k8s.apps.v1.Deployment(
     regionServiceName,
     {
@@ -95,15 +96,15 @@ for (const region of regions) {
                 env: [
                   {
                     name: "REGION",
-                    value: region.name,
+                    value: region.region,
                   },
                   {
                     name: "PBF_LOCATION",
-                    value: getPbfLocation(region.name),
+                    value: getPbfLocation(region.region),
                   },
                   {
                     name: "CACHE_LOCATION",
-                    value: getCacheLocation(region.name),
+                    value: getCacheLocation(region.region),
                   },
                   {
                     name: "ROUTER_VERSION",
@@ -112,7 +113,7 @@ for (const region of regions) {
                 ],
                 resources: {
                   requests: {
-                    memory: `${region.memory}Mi`,
+                    memory: `${region.peakMemoryUsageMb}Mi`,
                   },
                 },
                 ports: [
@@ -146,7 +147,7 @@ for (const region of regions) {
     },
   );
 
-  const routerService = new k8s.core.v1.Service(regionServiceName, {
+  new k8s.core.v1.Service(regionServiceName, {
     metadata: {
       name: regionServiceName,
       labels: {

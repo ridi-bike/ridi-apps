@@ -1,6 +1,12 @@
-import { K8sNode, Region } from "./types";
+import * as pulumi from "@pulumi/pulumi";
+
+import allRegions from "./all-regions.json";
+import { type K8sNode } from "./types";
+
+const config = new pulumi.Config();
 
 export const routerVersion = "v0.6.20";
+export const routerVersionNext = "v0.6.20";
 
 export const mapDataDateVersion = "2025-02-19";
 
@@ -27,14 +33,12 @@ export function getCacheLocation(region: string) {
   return `${ridiDataRootPath}/cache/${routerVersion}/${mapDataDateVersion}/${region}`;
 }
 
-export const regions: Region[] = [
-  { name: "europe/latvia", memory: 300 },
-  { name: "europe/greece", memory: 300 },
-];
+export type Region = (typeof allRegions)[number];
 
-export function getRegionNameSafe(region: Region): string {
-  return region.name.replace(/[\W_]+/g, "-");
-}
+const selectedRegions = config.getObject<string[]>("regions_selected");
+export const regions = selectedRegions
+  ? allRegions.filter((r) => selectedRegions.includes(r.region))
+  : allRegions;
 
 export const nodes: K8sNode[] = [
   {
