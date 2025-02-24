@@ -1,4 +1,4 @@
-FROM node:23-alpine as build
+FROM node:23-alpine AS build
 
 WORKDIR /app
 
@@ -11,4 +11,4 @@ COPY ./pnpm-workspace.yaml ./pnpm-workspace.yaml
 
 RUN pnpm install --prod
 
-CMD ["node", "./services/queue-service/src/index.ts"]
+CMD ["node", "--import=tsx", "./services/queue-service/src/index.ts"]
