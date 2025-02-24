@@ -7,12 +7,11 @@ import {
   getPbfLocation,
   regions,
   ridiDataRootPath,
+  ridiInfraVersion,
   routerVersion,
 } from "../config";
-import { ridiNamespace } from "../k8s";
+import { ghcrSecret, ridiNamespace } from "../k8s";
 import { regionVolumeClaims } from "../longhorn-storage";
-import { getMapDataInitContainer } from "../map-data-init";
-import { getRouterCacheInitContainer } from "../router-cache-init";
 import { getNameSafe } from "../util";
 
 const projectName = pulumi.getProject();
@@ -21,9 +20,10 @@ const config = new pulumi.Config();
 const containerRegistryUrl = pulumi.interpolate`${config.require("container_registry_url")}/${config.require("container_registry_namespace")}`;
 const routerServiceName = "router-service";
 const latestTag = pulumi.interpolate`${containerRegistryUrl}/${projectName}/${routerServiceName}:latest`;
+const versionTag = pulumi.interpolate`${containerRegistryUrl}/${projectName}/${routerServiceName}:${ridiInfraVersion}`;
 
 const routerServiceImage = new docker_build.Image(routerServiceName, {
-  tags: [latestTag],
+  tags: [versionTag, latestTag],
   context: {
     location: "../",
   },
@@ -87,14 +87,10 @@ for (const region of regions) {
             },
           },
           spec: {
-            initContainers: [
-              getMapDataInitContainer(region),
-              getRouterCacheInitContainer(region),
-            ],
             containers: [
               {
                 name: regionServiceName,
-                image: routerServiceImage.ref,
+                image: routerServiceImage.tags.get()![0],
                 env: [
                   {
                     name: "REGION",
@@ -127,17 +123,15 @@ for (const region of regions) {
                 volumeMounts: [
                   {
                     mountPath: ridiDataRootPath,
-                    name: "ridi-data volume",
+                    name: storage.claimName,
                   },
                 ],
               },
             ],
-            volumes: [
+            volumes: [regionVolumeClaims[region.region].volume],
+            imagePullSecrets: [
               {
-                name: storage.name,
-                persistentVolumeClaim: {
-                  claimName: storage.claim.metadata.name,
-                },
+                name: ghcrSecret.metadata.name,
               },
             ],
           },

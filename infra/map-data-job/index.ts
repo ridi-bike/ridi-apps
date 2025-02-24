@@ -1,6 +1,8 @@
 import * as k8s from "@pulumi/kubernetes";
 
 import { mapDataDateVersion, regions } from "../config";
+import { ghcrSecret } from "../k8s";
+import { regionVolumeClaims } from "../longhorn-storage";
 import { getMapDataInitContainer } from "../map-data-init";
 import { getRouterCacheInitContainer } from "../router-cache-init";
 import { getNameSafe } from "../util";
@@ -33,6 +35,12 @@ for (const region of regions) {
                 "-c",
                 "sleep 5 && echo 'Job completed successfully'",
               ],
+            },
+          ],
+          volumes: Object.values(regionVolumeClaims).map((vc) => vc.volume),
+          imagePullSecrets: [
+            {
+              name: ghcrSecret.metadata.name,
             },
           ],
         },

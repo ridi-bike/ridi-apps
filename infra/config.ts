@@ -5,6 +5,8 @@ import { type K8sNode } from "./types";
 
 const config = new pulumi.Config();
 
+export const ridiInfraVersion = Date.now();
+
 export const routerVersion = "v0.6.20";
 export const routerVersionNext = "v0.6.20";
 

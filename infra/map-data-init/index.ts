@@ -2,7 +2,7 @@ import * as docker_build from "@pulumi/docker-build";
 import type * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 
-import { type Region } from "../config";
+import { ridiInfraVersion, type Region } from "../config";
 import {
   getKmlLocation,
   getKmlRemoteUrl,
@@ -20,9 +20,10 @@ const config = new pulumi.Config();
 const containerRegistryUrl = pulumi.interpolate`${config.require("container_registry_url")}/${config.require("container_registry_namespace")}`;
 const mapDataInitName = "map-data-init";
 const latestTag = pulumi.interpolate`${containerRegistryUrl}/${projectName}/${mapDataInitName}:latest`;
+const versionTag = pulumi.interpolate`${containerRegistryUrl}/${projectName}/${mapDataInitName}:${ridiInfraVersion}`;
 
 const mapDataInitImage = new docker_build.Image(mapDataInitName, {
-  tags: [latestTag],
+  tags: [versionTag, latestTag],
   context: {
     location: "../",
   },
@@ -61,7 +62,7 @@ export const getMapDataInitContainer = (
   const containerName = `${mapDataInitName}-${getNameSafe(region.region)}`;
   return {
     name: containerName,
-    image: mapDataInitImage.ref,
+    image: mapDataInitImage.tags.get()![0],
     env: [
       {
         name: "REGION",
@@ -96,7 +97,7 @@ export const getMapDataInitContainer = (
     volumeMounts: [
       {
         mountPath: ridiDataRootPath,
-        name: storage.name,
+        name: storage.claimName,
       },
     ],
   };
