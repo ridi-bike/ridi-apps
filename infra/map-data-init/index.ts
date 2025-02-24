@@ -11,13 +11,13 @@ import {
   getPbfRemoteUrl,
   ridiDataRootPath,
 } from "../config";
+import { containerRegistryUrl } from "../k8s";
 import { regionVolumeClaims } from "../longhorn-storage";
 import { getNameSafe } from "../util";
 
 const projectName = pulumi.getProject();
 const config = new pulumi.Config();
 
-const containerRegistryUrl = pulumi.interpolate`${config.require("container_registry_url")}/${config.require("container_registry_namespace")}`;
 const mapDataInitName = "map-data-init";
 const latestTag = pulumi.interpolate`${containerRegistryUrl}/${projectName}/${mapDataInitName}:latest`;
 const versionTag = pulumi.interpolate`${containerRegistryUrl}/${projectName}/${mapDataInitName}:${ridiInfraVersion}`;
@@ -62,7 +62,7 @@ export const getMapDataInitContainer = (
   const containerName = `${mapDataInitName}-${getNameSafe(region.region)}`;
   return {
     name: containerName,
-    image: mapDataInitImage.tags.get()![0],
+    image: mapDataInitImage.ref,
     env: [
       {
         name: "REGION",

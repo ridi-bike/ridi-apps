@@ -90,7 +90,7 @@ for (const region of regions) {
             containers: [
               {
                 name: regionServiceName,
-                image: routerServiceImage.tags.get()![0],
+                image: routerServiceImage.ref,
                 env: [
                   {
                     name: "REGION",
