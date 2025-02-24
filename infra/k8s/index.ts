@@ -20,13 +20,11 @@ export const ridiNamespace = new k8s.core.v1.Namespace(
 );
 
 export const containerRegistryUrl = `${config.require("container_registry_url")}/${config.require("container_registry_namespace")}`;
-const username = config.require("container_registry_url");
-const password = config.require("container_registry_url");
+const username = config.require("container_registry_username");
+const password = config.require("container_registry_password");
 const dockerConfig = {
   auths: {
-    [containerRegistryUrl]: {
-      username,
-      password,
+    [config.require("container_registry_url")]: {
       auth: Buffer.from(`${username}:${password}`).toString("base64"),
     },
   },

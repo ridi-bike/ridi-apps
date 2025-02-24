@@ -2,7 +2,6 @@ import * as docker_build from "@pulumi/docker-build";
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 
-import { ridiInfraVersion } from "../config";
 import { containerRegistryUrl, ghcrSecret, ridiNamespace } from "../k8s";
 import { regionServiceList } from "../router-service";
 
@@ -10,11 +9,10 @@ const projectName = pulumi.getProject();
 const config = new pulumi.Config();
 
 const queueServiceName = "queue-service";
-const latestTag = pulumi.interpolate`${containerRegistryUrl}/${projectName}/${queueServiceName}:latest`;
-const versionTag = pulumi.interpolate`${containerRegistryUrl}/${projectName}/${queueServiceName}:${ridiInfraVersion}`;
+const latestTag = pulumi.interpolate`${containerRegistryUrl}/${projectName}/${queueServiceName}`;
 
 const queueServiceImage = new docker_build.Image(queueServiceName, {
-  tags: [versionTag, latestTag],
+  tags: [latestTag],
   context: {
     location: "../",
   },
