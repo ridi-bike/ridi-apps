@@ -7,7 +7,6 @@ import {
   getPbfLocation,
   regions,
   ridiDataRootPath,
-  ridiInfraVersion,
   routerVersion,
 } from "../config";
 import { ghcrSecret, ridiNamespace } from "../k8s";
@@ -19,11 +18,10 @@ const config = new pulumi.Config();
 
 const containerRegistryUrl = pulumi.interpolate`${config.require("container_registry_url")}/${config.require("container_registry_namespace")}`;
 const routerServiceName = "router-service";
-const latestTag = pulumi.interpolate`${containerRegistryUrl}/${projectName}/${routerServiceName}:latest`;
-const versionTag = pulumi.interpolate`${containerRegistryUrl}/${projectName}/${routerServiceName}:${ridiInfraVersion}`;
+const latestTag = pulumi.interpolate`${containerRegistryUrl}/${projectName}/${routerServiceName}`;
 
 const routerServiceImage = new docker_build.Image(routerServiceName, {
-  tags: [versionTag, latestTag],
+  tags: [latestTag],
   context: {
     location: "../",
   },
