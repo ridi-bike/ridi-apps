@@ -3,13 +3,12 @@ import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 
 import { ridiInfraVersion } from "../config";
-import { ghcrSecret, ridiNamespace } from "../k8s";
+import { containerRegistryUrl, ghcrSecret, ridiNamespace } from "../k8s";
 import { regionServiceList } from "../router-service";
 
 const projectName = pulumi.getProject();
 const config = new pulumi.Config();
 
-const containerRegistryUrl = pulumi.interpolate`${config.require("container_registry_url")}/${config.require("container_registry_namespace")}`;
 const queueServiceName = "queue-service";
 const latestTag = pulumi.interpolate`${containerRegistryUrl}/${projectName}/${queueServiceName}:latest`;
 const versionTag = pulumi.interpolate`${containerRegistryUrl}/${projectName}/${queueServiceName}:${ridiInfraVersion}`;
@@ -72,7 +71,7 @@ new k8s.apps.v1.Deployment(queueServiceName, {
         containers: [
           {
             name: queueServiceName,
-            image: queueServiceImage.tags.get()![0],
+            image: queueServiceImage.ref,
             env: [
               {
                 name: "SUPABASE_DB_URL",

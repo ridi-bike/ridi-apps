@@ -4,13 +4,13 @@ import * as pulumi from "@pulumi/pulumi";
 
 import { ridiInfraVersion, routerVersionNext, type Region } from "../config";
 import { getCacheLocation, getPbfLocation, ridiDataRootPath } from "../config";
+import { containerRegistryUrl } from "../k8s";
 import { regionVolumeClaims } from "../longhorn-storage";
 import { getNameSafe } from "../util";
 
 const projectName = pulumi.getProject();
 const config = new pulumi.Config();
 
-const containerRegistryUrl = pulumi.interpolate`${config.require("container_registry_url")}/${config.require("container_registry_namespace")}`;
 const routerCacheInitName = "router-cache-init";
 const latestTag = pulumi.interpolate`${containerRegistryUrl}/${projectName}/${routerCacheInitName}:latest`;
 const versionTag = pulumi.interpolate`${containerRegistryUrl}/${projectName}/${routerCacheInitName}:${ridiInfraVersion}`;
@@ -58,7 +58,7 @@ export const getRouterCacheInitContainer = (
   const containerName = `${routerCacheInitName}-${getNameSafe(region.region)}`;
   return {
     name: containerName,
-    image: routerCacheInitImage.tags.get()![0],
+    image: routerCacheInitImage.ref,
     env: [
       {
         name: "REGION",
