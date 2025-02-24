@@ -2,7 +2,7 @@ import * as docker_build from "@pulumi/docker-build";
 import type * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 
-import { routerVersionNext, type Region } from "../config";
+import { ridiInfraVersion, routerVersionNext, type Region } from "../config";
 import { getCacheLocation, getPbfLocation, ridiDataRootPath } from "../config";
 import { regionVolumeClaims } from "../longhorn-storage";
 import { getNameSafe } from "../util";
@@ -13,9 +13,10 @@ const config = new pulumi.Config();
 const containerRegistryUrl = pulumi.interpolate`${config.require("container_registry_url")}/${config.require("container_registry_namespace")}`;
 const routerCacheInitName = "router-cache-init";
 const latestTag = pulumi.interpolate`${containerRegistryUrl}/${projectName}/${routerCacheInitName}:latest`;
+const versionTag = pulumi.interpolate`${containerRegistryUrl}/${projectName}/${routerCacheInitName}:${ridiInfraVersion}`;
 
 const routerCacheInitImage = new docker_build.Image(routerCacheInitName, {
-  tags: [latestTag],
+  tags: [versionTag, latestTag],
   context: {
     location: "../",
   },
@@ -57,7 +58,7 @@ export const getRouterCacheInitContainer = (
   const containerName = `${routerCacheInitName}-${getNameSafe(region.region)}`;
   return {
     name: containerName,
-    image: routerCacheInitImage.ref,
+    image: routerCacheInitImage.tags.get()![0],
     env: [
       {
         name: "REGION",
@@ -84,7 +85,7 @@ export const getRouterCacheInitContainer = (
     volumeMounts: [
       {
         mountPath: ridiDataRootPath,
-        name: storage.name,
+        name: storage.claimName,
       },
     ],
   };
