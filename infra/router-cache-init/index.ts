@@ -20,7 +20,7 @@ const routerCacheInitImage = new docker_build.Image(routerCacheInitName, {
     location: "../",
   },
   dockerfile: {
-    location: "./map-data-init/Containerfile",
+    location: "./router-cache-init/Containerfile",
   },
   buildArgs: {
     ROUTER_VERSION: routerVersionNext,

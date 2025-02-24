@@ -1,4 +1,4 @@
-FROM node:23-alpine as build
+FROM node:23-alpine AS build
 
 WORKDIR /app
 
@@ -16,10 +16,10 @@ ENV ROUTER_BIN=/app/ridi-router
 RUN npm install -g pnpm
 
 COPY ./libs/ ./libs
-COPY ./services/ridi-router ./services/ridi-router
+COPY ./services/router-cache-init ./services/router-cache-init
 COPY ./package.json ./package.json
 COPY ./pnpm-workspace.yaml ./pnpm-workspace.yaml
 
 RUN pnpm install --prod
 
-CMD ["node", "./services/ridi-router/src/index.ts"]
+CMD ["node", "--import=tsx", "./services/router-cache-init/src/index.ts"]
