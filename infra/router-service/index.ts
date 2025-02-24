@@ -58,6 +58,8 @@ const routerServiceImage = new docker_build.Image(routerServiceName, {
   ],
 });
 
+const regionServiceList = {} as Record<string, string>;
+
 for (const region of regions) {
   const storage = regionVolumeClaims[region.region];
   const regionServiceName = `${routerServiceName}-${getNameSafe(region.region)}`;
@@ -138,9 +140,6 @@ for (const region of regions) {
                 },
               },
             ],
-            nodeSelector: {
-              "beta.kubernetes.io/os": "linux",
-            },
           },
         },
       },
@@ -165,4 +164,7 @@ for (const region of regions) {
       selector: routerServiceDeployment.spec.template.metadata.labels,
     },
   });
+  regionServiceList[region.region] = regionServiceName;
 }
+
+export { regionServiceList };
