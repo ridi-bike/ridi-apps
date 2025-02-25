@@ -1,38 +1,39 @@
-import * as turf from "@turf/turf";
 import {
-  TsRestResponse,
-  fetchRequestHandler,
-  tsr,
-} from "@ts-rest/serverless/fetch";
-import * as R from "remeda";
-import type {
-  Request as WorkerRequest,
-  ExecutionContext,
+  type Request as WorkerRequest,
+  type ExecutionContext,
 } from "@cloudflare/workers-types/experimental";
+import { type RoadTags } from "@ridi/api-contracts";
 import {
-  RoadTags,
   apiContract,
   plansListResponseSchema,
   routeGetRespopnseSchema,
   ruleSetsListSchema,
 } from "@ridi/api-contracts";
-import { User, createClient } from "@supabase/supabase-js";
-import { Database } from "./supabase";
-import postgres from "postgres";
-import { Messaging } from "./messaging";
-import { RidiLogger } from "./logging";
 import {
   planCreate,
   planList,
   routeStatsGet,
   routesGet,
   ruleSetGet,
-  ruleSetRoadTagsGet,
   ruleSetRoadTagsUpsert,
   ruleSetsList,
   ruleSetUpsert,
-  ruleSetDelete,
-} from "./queries_sql";
+  ruleSetRoadTagsList,
+  ruleSetSetDeleted,
+} from "@ridi/db-queries";
+import { RidiLogger } from "@ridi/logger";
+import { Messaging } from "@ridi/messaging";
+import { type User } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
+import {
+  TsRestResponse,
+  fetchRequestHandler,
+  tsr,
+} from "@ts-rest/serverless/fetch";
+import * as turf from "@turf/turf";
+import postgres from "postgres";
+import * as R from "remeda";
+
 import { lookupCooordsInfo } from "./maps/lookup";
 
 export type FieldsNotNull<T extends object> = {
@@ -44,9 +45,7 @@ const router = tsr
     workerRequest: WorkerRequest;
     workerEnv: CloudflareBindings;
     workerContext: ExecutionContext;
-    supabaseClient: ReturnType<
-      typeof createClient<Database, "public", Database["public"]>
-    >;
+    supabaseClient: ReturnType<typeof createClient<any, "public", any>>;
     db: ReturnType<typeof postgres>;
     messaging: Messaging;
     logger: RidiLogger;
@@ -64,7 +63,7 @@ const router = tsr
     const rules = await ruleSetsList(ctx.db, {
       userId: ctx.request.user.id,
     });
-    const tags = await ruleSetRoadTagsGet(ctx.db, {
+    const tags = await ruleSetRoadTagsList(ctx.db, {
       userId: ctx.request.user.id,
     });
 
@@ -163,7 +162,7 @@ const router = tsr
       };
     }
 
-    await ruleSetDelete(ctx.db, {
+    await ruleSetSetDeleted(ctx.db, {
       id: body.id,
     });
 
@@ -381,8 +380,7 @@ const router = tsr
   },
 });
 
-RidiLogger.init("cfw-api");
-const ridiLogger = RidiLogger.get();
+const ridiLogger = RidiLogger.init({ service: "cfw-api" });
 
 export default {
   async fetch(
@@ -397,7 +395,7 @@ export default {
           "Access-Control-Allow-Credentials": "true",
           "Access-Control-Allow-Headers":
             "authorization, origin, content-type, accept",
-          "Access-Control-Request-Method": "GET, POST",
+          "Access-Control-Allow-Methods": "GET, POST, DELETE",
         },
       });
     }
@@ -405,7 +403,7 @@ export default {
       return new Response();
     }
 
-    const supabaseClient = createClient<Database, "public", Database["public"]>(
+    const supabaseClient = createClient(
       env.SUPABASE_URL,
       env.SUPABASE_SERVICE_ROLE_KEY,
     );

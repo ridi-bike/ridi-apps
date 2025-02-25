@@ -1,0 +1,9 @@
+{
+  "name": "@ridi/logger",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "type": "module",
+  "dependencies": {
+    "pino": "^9.6.0"
+  }
+}

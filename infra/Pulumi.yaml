@@ -1,0 +1,10 @@
+name: ridi
+description: Ridi
+runtime:
+  name: nodejs
+  options:
+    packagemanager: pnpm
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: kubernetes-typescript

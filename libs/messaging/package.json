@@ -1,0 +1,10 @@
+{
+  "name": "@ridi/messaging",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "type": "module",
+  "dependencies": {
+    "@ridi/logger": "workspace:^",
+    "postgres": "^3.4.5"
+  }
+}

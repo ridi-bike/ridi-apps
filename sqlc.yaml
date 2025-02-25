@@ -9,48 +9,24 @@ plugins:
 sql:
   - schema: "supabase/migrations"
     queries:
-      - "./services/cfw-api/src/queries.sql"
+      - "./libs/db-queries/src/queries.sql"
     engine: postgresql
     database:
       uri: "postgres://postgres:postgres@localhost:54322/postgres"
     codegen:
-      - out: "./services/cfw-api/src"
+      - out: "./libs/db-queries/src/"
         plugin: ts
         options:
           runtime: node
           driver: postgres
   - schema: "supabase/migrations"
     queries:
-      - "./services/cfw-api/src/messaging/messaging.sql"
+      - "./libs/messaging/src/messaging.sql"
     engine: postgresql
     database:
       uri: "postgres://postgres:postgres@localhost:54322/postgres"
     codegen:
-      - out: "./services/cfw-api/src/messaging"
-        plugin: ts
-        options:
-          runtime: node
-          driver: postgres
-  - schema: "supabase/migrations"
-    queries:
-      - "services/ridi-router/packages/lib/queries.sql"
-    engine: postgresql
-    database:
-      uri: "postgres://postgres:postgres@localhost:54322/postgres"
-    codegen:
-      - out: "services/ridi-router/packages/lib/"
-        plugin: ts
-        options:
-          runtime: node
-          driver: postgres
-  - schema: "supabase/migrations"
-    queries:
-      - "services/ridi-router/packages/messaging/messaging.sql"
-    engine: postgresql
-    database:
-      uri: "postgres://postgres:postgres@localhost:54322/postgres"
-    codegen:
-      - out: "services/ridi-router/packages/messaging/"
+      - out: "./libs/messaging/src/"
         plugin: ts
         options:
           runtime: node

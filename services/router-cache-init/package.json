@@ -1,0 +1,22 @@
+{
+  "name": "@ridi/router-cache-init",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "type": "module",
+  "author": "",
+  "scripts": {
+    "tsc": "tsc"
+  },
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@ridi/logger": "workspace:^",
+    "@ridi/messaging": "workspace:^",
+    "json-nd": "^1.0.0",
+    "typescript": "^5.8.1-rc",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "pino-pretty": "^13.0.0"
+  }
+}

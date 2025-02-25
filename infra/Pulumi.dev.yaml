@@ -1,0 +1,5 @@
+environment:
+  - ridi/infra
+  - ridi/dev
+config:
+  kubernetes:context: ridi-dev

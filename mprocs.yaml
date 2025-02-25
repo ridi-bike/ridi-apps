@@ -1,26 +1,30 @@
 procs:
   supabase_status:
     shell: "supabase status"
-  # supabase_functions:
-  #   shell: "supabase functions serve"
   cloudflare-worker-api:
     shell: "pnpm dev"
-    cwd: services/cfw-api
+    cwd: "./services/cfw-api"
   astro:
     shell: "pnpm start"
-    cwd: "apps/astro-app"
+    cwd: "./apps/astro-app"
   expo:
     shell: "pnpm start"
-    cwd: "apps/expo-app"
+    cwd: "./apps/expo-app"
   expo-tsc:
-    shell: "pnpm tsc"
-    cwd: "apps/expo-app"
-  router-handler:
-    shell: "deno task dev | pino-pretty"
-    cwd: "services/ridi-router/router-handler"
-  map-data-handler:
-    shell: "deno task dev | pino-pretty"
-    cwd: "services/ridi-router/map-data-handler"
-  depliy-handler:
-    shell: "deno task dev | pino-pretty"
-    cwd: "services/ridi-router/deploy-handler"
+    shell: "pnpm run tsc"
+    cwd: "./apps/expo-app"
+  queue-service:
+    shell: "node --import=tsx --watch-path=./src --env-file=.env.base src/index.ts | pino-pretty"
+    cwd: "./services/queue-service/"
+  queue-service-tsc:
+    shell: "pnpm run tsc --watch"
+    cwd: "./services/queue-service/"
+  router-service-latvia:
+    shell: "node --import=tsx --watch-path=./src --env-file=.env.latvia src/index.ts | pino-pretty"
+    cwd: "./services/router-service/"
+  router-service-greece:
+    shell: "node --import=tsx --watch-path=./src --env-file=.env.greece src/index.ts | pino-pretty"
+    cwd: "./services/router-service/"
+  router-service-tsc:
+    shell: "pnpm run tsc --watch"
+    cwd: "./services/router-service/"
