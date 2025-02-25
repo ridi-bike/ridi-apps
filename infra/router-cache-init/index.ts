@@ -3,9 +3,9 @@ import type * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 
 import { routerVersionNext, type Region } from "../config";
-import { getCacheLocation, getPbfLocation, ridiDataRootPath } from "../config";
+import { getCacheLocation, getPbfLocation } from "../config";
 import { containerRegistryUrl } from "../k8s";
-import { regionVolumes } from "../longhorn-storage";
+import { ridiDataVolumeSetup } from "../storage";
 import { getNameSafe } from "../util";
 
 const projectName = pulumi.getProject();
@@ -80,11 +80,6 @@ export const getRouterCacheInitContainer = (
         memory: `${region.peakMemoryUsageMb}Mi`,
       },
     },
-    volumeMounts: [
-      {
-        mountPath: ridiDataRootPath,
-        name: regionVolumes[region.region].volume.name,
-      },
-    ],
+    volumeMounts: [ridiDataVolumeSetup.volumeMount],
   };
 };

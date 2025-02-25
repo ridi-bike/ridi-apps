@@ -9,10 +9,9 @@ import {
   getMapDataLocation,
   getPbfLocation,
   getPbfRemoteUrl,
-  ridiDataRootPath,
 } from "../config";
 import { containerRegistryUrl } from "../k8s";
-import { regionVolumes } from "../longhorn-storage";
+import { ridiDataVolumeSetup } from "../storage";
 import { getNameSafe } from "../util";
 
 const projectName = pulumi.getProject();
@@ -92,11 +91,6 @@ export const getMapDataInitContainer = (
         memory: `${region.peakMemoryUsageMb}Mi`,
       },
     },
-    volumeMounts: [
-      {
-        mountPath: ridiDataRootPath,
-        name: regionVolumes[region.region].volume.name,
-      },
-    ],
+    volumeMounts: [ridiDataVolumeSetup.volumeMount],
   };
 };
