@@ -46,7 +46,11 @@ const ridiDataPV = new k8s.core.v1.PersistentVolume(ridiDataPVName, {
               {
                 key: "kubernetes.io/hostname",
                 operator: "In",
-                values: [nodes.find((n) => n.storageNode)!.name],
+                values: [
+                  Object.entries(nodes).find(
+                    ([_host, node]) => node.storageNode,
+                  )![0],
+                ],
               },
             ],
           },

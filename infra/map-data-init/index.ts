@@ -85,6 +85,10 @@ export const getMapDataInitContainer = (
         name: "KML_LOCATION",
         value: getKmlLocation(region.region),
       },
+      {
+        name: "SUPABASE_DB_URL",
+        value: config.requireSecret("supabase_db_url"),
+      },
     ],
     resources: {
       requests: {

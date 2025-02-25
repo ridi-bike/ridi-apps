@@ -43,10 +43,10 @@ export const ghcrSecret = new k8s.core.v1.Secret(ghrSecretName, {
   },
 });
 
-nodes.forEach((node) => {
-  new k8s.core.v1.NodePatch(node.name, {
+Object.entries(nodes).forEach(([hostname, node]) => {
+  new k8s.core.v1.NodePatch(hostname, {
     metadata: {
-      name: node.name,
+      name: hostname,
       labels: node.labels,
     },
   });
