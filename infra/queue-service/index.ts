@@ -80,6 +80,18 @@ new k8s.apps.v1.Deployment(queueServiceName, {
                 value: JSON.stringify(regionServiceList),
               },
             ],
+            startupProbe: {
+              httpGet: {
+                path: "/",
+                port: 3000,
+              },
+            },
+            livenessProbe: {
+              httpGet: {
+                path: "/",
+                port: 3000,
+              },
+            },
           },
         ],
         imagePullSecrets: [

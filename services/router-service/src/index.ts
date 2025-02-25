@@ -92,7 +92,7 @@ const router = s.router(ridiRouterContract, {
   },
   healthcheck: async () => {
     return {
-      status: 200,
+      status: routerServer.getState() === "running" ? 200 : 500,
       body: {
         routerVersion: env.ROUTER_VERSION,
         running: routerServer.getState() === "running",

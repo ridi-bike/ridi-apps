@@ -58,9 +58,11 @@ process.on("SIGUSR2", handleExit);
 // catches uncaught exceptions
 process.on("uncaughtException", (error, origin) => {
   logger.error("uncaughtException", { error, origin });
+  process.exit();
 });
 process.on("unhandledRejection", (reason, promise) => {
   logger.error("unhandledRejection", { reason, promise });
+  process.exit();
 });
 
 const server = createServer(async (_req, res) => {
@@ -77,6 +79,7 @@ const server = createServer(async (_req, res) => {
       );
     }
   } catch (error) {
+    logger.error("Error on healthcheck", { error });
     res.writeHead(500, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "Internal Server Error" }));
   }

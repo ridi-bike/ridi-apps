@@ -121,6 +121,18 @@ for (const region of regions) {
                   },
                 ],
                 volumeMounts: [ridiDataVolumeSetup.volumeMount],
+                startupProbe: {
+                  httpGet: {
+                    path: "/",
+                    port: 3000,
+                  },
+                },
+                livenessProbe: {
+                  httpGet: {
+                    path: "/",
+                    port: 3000,
+                  },
+                },
               },
             ],
             volumes: [ridiDataVolumeSetup.volume],
