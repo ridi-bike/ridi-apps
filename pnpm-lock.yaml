@@ -473,9 +473,6 @@ importers:
       postgres:
         specifier: ^3.4.5
         version: 3.4.5
-      tsx:
-        specifier: ^4.19.3
-        version: 4.19.3
       typescript:
         specifier: ^5.8.1-rc
         version: 5.8.1-rc
@@ -538,9 +535,6 @@ importers:
       json-nd:
         specifier: ^1.0.0
         version: 1.0.0
-      tsx:
-        specifier: ^4.19.3
-        version: 4.19.3
       typescript:
         specifier: ^5.8.1-rc
         version: 5.8.1-rc
@@ -572,9 +566,6 @@ importers:
       json-nd:
         specifier: ^1.0.0
         version: 1.0.0
-      tsx:
-        specifier: ^4.19.3
-        version: 4.19.3
       typescript:
         specifier: ^5.8.1-rc
         version: 5.8.1-rc
