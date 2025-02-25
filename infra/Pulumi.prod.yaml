@@ -1,0 +1,5 @@
+environment:
+  - ridi/infra
+  - ridi/prod
+config:
+  kubernetes:context: ridi-prod
