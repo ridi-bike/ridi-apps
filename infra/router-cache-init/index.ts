@@ -5,7 +5,7 @@ import * as pulumi from "@pulumi/pulumi";
 import { routerVersionNext, type Region } from "../config";
 import { getCacheLocation, getPbfLocation, ridiDataRootPath } from "../config";
 import { containerRegistryUrl } from "../k8s";
-import { regionVolumeClaims } from "../longhorn-storage";
+import { regionVolumes } from "../longhorn-storage";
 import { getNameSafe } from "../util";
 
 const projectName = pulumi.getProject();
@@ -53,7 +53,6 @@ const routerCacheInitImage = new docker_build.Image(routerCacheInitName, {
 export const getRouterCacheInitContainer = (
   region: Region,
 ): pulumi.Input<k8s.types.input.core.v1.Container> => {
-  const storage = regionVolumeClaims[region.region];
   const containerName = `${routerCacheInitName}-${getNameSafe(region.region)}`;
   return {
     name: containerName,
@@ -84,7 +83,7 @@ export const getRouterCacheInitContainer = (
     volumeMounts: [
       {
         mountPath: ridiDataRootPath,
-        name: storage.claimName,
+        name: regionVolumes[region.region].volume.name,
       },
     ],
   };

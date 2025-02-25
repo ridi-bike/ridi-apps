@@ -1,8 +1,8 @@
 import * as k8s from "@pulumi/kubernetes";
 
 import { regions, routerVersion } from "../config";
-import { ghcrSecret } from "../k8s";
-import { regionVolumeClaims } from "../longhorn-storage";
+import { ghcrSecret, ridiNamespace } from "../k8s";
+import { regionVolumes } from "../longhorn-storage";
 import { getRouterCacheInitContainer } from "../router-cache-init";
 import { getNameSafe } from "../util";
 
@@ -11,6 +11,7 @@ for (const region of regions) {
   new k8s.batch.v1.Job(routerCacheJobName, {
     metadata: {
       name: routerCacheJobName,
+      namespace: ridiNamespace.metadata.name,
       labels: {
         name: routerCacheJobName,
       },
@@ -33,7 +34,7 @@ for (const region of regions) {
               ],
             },
           ],
-          volumes: Object.values(regionVolumeClaims).map((vc) => vc.volume),
+          volumes: [regionVolumes[region.region].volume],
           imagePullSecrets: [
             {
               name: ghcrSecret.metadata.name,

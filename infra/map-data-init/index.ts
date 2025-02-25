@@ -12,7 +12,7 @@ import {
   ridiDataRootPath,
 } from "../config";
 import { containerRegistryUrl } from "../k8s";
-import { regionVolumeClaims } from "../longhorn-storage";
+import { regionVolumes } from "../longhorn-storage";
 import { getNameSafe } from "../util";
 
 const projectName = pulumi.getProject();
@@ -57,7 +57,6 @@ const mapDataInitImage = new docker_build.Image(mapDataInitName, {
 export const getMapDataInitContainer = (
   region: Region,
 ): pulumi.Input<k8s.types.input.core.v1.Container> => {
-  const storage = regionVolumeClaims[region.region];
   const containerName = `${mapDataInitName}-${getNameSafe(region.region)}`;
   return {
     name: containerName,
@@ -96,7 +95,7 @@ export const getMapDataInitContainer = (
     volumeMounts: [
       {
         mountPath: ridiDataRootPath,
-        name: storage.claimName,
+        name: regionVolumes[region.region].volume.name,
       },
     ],
   };
