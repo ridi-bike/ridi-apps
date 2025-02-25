@@ -104,6 +104,10 @@ for (const region of regions) {
                     name: "ROUTER_VERSION",
                     value: routerVersion,
                   },
+                  {
+                    name: "PORT",
+                    value: "3000",
+                  },
                 ],
                 resources: {
                   requests: {

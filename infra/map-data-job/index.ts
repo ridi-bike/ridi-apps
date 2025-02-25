@@ -9,43 +9,52 @@ import { getNameSafe } from "../util";
 
 for (const region of regions) {
   const mapDataJobName = `map-data-job-${mapDataDateVersion}-${getNameSafe(region.region)}`;
-  new k8s.batch.v1.Job(mapDataJobName, {
-    metadata: {
-      name: mapDataJobName,
-      namespace: ridiNamespace.metadata.name,
-      labels: {
+  new k8s.batch.v1.Job(
+    mapDataJobName,
+    {
+      metadata: {
         name: mapDataJobName,
+        namespace: ridiNamespace.metadata.name,
+        labels: {
+          name: mapDataJobName,
+        },
+        annotations: {
+          "pulumi.com/skipAwait": "true",
+        },
       },
-    },
-    spec: {
-      backoffLimit: 4, // Number of retries before considering job as failed
-      ttlSecondsAfterFinished: 100, // Clean up completed jobs after 100 seconds
-      template: {
-        spec: {
-          restartPolicy: "OnFailure",
-          initContainers: [
-            getMapDataInitContainer(region),
-            getRouterCacheInitContainer(region),
-          ],
-          containers: [
-            {
-              name: mapDataJobName,
-              image: "busybox:1.36",
-              command: [
-                "sh",
-                "-c",
-                "sleep 5 && echo 'Job completed successfully'",
-              ],
-            },
-          ],
-          volumes: [ridiDataVolumeSetup.volume],
-          imagePullSecrets: [
-            {
-              name: ghcrSecret.metadata.name,
-            },
-          ],
+      spec: {
+        backoffLimit: 4, // Number of retries before considering job as failed
+        template: {
+          spec: {
+            restartPolicy: "OnFailure",
+            initContainers: [
+              getMapDataInitContainer(region),
+              getRouterCacheInitContainer(region),
+            ],
+            containers: [
+              {
+                name: mapDataJobName,
+                image: "busybox:1.36",
+                command: [
+                  "sh",
+                  "-c",
+                  "sleep 5 && echo 'Job completed successfully'",
+                ],
+              },
+            ],
+            volumes: [ridiDataVolumeSetup.volume],
+            imagePullSecrets: [
+              {
+                name: ghcrSecret.metadata.name,
+              },
+            ],
+          },
         },
       },
     },
-  });
+    {
+      deleteBeforeReplace: true,
+      replaceOnChanges: ["*"],
+    },
+  );
 }

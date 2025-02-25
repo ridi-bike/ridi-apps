@@ -42,15 +42,5 @@ export const regions = selectedRegions
   ? allRegions.filter((r) => selectedRegions.includes(r.region))
   : allRegions;
 
-export const nodes: K8sNode[] = [
-  {
-    name: "arch-l13",
-    labels: {
-      "node-role.kubernetes.io/control-plane": "true",
-      "node-role.kubernetes.io/master": "true",
-      "node-role.kubernetes.io/worker": "true",
-      "node.longhorn.io/create-default-disk": "true",
-    },
-    storageNode: true,
-  },
-];
+export const nodes: Record<string, K8sNode> =
+  config.requireObject("cluster_nodes");
