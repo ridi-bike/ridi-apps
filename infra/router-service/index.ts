@@ -10,7 +10,7 @@ import {
   routerVersion,
 } from "../config";
 import { ghcrSecret, ridiNamespace } from "../k8s";
-import { regionVolumeClaims } from "../longhorn-storage";
+import { regionVolumes } from "../longhorn-storage";
 import { getNameSafe } from "../util";
 
 const projectName = pulumi.getProject();
@@ -59,7 +59,6 @@ const routerServiceImage = new docker_build.Image(routerServiceName, {
 const regionServiceList = {} as Record<string, string>;
 
 for (const region of regions) {
-  const storage = regionVolumeClaims[region.region];
   const regionServiceName = `${routerServiceName}-${getNameSafe(region.region)}`;
   const routerServiceDeployment = new k8s.apps.v1.Deployment(
     regionServiceName,
@@ -121,12 +120,12 @@ for (const region of regions) {
                 volumeMounts: [
                   {
                     mountPath: ridiDataRootPath,
-                    name: storage.claimName,
+                    name: regionVolumes[region.region].volume.name,
                   },
                 ],
               },
             ],
-            volumes: [regionVolumeClaims[region.region].volume],
+            volumes: [regionVolumes[region.region].volume],
             imagePullSecrets: [
               {
                 name: ghcrSecret.metadata.name,

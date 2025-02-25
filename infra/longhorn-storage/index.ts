@@ -1,5 +1,5 @@
 import * as k8s from "@pulumi/kubernetes";
-import type * as pulumi from "@pulumi/pulumi";
+import * as pulumi from "@pulumi/pulumi";
 
 import { regions, volumeSizeMemoryMultiplier } from "../config";
 import { ridiNamespace } from "../k8s";
@@ -33,11 +33,9 @@ const longhornStorageClass = new k8s.storage.v1.StorageClass(storageClassName, {
   volumeBindingMode: "Immediate",
   allowVolumeExpansion: true,
 });
-const regionVolumeClaims: Record<
+const regionVolumes: Record<
   string,
   {
-    claim: k8s.core.v1.PersistentVolumeClaim;
-    claimName: pulumi.Input<string>;
     volume: k8s.types.input.core.v1.Volume;
   }
 > = {};
@@ -97,11 +95,9 @@ for (const region of regions) {
     },
   );
 
-  regionVolumeClaims[region.region] = {
-    claim: longhornPVC,
-    claimName: longhornPVC.metadata.name,
+  regionVolumes[region.region] = {
     volume: {
-      name: longhornPV.metadata.name,
+      name: pulumi.interpolate`volume-${longhornPV.metadata.name}`,
       persistentVolumeClaim: {
         claimName: longhornPVC.metadata.name,
       },
@@ -109,4 +105,4 @@ for (const region of regions) {
   };
 }
 
-export { regionVolumeClaims };
+export { regionVolumes };

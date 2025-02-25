@@ -15,7 +15,6 @@
     "@ridi/messaging": "workspace:^",
     "@tmcw/togeojson": "^6.0.1",
     "postgres": "^3.4.5",
-    "tsx": "^4.19.3",
     "typescript": "^5.8.1-rc",
     "xmldom": "^0.6.0",
     "zod": "^3.24.1"
