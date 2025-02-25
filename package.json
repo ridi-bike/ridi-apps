@@ -7,7 +7,7 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "container:build:ridi-router": "podman build -f ./infra/router-service/Containerfile --build-arg-file=./services/router-service/.env -t=ridi-router-service .",
+    "container:build:ridi-router": "podman build -f ./infra/router-service/Containerfile --build-arg-file=./services/router-service/.env.latvia -t=ridi-router-service .",
     "container:run:ridi-router": "podman run --env-file=./services/router-service/.env ridi-router-service"
   },
   "devDependencies": {

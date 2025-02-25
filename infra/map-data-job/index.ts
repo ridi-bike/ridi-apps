@@ -2,9 +2,9 @@ import * as k8s from "@pulumi/kubernetes";
 
 import { mapDataDateVersion, regions } from "../config";
 import { ghcrSecret, ridiNamespace } from "../k8s";
-import { regionVolumes } from "../longhorn-storage";
 import { getMapDataInitContainer } from "../map-data-init";
 import { getRouterCacheInitContainer } from "../router-cache-init";
+import { ridiDataVolumeSetup } from "../storage";
 import { getNameSafe } from "../util";
 
 for (const region of regions) {
@@ -38,7 +38,7 @@ for (const region of regions) {
               ],
             },
           ],
-          volumes: [regionVolumes[region.region].volume],
+          volumes: [ridiDataVolumeSetup.volume],
           imagePullSecrets: [
             {
               name: ghcrSecret.metadata.name,

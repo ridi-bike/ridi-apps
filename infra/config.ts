@@ -51,5 +51,6 @@ export const nodes: K8sNode[] = [
       "node-role.kubernetes.io/worker": "true",
       "node.longhorn.io/create-default-disk": "true",
     },
+    storageNode: true,
   },
 ];

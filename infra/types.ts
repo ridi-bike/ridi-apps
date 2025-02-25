@@ -6,4 +6,5 @@ export type K8sNode = {
     "node-role.kubernetes.io/worker"?: "true" | "false";
     "node.longhorn.io/create-default-disk"?: "true" | "false";
   };
+  storageNode: boolean;
 };
