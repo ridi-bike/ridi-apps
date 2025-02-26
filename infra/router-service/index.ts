@@ -57,6 +57,14 @@ const routerServiceImage = new docker_build.Image(routerServiceName, {
 
 const regionServiceList = {} as Record<string, string>;
 
+// KEDA ScaledObject interface
+type KedaScalingConfig = {
+  minReplicas: number;
+  maxReplicas: number;
+  pollingInterval: number;
+  cooldownPeriod: number;
+};
+
 for (const region of regions) {
   const regionServiceName = getSafeResourceName(
     `${routerServiceName}-${getNameSafe(region.region)}`,
@@ -146,6 +154,76 @@ for (const region of regions) {
           },
         },
       },
+    },
+  );
+
+  // Create KEDA ScaledObject for deployments
+  const canScaleToZero = region.serverStartupS < 10;
+
+  const kedaScaling: KedaScalingConfig = {
+    minReplicas: canScaleToZero ? 0 : 1,
+    maxReplicas: 5,
+    pollingInterval: 10,
+    cooldownPeriod: 300,
+  };
+
+  new k8s.apiextensions.CustomResource(
+    `${regionServiceName}-scaled-object`,
+    {
+      apiVersion: "keda.sh/v1alpha1",
+      kind: "ScaledObject",
+      metadata: {
+        name: `${regionServiceName}-scaler`,
+        namespace: ridiNamespace.metadata.name,
+      },
+      spec: {
+        scaleTargetRef: {
+          name: regionServiceName,
+          kind: "Deployment",
+        },
+        minReplicaCount: kedaScaling.minReplicas,
+        maxReplicaCount: kedaScaling.maxReplicas,
+        pollingInterval: kedaScaling.pollingInterval,
+        cooldownPeriod: kedaScaling.cooldownPeriod,
+        triggers: [
+          {
+            type: "kubernetes-workload",
+            metadata: {
+              podSelector: `name=${regionServiceName}`,
+              value: "1",
+            },
+          },
+        ],
+        advanced: {
+          horizontalPodAutoscalerConfig: {
+            behavior: {
+              scaleDown: {
+                stabilizationWindowSeconds: 300,
+                policies: [
+                  {
+                    type: "Pods",
+                    value: 1,
+                    periodSeconds: 60,
+                  },
+                ],
+              },
+              scaleUp: {
+                stabilizationWindowSeconds: 0,
+                policies: [
+                  {
+                    type: "Pods",
+                    value: 1,
+                    periodSeconds: 10,
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+    },
+    {
+      dependsOn: [routerServiceDeployment],
     },
   );
 

@@ -1,3 +1,5 @@
+import { setTimeout } from "node:timers/promises";
+
 import { type RidiLogger } from "@ridi/logger";
 import {
   ridiRouterContract,
@@ -14,7 +16,7 @@ export class RouterServiceLookup {
     this.logger = logger.withContext({ module: "ridi-service-lookup" });
   }
 
-  callRouterService(region: string, req: RouteReq) {
+  async callRouterService(region: string, req: RouteReq) {
     const routerServiceUrl = env.ROUTER_SERVICE_LIST[region];
 
     if (!routerServiceUrl) {
@@ -24,8 +26,35 @@ export class RouterServiceLookup {
     const client = initClient(ridiRouterContract, {
       baseUrl: routerServiceUrl,
     });
-    return client.generateRoute({
-      body: req,
+
+    const maxRetries = 5;
+    const waitTimeMs = 3000;
+    let lastError: unknown;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await client.generateRoute({
+          body: req,
+        });
+      } catch (error) {
+        lastError = error;
+        this.logger.warn("Router service call failed", {
+          attempt,
+          error,
+          region,
+          willRetry: attempt < maxRetries,
+        });
+
+        if (attempt < maxRetries) {
+          await setTimeout(waitTimeMs);
+        }
+      }
+    }
+
+    throw this.logger.error("Router service call failed after all retries", {
+      region,
+      attempts: maxRetries,
+      error: lastError,
     });
   }
 }
