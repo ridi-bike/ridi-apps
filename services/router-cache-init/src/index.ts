@@ -7,6 +7,7 @@ import { NdJson } from "json-nd";
 import { env } from "./env.ts";
 
 const logger = RidiLogger.init({
+  runTimestamp: Date.now(),
   service: "router-cache-init",
   region: env.REGION,
   routerVersion: env.ROUTER_VERSION,
@@ -56,7 +57,7 @@ try {
       process.stdout.on("data", (data) => {
         if (!(data instanceof Buffer)) {
           throw logger.error(
-            "Data received from router client process on stdout is not a Buffer",
+            "Data received from router prep-cache process on stdout is not a Buffer",
             { name: `${data}` },
           );
         }
@@ -69,8 +70,8 @@ try {
             output: output,
           });
         } catch (error) {
-          logger.error("Router client process output", {
-            data,
+          logger.error("Router prep-cache process output", {
+            text,
             error,
           });
         }
@@ -79,7 +80,7 @@ try {
       process.stderr.on("data", (data) => {
         if (!(data instanceof Buffer)) {
           throw logger.error(
-            "Data received from router client process on stderr is not a Buffer",
+            "Data received from router prep-cache process on stderr is not a Buffer",
             { name: `${data}` },
           );
         }
@@ -92,8 +93,8 @@ try {
             output: output,
           });
         } catch (error) {
-          logger.error("Router client process output", {
-            data,
+          logger.error("Router prep-cache process output", {
+            text,
             error,
           });
         }
@@ -113,5 +114,6 @@ try {
     });
   }
 } catch (error) {
-  throw logger.error("Cache generation failed", { error });
+  logger.error("Cache generation failed", { error });
+  process.exit(1);
 }

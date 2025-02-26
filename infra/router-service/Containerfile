@@ -22,4 +22,4 @@ COPY ./pnpm-workspace.yaml ./pnpm-workspace.yaml
 
 RUN pnpm install --prod
 
-CMD ["node", "--import=tsx", "./services/router-service/src/index.ts"]
+CMD ["node", "--max_old_space_size=32000", "--import=tsx", "./services/router-service/src/index.ts"]

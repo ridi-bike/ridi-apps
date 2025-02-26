@@ -10,6 +10,7 @@ import { DOMParser } from "xmldom";
 import { env } from "./env.ts";
 
 const logger = RidiLogger.init({
+  runTimestamp: Date.now(),
   service: "map-data-init",
   region: env.REGION,
   location: env.MAP_DATA_LOCATION,
@@ -76,7 +77,8 @@ try {
     logger.info("KML saved to db");
   }
 } catch (error) {
-  throw logger.error("Failed to download and process KML", { error });
+  logger.error("Failed to download and process KML", { error });
+  process.exit(1);
 }
 
 try {
@@ -103,5 +105,6 @@ try {
     logger.info("PBF download done");
   }
 } catch (error) {
-  throw logger.error("Failed to download PBF", { error });
+  logger.error("Failed to download PBF", { error });
+  process.exit(1);
 }
