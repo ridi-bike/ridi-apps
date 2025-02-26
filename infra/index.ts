@@ -1,4 +1,4 @@
-import "./better-stack/";
+import "./grafana/";
 import "./map-data-job/";
 // import "./router-cache-job/";
 // import "./queue-service";
