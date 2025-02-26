@@ -10,7 +10,7 @@ import {
 } from "../config";
 import { ghcrSecret, ridiNamespace } from "../k8s";
 import { ridiDataVolumeSetup } from "../storage";
-import { getNameSafe } from "../util";
+import { getNameSafe, getSafeResourceName } from "../util";
 
 const projectName = pulumi.getProject();
 const config = new pulumi.Config();
@@ -58,7 +58,9 @@ const routerServiceImage = new docker_build.Image(routerServiceName, {
 const regionServiceList = {} as Record<string, string>;
 
 for (const region of regions) {
-  const regionServiceName = `${routerServiceName}-${getNameSafe(region.region)}`;
+  const regionServiceName = getSafeResourceName(
+    `${routerServiceName}-${getNameSafe(region.region)}`,
+  );
   const routerServiceDeployment = new k8s.apps.v1.Deployment(
     regionServiceName,
     {

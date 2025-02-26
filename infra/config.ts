@@ -10,20 +10,20 @@ export const ridiInfraVersion = Date.now();
 export const routerVersion = "v0.6.20";
 export const routerVersionNext = "v0.6.20";
 
-export const mapDataDateVersion = "2025-02-19";
+export const mapDataVersionDate = "2025-02-19";
 
 export const ridiDataRootPath = "/ridi-data";
 
 export const volumeSizeMemoryMultiplier = 5;
 
 export function getMapDataLocation(region: string) {
-  return `${ridiDataRootPath}/map-data/${mapDataDateVersion}/${region}`;
+  return `${ridiDataRootPath}/map-data/${mapDataVersionDate}/${region}`;
 }
 export function getPbfRemoteUrl(region: string) {
   return `https://download.geofabrik.de/${region}-latest.osm.pbf`;
 }
 export function getKmlRemoteUrl(region: string) {
-  return `https://download.geofabrik.de/${region}.html`;
+  return `https://download.geofabrik.de/${region}.kml`;
 }
 export function getPbfLocation(region: string) {
   return `${getMapDataLocation(region)}/map.osm.pbf`;
@@ -32,7 +32,7 @@ export function getKmlLocation(region: string) {
   return `${getMapDataLocation(region)}/map.kml`;
 }
 export function getCacheLocation(region: string) {
-  return `${ridiDataRootPath}/cache/${routerVersion}/${mapDataDateVersion}/${region}`;
+  return `${ridiDataRootPath}/cache/${routerVersion}/${mapDataVersionDate}/${region}`;
 }
 
 export type Region = (typeof allRegions)[number];

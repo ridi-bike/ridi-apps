@@ -12,7 +12,7 @@ import {
 } from "../config";
 import { containerRegistryUrl } from "../k8s";
 import { ridiDataVolumeSetup } from "../storage";
-import { getNameSafe } from "../util";
+import { getNameSafe, getSafeResourceName } from "../util";
 
 const projectName = pulumi.getProject();
 const config = new pulumi.Config();
@@ -56,7 +56,9 @@ const mapDataInitImage = new docker_build.Image(mapDataInitName, {
 export const getMapDataInitContainer = (
   region: Region,
 ): pulumi.Input<k8s.types.input.core.v1.Container> => {
-  const containerName = `${mapDataInitName}-${getNameSafe(region.region)}`;
+  const containerName = getSafeResourceName(
+    `${mapDataInitName}-${getNameSafe(region.region)}`,
+  );
   return {
     name: containerName,
     image: mapDataInitImage.ref,

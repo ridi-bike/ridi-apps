@@ -6,7 +6,7 @@ import { routerVersionNext, type Region } from "../config";
 import { getCacheLocation, getPbfLocation } from "../config";
 import { containerRegistryUrl } from "../k8s";
 import { ridiDataVolumeSetup } from "../storage";
-import { getNameSafe } from "../util";
+import { getNameSafe, getSafeResourceName } from "../util";
 
 const projectName = pulumi.getProject();
 const config = new pulumi.Config();
@@ -53,7 +53,9 @@ const routerCacheInitImage = new docker_build.Image(routerCacheInitName, {
 export const getRouterCacheInitContainer = (
   region: Region,
 ): pulumi.Input<k8s.types.input.core.v1.Container> => {
-  const containerName = `${routerCacheInitName}-${getNameSafe(region.region)}`;
+  const containerName = getSafeResourceName(
+    `${routerCacheInitName}-${getNameSafe(region.region)}`,
+  );
   return {
     name: containerName,
     image: routerCacheInitImage.ref,
