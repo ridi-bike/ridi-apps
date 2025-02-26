@@ -16,7 +16,7 @@ function calculateCronSchedule(region: (typeof regions)[0], prevDelay: number) {
   const mbPerMin = 2 * 60;
   const processingMinutes = Math.ceil(region.pbfSizeMb / mbPerMin);
 
-  const totalDelayMinutes = prevDelay * processingMinutes;
+  const totalDelayMinutes = prevDelay + processingMinutes;
 
   const additionalHours = Math.floor(totalDelayMinutes / 60);
   const minutes = totalDelayMinutes % 60;

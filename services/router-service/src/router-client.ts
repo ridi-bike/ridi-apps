@@ -76,7 +76,10 @@ export class RouterClient {
       },
       {} as Record<
         string,
-        { action: "avoid" } | { action: "priority"; value: number }
+        Record<
+          string,
+          { action: "avoid" } | { action: "priority"; value: number }
+        >
       >,
     );
 

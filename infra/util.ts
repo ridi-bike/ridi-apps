@@ -3,7 +3,7 @@ export function getNameSafe(val: string): string {
 }
 
 export function getSafeResourceName(val: string): string {
-  let shortVal = val.slice(0, 60);
+  let shortVal = val.slice(0, 50);
   while (/[^a-zA-Z0-9]$/.test(shortVal)) {
     shortVal = shortVal.slice(0, shortVal.length - 2);
   }

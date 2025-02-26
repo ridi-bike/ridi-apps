@@ -92,11 +92,6 @@ export const getMapDataInitContainer = (
         value: config.requireSecret("supabase_db_url"),
       },
     ],
-    resources: {
-      requests: {
-        memory: `${region.peakMemoryUsageMb}Mi`,
-      },
-    },
     volumeMounts: [ridiDataVolumeSetup.volumeMount],
   };
 };
