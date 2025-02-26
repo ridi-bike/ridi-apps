@@ -7,29 +7,27 @@ import { getRouterCacheInitContainer } from "../router-cache-init";
 import { ridiDataVolumeSetup } from "../storage";
 import { getNameSafe, getSafeResourceName } from "../util";
 
-const baseHour = 16;
-const baseMinute = 15;
+const baseHour = 22;
 
-function calculateCronSchedule(
-  region: (typeof regions)[0],
-  index: number,
-): string {
-  const processingMinutes = Math.ceil(region.pbfSizeMb / (2 * 60));
+function calculateCronSchedule(region: (typeof regions)[0], prevDelay: number) {
+  if (region.region.startsWith("europe")) {
+    return { cron: `${1} ${baseHour} * * *`, delayMin: prevDelay };
+  }
+  const mbPerMin = 2 * 60;
+  const processingMinutes = Math.ceil(region.pbfSizeMb / mbPerMin);
 
-  const bufferMinutes = Math.ceil(processingMinutes * 0.2);
-
-  const totalDelayMinutes =
-    index * (processingMinutes + bufferMinutes) + baseMinute;
+  const totalDelayMinutes = prevDelay * processingMinutes;
 
   const additionalHours = Math.floor(totalDelayMinutes / 60);
   const minutes = totalDelayMinutes % 60;
 
   const hour = (baseHour + additionalHours) % 24;
 
-  return `${minutes} ${hour} * * *`;
+  return { cron: `${minutes} ${hour} * * *`, delayMin: totalDelayMinutes };
 }
 
-regions.forEach((region, index) => {
+regions.reduce((prevDelay, region) => {
+  const { cron, delayMin } = calculateCronSchedule(region, prevDelay);
   const mapDataJobName = getSafeResourceName(
     `map-data-job-${getNameSafe(region.region)}`,
   );
@@ -47,7 +45,7 @@ regions.forEach((region, index) => {
     },
     spec: {
       timeZone: "Etc/UTC",
-      schedule: calculateCronSchedule(region, index),
+      schedule: cron,
       concurrencyPolicy: "Forbid",
       successfulJobsHistoryLimit: 3,
       failedJobsHistoryLimit: 3,
@@ -71,4 +69,6 @@ regions.forEach((region, index) => {
       },
     },
   });
-});
+
+  return delayMin;
+}, 0);
