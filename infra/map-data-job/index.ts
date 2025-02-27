@@ -1,7 +1,7 @@
 import * as k8s from "@pulumi/kubernetes";
 
 import { mapDataVersionDateNext, regions, routerVersionNext } from "../config";
-import { ghcrSecret, ridiNamespace } from "../k8s";
+import { ghcrSecret, ridiNamespace, stackName } from "../k8s";
 import { getMapDataInitContainer } from "../map-data-init";
 import { getRouterCacheInitContainer } from "../router-cache-init";
 import { ridiDataVolumeSetup } from "../storage";
@@ -51,6 +51,7 @@ regions.reduce((prevDelay, region) => {
           backoffLimit: 1,
           template: {
             spec: {
+              hostNetwork: stackName === "dev",
               restartPolicy: "OnFailure",
               initContainers: [getMapDataInitContainer(region)],
               containers: [getRouterCacheInitContainer(region)],

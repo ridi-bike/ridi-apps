@@ -2,7 +2,12 @@ import * as docker_build from "@pulumi/docker-build";
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 
-import { containerRegistryUrl, ghcrSecret, ridiNamespace } from "../k8s";
+import {
+  containerRegistryUrl,
+  ghcrSecret,
+  ridiNamespace,
+  stackName,
+} from "../k8s";
 import { regionServiceList } from "../router-service";
 
 const projectName = pulumi.getProject();
@@ -70,6 +75,7 @@ new k8s.apps.v1.Deployment(queueServiceName, {
         },
       },
       spec: {
+        hostNetwork: stackName === "dev",
         containers: [
           {
             name: queueServiceName,

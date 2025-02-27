@@ -4,7 +4,7 @@ import * as pulumi from "@pulumi/pulumi";
 import { nodes } from "../config";
 
 const projectName = pulumi.getProject();
-const stackName = pulumi.getStack();
+export const stackName = pulumi.getStack();
 const config = new pulumi.Config();
 
 export const ridiNamespace = new k8s.core.v1.Namespace(
