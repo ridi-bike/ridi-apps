@@ -1,10 +1,10 @@
-FROM node:23-alpine AS build
+FROM node:23-bookworm AS build
 
 WORKDIR /app
 
 ARG ROUTER_VERSION
 
-RUN apk add --no-cache curl unzip coreutils gcompat
+RUN apt-get update && apt-get install -y curl unzip coreutils
 
 RUN curl -L "https://github.com/tomsjansons/ridi-router/releases/download/${ROUTER_VERSION}/ridi-router-linux-amd64.zip" -o ridi-router-linux-amd64.zip \
   && unzip ridi-router-linux-amd64.zip \

@@ -172,13 +172,18 @@ export class RouterClient {
     });
 
     try {
-      console.log("=======================", response);
       return JSON.parse(response) as RidiRouterOutput;
     } catch (error) {
-      throw this.logger.error("Router client result not parsable", {
+      this.logger.error("Router client result not parsable", {
         response,
         error,
       });
+      return {
+        id: this.req.reqId,
+        result: {
+          err: "Failed to parse JSON response",
+        },
+      } as RidiRouterOutput;
     }
   }
 }

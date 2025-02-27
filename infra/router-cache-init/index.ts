@@ -79,10 +79,7 @@ export const getRouterCacheInitContainer = (
     ],
     resources: {
       requests: {
-        memory: `${region.peakMemoryUsageMb * 1.2}Mi`,
-      },
-      limits: {
-        memory: `${region.peakMemoryUsageMb * 1.7}Mi`,
+        memory: `${Math.ceil(region.peakMemoryUsageMb * 2)}Mi`,
       },
     },
     volumeMounts: [ridiDataVolumeSetup.volumeMount],
