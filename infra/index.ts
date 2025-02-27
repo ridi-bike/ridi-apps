@@ -1,3 +1,5 @@
 import "./grafana/";
 import "./map-data-job/";
-// import "./queue-service";
+import "./keda/";
+import "./router-service/";
+import "./queue-service";

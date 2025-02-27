@@ -11,4 +11,6 @@ COPY ./pnpm-workspace.yaml ./pnpm-workspace.yaml
 
 RUN pnpm install --prod
 
+EXPOSE 3000
+
 CMD ["node", "--import=tsx", "./services/queue-service/src/index.ts"]

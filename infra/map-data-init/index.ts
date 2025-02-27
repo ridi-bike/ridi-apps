@@ -2,7 +2,7 @@ import * as docker_build from "@pulumi/docker-build";
 import type * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 
-import { type Region } from "../config";
+import { mapDataVersionDateNext, type Region } from "../config";
 import {
   getKmlLocation,
   getKmlRemoteUrl,
@@ -69,7 +69,7 @@ export const getMapDataInitContainer = (
       },
       {
         name: "MAP_DATA_LOCATION",
-        value: getMapDataLocation(region.region),
+        value: getMapDataLocation(region.region, mapDataVersionDateNext),
       },
       {
         name: "PBF_REMOTE_URL",
@@ -81,11 +81,11 @@ export const getMapDataInitContainer = (
       },
       {
         name: "PBF_LOCATION",
-        value: getPbfLocation(region.region),
+        value: getPbfLocation(region.region, mapDataVersionDateNext),
       },
       {
         name: "KML_LOCATION",
-        value: getKmlLocation(region.region),
+        value: getKmlLocation(region.region, mapDataVersionDateNext),
       },
       {
         name: "SUPABASE_DB_URL",

@@ -108,3 +108,5 @@ try {
   logger.error("Failed to download PBF", { error });
   process.exit(1);
 }
+
+logger.info("Starting Map Data init done");

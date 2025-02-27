@@ -3,6 +3,7 @@ FROM node:23-bookworm AS build
 WORKDIR /app
 
 ARG ROUTER_VERSION
+ARG PORT
 
 RUN apt-get update && apt-get install -y curl unzip coreutils
 
@@ -21,5 +22,7 @@ COPY ./package.json ./package.json
 COPY ./pnpm-workspace.yaml ./pnpm-workspace.yaml
 
 RUN pnpm install --prod
+
+EXPOSE ${PORT}
 
 CMD ["node", "--max_old_space_size=32000", "--import=tsx", "./services/router-service/src/index.ts"]

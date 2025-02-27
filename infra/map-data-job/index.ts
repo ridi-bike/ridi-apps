@@ -1,6 +1,6 @@
 import * as k8s from "@pulumi/kubernetes";
 
-import { mapDataVersionDate, regions } from "../config";
+import { mapDataVersionDateNext, regions, routerVersionNext } from "../config";
 import { ghcrSecret, ridiNamespace } from "../k8s";
 import { getMapDataInitContainer } from "../map-data-init";
 import { getRouterCacheInitContainer } from "../router-cache-init";
@@ -28,51 +28,44 @@ regions.reduce((prevDelay, region) => {
   const mapDataJobName = getSafeResourceName(
     `map-data-job-${getNameSafe(region.region)}`,
   );
-  new k8s.batch.v1.CronJob(
-    mapDataJobName,
-    {
-      metadata: {
+  new k8s.batch.v1.CronJob(mapDataJobName, {
+    metadata: {
+      name: mapDataJobName,
+      namespace: ridiNamespace.metadata.name,
+      labels: {
         name: mapDataJobName,
-        namespace: ridiNamespace.metadata.name,
-        labels: {
-          name: mapDataJobName,
-        },
-        annotations: {
-          "pulumi.com/skipAwait": "true",
-          "ridi.bike/mapDataVersionDate": mapDataVersionDate,
-        },
       },
-      spec: {
-        timeZone: "Etc/UTC",
-        schedule: cron,
-        concurrencyPolicy: "Forbid",
-        successfulJobsHistoryLimit: 3,
-        failedJobsHistoryLimit: 3,
-        jobTemplate: {
-          spec: {
-            backoffLimit: 1,
-            template: {
-              spec: {
-                restartPolicy: "OnFailure",
-                initContainers: [getMapDataInitContainer(region)],
-                containers: [getRouterCacheInitContainer(region)],
-                volumes: [ridiDataVolumeSetup.volume],
-                imagePullSecrets: [
-                  {
-                    name: ghcrSecret.metadata.name,
-                  },
-                ],
-              },
+      annotations: {
+        "ridi.bike/mapDataVersionDateNext": mapDataVersionDateNext,
+        "ridi.bike/routerVersionNext": routerVersionNext,
+      },
+    },
+    spec: {
+      timeZone: "Etc/UTC",
+      schedule: cron,
+      concurrencyPolicy: "Forbid",
+      successfulJobsHistoryLimit: 3,
+      failedJobsHistoryLimit: 3,
+      jobTemplate: {
+        spec: {
+          backoffLimit: 1,
+          template: {
+            spec: {
+              restartPolicy: "OnFailure",
+              initContainers: [getMapDataInitContainer(region)],
+              containers: [getRouterCacheInitContainer(region)],
+              volumes: [ridiDataVolumeSetup.volume],
+              imagePullSecrets: [
+                {
+                  name: ghcrSecret.metadata.name,
+                },
+              ],
             },
           },
         },
       },
     },
-    {
-      replaceOnChanges: ["*"],
-      deleteBeforeReplace: true,
-    },
-  );
+  });
 
   return delayMin;
 }, 0);

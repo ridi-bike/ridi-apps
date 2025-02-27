@@ -9,3 +9,7 @@ export function getSafeResourceName(val: string): string {
   }
   return shortVal;
 }
+
+export function getRouterMemoryRequest(mem: number) {
+  return `${Math.ceil(mem * 2)}Mi`;
+}

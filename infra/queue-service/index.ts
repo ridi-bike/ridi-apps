@@ -44,6 +44,10 @@ const queueServiceImage = new docker_build.Image(queueServiceName, {
   ],
 });
 
+const serviceListStr = pulumi
+  .all(regionServiceList)
+  .apply((v) => JSON.stringify(v));
+
 new k8s.apps.v1.Deployment(queueServiceName, {
   metadata: {
     name: queueServiceName,
@@ -77,7 +81,7 @@ new k8s.apps.v1.Deployment(queueServiceName, {
               },
               {
                 name: "ROUTER_SERVICE_LIST",
-                value: JSON.stringify(regionServiceList),
+                value: serviceListStr,
               },
             ],
             startupProbe: {

@@ -105,8 +105,8 @@ app.register(s.plugin(router));
 
 const start = async () => {
   try {
-    logger.info("Service listening", { port: env.PORT });
-    await app.listen({ port: env.PORT });
+    logger.info("Healthcheck listening", { port: env.PORT });
+    await app.listen({ port: env.PORT, host: "0.0.0.0" });
   } catch (err) {
     app.log.error(err);
     process.exit(1);

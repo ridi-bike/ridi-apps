@@ -5,12 +5,17 @@ import * as pulumi from "@pulumi/pulumi";
 import {
   getCacheLocation,
   getPbfLocation,
+  mapDataVersionDate,
   regions,
   routerVersion,
 } from "../config";
 import { ghcrSecret, ridiNamespace } from "../k8s";
 import { ridiDataVolumeSetup } from "../storage";
-import { getNameSafe, getSafeResourceName } from "../util";
+import {
+  getNameSafe,
+  getRouterMemoryRequest,
+  getSafeResourceName,
+} from "../util";
 
 const projectName = pulumi.getProject();
 const config = new pulumi.Config();
@@ -29,6 +34,7 @@ const routerServiceImage = new docker_build.Image(routerServiceName, {
   },
   buildArgs: {
     ROUTER_VERSION: routerVersion,
+    PORT: "3000",
   },
   cacheFrom: [
     {
@@ -55,9 +61,8 @@ const routerServiceImage = new docker_build.Image(routerServiceName, {
   ],
 });
 
-const regionServiceList = {} as Record<string, string>;
+const regionServiceList = {} as Record<string, pulumi.Output<string>>;
 
-// KEDA ScaledObject interface
 type KedaScalingConfig = {
   minReplicas: number;
   maxReplicas: number;
@@ -78,9 +83,14 @@ for (const region of regions) {
           name: regionServiceName,
         },
         namespace: ridiNamespace.metadata.name,
+        annotations: {
+          "ridi.bike/mapDataVersionDate": mapDataVersionDate,
+          "ridi.bike/routerVersion": routerVersion,
+          "pulumi.com/patchForce": "true",
+        },
       },
       spec: {
-        replicas: 1,
+        replicas: region.serverStartupS < 10 ? 0 : 1,
         selector: {
           matchLabels: {
             name: regionServiceName,
@@ -104,11 +114,11 @@ for (const region of regions) {
                   },
                   {
                     name: "PBF_LOCATION",
-                    value: getPbfLocation(region.region),
+                    value: getPbfLocation(region.region, mapDataVersionDate),
                   },
                   {
                     name: "CACHE_LOCATION",
-                    value: getCacheLocation(region.region),
+                    value: getCacheLocation(region.region, mapDataVersionDate),
                   },
                   {
                     name: "ROUTER_VERSION",
@@ -121,7 +131,7 @@ for (const region of regions) {
                 ],
                 resources: {
                   requests: {
-                    memory: `${region.peakMemoryUsageMb}Mi`,
+                    memory: getRouterMemoryRequest(region.peakMemoryUsageMb),
                   },
                 },
                 ports: [
@@ -134,14 +144,26 @@ for (const region of regions) {
                 startupProbe: {
                   httpGet: {
                     path: "/",
-                    port: 3000,
+                    port: "api",
+                    scheme: "HTTP",
                   },
+                  initialDelaySeconds: 10,
+                  periodSeconds: 10,
+                  timeoutSeconds: 5,
+                  successThreshold: 1,
+                  failureThreshold: 90,
                 },
                 livenessProbe: {
                   httpGet: {
                     path: "/",
-                    port: 3000,
+                    port: "api",
+                    scheme: "HTTP",
                   },
+                  initialDelaySeconds: 15,
+                  periodSeconds: 2,
+                  timeoutSeconds: 1,
+                  successThreshold: 1,
+                  failureThreshold: 3,
                 },
               },
             ],
@@ -157,7 +179,6 @@ for (const region of regions) {
     },
   );
 
-  // Create KEDA ScaledObject for deployments
   const canScaleToZero = region.serverStartupS < 10;
 
   const kedaScaling: KedaScalingConfig = {
@@ -227,7 +248,7 @@ for (const region of regions) {
     },
   );
 
-  new k8s.core.v1.Service(regionServiceName, {
+  const service = new k8s.core.v1.Service(regionServiceName, {
     metadata: {
       name: regionServiceName,
       labels: {
@@ -245,7 +266,9 @@ for (const region of regions) {
       selector: routerServiceDeployment.spec.template.metadata.labels,
     },
   });
-  regionServiceList[region.region] = regionServiceName;
+
+  const serviceAddress = pulumi.interpolate`${service.metadata.name}.${ridiNamespace.metadata.name}.svc.cluster.local:3000`;
+  regionServiceList[region.region] = serviceAddress;
 }
 
 export { regionServiceList };

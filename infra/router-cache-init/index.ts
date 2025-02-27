@@ -2,11 +2,19 @@ import * as docker_build from "@pulumi/docker-build";
 import type * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 
-import { routerVersionNext, type Region } from "../config";
+import {
+  mapDataVersionDateNext,
+  routerVersionNext,
+  type Region,
+} from "../config";
 import { getCacheLocation, getPbfLocation } from "../config";
 import { containerRegistryUrl } from "../k8s";
 import { ridiDataVolumeSetup } from "../storage";
-import { getNameSafe, getSafeResourceName } from "../util";
+import {
+  getNameSafe,
+  getRouterMemoryRequest,
+  getSafeResourceName,
+} from "../util";
 
 const projectName = pulumi.getProject();
 const config = new pulumi.Config();
@@ -66,11 +74,11 @@ export const getRouterCacheInitContainer = (
       },
       {
         name: "PBF_LOCATION",
-        value: getPbfLocation(region.region),
+        value: getPbfLocation(region.region, mapDataVersionDateNext),
       },
       {
         name: "CACHE_LOCATION",
-        value: getCacheLocation(region.region),
+        value: getCacheLocation(region.region, mapDataVersionDateNext),
       },
       {
         name: "ROUTER_VERSION",
@@ -79,7 +87,7 @@ export const getRouterCacheInitContainer = (
     ],
     resources: {
       requests: {
-        memory: `${Math.ceil(region.peakMemoryUsageMb * 2)}Mi`,
+        memory: getRouterMemoryRequest(region.peakMemoryUsageMb),
       },
     },
     volumeMounts: [ridiDataVolumeSetup.volumeMount],

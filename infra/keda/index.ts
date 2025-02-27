@@ -10,7 +10,7 @@ const kedaNamespace = new k8s.core.v1.Namespace("keda", {
   },
 });
 
-const kedaHelmRelease = new k8s.helm.v3.Release(
+new k8s.helm.v3.Release(
   "keda",
   {
     chart: "keda",
@@ -37,7 +37,3 @@ const kedaHelmRelease = new k8s.helm.v3.Release(
     dependsOn: [kedaNamespace],
   },
 );
-
-// Export some useful information
-export const kedaNamespaceName = kedaNamespace.metadata.name;
-export const kedaReleaseName = kedaHelmRelease.name;

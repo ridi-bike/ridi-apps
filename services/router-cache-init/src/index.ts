@@ -18,8 +18,6 @@ logger.info("Starting Router Cache init", {
   cacheLocation: env.CACHE_LOCATION,
 });
 
-logger.info("Router client starting");
-
 try {
   let generateCache = true;
 
@@ -46,6 +44,8 @@ try {
   }
 
   if (generateCache) {
+    logger.info("Router prep-cache starting");
+
     const process = spawn(env.ROUTER_BIN, [
       "prep-cache",
       "--input",
@@ -105,7 +105,7 @@ try {
           resolve();
         } else {
           reject(
-            logger.error("Router client process closed with nonzero code", {
+            logger.error("Router prep-cache process closed with nonzero code", {
               exitCode,
             }),
           );
@@ -117,3 +117,5 @@ try {
   logger.error("Cache generation failed", { error });
   process.exit(1);
 }
+
+logger.info("Starting Router Cache init done");
