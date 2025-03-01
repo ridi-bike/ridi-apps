@@ -63,6 +63,12 @@ new k8s.apps.v1.Deployment(queueServiceName, {
   },
   spec: {
     replicas: 1,
+    strategy:
+      stackName === "dev"
+        ? {
+            type: "Recreate",
+          }
+        : undefined,
     selector: {
       matchLabels: {
         name: queueServiceName,
@@ -72,6 +78,9 @@ new k8s.apps.v1.Deployment(queueServiceName, {
       metadata: {
         labels: {
           name: queueServiceName,
+        },
+        annotations: {
+          "pulumi.com/skipAwait": "true",
         },
       },
       spec: {
