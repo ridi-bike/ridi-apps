@@ -24,7 +24,7 @@ export class RouterServiceLookup {
     }
 
     const client = initClient(ridiRouterContract, {
-      baseUrl: routerServiceUrl,
+      baseUrl: `http://${routerServiceUrl}`,
     });
 
     const maxRetries = 5;
