@@ -33,15 +33,18 @@ export class RouterServiceLookup {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        return await client.generateRoute({
+        const result = await client.generateRoute({
           body: req,
         });
+        return result;
       } catch (error) {
+        console.error(error);
         lastError = error;
         this.logger.warn("Router service call failed", {
           attempt,
           error,
           region,
+          routerServiceUrl,
           willRetry: attempt < maxRetries,
         });
 

@@ -66,7 +66,13 @@ const routerServiceImage = new docker_build.Image(routerServiceName, {
 const regionServiceList = {} as Record<string, pulumi.Output<string>>;
 
 for (const region of regions) {
-  const shouldScaleToZero = region.serverStartupS < 10;
+  const shouldScaleToZero =
+    region.serverStartupS < 10 ||
+    region.region.startsWith("asia") ||
+    region.region.startsWith("africa") ||
+    region.region.startsWith("south-america") ||
+    region.region.startsWith("central-america");
+
   const regionServiceName = getSafeResourceName(
     `${routerServiceName}-${getNameSafe(region.region)}`,
   );
@@ -83,9 +89,13 @@ for (const region of regions) {
           "ridi.bike/mapDataVersionDate": mapDataVersionDate,
           "ridi.bike/routerVersion": routerVersion,
           "pulumi.com/patchForce": "true",
+          "pulumi.com/skipAwait": "true",
         },
       },
       spec: {
+        strategy: {
+          type: "Recreate",
+        },
         replicas: shouldScaleToZero ? 0 : 1,
         selector: {
           matchLabels: {
@@ -181,6 +191,9 @@ for (const region of regions) {
         name: regionServiceName,
       },
       namespace: ridiNamespace.metadata.name,
+      annotations: {
+        "pulumi.com/skipAwait": "true",
+      },
     },
     spec: {
       ports: [
@@ -294,9 +307,15 @@ for (const region of regions) {
             "app.kubernetes.io/name": zpaDeploymentName,
           },
           namespace: ridiNamespace.metadata.name,
+          annotations: {
+            "pulumi.com/skipAwait": "true",
+          },
         },
 
         spec: {
+          strategy: {
+            type: "Recreate",
+          },
           replicas: 1,
           selector: {
             matchLabels: {
@@ -327,7 +346,7 @@ for (const region of regions) {
                     pulumi.interpolate`--address=0.0.0.0:${port}`,
                     pulumi.interpolate`--endpoints=${routerServiceService.metadata.name}`,
                     pulumi.interpolate`--target=${routerServiceService.metadata.name}:${port}`,
-                    "--ttl=10m",
+                    "--ttl=30m",
                   ],
                   ports: [
                     {
@@ -365,6 +384,9 @@ for (const region of regions) {
           "app.kubernetes.io/name": zpaDeployment.metadata.name,
         },
         namespace: ridiNamespace.metadata.name,
+        annotations: {
+          "pulumi.com/skipAwait": "true",
+        },
       },
       spec: {
         ports: [

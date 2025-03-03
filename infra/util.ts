@@ -11,5 +11,5 @@ export function getSafeResourceName(val: string): string {
 }
 
 export function getRouterMemoryRequest(mem: number) {
-  return `${Math.ceil(mem * 2)}Mi`;
+  return `${Math.ceil(mem / 2)}Mi`;
 }

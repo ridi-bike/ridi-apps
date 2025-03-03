@@ -8,6 +8,7 @@ export class RidiLogger {
 
   static init(context: Record<string, unknown>) {
     const innerLogger = pino({
+      serializers: pino.stdSerializers,
       formatters: {
         level: (label) => {
           return {

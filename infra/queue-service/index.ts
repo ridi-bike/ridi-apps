@@ -60,15 +60,15 @@ new k8s.apps.v1.Deployment(queueServiceName, {
       name: queueServiceName,
     },
     namespace: ridiNamespace.metadata.name,
+    annotations: {
+      "pulumi.com/skipAwait": "true",
+    },
   },
   spec: {
     replicas: 1,
-    strategy:
-      stackName === "dev"
-        ? {
-            type: "Recreate",
-          }
-        : undefined,
+    strategy: {
+      type: "Recreate",
+    },
     selector: {
       matchLabels: {
         name: queueServiceName,

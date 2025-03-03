@@ -22,43 +22,50 @@ const localPathStorageClass = new k8s.storage.v1.StorageClass(
 
 const ridiDataPVName = "ridi-data-pv";
 const ridiDataStorageSize = "450Gi";
-const ridiDataPV = new k8s.core.v1.PersistentVolume(ridiDataPVName, {
-  metadata: {
-    name: ridiDataPVName,
-    namespace: ridiNamespace.metadata.name,
-  },
-  spec: {
-    capacity: {
-      storage: ridiDataStorageSize,
+const ridiDataPV = new k8s.core.v1.PersistentVolume(
+  ridiDataPVName,
+  {
+    metadata: {
+      name: ridiDataPVName,
+      namespace: ridiNamespace.metadata.name,
     },
-    volumeMode: "Filesystem",
-    accessModes: ["ReadWriteOnce"],
-    persistentVolumeReclaimPolicy: "Retain",
-    storageClassName: localPathStorageClass.metadata.name,
-    local: {
-      path: "/ridi-data",
-    },
-    nodeAffinity: {
-      required: {
-        nodeSelectorTerms: [
-          {
-            matchExpressions: [
-              {
-                key: "kubernetes.io/hostname",
-                operator: "In",
-                values: [
-                  Object.entries(nodes).find(
-                    ([_host, node]) => node.storageNode,
-                  )![0],
-                ],
-              },
-            ],
-          },
-        ],
+    spec: {
+      capacity: {
+        storage: ridiDataStorageSize,
+      },
+      volumeMode: "Filesystem",
+      accessModes: ["ReadWriteOnce"],
+      persistentVolumeReclaimPolicy: "Retain",
+      storageClassName: localPathStorageClass.metadata.name,
+      local: {
+        path: "/ridi-data",
+      },
+      nodeAffinity: {
+        required: {
+          nodeSelectorTerms: [
+            {
+              matchExpressions: [
+                {
+                  key: "kubernetes.io/hostname",
+                  operator: "In",
+                  values: [
+                    ...Object.entries(nodes)
+                      .filter(([_host, node]) => node.storageNode)
+                      .map(([host, _node]) => host),
+                  ],
+                },
+              ],
+            },
+          ],
+        },
       },
     },
   },
-});
+  {
+    deleteBeforeReplace: true,
+    replaceOnChanges: ["*"],
+  },
+);
 
 const rididDataPVCName = "ridi-data-pvc";
 const ridiDataPVC = new k8s.core.v1.PersistentVolumeClaim(rididDataPVCName, {
