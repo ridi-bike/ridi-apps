@@ -153,11 +153,11 @@ for (const region of regions) {
                     port: "api",
                     scheme: "HTTP",
                   },
-                  initialDelaySeconds: 10,
-                  periodSeconds: 10,
+                  initialDelaySeconds: 1,
+                  periodSeconds: 1,
                   timeoutSeconds: 5,
                   successThreshold: 1,
-                  failureThreshold: 90,
+                  failureThreshold: 600,
                 },
                 livenessProbe: {
                   httpGet: {
