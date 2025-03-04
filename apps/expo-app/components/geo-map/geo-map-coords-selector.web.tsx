@@ -63,13 +63,20 @@ export function GeoMapCoordsSelector({
 
   const mapBounds = useMemo(() => {
     const allPoints = [
-      ...(start ? [[start.lon, start.lat]] : []),
-      ...(finish ? [[finish.lon, finish.lat]] : []),
-      ...(current ? [[current.lon, current.lat]] : []),
-      ...(points || []).map((p) => [p.coords.lon, p.coords.lat]),
+      ...(start ? [[start.lon, start.lat] as [number, number]] : []),
+      ...(finish ? [[finish.lon, finish.lat] as [number, number]] : []),
+      ...(current ? [[current.lon, current.lat] as [number, number]] : []),
+      ...(points || []).map(
+        (p) => [p.coords.lon, p.coords.lat] as [number, number],
+      ),
     ];
     if (!allPoints.length) {
       return null;
+    }
+    if (allPoints.length === 1) {
+      const p = allPoints[0];
+      allPoints.push([p[0] - 0.12, p[1] - 0.09]);
+      allPoints.push([p[0] + 0.09, p[1] + 0.12]);
     }
     const pointsFeatures = turf.points(allPoints);
     const pointsBbox = turf.bbox(pointsFeatures);
@@ -166,8 +173,18 @@ export function GeoMapCoordsSelector({
           lat={findCoordsCurr.lat}
           lon={findCoordsCurr.lon}
           title="Point"
-          setStart={() => setStart(findCoordsCurr)}
-          setFinish={isRoundTrip ? undefined : () => setFinish(findCoordsCurr)}
+          setStart={() => {
+            setStart(findCoordsCurr);
+            setFindCoordsCurr(null);
+          }}
+          setFinish={
+            isRoundTrip
+              ? undefined
+              : () => {
+                  setFinish(findCoordsCurr);
+                  setFindCoordsCurr(null);
+                }
+          }
           isDialogOpen={findCoordsCurr.tapped}
         >
           <CircleDotIcon className="size-8 text-yellow-500" />

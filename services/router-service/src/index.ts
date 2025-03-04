@@ -124,9 +124,11 @@ process.on("SIGUSR1", handleExit);
 process.on("SIGUSR2", handleExit);
 process.on("uncaughtException", (error, origin) => {
   logger.error("uncaughtException", { error, origin });
+  process.exit(1);
 });
 process.on("unhandledRejection", (reason, promise) => {
   logger.error("unhandledRejection", { reason, promise });
+  process.exit(1);
 });
 
 start();

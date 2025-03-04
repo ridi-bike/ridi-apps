@@ -146,8 +146,6 @@ export default function PlansNew() {
     }
   }, [finishCoords]);
 
-  console.log({ finishCoords, startCoords, startDesc, finishDesc });
-
   const getCurrentLocation = useCallback(async () => {
     if (currentCoords) {
       setCurrentCoords(null);
@@ -236,46 +234,67 @@ export default function PlansNew() {
       )}
       <View className="max-w-3xl flex-1 p-4 pb-24">
         <GroupWithTitle title="Trip details">
-          <View className="flex flex-col items-start justify-start p-2">
-            <View className="flex flex-row items-center gap-2">
-              <CirclePlayIcon className="size-4 text-[#FF5937]" />
-              <Text className="text-sm dark:text-gray-200">
-                {isRoundTrip ? "Start/Finish Point: " : "Start: "}
-                {startCoords
-                  ? startDesc ||
-                    `${startCoords[0].toFixed(4)}, ${startCoords[1].toFixed(4)}`
-                  : "Not set"}
-              </Text>
-            </View>
-            {!isRoundTrip && (
-              <View className="flex flex-row items-center gap-2">
-                <CirclePauseIcon className="size-4 text-[#FF5937]" />
-                <Text className="text-sm dark:text-gray-200">
-                  Finish:{" "}
-                  {finishCoords
-                    ? finishDesc ||
-                      `${finishCoords[0].toFixed(4)}, ${finishCoords[1].toFixed(4)}`
-                    : "Not set"}
+          <AnimatePresence>
+            {!startCoords && !finishCoords && (
+              <MotiView
+                from={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 1 }}
+                className="flex h-14 flex-row items-center justify-center"
+              >
+                <Text className="text-xl dark:text-gray-200">
+                  Tap on map to start
                 </Text>
-              </View>
+              </MotiView>
             )}
-            {isRoundTrip && (
-              <View className="flex flex-row items-center gap-6">
+            {(startCoords || finishCoords) && (
+              <MotiView
+                from={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 1 }}
+                className="flex h-14 flex-col items-start justify-start p-2"
+              >
                 <View className="flex flex-row items-center gap-2">
-                  <StretchHorizontal className="size-4 text-[#FF5937]" />
+                  <CirclePlayIcon className="size-4 text-[#FF5937]" />
                   <Text className="text-sm dark:text-gray-200">
-                    Trip: ~{selectedDistance}km
+                    {isRoundTrip ? "Start/Finish Point: " : "Start: "}
+                    {startCoords
+                      ? startDesc ||
+                        `${startCoords[0].toFixed(4)}, ${startCoords[1].toFixed(4)}`
+                      : "Not set"}
                   </Text>
                 </View>
-                <View className="flex flex-row items-center gap-2">
-                  <Compass className="size-4 text-[#FF5937]" />
-                  <Text className="text-sm dark:text-gray-200">
-                    {getCardinalDirection(bearing || 0)} ({bearing || 0}°)
-                  </Text>
-                </View>
-              </View>
+                {!isRoundTrip && (
+                  <View className="flex flex-row items-center gap-2">
+                    <CirclePauseIcon className="size-4 text-[#FF5937]" />
+                    <Text className="text-sm dark:text-gray-200">
+                      Finish:{" "}
+                      {finishCoords
+                        ? finishDesc ||
+                          `${finishCoords[0].toFixed(4)}, ${finishCoords[1].toFixed(4)}`
+                        : "Not set"}
+                    </Text>
+                  </View>
+                )}
+                {isRoundTrip && (
+                  <View className="flex flex-row items-center gap-6">
+                    <View className="flex flex-row items-center gap-2">
+                      <StretchHorizontal className="size-4 text-[#FF5937]" />
+                      <Text className="text-sm dark:text-gray-200">
+                        Trip: ~{selectedDistance}km
+                      </Text>
+                    </View>
+                    <View className="flex flex-row items-center gap-2">
+                      <Compass className="size-4 text-[#FF5937]" />
+                      <Text className="text-sm dark:text-gray-200">
+                        {getCardinalDirection(bearing || 0)} ({bearing || 0}°)
+                      </Text>
+                    </View>
+                  </View>
+                )}
+              </MotiView>
             )}
-          </View>
+          </AnimatePresence>
         </GroupWithTitle>
         <GroupWithTitle title="Show on map">
           <Pressable
@@ -417,7 +436,9 @@ export default function PlansNew() {
                 )}
               >
                 <Waypoints className="size-4 dark:text-gray-200" />
-                <Text className="text-sm dark:text-gray-200">{rs.name}</Text>
+                <Text className="text-center text-sm dark:text-gray-200">
+                  {rs.name}
+                </Text>
               </Pressable>
             ))}
           <Pressable
