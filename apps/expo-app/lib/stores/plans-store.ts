@@ -111,7 +111,7 @@ export function useStorePlans() {
 
       const plan: Plan = {
         id,
-        name: `from ${planNew.startLat},${planNew.startLon} to ${planNew.finishLat},${planNew.finishLon}`,
+        name: `${planNew.startLat},${planNew.startLon} to ${planNew.finishLat},${planNew.finishLon}`,
         startLat: planNew.startLat,
         startLon: planNew.startLon,
         startDesc: `${planNew.startLat},${planNew.startLon}`,

@@ -22,6 +22,7 @@ import {
   ruleSetSetDeleted,
 } from "@ridi/db-queries";
 import { RidiLogger } from "@ridi/logger";
+import { lookupCooordsInfo } from "@ridi/maps-api";
 import { Messaging } from "@ridi/messaging";
 import { type User } from "@supabase/supabase-js";
 import { createClient } from "@supabase/supabase-js";
@@ -33,8 +34,6 @@ import {
 import * as turf from "@turf/turf";
 import postgres from "postgres";
 import * as R from "remeda";
-
-import { lookupCooordsInfo } from "./maps/lookup";
 
 export type FieldsNotNull<T extends object> = {
   [n in keyof T]: NonNullable<T[n]>;
@@ -370,6 +369,7 @@ const router = tsr
         body: validated.data,
       };
     } catch (error) {
+      ctx.logger.error("Route get error", { error });
       return {
         status: 500,
         body: {

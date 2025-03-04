@@ -1,3 +1,4 @@
+import { coordsAddressCacheInsert } from "@ridi/maps-api";
 import { useRootNavigationState, useRouter } from "expo-router";
 import {
   Search,
@@ -99,6 +100,16 @@ export default function LocationSearch() {
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`,
       );
       const data = await response.json();
+
+      (data as Location[]).forEach((loc) =>
+        coordsAddressCacheInsert(
+          {
+            lat: Number(loc.lat),
+            lon: Number(loc.lon),
+          },
+          loc.display_name,
+        ),
+      );
       setLocations(data);
       setSearching(false);
     } catch (error) {

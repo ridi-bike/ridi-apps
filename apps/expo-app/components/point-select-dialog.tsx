@@ -24,14 +24,16 @@ export function PointSelectDialog({
   setStart,
   setFinish,
   unset,
+  isDialogOpen,
 }: GeoMapMarkerProps & {
   title: string;
   description: string;
   setStart?: () => void;
   setFinish?: () => void;
   unset?: () => void;
+  isDialogOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(!!isDialogOpen);
   return (
     <AlertDialog open={open} onOpenChange={(open) => setOpen(open)}>
       <AlertDialogTrigger asChild>
@@ -39,7 +41,9 @@ export function PointSelectDialog({
       </AlertDialogTrigger>
       <AlertDialogContent className="w-full border-black bg-white dark:border-gray-700 dark:bg-gray-800">
         <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogTitle className="dark:text-gray-100">
+            {title}
+          </AlertDialogTitle>
           <AlertDialogDescription>
             <View className="flex flex-row items-start gap-2">
               <MapPin className="mt-1 size-4 text-[#FF5937]" />

@@ -10,11 +10,11 @@ export type GeoMapCoordsSelectorProps = {
   finish?: Coords | null;
   current?: Coords | null;
   points?: MapPoint[];
-  findCoords?: boolean;
   setStart: (coords: Coords | null) => void;
   setFinish: (cords: Coords | null) => void;
   bearing?: number;
   distance?: number;
+  selectionMode: "tap" | "center";
 };
 
 export type Coords = {
@@ -23,8 +23,6 @@ export type Coords = {
 };
 
 export type MapPoint = {
-  title: string;
-  description: string;
   coords: Coords;
 };
 

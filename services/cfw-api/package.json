@@ -9,6 +9,7 @@
     "@ridi/api-contracts": "workspace:^",
     "@ridi/db-queries": "workspace:^",
     "@ridi/logger": "workspace:^",
+    "@ridi/maps-api": "workspace:^",
     "@ridi/messaging": "workspace:^",
     "@supabase/supabase-js": "^2.48.1",
     "@ts-rest/serverless": "^3.51.0",

@@ -1,6 +1,23 @@
-import { StatOptions } from "node:fs";
+type Coords = [string, string];
+const coordsAddrCache = new Map<string, string>();
+function getKey(coords: Coords): string {
+  return `${Math.round(Number(coords[0]) * 1000)}${Math.round(Number(coords[1]) * 1000)}`;
+}
+export function coordsAddressCacheInsert(coords: Coords, address: string) {
+  coordsAddrCache.set(getKey(coords), address);
+}
 
-export interface ReverseGeocodingResponse {
+export async function coordsAddressGet(coords: Coords): Promise<string> {
+  const fromCache = coordsAddrCache.get(getKey(coords));
+  if (fromCache) {
+    return fromCache;
+  }
+  const fromLookup = await lookupCooordsInfo([coords, null]);
+  coordsAddressCacheInsert(coords, fromLookup[0]);
+  return fromLookup[0];
+}
+
+type ReverseGeocodingResponse = {
   place_id: number;
   licence: string;
   osm_type: string;
@@ -15,9 +32,9 @@ export interface ReverseGeocodingResponse {
   icon: string;
   address: Address;
   extratags: Extratags;
-}
+};
 
-export interface Address {
+type Address = {
   city?: string;
   state_district: string;
   state: string;
@@ -33,15 +50,15 @@ export interface Address {
   village?: string;
   municipality?: string;
   county?: string;
-}
+};
 
-export interface Extratags {
+type Extratags = {
   capital: string;
   website: string;
   wikidata: string;
   wikipedia: string;
   population: string;
-}
+};
 
 function getCityLoc(coords: ReverseGeocodingResponse): string {
   return `${coords.address.city || coords.address.town || coords.address.state || coords.address.state_district || coords.address.village || coords.address.municipality}`;

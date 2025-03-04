@@ -28,7 +28,7 @@ export function GeoMapCoordsSelector({
   finish,
   current,
   points,
-  findCoords,
+  selectionMode,
   setStart,
   setFinish,
   isRoundTrip,
@@ -36,19 +36,23 @@ export function GeoMapCoordsSelector({
   distance,
 }: GeoMapCoordsSelectorProps) {
   const mapRef = useRef<MapRef>(null);
-  const [findCoordsCurr, setFindCoordsCurr] = useState<Coords | null>(null);
+  const [findCoordsCurr, setFindCoordsCurr] = useState<
+    (Coords & { tapped?: boolean }) | null
+  >(null);
 
   useEffect(() => {
-    if (findCoords) {
+    if (selectionMode === "center") {
       const coords = mapRef.current?.getCenter();
-      setFindCoordsCurr({
-        lat: coords.lat,
-        lon: coords.lng,
-      });
+      if (coords) {
+        setFindCoordsCurr({
+          lat: coords.lat,
+          lon: coords.lng,
+        });
+      }
     } else {
       setFindCoordsCurr(null);
     }
-  }, [findCoords]);
+  }, [selectionMode]);
 
   const { roundTripPolygon, rountdTripLayer } = useRoundTripPolygon(
     isRoundTrip,
@@ -95,8 +99,17 @@ export function GeoMapCoordsSelector({
             }
       }
       mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
+      onClick={(event) => {
+        if (selectionMode === "tap") {
+          setFindCoordsCurr({
+            lat: event.lngLat.lat,
+            lon: event.lngLat.lng,
+            tapped: true,
+          });
+        }
+      }}
       onMove={(event) => {
-        if (findCoords) {
+        if (selectionMode === "center") {
           setFindCoordsCurr({
             lat: event.viewState.latitude,
             lon: event.viewState.longitude,
@@ -109,8 +122,7 @@ export function GeoMapCoordsSelector({
           key={`${point.coords.lat},${point.coords.lon}`}
           lat={point.coords.lat}
           lon={point.coords.lon}
-          title={point.title}
-          description={point.description}
+          title="Point"
           setStart={() => setStart(point.coords)}
           setFinish={isRoundTrip ? undefined : () => setFinish(point.coords)}
         >
@@ -121,8 +133,7 @@ export function GeoMapCoordsSelector({
         <MapMarker
           lat={start.lat}
           lon={start.lon}
-          title="From"
-          description={`${start.lat}, ${start.lon}`}
+          title="Start"
           unset={() => setStart(null)}
         >
           <CirclePlayIcon className="size-8 text-green-500" />
@@ -132,8 +143,7 @@ export function GeoMapCoordsSelector({
         <MapMarker
           lat={finish.lat}
           lon={finish.lon}
-          title="To"
-          description={`${finish.lat}, ${finish.lon}`}
+          title="Finish"
           unset={() => setFinish(null)}
         >
           <CirclePauseIcon className="size-8 text-red-500" />
@@ -143,8 +153,7 @@ export function GeoMapCoordsSelector({
         <MapMarker
           lat={current.lat}
           lon={current.lon}
-          title="To"
-          description={`${current.lat}, ${current.lon}`}
+          title="Finish"
           setStart={() => setStart(current)}
           setFinish={isRoundTrip ? undefined : () => setFinish(current)}
         >
@@ -153,12 +162,13 @@ export function GeoMapCoordsSelector({
       )}
       {findCoordsCurr && (
         <MapMarker
+          key={`${findCoordsCurr.lat},${findCoordsCurr.lon}`}
           lat={findCoordsCurr.lat}
           lon={findCoordsCurr.lon}
-          title="To"
-          description={`${findCoordsCurr.lat}, ${findCoordsCurr.lon}`}
+          title="Point"
           setStart={() => setStart(findCoordsCurr)}
           setFinish={isRoundTrip ? undefined : () => setFinish(findCoordsCurr)}
+          isDialogOpen={findCoordsCurr.tapped}
         >
           <CircleDotIcon className="size-8 text-yellow-500" />
         </MapMarker>

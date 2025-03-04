@@ -27,6 +27,7 @@
     "@react-native-community/netinfo": "11.3.1",
     "@react-navigation/native": "^6.0.2",
     "@ridi/api-contracts": "workspace:^",
+    "@ridi/maps-api": "workspace:^",
     "@rn-primitives/alert-dialog": "^1.1.0",
     "@rn-primitives/label": "^1.0.4",
     "@rn-primitives/popover": "^1.1.0",

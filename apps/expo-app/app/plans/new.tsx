@@ -3,16 +3,18 @@ import * as turf from "@turf/turf";
 import * as Location from "expo-location";
 import { Link, useRouter } from "expo-router";
 import {
+  CirclePauseIcon,
+  CirclePlayIcon,
   Compass,
-  Crosshair,
   Locate,
-  MapPin,
   MapPinned,
   Navigation,
+  RotateCw,
   Route,
   Search,
   StretchHorizontal,
 } from "lucide-react-native";
+import { AnimatePresence, MotiView } from "moti";
 import { useCallback, useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import * as z from "zod";
@@ -31,6 +33,32 @@ const DISTANCES = [100, 150, 200, 250, 300, 350];
 const coordsSchema = z.tuple([z.number(), z.number()]);
 type Coords = z.infer<typeof coordsSchema>;
 
+function GroupWithTitle({
+  title,
+  children,
+  className,
+}: {
+  title: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <View
+      className={cn(
+        "mb-4 flex w-full flex-col items-start justify-start rounded-xl border-2 border-black bg-white p-2 dark:border-gray-700 dark:bg-gray-900",
+        className,
+      )}
+    >
+      <View className="h-4">
+        <Text className="relative -top-5 bg-white p-1 pl-2 text-sm dark:bg-gray-900 dark:text-gray-200">
+          {title}
+        </Text>
+      </View>
+      <View className="flex w-full flex-1 flex-row gap-2">{children}</View>
+    </View>
+  );
+}
+
 export default function PlansNew() {
   const router = useRouter();
   const { planAdd } = useStorePlans();
@@ -42,7 +70,10 @@ export default function PlansNew() {
     z.number(),
   );
   const [bearing, setBearing] = useUrlParams("bearing", z.number());
-  const [findCoords, setFindCoords] = useState(false);
+  const [centerSelectionMode, setCenterSelectionMode] = useUrlParams(
+    "centerSelect",
+    z.boolean(),
+  );
   const [searchPoints, setSearchPoints] = useUrlParams(
     "search-results",
     z.array(coordsSchema),
@@ -94,6 +125,10 @@ export default function PlansNew() {
   }, [ruleSetId, ruleSets, setRuleSetId]);
 
   const getCurrentLocation = useCallback(async () => {
+    if (currentCoords) {
+      setCurrentCoords(null);
+      return;
+    }
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
       setShowLocationAlert(true);
@@ -105,7 +140,7 @@ export default function PlansNew() {
     if (location) {
       setCurrentCoords([location.coords.latitude, location.coords.longitude]);
     }
-  }, []);
+  }, [currentCoords]);
 
   function canCreateRoute(): boolean {
     return (
@@ -178,134 +213,73 @@ export default function PlansNew() {
       <View className="max-w-3xl flex-1 p-4 pb-24">
         <View className="mb-4 rounded-xl border-2 border-black p-4 dark:border-gray-700">
           <View className="flex flex-row items-center justify-between">
-            <View className="flex-1 space-y-2">
+            <View className="flex flex-row items-center gap-2">
+              <CirclePlayIcon className="size-4 text-[#FF5937]" />
+              <Text className="text-sm dark:text-gray-200">
+                {isRoundTrip ? "Start/Finish Point: " : "Start: "}
+                {startCoords
+                  ? `${startCoords[0].toFixed(4)}, ${startCoords[1].toFixed(4)}`
+                  : "Not set"}
+              </Text>
+            </View>
+            {!isRoundTrip && (
               <View className="flex flex-row items-center gap-2">
-                <MapPin className="size-4 text-[#FF5937]" />
+                <CirclePauseIcon className="size-4 text-[#FF5937]" />
                 <Text className="text-sm dark:text-gray-200">
-                  {isRoundTrip ? "Start/Finish Point: " : "Start: "}
-                  {startCoords
-                    ? `${startCoords[0].toFixed(4)}, ${startCoords[1].toFixed(
-                        4,
-                      )}`
+                  Finish:{" "}
+                  {finishCoords
+                    ? `${finishCoords[0].toFixed(4)}, ${finishCoords[1].toFixed(4)}`
                     : "Not set"}
                 </Text>
               </View>
-              {!isRoundTrip && (
+            )}
+            {isRoundTrip && (
+              <View className="flex flex-row items-center gap-6">
                 <View className="flex flex-row items-center gap-2">
-                  <Crosshair className="size-4 text-[#FF5937]" />
+                  <StretchHorizontal className="size-4 text-[#FF5937]" />
                   <Text className="text-sm dark:text-gray-200">
-                    Finish:{" "}
-                    {finishCoords
-                      ? `${finishCoords[0].toFixed(4)}, ${finishCoords[1].toFixed(4)}`
-                      : "Not set"}
+                    Trip: ~{selectedDistance}km
                   </Text>
                 </View>
-              )}
-              {isRoundTrip && (
-                <View className="flex flex-row items-center gap-6">
-                  <View className="flex flex-row items-center gap-2">
-                    <StretchHorizontal className="size-4 text-[#FF5937]" />
-                    <Text className="text-sm dark:text-gray-200">
-                      Trip: ~{selectedDistance}km
-                    </Text>
-                  </View>
-                  <View className="flex flex-row items-center gap-2">
-                    <Compass className="size-4 text-[#FF5937]" />
-                    <Text className="text-sm dark:text-gray-200">
-                      {getCardinalDirection(bearing || 0)} ({bearing || 0}°)
-                    </Text>
-                  </View>
+                <View className="flex flex-row items-center gap-2">
+                  <Compass className="size-4 text-[#FF5937]" />
+                  <Text className="text-sm dark:text-gray-200">
+                    {getCardinalDirection(bearing || 0)} ({bearing || 0}°)
+                  </Text>
                 </View>
-              )}
-            </View>
-            <Pressable
-              onPress={() => {
-                setIsRoundTrip(!isRoundTrip);
-              }}
-              className={cn(
-                "flex flex-row items-center justify-center gap-2 rounded-xl border-2 px-4 py-2 transition-colors ",
-                {
-                  "border-[#FF5937] bg-[#FF5937]": !isRoundTrip,
-                  "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
-                    isRoundTrip,
-                },
-              )}
-            >
-              <Route
-                className={cn("size-8", {
-                  "dark:text-gray-400": isRoundTrip,
-                  "dark:text-gray-800": !isRoundTrip,
-                })}
-              />
-            </Pressable>
+              </View>
+            )}
           </View>
         </View>
-        <View className="mb-4 flex flex-row gap-2">
-          <Pressable
-            onPress={() => {
-              router.navigate("/rules");
-              router.setParams({
-                "selected-rule-id": JSON.stringify(ruleSetId),
-              });
-            }}
-            className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-900"
-          >
-            <Navigation className="size-4 dark:text-gray-200" />
-            <Text className="text-sm dark:text-gray-200">
-              Routing rules:{" "}
-              {ruleSets?.find((rp) => rp.id === ruleSetId)?.name || "..."}
-            </Text>
-          </Pressable>
-        </View>
-        <View className="h-[400px] w-full overflow-hidden rounded-xl border-2 border-black dark:border-gray-700">
-          <GeoMapCoordsSelector
-            isRoundTrip={isRoundTrip || false}
-            start={
-              startCoords ? { lat: startCoords[0], lon: startCoords[1] } : null
-            }
-            finish={
-              finishCoords
-                ? { lat: finishCoords[0], lon: finishCoords[1] }
-                : null
-            }
-            current={
-              currentCoords
-                ? { lat: currentCoords[0], lon: currentCoords[1] }
-                : null
-            }
-            points={searchPoints?.map((c) => ({
-              title: "omg",
-              description: "omgomg",
-              coords: { lat: c[0], lon: c[1] },
-            }))}
-            findCoords={findCoords}
-            setStart={(c) => setStartCoords(c ? [c.lat, c.lon] : undefined)}
-            setFinish={(c) => setFinishCoords(c ? [c.lat, c.lon] : undefined)}
-            bearing={bearing}
-            distance={selectedDistance}
-          />
-        </View>
-        <View className="my-4 flex flex-row gap-2">
+        <GroupWithTitle title="Show on map">
           <Pressable
             onPress={getCurrentLocation}
-            className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-900"
+            className={cn(
+              "flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 px-4 py-2",
+
+              {
+                "border-[#FF5937] bg-[#FF5937] text-white": currentCoords,
+                "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
+                  !currentCoords,
+              },
+            )}
           >
             <Locate className="size-4 dark:text-gray-200" />
             <Text className="text-sm dark:text-gray-200">Me</Text>
           </Pressable>
           <Pressable
-            onPress={() => setFindCoords((v) => !v)}
+            onPress={() => setCenterSelectionMode(!centerSelectionMode)}
             className={cn(
               "flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 px-4 py-2",
               {
-                "border-[#FF5937] bg-[#FF5937] text-white": findCoords,
+                "border-[#FF5937] bg-[#FF5937] text-white": centerSelectionMode,
                 "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
-                  !findCoords,
+                  !centerSelectionMode,
               },
             )}
           >
             <MapPinned className="size-4 dark:text-gray-200" />
-            <Text className="text-sm dark:text-gray-200">Point on map</Text>
+            <Text className="text-sm dark:text-gray-200">Selector</Text>
           </Pressable>
           {!searchPoints && (
             <Link
@@ -327,87 +301,200 @@ export default function PlansNew() {
               <Text className="text-sm dark:text-gray-200">Search</Text>
             </Pressable>
           )}
-        </View>
-        <View className="space-y-4">
+        </GroupWithTitle>
+        <GroupWithTitle title="Tap on points" className="h-[400px]">
+          <GeoMapCoordsSelector
+            isRoundTrip={isRoundTrip || false}
+            start={
+              startCoords ? { lat: startCoords[0], lon: startCoords[1] } : null
+            }
+            finish={
+              finishCoords
+                ? { lat: finishCoords[0], lon: finishCoords[1] }
+                : null
+            }
+            current={
+              currentCoords
+                ? { lat: currentCoords[0], lon: currentCoords[1] }
+                : null
+            }
+            points={searchPoints?.map((c) => ({
+              coords: { lat: c[0], lon: c[1] },
+            }))}
+            selectionMode={centerSelectionMode ? "center" : "tap"}
+            setStart={(c) => setStartCoords(c ? [c.lat, c.lon] : undefined)}
+            setFinish={(c) => setFinishCoords(c ? [c.lat, c.lon] : undefined)}
+            bearing={bearing}
+            distance={selectedDistance}
+          />
+        </GroupWithTitle>
+        <GroupWithTitle title="Trip type">
+          <Pressable
+            onPress={() => {
+              setIsRoundTrip(false);
+            }}
+            className={cn(
+              "flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2",
+              {
+                "border-[#FF5937] bg-[#FF5937]": !isRoundTrip,
+                "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
+                  isRoundTrip,
+              },
+            )}
+          >
+            <Route className="size-6 text-sm dark:text-gray-200" />
+            <Text className="text-sm dark:text-gray-200">Start to Finish</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              setIsRoundTrip(true);
+            }}
+            className={cn(
+              "flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2",
+              {
+                "border-[#FF5937] bg-[#FF5937]": isRoundTrip,
+                "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
+                  !isRoundTrip,
+              },
+            )}
+          >
+            <RotateCw className="size-6 text-sm dark:text-gray-200" />
+            <Text className="text-sm dark:text-gray-200">Round Trip</Text>
+          </Pressable>
+        </GroupWithTitle>
+        <GroupWithTitle title="Routing rules">
+          <Pressable
+            onPress={() => {
+              router.navigate("/rules");
+              router.setParams({
+                "selected-rule-id": JSON.stringify(ruleSetId),
+              });
+            }}
+            className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-900"
+          >
+            <Navigation className="size-4 dark:text-gray-200" />
+            <Text className="text-sm dark:text-gray-200">
+              {ruleSets?.find((rp) => rp.id === ruleSetId)?.name || "..."}
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              router.navigate("/rules");
+              router.setParams({
+                "selected-rule-id": JSON.stringify(ruleSetId),
+              });
+            }}
+            className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-900"
+          >
+            <Navigation className="size-4 dark:text-gray-200" />
+            <Text className="text-sm dark:text-gray-200">
+              {ruleSets?.find((rp) => rp.id === ruleSetId)?.name || "..."}
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              router.navigate("/rules");
+              router.setParams({
+                "selected-rule-id": JSON.stringify(ruleSetId),
+              });
+            }}
+            className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-900"
+          >
+            <Navigation className="size-4 dark:text-gray-200" />
+            <Text className="text-sm dark:text-gray-200">
+              {ruleSets?.find((rp) => rp.id === ruleSetId)?.name || "..."}
+            </Text>
+          </Pressable>
+        </GroupWithTitle>
+        <AnimatePresence>
           {isRoundTrip && (
-            <>
-              <View className="space-y-4 rounded-xl border-2 border-black p-4 dark:border-gray-700">
-                <View className="flex w-full flex-row justify-between px-2">
-                  {DIRECTIONS.concat(["N"]).map((direction, idx) => (
-                    <Text
-                      key={idx}
-                      className={cn("text-xs font-medium transition-colors", {
-                        "text-[#FF5937]":
-                          getCardinalDirection(bearing || 0) === direction,
-                        "text-gray-400 dark:text-gray-500":
-                          getCardinalDirection(bearing || 0) !== direction,
-                      })}
-                    >
-                      {direction}
-                    </Text>
-                  ))}
-                </View>
-                <View className="relative h-12 w-full">
-                  <View className="absolute inset-0 flex flex-row items-center">
-                    <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
+            <MotiView
+              from={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="space-y-4"
+            >
+              <GroupWithTitle title="Direction">
+                <View className="flex w-full flex-col gap-2">
+                  <View className="flex w-full flex-row justify-between px-2">
+                    {DIRECTIONS.concat(["N"]).map((direction, idx) => (
+                      <Text
+                        key={idx}
+                        className={cn("text-xs font-medium transition-colors", {
+                          "text-[#FF5937]":
+                            getCardinalDirection(bearing || 0) === direction,
+                          "text-gray-400 dark:text-gray-500":
+                            getCardinalDirection(bearing || 0) !== direction,
+                        })}
+                      >
+                        {direction}
+                      </Text>
+                    ))}
                   </View>
-                  <Slider
-                    renderThumbComponent={() => (
-                      <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
-                    )}
-                    trackClickable={true}
-                    step={1}
-                    value={bearing}
-                    maximumValue={359}
-                    minimumValue={0}
-                    trackStyle={{ backgroundColor: "transparent" }}
-                    minimumTrackStyle={{ backgroundColor: "transparent" }}
-                    maximumTrackStyle={{ backgroundColor: "transparent" }}
-                    onValueChange={(value) => {
-                      setBearing(value[0]);
-                    }}
-                  />
-                </View>
-              </View>
-              <View className="space-y-4 rounded-xl border-2 border-black p-4 dark:border-gray-700">
-                <View className="flex w-full flex-row justify-between px-1">
-                  {DISTANCES.map((distance) => (
-                    <Text
-                      key={distance}
-                      className={`text-xs font-medium transition-colors ${
-                        selectedDistance === distance
-                          ? "text-[#FF5937]"
-                          : "text-gray-400 dark:text-gray-500"
-                      }`}
-                    >
-                      {distance}km
-                    </Text>
-                  ))}
-                </View>
-                <View className="relative h-12 w-full">
-                  <View className="absolute inset-0 flex flex-row items-center">
-                    <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
+                  <View className="relative h-12 w-full">
+                    <View className="absolute inset-0 flex flex-row items-center">
+                      <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
+                    </View>
+                    <Slider
+                      renderThumbComponent={() => (
+                        <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
+                      )}
+                      trackClickable={true}
+                      step={1}
+                      value={bearing}
+                      maximumValue={359}
+                      minimumValue={0}
+                      trackStyle={{ backgroundColor: "transparent" }}
+                      minimumTrackStyle={{ backgroundColor: "transparent" }}
+                      maximumTrackStyle={{ backgroundColor: "transparent" }}
+                      onValueChange={(value) => {
+                        setBearing(value[0]);
+                      }}
+                    />
                   </View>
-                  <Slider
-                    renderThumbComponent={() => (
-                      <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
-                    )}
-                    trackClickable={true}
-                    step={1}
-                    value={DISTANCES.indexOf(selectedDistance || 100)}
-                    maximumValue={DISTANCES.length - 1}
-                    trackStyle={{ backgroundColor: "transparent" }}
-                    minimumTrackStyle={{ backgroundColor: "transparent" }}
-                    maximumTrackStyle={{ backgroundColor: "transparent" }}
-                    onValueChange={(value) => {
-                      setSelectedDistance(DISTANCES[value[0]]);
-                    }}
-                  />
                 </View>
-              </View>
-            </>
+              </GroupWithTitle>
+              <GroupWithTitle title="Distance">
+                <View className="flex w-full flex-col gap-2">
+                  <View className="flex w-full flex-row justify-between px-1">
+                    {DISTANCES.map((distance) => (
+                      <Text
+                        key={distance}
+                        className={`text-xs font-medium transition-colors ${
+                          selectedDistance === distance
+                            ? "text-[#FF5937]"
+                            : "text-gray-400 dark:text-gray-500"
+                        }`}
+                      >
+                        {distance}km
+                      </Text>
+                    ))}
+                  </View>
+                  <View className="relative h-12 w-full">
+                    <View className="absolute inset-0 flex flex-row items-center">
+                      <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
+                    </View>
+                    <Slider
+                      renderThumbComponent={() => (
+                        <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
+                      )}
+                      trackClickable={true}
+                      step={1}
+                      value={DISTANCES.indexOf(selectedDistance || 100)}
+                      maximumValue={DISTANCES.length - 1}
+                      trackStyle={{ backgroundColor: "transparent" }}
+                      minimumTrackStyle={{ backgroundColor: "transparent" }}
+                      maximumTrackStyle={{ backgroundColor: "transparent" }}
+                      onValueChange={(value) => {
+                        setSelectedDistance(DISTANCES[value[0]]);
+                      }}
+                    />
+                  </View>
+                </View>
+              </GroupWithTitle>
+            </MotiView>
           )}
-        </View>
+        </AnimatePresence>
       </View>
     </ScreenFrame>
   );
