@@ -9,7 +9,6 @@ import {
   Compass,
   Locate,
   MapPinned,
-  Navigation,
   RotateCw,
   Route,
   Search,

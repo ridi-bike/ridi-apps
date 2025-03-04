@@ -99,13 +99,7 @@ const AlertDialogHeader = ({ className, ...props }: ViewProps) => (
 AlertDialogHeader.displayName = "AlertDialogHeader";
 
 const AlertDialogFooter = ({ className, ...props }: ViewProps) => (
-  <View
-    className={cn(
-      "flex flex-col-reverse sm:flex-row sm:justify-end gap-2",
-      className,
-    )}
-    {...props}
-  />
+  <View className={cn("flex flex-col-reverse gap-2", className)} {...props} />
 );
 AlertDialogFooter.displayName = "AlertDialogFooter";
 
