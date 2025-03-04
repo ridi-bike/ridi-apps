@@ -68,7 +68,11 @@ function formatCityDiff(coords: ReverseGeocodingResponse): string {
   return `${getCityLoc(coords)}, ${coords.address.country}`;
 }
 function formatCitySame(coords: ReverseGeocodingResponse): string {
-  return `${coords.address.isolated_dwelling || coords.address.road || coords.address.postcode}, ${getCityLoc(coords)}`;
+  const partOne =
+    coords.address.isolated_dwelling ||
+    coords.address.road ||
+    coords.address.postcode;
+  return `${partOne ? partOne + ", " : ""}${getCityLoc(coords)}`;
 }
 export async function lookupCooordsInfo(
   coords: [[string, string], null | [string, string]],

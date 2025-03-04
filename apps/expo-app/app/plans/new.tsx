@@ -1,4 +1,5 @@
 import { Slider } from "@miblanchard/react-native-slider";
+import { coordsAddressGet } from "@ridi/maps-api";
 import * as turf from "@turf/turf";
 import * as Location from "expo-location";
 import { Link, useRouter } from "expo-router";
@@ -12,7 +13,9 @@ import {
   RotateCw,
   Route,
   Search,
+  Settings,
   StretchHorizontal,
+  Waypoints,
 } from "lucide-react-native";
 import { AnimatePresence, MotiView } from "moti";
 import { useCallback, useEffect, useState } from "react";
@@ -49,7 +52,7 @@ function GroupWithTitle({
         className,
       )}
     >
-      <View className="h-4">
+      <View className="h-2">
         <Text className="relative -top-5 bg-white p-1 pl-2 text-sm dark:bg-gray-900 dark:text-gray-200">
           {title}
         </Text>
@@ -64,6 +67,8 @@ export default function PlansNew() {
   const { planAdd } = useStorePlans();
   const [startCoords, setStartCoords] = useUrlParams("start", coordsSchema);
   const [finishCoords, setFinishCoords] = useUrlParams("finish", coordsSchema);
+  const [startDesc, setStartDesc] = useState<string | null>(null);
+  const [finishDesc, setFinishDesc] = useState<string | null>(null);
   const [isRoundTrip, setIsRoundTrip] = useUrlParams("round-trip", z.boolean());
   const [selectedDistance, setSelectedDistance] = useUrlParams(
     "distance",
@@ -124,6 +129,26 @@ export default function PlansNew() {
     }
   }, [ruleSetId, ruleSets, setRuleSetId]);
 
+  useEffect(() => {
+    if (startCoords) {
+      coordsAddressGet([
+        startCoords[0].toString(),
+        startCoords[1].toString(),
+      ]).then((v) => setStartDesc(v));
+    }
+  }, [startCoords]);
+
+  useEffect(() => {
+    if (finishCoords) {
+      coordsAddressGet([
+        finishCoords[0].toString(),
+        finishCoords[1].toString(),
+      ]).then((v) => setFinishDesc(v));
+    }
+  }, [finishCoords]);
+
+  console.log({ finishCoords, startCoords, startDesc, finishDesc });
+
   const getCurrentLocation = useCallback(async () => {
     if (currentCoords) {
       setCurrentCoords(null);
@@ -142,12 +167,12 @@ export default function PlansNew() {
     }
   }, [currentCoords]);
 
-  function canCreateRoute(): boolean {
+  const canCreateRoute = useCallback(() => {
     return (
       (isRoundTrip && !!startCoords) ||
       (!isRoundTrip && !!startCoords && !!finishCoords)
     );
-  }
+  }, [finishCoords, isRoundTrip, startCoords]);
 
   return (
     <ScreenFrame
@@ -211,14 +236,15 @@ export default function PlansNew() {
         />
       )}
       <View className="max-w-3xl flex-1 p-4 pb-24">
-        <View className="mb-4 rounded-xl border-2 border-black p-4 dark:border-gray-700">
-          <View className="flex flex-row items-center justify-between">
+        <GroupWithTitle title="Trip details">
+          <View className="flex flex-col items-start justify-start p-2">
             <View className="flex flex-row items-center gap-2">
               <CirclePlayIcon className="size-4 text-[#FF5937]" />
               <Text className="text-sm dark:text-gray-200">
                 {isRoundTrip ? "Start/Finish Point: " : "Start: "}
                 {startCoords
-                  ? `${startCoords[0].toFixed(4)}, ${startCoords[1].toFixed(4)}`
+                  ? startDesc ||
+                    `${startCoords[0].toFixed(4)}, ${startCoords[1].toFixed(4)}`
                   : "Not set"}
               </Text>
             </View>
@@ -228,7 +254,8 @@ export default function PlansNew() {
                 <Text className="text-sm dark:text-gray-200">
                   Finish:{" "}
                   {finishCoords
-                    ? `${finishCoords[0].toFixed(4)}, ${finishCoords[1].toFixed(4)}`
+                    ? finishDesc ||
+                      `${finishCoords[0].toFixed(4)}, ${finishCoords[1].toFixed(4)}`
                     : "Not set"}
                 </Text>
               </View>
@@ -250,7 +277,7 @@ export default function PlansNew() {
               </View>
             )}
           </View>
-        </View>
+        </GroupWithTitle>
         <GroupWithTitle title="Show on map">
           <Pressable
             onPress={getCurrentLocation}
@@ -363,6 +390,37 @@ export default function PlansNew() {
           </Pressable>
         </GroupWithTitle>
         <GroupWithTitle title="Routing rules">
+          {(
+            ruleSets ||
+            Array(3).map((_, id) => ({
+              id,
+              isSystem: true,
+              name: "...",
+              isDefault: false,
+            }))
+          )
+            .filter((rs) => rs.isSystem)
+            .map((rs) => (
+              <Pressable
+                key={rs.id}
+                onPress={() => {
+                  if (typeof rs.id === "string") {
+                    setRuleSetId(rs.id);
+                  }
+                }}
+                className={cn(
+                  "flex flex-1 flex-col items-center justify-center gap-2 rounded-xl border-2 px-4 py-2",
+                  {
+                    "border-[#FF5937] bg-[#FF5937]": rs.id === ruleSetId,
+                    "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
+                      rs.id !== ruleSetId,
+                  },
+                )}
+              >
+                <Waypoints className="size-4 dark:text-gray-200" />
+                <Text className="text-sm dark:text-gray-200">{rs.name}</Text>
+              </Pressable>
+            ))}
           <Pressable
             onPress={() => {
               router.navigate("/rules");
@@ -370,40 +428,22 @@ export default function PlansNew() {
                 "selected-rule-id": JSON.stringify(ruleSetId),
               });
             }}
-            className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-900"
+            className={cn(
+              "flex flex-1 flex-col items-center justify-center gap-2 rounded-xl border-2 px-4 py-2",
+              {
+                "border-[#FF5937] bg-[#FF5937]":
+                  ruleSets?.find((rs) => rs.id === ruleSetId)?.isSystem ===
+                  false,
+                "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
+                  ruleSets?.find((rs) => rs.id === ruleSetId)?.isSystem ===
+                    true ||
+                  ruleSets?.find((rs) => rs.id === ruleSetId)?.isSystem ===
+                    undefined,
+              },
+            )}
           >
-            <Navigation className="size-4 dark:text-gray-200" />
-            <Text className="text-sm dark:text-gray-200">
-              {ruleSets?.find((rp) => rp.id === ruleSetId)?.name || "..."}
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              router.navigate("/rules");
-              router.setParams({
-                "selected-rule-id": JSON.stringify(ruleSetId),
-              });
-            }}
-            className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-900"
-          >
-            <Navigation className="size-4 dark:text-gray-200" />
-            <Text className="text-sm dark:text-gray-200">
-              {ruleSets?.find((rp) => rp.id === ruleSetId)?.name || "..."}
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              router.navigate("/rules");
-              router.setParams({
-                "selected-rule-id": JSON.stringify(ruleSetId),
-              });
-            }}
-            className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-900"
-          >
-            <Navigation className="size-4 dark:text-gray-200" />
-            <Text className="text-sm dark:text-gray-200">
-              {ruleSets?.find((rp) => rp.id === ruleSetId)?.name || "..."}
-            </Text>
+            <Settings className="size-4 dark:text-gray-200" />
+            <Text className="text-sm dark:text-gray-200">Custom</Text>
           </Pressable>
         </GroupWithTitle>
         <AnimatePresence>
