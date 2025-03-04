@@ -128,6 +128,22 @@
     "peakMemoryUsageMb": 4477
   },
   {
+    "region": "north-america/us-south",
+    "serverStartupS": 40,
+    "pbfSizeMb": 3500,
+    "cacheSizeMb": 4000,
+    "cacheGenS": 500,
+    "peakMemoryUsageMb": 9000
+  },
+  {
+    "region": "north-america/us-west",
+    "serverStartupS": 40,
+    "pbfSizeMb": 2800,
+    "cacheSizeMb": 3500,
+    "cacheGenS": 400,
+    "peakMemoryUsageMb": 9000
+  },
+  {
     "region": "europe/great-britain",
     "serverStartupS": 20,
     "pbfSizeMb": 1796,
@@ -2296,4 +2312,3 @@
     "peakMemoryUsageMb": 5
   }
 ]
-

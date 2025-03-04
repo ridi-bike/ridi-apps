@@ -66,13 +66,6 @@ const routerServiceImage = new docker_build.Image(routerServiceName, {
 const regionServiceList = {} as Record<string, pulumi.Output<string>>;
 
 for (const region of regions) {
-  const shouldScaleToZero =
-    region.serverStartupS < 10 ||
-    region.region.startsWith("asia") ||
-    region.region.startsWith("africa") ||
-    region.region.startsWith("south-america") ||
-    region.region.startsWith("central-america");
-
   const regionServiceName = getSafeResourceName(
     `${routerServiceName}-${getNameSafe(region.region)}`,
   );
@@ -96,7 +89,7 @@ for (const region of regions) {
         strategy: {
           type: "Recreate",
         },
-        replicas: shouldScaleToZero ? 0 : 1,
+        replicas: 1,
         selector: {
           matchLabels: {
             name: regionServiceName,
@@ -207,204 +200,8 @@ for (const region of regions) {
     },
   });
 
-  if (shouldScaleToZero) {
-    const zpaServiceAccountName = `${regionServiceName}-zpa-sa`;
-    const zpaServiceAccount = new k8s.core.v1.ServiceAccount(
-      zpaServiceAccountName,
-      {
-        metadata: {
-          name: zpaServiceAccountName,
-          namespace: ridiNamespace.metadata.name,
-        },
-      },
-    );
-
-    const zpaRoleName = `${regionServiceName}-zpa-role`;
-    const zpaRole = new k8s.rbac.v1.Role(zpaRoleName, {
-      metadata: {
-        name: zpaRoleName,
-        namespace: ridiNamespace.metadata.name,
-      },
-      rules: [
-        {
-          apiGroups: ["apps"],
-          resources: ["deployments"],
-          verbs: ["get", "list", "watch", "update", "patch"],
-        },
-        {
-          apiGroups: ["apps"],
-          resources: ["deployments/scale"],
-          verbs: ["get", "update", "patch"],
-        },
-        {
-          apiGroups: [""],
-          resources: ["endpoints"],
-          verbs: ["get", "list", "watch"],
-        },
-      ],
-    });
-
-    const zpaRoleBindingName = `${regionServiceName}-zpa-rolebinding`;
-    const zpaRoleBinding = new k8s.rbac.v1.RoleBinding(zpaRoleBindingName, {
-      metadata: {
-        name: zpaRoleBindingName,
-        namespace: ridiNamespace.metadata.name,
-      },
-      roleRef: {
-        apiGroup: "rbac.authorization.k8s.io",
-        kind: "Role",
-        name: zpaRole.metadata.name,
-      },
-      subjects: [
-        {
-          kind: "ServiceAccount",
-          name: zpaServiceAccount.metadata.name,
-          namespace: ridiNamespace.metadata.name,
-        },
-      ],
-    });
-    const zpaImageLatestTag = pulumi.interpolate`${containerRegistryUrl}/${projectName}/${routerServiceName}-zpa-image`;
-    const zpaImage = new docker_build.Image(`${regionServiceName}-zpa-image`, {
-      tags: [zpaImageLatestTag],
-      context: {
-        location: "./zero-pod-autoscaler/",
-      },
-      dockerfile: {
-        location: "./zero-pod-autoscaler/Dockerfile",
-      },
-      cacheFrom: [
-        {
-          registry: {
-            ref: latestTag,
-          },
-        },
-      ],
-      cacheTo: [
-        {
-          registry: {
-            ref: latestTag,
-          },
-        },
-      ],
-      platforms: ["linux/amd64"],
-      push: true,
-      registries: [
-        {
-          address: containerRegistryUrl,
-          password: config.requireSecret("container_registry_password"),
-          username: config.require("container_registry_username"),
-        },
-      ],
-    });
-
-    const zpaDeploymentName = `${regionServiceName}-zpa`;
-    const zpaDeployment = new k8s.apps.v1.Deployment(
-      zpaDeploymentName,
-      {
-        metadata: {
-          name: zpaDeploymentName,
-          labels: {
-            "app.kubernetes.io/name": zpaDeploymentName,
-          },
-          namespace: ridiNamespace.metadata.name,
-          annotations: {
-            "pulumi.com/skipAwait": "true",
-          },
-        },
-
-        spec: {
-          strategy: {
-            type: "Recreate",
-          },
-          replicas: 1,
-          selector: {
-            matchLabels: {
-              "app.kubernetes.io/name": zpaDeploymentName,
-            },
-          },
-          template: {
-            metadata: {
-              labels: {
-                "app.kubernetes.io/name": zpaDeploymentName,
-              },
-            },
-            spec: {
-              serviceAccountName: zpaServiceAccount.metadata.name,
-              imagePullSecrets: [
-                {
-                  name: ghcrSecret.metadata.name,
-                },
-              ],
-              containers: [
-                {
-                  name: "zpa",
-                  image: zpaImage.ref,
-                  imagePullPolicy: "IfNotPresent",
-                  args: [
-                    pulumi.interpolate`--namespace=${ridiNamespace.metadata.name}`,
-                    pulumi.interpolate`--deployment=${routerServiceDeployment.metadata.name}`,
-                    pulumi.interpolate`--address=0.0.0.0:${port}`,
-                    pulumi.interpolate`--endpoints=${routerServiceService.metadata.name}`,
-                    pulumi.interpolate`--target=${routerServiceService.metadata.name}:${port}`,
-                    "--ttl=30m",
-                  ],
-                  ports: [
-                    {
-                      name: "proxy",
-                      protocol: "TCP",
-                      containerPort: 80,
-                    },
-                  ],
-                  resources: {
-                    requests: {
-                      cpu: "50m",
-                      memory: "64Mi",
-                    },
-                    limits: {
-                      cpu: "100m",
-                      memory: "128Mi",
-                    },
-                  },
-                },
-              ],
-            },
-          },
-        },
-      },
-      {
-        dependsOn: [zpaServiceAccount, zpaRoleBinding],
-      },
-    );
-
-    const zpaServiceName = `${regionServiceName}-zpa-svc`;
-    const zpaService = new k8s.core.v1.Service(zpaServiceName, {
-      metadata: {
-        name: zpaServiceName,
-        labels: {
-          "app.kubernetes.io/name": zpaDeployment.metadata.name,
-        },
-        namespace: ridiNamespace.metadata.name,
-        annotations: {
-          "pulumi.com/skipAwait": "true",
-        },
-      },
-      spec: {
-        ports: [
-          {
-            port: port,
-            targetPort: port,
-            name: "proxy",
-          },
-        ],
-        selector: zpaDeployment.metadata.labels,
-      },
-    });
-    const serviceAddress = pulumi.interpolate`${zpaService.metadata.name}.${ridiNamespace.metadata.name}.svc.cluster.local:${port}`;
-    regionServiceList[region.region] = serviceAddress;
-  } else {
-    const serviceAddress = pulumi.interpolate`${routerServiceService.metadata.name}.${ridiNamespace.metadata.name}.svc.cluster.local:${port}`;
-    regionServiceList[region.region] = serviceAddress;
-  }
+  const serviceAddress = pulumi.interpolate`${routerServiceService.metadata.name}.${ridiNamespace.metadata.name}.svc.cluster.local:${port}`;
+  regionServiceList[region.region] = serviceAddress;
 }
 
 export { regionServiceList };

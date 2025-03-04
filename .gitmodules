@@ -1,3 +1,0 @@
-[submodule "infra/zero-pod-autoscaler"]
-	path = infra/zero-pod-autoscaler
-	url = https://github.com/tomsjansons/zero-pod-autoscaler.git
