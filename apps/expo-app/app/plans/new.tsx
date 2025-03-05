@@ -225,8 +225,21 @@ export default function PlansNew() {
   return (
     <ScreenFrame
       title="New plan"
+      onGoBack={mapMode ? () => setMapMode(false) : undefined}
       floating={
         <View className="fixed bottom-0 w-full bg-white p-4 dark:bg-gray-800">
+          <AnimatePresence>
+            {!!errorMessage && (
+              <MotiView
+                from={{ height: 0 }}
+                animate={{ height: 50 }}
+                exit={{ height: 0 }}
+                className="flex h-14 flex-row items-center justify-center"
+              >
+                <Text className="text-xl text-red-500">{errorMessage}</Text>
+              </MotiView>
+            )}
+          </AnimatePresence>
           {mapMode && (
             <Pressable
               onPress={() => setMapMode(false)}
@@ -296,64 +309,12 @@ export default function PlansNew() {
         {mapMode && (
           <MotiView
             id="omg"
-            className="fixed top-0 z-50 w-full bg-white p-4 dark:bg-gray-900"
+            className="fixed top-0 z-50 mt-16 w-full bg-white p-4 pb-40 dark:bg-gray-900"
             from={{ height: "0%" }}
             animate={{ height: "100%" }}
             exit={{ height: "0%" }}
             transition={{ type: "timing" }}
           >
-            <GroupWithTitle title="Show on map">
-              <Pressable
-                onPress={getCurrentLocation}
-                className={cn(
-                  "flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 px-4 py-2",
-
-                  {
-                    "border-[#FF5937] bg-[#FF5937] text-white": currentCoords,
-                    "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
-                      !currentCoords,
-                  },
-                )}
-              >
-                <Locate className="size-4 dark:text-gray-200" />
-                <Text className="text-sm dark:text-gray-200">Me</Text>
-              </Pressable>
-              <Pressable
-                onPress={() => setCenterSelectionMode(!centerSelectionMode)}
-                className={cn(
-                  "flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 px-4 py-2",
-                  {
-                    "border-[#FF5937] bg-[#FF5937] text-white":
-                      centerSelectionMode,
-                    "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
-                      !centerSelectionMode,
-                  },
-                )}
-              >
-                <MapPinned className="size-4 dark:text-gray-200" />
-                <Text className="text-sm dark:text-gray-200">Selector</Text>
-              </Pressable>
-              {!searchPoints && (
-                <Link
-                  href="/search"
-                  className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-900"
-                >
-                  <Search className="size-4 dark:text-gray-200" />
-                  <Text className="text-sm dark:text-gray-200">Search</Text>
-                </Link>
-              )}
-              {searchPoints?.length && (
-                <Pressable
-                  onPress={() => {
-                    setSearchPoints();
-                  }}
-                  className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-[#FF5937] bg-[#FF5937] px-4 py-2 text-white"
-                >
-                  <Search className="size-4 dark:text-gray-200" />
-                  <Text className="text-sm dark:text-gray-200">Search</Text>
-                </Pressable>
-              )}
-            </GroupWithTitle>
             <GeoMapCoordsSelector
               regions={
                 errorMessage
@@ -384,7 +345,56 @@ export default function PlansNew() {
               setFinish={(c) => setFinishCoords(c ? [c.lat, c.lon] : undefined)}
               bearing={bearing}
               distance={selectedDistance}
-            />
+            >
+              <View className="flex flex-col items-end justify-start gap-2 p-4">
+                <Pressable
+                  onPress={getCurrentLocation}
+                  className={cn(
+                    "flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 p-4",
+
+                    {
+                      "border-[#FF5937] bg-[#FF5937] text-white": currentCoords,
+                      "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
+                        !currentCoords,
+                    },
+                  )}
+                >
+                  <Locate className="size-4 dark:text-gray-200" />
+                </Pressable>
+                <Pressable
+                  onPress={() => setCenterSelectionMode(!centerSelectionMode)}
+                  className={cn(
+                    "flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 p-4",
+                    {
+                      "border-[#FF5937] bg-[#FF5937] text-white":
+                        centerSelectionMode,
+                      "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
+                        !centerSelectionMode,
+                    },
+                  )}
+                >
+                  <MapPinned className="size-4 dark:text-gray-200" />
+                </Pressable>
+                {!searchPoints && (
+                  <Link
+                    href="/search"
+                    className="flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 border-black bg-white p-4 dark:border-gray-700 dark:bg-gray-900"
+                  >
+                    <Search className="size-4 dark:text-gray-200" />
+                  </Link>
+                )}
+                {searchPoints?.length && (
+                  <Pressable
+                    onPress={() => {
+                      setSearchPoints();
+                    }}
+                    className="flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 border-[#FF5937] bg-[#FF5937] p-4 text-white"
+                  >
+                    <Search className="size-4 dark:text-gray-200" />
+                  </Pressable>
+                )}
+              </View>
+            </GeoMapCoordsSelector>
           </MotiView>
         )}
       </AnimatePresence>
@@ -395,67 +405,55 @@ export default function PlansNew() {
           }}
         />
       )}
-      <View className="max-w-3xl flex-1 p-4 pb-24">
+      <View className="max-w-3xl flex-1 p-4">
         <Pressable onPress={() => setMapMode(true)}>
           <GroupWithTitle title="Trip details">
             <AnimatePresence>
-              {!!errorMessage && (
-                <MotiView
-                  from={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 1 }}
-                  className="flex h-14 flex-row items-center justify-center"
-                >
-                  <Text className="text-xl text-red-500">{errorMessage}</Text>
-                </MotiView>
-              )}
-              {!errorMessage && (startCoords || finishCoords) && (
-                <MotiView
-                  from={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 1 }}
-                  className="flex h-14 flex-col items-start justify-start p-2"
-                >
+              <MotiView
+                from={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 1 }}
+                className="flex h-14 flex-col items-start justify-start p-2"
+              >
+                <View className="flex flex-row items-center gap-2">
+                  <CirclePlayIcon className="size-4 text-[#FF5937]" />
+                  <Text className="text-sm dark:text-gray-200">
+                    {isRoundTrip ? "Start/Finish Point: " : "Start: "}
+                    {startCoords
+                      ? startDesc ||
+                        `${startCoords[0].toFixed(4)}, ${startCoords[1].toFixed(4)}`
+                      : "Not set"}
+                  </Text>
+                </View>
+                {!isRoundTrip && (
                   <View className="flex flex-row items-center gap-2">
-                    <CirclePlayIcon className="size-4 text-[#FF5937]" />
+                    <CirclePauseIcon className="size-4 text-[#FF5937]" />
                     <Text className="text-sm dark:text-gray-200">
-                      {isRoundTrip ? "Start/Finish Point: " : "Start: "}
-                      {startCoords
-                        ? startDesc ||
-                          `${startCoords[0].toFixed(4)}, ${startCoords[1].toFixed(4)}`
+                      Finish:{" "}
+                      {finishCoords
+                        ? finishDesc ||
+                          `${finishCoords[0].toFixed(4)}, ${finishCoords[1].toFixed(4)}`
                         : "Not set"}
                     </Text>
                   </View>
-                  {!isRoundTrip && (
+                )}
+                {isRoundTrip && (
+                  <View className="flex flex-row items-center gap-6">
                     <View className="flex flex-row items-center gap-2">
-                      <CirclePauseIcon className="size-4 text-[#FF5937]" />
+                      <StretchHorizontal className="size-4 text-[#FF5937]" />
                       <Text className="text-sm dark:text-gray-200">
-                        Finish:{" "}
-                        {finishCoords
-                          ? finishDesc ||
-                            `${finishCoords[0].toFixed(4)}, ${finishCoords[1].toFixed(4)}`
-                          : "Not set"}
+                        Trip: ~{selectedDistance}km
                       </Text>
                     </View>
-                  )}
-                  {isRoundTrip && (
-                    <View className="flex flex-row items-center gap-6">
-                      <View className="flex flex-row items-center gap-2">
-                        <StretchHorizontal className="size-4 text-[#FF5937]" />
-                        <Text className="text-sm dark:text-gray-200">
-                          Trip: ~{selectedDistance}km
-                        </Text>
-                      </View>
-                      <View className="flex flex-row items-center gap-2">
-                        <Compass className="size-4 text-[#FF5937]" />
-                        <Text className="text-sm dark:text-gray-200">
-                          {getCardinalDirection(bearing || 0)} ({bearing || 0}°)
-                        </Text>
-                      </View>
+                    <View className="flex flex-row items-center gap-2">
+                      <Compass className="size-4 text-[#FF5937]" />
+                      <Text className="text-sm dark:text-gray-200">
+                        {getCardinalDirection(bearing || 0)} ({bearing || 0}°)
+                      </Text>
                     </View>
-                  )}
-                </MotiView>
-              )}
+                  </View>
+                )}
+              </MotiView>
             </AnimatePresence>
           </GroupWithTitle>
         </Pressable>

@@ -18,6 +18,7 @@ export type GeoMapCoordsSelectorProps = {
   distance?: number;
   selectionMode: "tap" | "center";
   regions?: Region[] | null;
+  children: React.ReactNode;
 };
 
 export type Coords = {

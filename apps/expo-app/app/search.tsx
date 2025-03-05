@@ -102,13 +102,7 @@ export default function LocationSearch() {
       const data = await response.json();
 
       (data as Location[]).forEach((loc) =>
-        coordsAddressCacheInsert(
-          {
-            lat: Number(loc.lat),
-            lon: Number(loc.lon),
-          },
-          loc.display_name,
-        ),
+        coordsAddressCacheInsert([loc.lat, loc.lon], loc.display_name),
       );
       setLocations(data);
       setSearching(false);

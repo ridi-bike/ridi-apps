@@ -7,9 +7,8 @@ import {
   onlineManager,
 } from "@tanstack/react-query";
 import { Stack } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { persister } from "~/lib/stores/async-storage-persister";
 import { supabase } from "~/lib/supabase";
 import { useEffectOnce } from "~/lib/utils";
 

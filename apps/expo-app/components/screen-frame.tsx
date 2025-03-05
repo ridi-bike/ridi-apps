@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import { ScrollView, View } from "react-native";
+import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ScreenHeader } from "~/components/screen-header";
@@ -8,24 +8,34 @@ type ScreenFramePropsn = {
   title: string;
   children: React.ReactNode;
   floating?: React.ReactNode;
+  onGoBack?: () => void;
 };
-export function ScreenFrame({ children, floating, title }: ScreenFramePropsn) {
+export function ScreenFrame({
+  children,
+  floating,
+  title,
+  onGoBack,
+}: ScreenFramePropsn) {
   const insets = useSafeAreaInsets();
   return (
     <>
-      <ScrollView
+      <View
         style={{
           paddingTop: insets.top,
           paddingBottom: insets.bottom,
           paddingLeft: insets.left,
           paddingRight: insets.right,
         }}
-        className="mb-12 min-h-screen w-full bg-white dark:bg-gray-900"
+        className="my-12 min-h-screen w-full bg-white dark:bg-gray-900"
       >
         <Stack.Screen
           options={{
             header: (props) => (
-              <ScreenHeader headerProps={props} title={title} />
+              <ScreenHeader
+                headerProps={props}
+                title={title}
+                onGoBack={onGoBack}
+              />
             ),
           }}
         />
@@ -35,7 +45,7 @@ export function ScreenFrame({ children, floating, title }: ScreenFramePropsn) {
         >
           {children}
         </View>
-      </ScrollView>
+      </View>
       {floating}
     </>
   );

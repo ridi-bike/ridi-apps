@@ -59,6 +59,7 @@ export function GeoMapCoordsSelector({
   bearing,
   distance,
   regions,
+  children,
 }: GeoMapCoordsSelectorProps) {
   const mapRef = useRef<MapRef>(null);
   const [findCoordsCurr, setFindCoordsCurr] = useState<
@@ -70,8 +71,8 @@ export function GeoMapCoordsSelector({
       const coords = mapRef.current?.getCenter();
       if (coords) {
         setFindCoordsCurr({
-          lat: coords.lat,
-          lon: coords.lng,
+          lat: Math.round(coords.lat * 100000) / 100000,
+          lon: Math.round(coords.lng * 100000) / 100000,
         });
       }
     } else {
@@ -165,8 +166,8 @@ export function GeoMapCoordsSelector({
       onClick={(event) => {
         if (selectionMode === "tap") {
           setFindCoordsCurr({
-            lat: event.lngLat.lat,
-            lon: event.lngLat.lng,
+            lat: Math.round(event.lngLat.lat * 100000) / 100000,
+            lon: Math.round(event.lngLat.lng * 100000) / 100000,
             tapped: true,
           });
         }
@@ -174,12 +175,13 @@ export function GeoMapCoordsSelector({
       onMove={(event) => {
         if (selectionMode === "center") {
           setFindCoordsCurr({
-            lat: event.viewState.latitude,
-            lon: event.viewState.longitude,
+            lat: Math.round(event.viewState.latitude * 100000) / 100000,
+            lon: Math.round(event.viewState.longitude * 100000) / 100000,
           });
         }
       }}
     >
+      {children}
       {(points || []).map((point) => (
         <MapMarker
           key={`${point.coords.lat},${point.coords.lon}`}
@@ -248,7 +250,7 @@ export function GeoMapCoordsSelector({
       )}
       {rountdTripLayer}
       {regionLayers}
-      <NavigationControl position="top-right" />
+      <NavigationControl position="top-left" />
     </MapLibre>
   );
 }

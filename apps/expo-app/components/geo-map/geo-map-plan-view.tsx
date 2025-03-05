@@ -2,7 +2,7 @@ import * as turf from "@turf/turf";
 import { type MapRef } from "@vis.gl/react-maplibre";
 import { Map as MapLibre } from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { CirclePauseIcon, CirclePlayIcon } from "lucide-react-native";
+import { CirclePauseIcon, CirclePlayIcon, RotateCw } from "lucide-react-native";
 import maplibre from "maplibre-gl";
 import { useEffect, useMemo, useRef } from "react";
 import { View } from "react-native";
@@ -33,6 +33,10 @@ export function GeoMapPlanView(props: GeoMapPlanView) {
     const points = (
       props.start ? [[props.start.lon, props.start.lat]] : []
     ).concat(props.finish ? [[props.finish.lon, props.finish.lat]] : []);
+    if (!points.length) {
+      return null;
+    }
+
     if (points.length === 1) {
       points.push([points[0][0] - 0.1, points[0][1] - 0.1]);
       points.push([points[0][0] + 0.1, points[0][1] + 0.1]);
@@ -50,19 +54,24 @@ export function GeoMapPlanView(props: GeoMapPlanView) {
     }
   }, [bbox]);
 
+  console.log({ rountdTripLayer, roundTripPolygon });
+
   return (
     <View className={cn("size-full", props.className)}>
       <MapLibre
         ref={mapRef}
         mapLib={maplibre}
-        initialViewState={{
-          bounds: [
-            bbox[0] - 0.03,
-            bbox[1] - 0.03,
-            bbox[2] + 0.03,
-            bbox[3] + 0.03,
-          ],
-        }}
+        initialViewState={
+          bbox
+            ? {
+                bounds: bbox,
+              }
+            : {
+                longitude: 24.853,
+                latitude: 57.153,
+                zoom: 4,
+              }
+        }
         mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
         interactive={false}
         attributionControl={false}
