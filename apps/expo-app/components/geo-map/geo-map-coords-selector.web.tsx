@@ -248,7 +248,7 @@ export function GeoMapCoordsSelector({
       )}
       {rountdTripLayer}
       {regionLayers}
-      <NavigationControl position="bottom-right" />
+      <NavigationControl position="top-right" />
     </MapLibre>
   );
 }

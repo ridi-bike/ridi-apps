@@ -6,7 +6,7 @@ import {
   type MotiPressableProp,
 } from "moti/interactions";
 import { useEffect, useMemo } from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 
 import { ErrorBox } from "~/components/error";
 import { Loading } from "~/components/loading";

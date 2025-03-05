@@ -14,7 +14,7 @@ import { type Coords } from "./types";
 import { combineBBox, useRoundTripPolygon } from "./util";
 
 type GeoMapPlanView = {
-  start: Coords;
+  start: Coords | null;
   finish: Coords | null;
   bearing: number | null;
   distance: number;
@@ -30,15 +30,18 @@ export function GeoMapPlanView(props: GeoMapPlanView) {
   );
 
   const bbox = useMemo(() => {
-    const pointsFeatures = turf.points(
-      [[props.start.lon, props.start.lat]].concat(
-        props.finish ? [[props.finish.lon, props.finish.lat]] : [],
-      ),
-    );
+    const points = (
+      props.start ? [[props.start.lon, props.start.lat]] : []
+    ).concat(props.finish ? [[props.finish.lon, props.finish.lat]] : []);
+    if (points.length === 1) {
+      points.push([points[0][0] - 0.1, points[0][1] - 0.1]);
+      points.push([points[0][0] + 0.1, points[0][1] + 0.1]);
+    }
+    const pointsFeatures = turf.points(points);
     const pointsBbox = turf.bbox(pointsFeatures);
     const coneBbox = roundTripPolygon ? turf.bbox(roundTripPolygon) : null;
     return combineBBox(pointsBbox, coneBbox);
-  }, [props.finish, props.start.lat, props.start.lon, roundTripPolygon]);
+  }, [props.finish, props.start, roundTripPolygon]);
 
   const mapRef = useRef<MapRef>(null);
   useEffect(() => {
@@ -64,9 +67,11 @@ export function GeoMapPlanView(props: GeoMapPlanView) {
         interactive={false}
         attributionControl={false}
       >
-        <GeoMapMarker lat={props.start.lat} lon={props.start.lon}>
-          <CirclePlayIcon className="size-8 text-green-500" />
-        </GeoMapMarker>
+        {props.start && (
+          <GeoMapMarker lat={props.start.lat} lon={props.start.lon}>
+            <CirclePlayIcon className="size-8 text-green-500" />
+          </GeoMapMarker>
+        )}
         {props.finish && (
           <GeoMapMarker lat={props.finish.lat} lon={props.finish.lon}>
             <CirclePauseIcon className="size-8 text-red-500" />

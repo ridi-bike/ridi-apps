@@ -22,6 +22,7 @@ import { Pressable, Text, View } from "react-native";
 import * as z from "zod";
 
 import { GeoMapCoordsSelector } from "~/components/geo-map/geo-map-coords-selector";
+import { GeoMapPlanView } from "~/components/geo-map/geo-map-plan-view";
 import { DIRECTIONS, getCardinalDirection } from "~/components/geo-map/util";
 import { LocationPermsNotGiven } from "~/components/LocationPermsNotGiven";
 import { ScreenFrame } from "~/components/screen-frame";
@@ -219,56 +220,174 @@ export default function PlansNew() {
     startCoords,
   ]);
 
+  const [mapMode, setMapMode] = useUrlParams("map-mode", z.boolean());
+
   return (
     <ScreenFrame
       title="New plan"
       floating={
         <View className="fixed bottom-0 w-full bg-white p-4 dark:bg-gray-800">
-          <Pressable
-            onPress={() => {
-              if (canCreateRoute()) {
-                if (!startCoords || !ruleSetId) {
-                  return;
-                }
-                let distance = (selectedDistance || 0) * 1000;
-                if (!isRoundTrip && finishCoords) {
-                  const turfP1 = turf.point([startCoords[1], startCoords[0]]);
-                  const turfP2 = turf.point([finishCoords[1], finishCoords[0]]);
-                  distance = turf.distance(turfP1, turfP2, {
-                    units: "meters",
+          {mapMode && (
+            <Pressable
+              onPress={() => setMapMode(false)}
+              aria-disabled={!canCreateRoute()}
+              className={cn(
+                "w-full rounded-xl px-4 py-3 font-medium text-white transition-colors",
+                {
+                  "bg-[#FF5937] hover:bg-[#FF5937]/90": mapMode,
+                  "cursor-not-allowed bg-gray-200 dark:bg-gray-700": !mapMode,
+                },
+              )}
+            >
+              <Text className="text-center text-white">Close map</Text>
+            </Pressable>
+          )}
+          {!mapMode && (
+            <Pressable
+              onPress={() => {
+                if (canCreateRoute()) {
+                  if (!startCoords || !ruleSetId) {
+                    return;
+                  }
+                  let distance = (selectedDistance || 0) * 1000;
+                  if (!isRoundTrip && finishCoords) {
+                    const turfP1 = turf.point([startCoords[1], startCoords[0]]);
+                    const turfP2 = turf.point([
+                      finishCoords[1],
+                      finishCoords[0],
+                    ]);
+                    distance = turf.distance(turfP1, turfP2, {
+                      units: "meters",
+                    });
+                  }
+                  const planId = planAdd({
+                    startLat: startCoords[0],
+                    startLon: startCoords[1],
+                    finishLat: finishCoords ? finishCoords[0] : null,
+                    finishLon: finishCoords ? finishCoords[1] : null,
+                    bearing: isRoundTrip ? bearing || 0 : null,
+                    distance,
+                    tripType: isRoundTrip ? "round-trip" : "start-finish",
+                    ruleSetId,
+                  });
+                  router.replace({
+                    pathname: "/plans/[planId]",
+                    params: { planId },
                   });
                 }
-                const planId = planAdd({
-                  startLat: startCoords[0],
-                  startLon: startCoords[1],
-                  finishLat: finishCoords ? finishCoords[0] : null,
-                  finishLon: finishCoords ? finishCoords[1] : null,
-                  bearing: isRoundTrip ? bearing || 0 : null,
-                  distance,
-                  tripType: isRoundTrip ? "round-trip" : "start-finish",
-                  ruleSetId,
-                });
-                router.replace({
-                  pathname: "/plans/[planId]",
-                  params: { planId },
-                });
-              }
-            }}
-            aria-disabled={!canCreateRoute()}
-            className={cn(
-              "w-full rounded-xl px-4 py-3 font-medium text-white transition-colors",
-              {
-                "bg-[#FF5937] hover:bg-[#FF5937]/90": canCreateRoute(),
-                "cursor-not-allowed bg-gray-200 dark:bg-gray-700":
-                  !canCreateRoute(),
-              },
-            )}
-          >
-            <Text className="text-center text-white">OK</Text>
-          </Pressable>
+              }}
+              aria-disabled={!canCreateRoute()}
+              className={cn(
+                "w-full rounded-xl px-4 py-3 font-medium text-white transition-colors",
+                {
+                  "bg-[#FF5937] hover:bg-[#FF5937]/90": canCreateRoute(),
+                  "cursor-not-allowed bg-gray-200 dark:bg-gray-700":
+                    !canCreateRoute(),
+                },
+              )}
+            >
+              <Text className="text-center text-white">OK</Text>
+            </Pressable>
+          )}
         </View>
       }
     >
+      <AnimatePresence>
+        {mapMode && (
+          <MotiView
+            id="omg"
+            className="fixed top-0 z-50 w-full bg-white p-4 dark:bg-gray-900"
+            from={{ height: "0%" }}
+            animate={{ height: "100%" }}
+            exit={{ height: "0%" }}
+            transition={{ type: "timing" }}
+          >
+            <GroupWithTitle title="Show on map">
+              <Pressable
+                onPress={getCurrentLocation}
+                className={cn(
+                  "flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 px-4 py-2",
+
+                  {
+                    "border-[#FF5937] bg-[#FF5937] text-white": currentCoords,
+                    "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
+                      !currentCoords,
+                  },
+                )}
+              >
+                <Locate className="size-4 dark:text-gray-200" />
+                <Text className="text-sm dark:text-gray-200">Me</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setCenterSelectionMode(!centerSelectionMode)}
+                className={cn(
+                  "flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 px-4 py-2",
+                  {
+                    "border-[#FF5937] bg-[#FF5937] text-white":
+                      centerSelectionMode,
+                    "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
+                      !centerSelectionMode,
+                  },
+                )}
+              >
+                <MapPinned className="size-4 dark:text-gray-200" />
+                <Text className="text-sm dark:text-gray-200">Selector</Text>
+              </Pressable>
+              {!searchPoints && (
+                <Link
+                  href="/search"
+                  className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-900"
+                >
+                  <Search className="size-4 dark:text-gray-200" />
+                  <Text className="text-sm dark:text-gray-200">Search</Text>
+                </Link>
+              )}
+              {searchPoints?.length && (
+                <Pressable
+                  onPress={() => {
+                    setSearchPoints();
+                  }}
+                  className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-[#FF5937] bg-[#FF5937] px-4 py-2 text-white"
+                >
+                  <Search className="size-4 dark:text-gray-200" />
+                  <Text className="text-sm dark:text-gray-200">Search</Text>
+                </Pressable>
+              )}
+            </GroupWithTitle>
+            <GeoMapCoordsSelector
+              regions={
+                errorMessage
+                  ? (startRegions || []).concat(finishRegions || [])
+                  : null
+              }
+              isRoundTrip={isRoundTrip || false}
+              start={
+                startCoords
+                  ? { lat: startCoords[0], lon: startCoords[1] }
+                  : null
+              }
+              finish={
+                finishCoords
+                  ? { lat: finishCoords[0], lon: finishCoords[1] }
+                  : null
+              }
+              current={
+                currentCoords
+                  ? { lat: currentCoords[0], lon: currentCoords[1] }
+                  : null
+              }
+              points={searchPoints?.map((c) => ({
+                coords: { lat: c[0], lon: c[1] },
+              }))}
+              selectionMode={centerSelectionMode ? "center" : "tap"}
+              setStart={(c) => setStartCoords(c ? [c.lat, c.lon] : undefined)}
+              setFinish={(c) => setFinishCoords(c ? [c.lat, c.lon] : undefined)}
+              bearing={bearing}
+              distance={selectedDistance}
+            />
+          </MotiView>
+        )}
+      </AnimatePresence>
       {showLocationAlert && (
         <LocationPermsNotGiven
           close={() => {
@@ -277,161 +396,69 @@ export default function PlansNew() {
         />
       )}
       <View className="max-w-3xl flex-1 p-4 pb-24">
-        <GroupWithTitle title="Trip details">
-          <AnimatePresence>
-            {!!errorMessage && (
-              <MotiView
-                from={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 1 }}
-                className="flex h-14 flex-row items-center justify-center"
-              >
-                <Text className="text-xl text-red-500">{errorMessage}</Text>
-              </MotiView>
-            )}
-            {!startCoords && !finishCoords && (
-              <MotiView
-                from={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 1 }}
-                className="flex h-14 flex-row items-center justify-center"
-              >
-                <Text className="text-xl dark:text-gray-200">
-                  Tap on map to start
-                </Text>
-              </MotiView>
-            )}
-            {!errorMessage && (startCoords || finishCoords) && (
-              <MotiView
-                from={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 1 }}
-                className="flex h-14 flex-col items-start justify-start p-2"
-              >
-                <View className="flex flex-row items-center gap-2">
-                  <CirclePlayIcon className="size-4 text-[#FF5937]" />
-                  <Text className="text-sm dark:text-gray-200">
-                    {isRoundTrip ? "Start/Finish Point: " : "Start: "}
-                    {startCoords
-                      ? startDesc ||
-                        `${startCoords[0].toFixed(4)}, ${startCoords[1].toFixed(4)}`
-                      : "Not set"}
-                  </Text>
-                </View>
-                {!isRoundTrip && (
+        <Pressable onPress={() => setMapMode(true)}>
+          <GroupWithTitle title="Trip details">
+            <AnimatePresence>
+              {!!errorMessage && (
+                <MotiView
+                  from={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 1 }}
+                  className="flex h-14 flex-row items-center justify-center"
+                >
+                  <Text className="text-xl text-red-500">{errorMessage}</Text>
+                </MotiView>
+              )}
+              {!errorMessage && (startCoords || finishCoords) && (
+                <MotiView
+                  from={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 1 }}
+                  className="flex h-14 flex-col items-start justify-start p-2"
+                >
                   <View className="flex flex-row items-center gap-2">
-                    <CirclePauseIcon className="size-4 text-[#FF5937]" />
+                    <CirclePlayIcon className="size-4 text-[#FF5937]" />
                     <Text className="text-sm dark:text-gray-200">
-                      Finish:{" "}
-                      {finishCoords
-                        ? finishDesc ||
-                          `${finishCoords[0].toFixed(4)}, ${finishCoords[1].toFixed(4)}`
+                      {isRoundTrip ? "Start/Finish Point: " : "Start: "}
+                      {startCoords
+                        ? startDesc ||
+                          `${startCoords[0].toFixed(4)}, ${startCoords[1].toFixed(4)}`
                         : "Not set"}
                     </Text>
                   </View>
-                )}
-                {isRoundTrip && (
-                  <View className="flex flex-row items-center gap-6">
+                  {!isRoundTrip && (
                     <View className="flex flex-row items-center gap-2">
-                      <StretchHorizontal className="size-4 text-[#FF5937]" />
+                      <CirclePauseIcon className="size-4 text-[#FF5937]" />
                       <Text className="text-sm dark:text-gray-200">
-                        Trip: ~{selectedDistance}km
+                        Finish:{" "}
+                        {finishCoords
+                          ? finishDesc ||
+                            `${finishCoords[0].toFixed(4)}, ${finishCoords[1].toFixed(4)}`
+                          : "Not set"}
                       </Text>
                     </View>
-                    <View className="flex flex-row items-center gap-2">
-                      <Compass className="size-4 text-[#FF5937]" />
-                      <Text className="text-sm dark:text-gray-200">
-                        {getCardinalDirection(bearing || 0)} ({bearing || 0}°)
-                      </Text>
+                  )}
+                  {isRoundTrip && (
+                    <View className="flex flex-row items-center gap-6">
+                      <View className="flex flex-row items-center gap-2">
+                        <StretchHorizontal className="size-4 text-[#FF5937]" />
+                        <Text className="text-sm dark:text-gray-200">
+                          Trip: ~{selectedDistance}km
+                        </Text>
+                      </View>
+                      <View className="flex flex-row items-center gap-2">
+                        <Compass className="size-4 text-[#FF5937]" />
+                        <Text className="text-sm dark:text-gray-200">
+                          {getCardinalDirection(bearing || 0)} ({bearing || 0}°)
+                        </Text>
+                      </View>
                     </View>
-                  </View>
-                )}
-              </MotiView>
-            )}
-          </AnimatePresence>
-        </GroupWithTitle>
-        <GroupWithTitle title="Show on map">
-          <Pressable
-            onPress={getCurrentLocation}
-            className={cn(
-              "flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 px-4 py-2",
-
-              {
-                "border-[#FF5937] bg-[#FF5937] text-white": currentCoords,
-                "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
-                  !currentCoords,
-              },
-            )}
-          >
-            <Locate className="size-4 dark:text-gray-200" />
-            <Text className="text-sm dark:text-gray-200">Me</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => setCenterSelectionMode(!centerSelectionMode)}
-            className={cn(
-              "flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 px-4 py-2",
-              {
-                "border-[#FF5937] bg-[#FF5937] text-white": centerSelectionMode,
-                "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
-                  !centerSelectionMode,
-              },
-            )}
-          >
-            <MapPinned className="size-4 dark:text-gray-200" />
-            <Text className="text-sm dark:text-gray-200">Selector</Text>
-          </Pressable>
-          {!searchPoints && (
-            <Link
-              href="/search"
-              className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-900"
-            >
-              <Search className="size-4 dark:text-gray-200" />
-              <Text className="text-sm dark:text-gray-200">Search</Text>
-            </Link>
-          )}
-          {searchPoints?.length && (
-            <Pressable
-              onPress={() => {
-                setSearchPoints();
-              }}
-              className="flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-[#FF5937] bg-[#FF5937] px-4 py-2 text-white"
-            >
-              <Search className="size-4 dark:text-gray-200" />
-              <Text className="text-sm dark:text-gray-200">Search</Text>
-            </Pressable>
-          )}
-        </GroupWithTitle>
-        <GroupWithTitle title="Tap on points" className="h-[400px]">
-          <GeoMapCoordsSelector
-            regions={
-              errorMessage
-                ? (startRegions || []).concat(finishRegions || [])
-                : null
-            }
-            isRoundTrip={isRoundTrip || false}
-            start={
-              startCoords ? { lat: startCoords[0], lon: startCoords[1] } : null
-            }
-            finish={
-              finishCoords
-                ? { lat: finishCoords[0], lon: finishCoords[1] }
-                : null
-            }
-            current={
-              currentCoords
-                ? { lat: currentCoords[0], lon: currentCoords[1] }
-                : null
-            }
-            points={searchPoints?.map((c) => ({
-              coords: { lat: c[0], lon: c[1] },
-            }))}
-            selectionMode={centerSelectionMode ? "center" : "tap"}
-            setStart={(c) => setStartCoords(c ? [c.lat, c.lon] : undefined)}
-            setFinish={(c) => setFinishCoords(c ? [c.lat, c.lon] : undefined)}
-            bearing={bearing}
-            distance={selectedDistance}
-          />
-        </GroupWithTitle>
+                  )}
+                </MotiView>
+              )}
+            </AnimatePresence>
+          </GroupWithTitle>
+        </Pressable>
         <GroupWithTitle title="Trip type">
           <Pressable
             onPress={() => {
@@ -525,6 +552,27 @@ export default function PlansNew() {
             <Text className="text-sm dark:text-gray-200">Custom</Text>
           </Pressable>
         </GroupWithTitle>
+        <Pressable onPress={() => setMapMode(true)}>
+          <GroupWithTitle title="Overview" className="h-48">
+            <GeoMapPlanView
+              bearing={isRoundTrip ? (bearing ?? null) : null}
+              distance={selectedDistance || 0}
+              start={
+                startCoords
+                  ? {
+                      lat: startCoords[0],
+                      lon: startCoords[1],
+                    }
+                  : null
+              }
+              finish={
+                finishCoords
+                  ? { lat: finishCoords[0], lon: finishCoords[1] }
+                  : null
+              }
+            />
+          </GroupWithTitle>
+        </Pressable>
         <AnimatePresence>
           {isRoundTrip && (
             <MotiView
