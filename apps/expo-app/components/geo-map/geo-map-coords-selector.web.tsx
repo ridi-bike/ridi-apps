@@ -1,7 +1,10 @@
 import * as turf from "@turf/turf";
 import {
+  type FillLayer,
+  Layer,
   Map as MapLibre,
   NavigationControl,
+  Source,
   type MapRef,
 } from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -23,6 +26,27 @@ import {
 
 import { combineBBox, useRoundTripPolygon } from "./util";
 
+const colors = [
+  "#dc2626",
+  "#16a34a",
+  "#ea580c",
+  "#eab308",
+  "#db2777",
+  "#9333ea",
+  "#057aff",
+  "#c026d3",
+  "#ca8a04",
+  "#059669",
+];
+
+function stringToColor(str: string) {
+  const hash = str.split("").reduce((tot, char) => tot + char.charCodeAt(0), 0);
+
+  const colorIndex = Math.abs(hash) % colors.length;
+
+  return colors[colorIndex];
+}
+
 export function GeoMapCoordsSelector({
   start,
   finish,
@@ -34,6 +58,7 @@ export function GeoMapCoordsSelector({
   isRoundTrip,
   bearing,
   distance,
+  regions,
 }: GeoMapCoordsSelectorProps) {
   const mapRef = useRef<MapRef>(null);
   const [findCoordsCurr, setFindCoordsCurr] = useState<
@@ -89,6 +114,37 @@ export function GeoMapCoordsSelector({
       mapRef.current.fitBounds(mapBounds);
     }
   }, [mapBounds]);
+
+  const regionLayers = useMemo(() => {
+    return regions?.map((region) => {
+      const layerId = `region-${region.region}`;
+      const layerStyle: FillLayer = {
+        id: layerId,
+        type: "fill",
+        source: layerId,
+        paint: {
+          "fill-color": stringToColor(region.region),
+          "fill-opacity": 0.3,
+        },
+      };
+      return (
+        <Source
+          key={region.region}
+          id={layerId}
+          type="geojson"
+          data={region.geojson}
+        >
+          <Layer {...layerStyle} />
+        </Source>
+      );
+    });
+  }, [regions]);
+
+  useEffect(() => {
+    if (mapRef.current && mapBounds && regions?.length) {
+      mapRef.current.setZoom(5);
+    }
+  }, [mapBounds, regions?.reduce((all, curr) => all + curr, "")]);
 
   return (
     <MapLibre
@@ -191,6 +247,7 @@ export function GeoMapCoordsSelector({
         </MapMarker>
       )}
       {rountdTripLayer}
+      {regionLayers}
       <NavigationControl position="bottom-right" />
     </MapLibre>
   );

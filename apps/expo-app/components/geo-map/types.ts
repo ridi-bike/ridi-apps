@@ -1,5 +1,7 @@
 import { type PropsWithChildren } from "react";
 
+import { type Region } from "~/lib/regions";
+
 export type GeoMapRouteViewProps = {
   route: Coords[];
   interactive: boolean;
@@ -15,6 +17,7 @@ export type GeoMapCoordsSelectorProps = {
   bearing?: number;
   distance?: number;
   selectionMode: "tap" | "center";
+  regions?: Region[] | null;
 };
 
 export type Coords = {

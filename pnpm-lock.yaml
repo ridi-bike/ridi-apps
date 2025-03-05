@@ -336,6 +336,9 @@ importers:
       zod:
         specifier: ^3.24.1
         version: 3.24.2
+      zod-geojson:
+        specifier: ^0.0.3
+        version: 0.0.3
     devDependencies:
       '@babel/core':
         specifier: ^7.20.0
@@ -10993,6 +10996,9 @@ packages:
 
   youch@3.2.3:
     resolution: {integrity: sha512-ZBcWz/uzZaQVdCvfV4uk616Bbpf2ee+F/AvuKDR5EwX/Y4v06xWdtMluqTD7+KlZdM93lLm9gMZYo0sKBS0pgw==}
+
+  zod-geojson@0.0.3:
+    resolution: {integrity: sha512-swL9Tatws3djCG6yux98SuaIdfa8dHh3lEITNeI8HOCxM26XBgqOVrw4KC5YtNwxE1kmfaJnR8rG+fRc5y7Eog==}
 
   zod-to-json-schema@3.24.3:
     resolution: {integrity: sha512-HIAfWdYIt1sssHfYZFCXp4rU1w2r8hVVXYIlmoa0r0gABLs5di3RCqPU5DDROogVz1pAdYBaz7HK5n9pSUNs3A==}
@@ -24412,6 +24418,8 @@ snapshots:
       cookie: 0.5.0
       mustache: 4.2.0
       stacktracey: 2.1.8
+
+  zod-geojson@0.0.3: {}
 
   zod-to-json-schema@3.24.3(zod@3.24.2):
     dependencies:

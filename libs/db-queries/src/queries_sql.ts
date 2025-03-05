@@ -2,6 +2,20 @@
 
 import type  { Sql } from "postgres";
 
+export const planSetRegionQuery = `-- name: PlanSetRegion :exec
+update plans
+set region = $1
+where id = $2`;
+
+export interface PlanSetRegionArgs {
+    region: string | null;
+    id: string;
+}
+
+export async function planSetRegion(sql: Sql, args: PlanSetRegionArgs): Promise<void> {
+    await sql.unsafe(planSetRegionQuery, [args.region, args.id]);
+}
+
 export const regionInsertOrUpdateQuery = `-- name: RegionInsertOrUpdate :one
 insert into regions (region, geojson, polygon)
 values ($1, $2, $3)
@@ -566,7 +580,7 @@ export async function regionGetCount(sql: Sql): Promise<RegionGetCountRow | null
 }
 
 export const planGetByIdQuery = `-- name: PlanGetById :one
-select id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc, rule_set_id from plans
+select id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc, rule_set_id, region from plans
 where plans.id = $1`;
 
 export interface PlanGetByIdArgs {
@@ -591,6 +605,7 @@ export interface PlanGetByIdRow {
     startDesc: string;
     finishDesc: string | null;
     ruleSetId: string;
+    region: string | null;
 }
 
 export async function planGetById(sql: Sql, args: PlanGetByIdArgs): Promise<PlanGetByIdRow | null> {
@@ -619,12 +634,13 @@ export async function planGetById(sql: Sql, args: PlanGetByIdArgs): Promise<Plan
         bearing: row[13],
         startDesc: row[14],
         finishDesc: row[15],
-        ruleSetId: row[16]
+        ruleSetId: row[16],
+        region: row[17]
     };
 }
 
 export const plansGetNewQuery = `-- name: PlansGetNew :many
-select id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc, rule_set_id from plans
+select id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc, rule_set_id, region from plans
 where state = 'new'`;
 
 export interface PlansGetNewRow {
@@ -645,6 +661,7 @@ export interface PlansGetNewRow {
     startDesc: string;
     finishDesc: string | null;
     ruleSetId: string;
+    region: string | null;
 }
 
 export async function plansGetNew(sql: Sql): Promise<PlansGetNewRow[]> {
@@ -665,7 +682,8 @@ export async function plansGetNew(sql: Sql): Promise<PlansGetNewRow[]> {
         bearing: row[13],
         startDesc: row[14],
         finishDesc: row[15],
-        ruleSetId: row[16]
+        ruleSetId: row[16],
+        region: row[17]
     }));
 }
 

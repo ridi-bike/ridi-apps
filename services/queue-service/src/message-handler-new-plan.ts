@@ -94,6 +94,11 @@ export class MessageHandlerNewPlan {
       });
     }
 
+    await pgQueries.planSetRegion(this.pgClient, {
+      id: planRecord.id,
+      region: region.region,
+    });
+
     const rules = await pgQueries.ruleSetRoadTagsListByRuleSetIdWithDeleted(
       this.pgClient,
       {

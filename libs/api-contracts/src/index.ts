@@ -249,6 +249,28 @@ export const ruleSetSetSchema = z.discriminatedUnion("version", [
 export type RuleSetsSetRequest = z.infer<typeof ruleSetSetSchema>;
 
 export const apiContract = c.router({
+  regionGet: {
+    method: "GET",
+    path: "/region/:lat/:lon",
+    query: z.discriminatedUnion("version", [
+      z.object({
+        version: z.literal("v1"),
+      }),
+    ]),
+    responses: {
+      200: z.array(
+        z.object({
+          region: z.string(),
+          geojson: z.string(),
+        }),
+      ),
+      400: z.object({ message: z.string() }),
+      401: z.object({ message: z.string() }),
+      404: z.object({ message: z.string() }),
+      500: z.object({ message: z.string() }),
+    },
+    summary: "Get a route by ID",
+  },
   ruleSetsList: {
     method: "GET",
     path: "/user/rules",

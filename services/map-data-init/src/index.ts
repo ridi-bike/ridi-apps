@@ -109,4 +109,5 @@ try {
   process.exit(1);
 }
 
-logger.info("Starting Map Data init done");
+logger.info("Map Data init done");
+process.exit(0);

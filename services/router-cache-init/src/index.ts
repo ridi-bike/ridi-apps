@@ -118,4 +118,5 @@ try {
   process.exit(1);
 }
 
-logger.info("Starting Router Cache init done");
+logger.info("Router Cache init done");
+process.exit(0);

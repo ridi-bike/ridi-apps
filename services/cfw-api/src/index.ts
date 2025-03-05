@@ -20,6 +20,7 @@ import {
   ruleSetUpsert,
   ruleSetRoadTagsList,
   ruleSetSetDeleted,
+  regionFindFromCoords,
 } from "@ridi/db-queries";
 import { RidiLogger } from "@ridi/logger";
 import { lookupCooordsInfo } from "@ridi/maps-api";
@@ -44,12 +45,27 @@ const router = tsr
     workerRequest: WorkerRequest;
     workerEnv: CloudflareBindings;
     workerContext: ExecutionContext;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     supabaseClient: ReturnType<typeof createClient<any, "public", any>>;
     db: ReturnType<typeof postgres>;
     messaging: Messaging;
     logger: RidiLogger;
   }>()
   .routerWithMiddleware(apiContract)<{ user: User }>({
+  regionGet: async ({ params: { lon, lat } }, ctx) => {
+    const regions = await regionFindFromCoords(ctx.db, {
+      lat,
+      lon,
+    });
+
+    return {
+      status: 200,
+      body: regions.map((r) => ({
+        region: r.region,
+        geojson: r.geojson,
+      })),
+    };
+  },
   ruleSetsList: async ({ query }, ctx) => {
     if (query.version !== "v1") {
       return {

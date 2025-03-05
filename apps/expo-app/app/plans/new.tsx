@@ -25,6 +25,7 @@ import { GeoMapCoordsSelector } from "~/components/geo-map/geo-map-coords-select
 import { DIRECTIONS, getCardinalDirection } from "~/components/geo-map/util";
 import { LocationPermsNotGiven } from "~/components/LocationPermsNotGiven";
 import { ScreenFrame } from "~/components/screen-frame";
+import { findRegions, type Region } from "~/lib/regions";
 import { useStorePlans } from "~/lib/stores/plans-store";
 import { useStoreRuleSets } from "~/lib/stores/rules-store";
 import { useUrlParams } from "~/lib/url-params";
@@ -85,6 +86,40 @@ export default function PlansNew() {
 
   const [showLocationAlert, setShowLocationAlert] = useState(false);
   const [currentCoords, setCurrentCoords] = useState<Coords | null>(null);
+
+  const [startRegions, setStartRegions] = useState<Region[] | null>(null);
+  useEffect(() => {
+    if (startCoords) {
+      findRegions(startCoords).then((regions) => setStartRegions(regions));
+    } else {
+      setStartRegions(null);
+    }
+  }, [startCoords]);
+  const [finishRegions, setFinishRegions] = useState<Region[] | null>(null);
+  useEffect(() => {
+    if (finishCoords) {
+      findRegions(finishCoords).then((regions) => setFinishRegions(regions));
+    } else {
+      setStartRegions(null);
+    }
+  }, [finishCoords]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  useEffect(() => {
+    if (startCoords && finishCoords && startRegions && finishRegions) {
+      if (!startRegions.length || !finishRegions.length) {
+        setErrorMessage("Journey start or finish set in unsupported region");
+      } else {
+        const overlapping = startRegions.filter((sr) =>
+          finishRegions.find((fr) => fr.region === sr.region),
+        );
+        if (!overlapping.length) {
+          setErrorMessage("Journey start and finish are in different regions");
+        } else {
+          setErrorMessage(null);
+        }
+      }
+    }
+  }, [finishCoords, finishRegions, startCoords, startRegions]);
 
   useEffect(() => {
     // set immediate is needed to let the stack mount first and then update params
@@ -166,10 +201,23 @@ export default function PlansNew() {
 
   const canCreateRoute = useCallback(() => {
     return (
-      (isRoundTrip && !!startCoords) ||
-      (!isRoundTrip && !!startCoords && !!finishCoords)
+      ((!isRoundTrip && startCoords && finishCoords && ruleSetId) ||
+        (isRoundTrip &&
+          startCoords &&
+          bearing !== undefined &&
+          selectedDistance &&
+          ruleSetId)) &&
+      !errorMessage
     );
-  }, [finishCoords, isRoundTrip, startCoords]);
+  }, [
+    bearing,
+    errorMessage,
+    finishCoords,
+    isRoundTrip,
+    ruleSetId,
+    selectedDistance,
+    startCoords,
+  ]);
 
   return (
     <ScreenFrame
@@ -178,14 +226,10 @@ export default function PlansNew() {
         <View className="fixed bottom-0 w-full bg-white p-4 dark:bg-gray-800">
           <Pressable
             onPress={() => {
-              if (
-                (!isRoundTrip && startCoords && finishCoords && ruleSetId) ||
-                (isRoundTrip &&
-                  startCoords &&
-                  bearing !== undefined &&
-                  selectedDistance &&
-                  ruleSetId)
-              ) {
+              if (canCreateRoute()) {
+                if (!startCoords || !ruleSetId) {
+                  return;
+                }
                 let distance = (selectedDistance || 0) * 1000;
                 if (!isRoundTrip && finishCoords) {
                   const turfP1 = turf.point([startCoords[1], startCoords[0]]);
@@ -235,6 +279,16 @@ export default function PlansNew() {
       <View className="max-w-3xl flex-1 p-4 pb-24">
         <GroupWithTitle title="Trip details">
           <AnimatePresence>
+            {!!errorMessage && (
+              <MotiView
+                from={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 1 }}
+                className="flex h-14 flex-row items-center justify-center"
+              >
+                <Text className="text-xl text-red-500">{errorMessage}</Text>
+              </MotiView>
+            )}
             {!startCoords && !finishCoords && (
               <MotiView
                 from={{ opacity: 0 }}
@@ -247,7 +301,7 @@ export default function PlansNew() {
                 </Text>
               </MotiView>
             )}
-            {(startCoords || finishCoords) && (
+            {!errorMessage && (startCoords || finishCoords) && (
               <MotiView
                 from={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -349,6 +403,11 @@ export default function PlansNew() {
         </GroupWithTitle>
         <GroupWithTitle title="Tap on points" className="h-[400px]">
           <GeoMapCoordsSelector
+            regions={
+              errorMessage
+                ? (startRegions || []).concat(finishRegions || [])
+                : null
+            }
             isRoundTrip={isRoundTrip || false}
             start={
               startCoords ? { lat: startCoords[0], lon: startCoords[1] } : null

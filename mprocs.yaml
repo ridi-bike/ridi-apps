@@ -25,6 +25,9 @@ procs:
   router-service-greece:
     shell: "node --import=tsx --watch-path=./src --env-file=.env.greece src/index.ts | pino-pretty"
     cwd: "./services/router-service/"
+  router-service-estonia:
+    shell: "node --import=tsx --watch-path=./src --env-file=.env.estonia src/index.ts | pino-pretty"
+    cwd: "./services/router-service/"
   router-service-tsc:
     shell: "pnpm run tsc --watch"
     cwd: "./services/router-service/"

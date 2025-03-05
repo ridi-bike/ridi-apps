@@ -1,3 +1,8 @@
+-- name: PlanSetRegion :exec
+update plans
+set region = $1
+where id = $2;
+
 -- name: RegionInsertOrUpdate :one
 insert into regions (region, geojson, polygon)
 values ($1, $2, $3)
