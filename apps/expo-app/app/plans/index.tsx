@@ -5,7 +5,7 @@ import {
   type MotiPressableTransitionProp,
   type MotiPressableProp,
 } from "moti/interactions";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { View, Text } from "react-native";
 
 import { ErrorBox } from "~/components/error";
@@ -41,6 +41,12 @@ export default function PlansPage() {
       },
     [],
   );
+
+  useEffect(() => {
+    if (plans?.length === 0) {
+      router.push("/plans/new");
+    }
+  }, [plans, router]);
 
   return (
     <ScreenFrame

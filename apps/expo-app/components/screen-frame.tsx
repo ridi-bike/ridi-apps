@@ -31,7 +31,7 @@ export function ScreenFrame({ children, floating, title }: ScreenFramePropsn) {
         />
         <View
           role="main"
-          className="flex flex-row justify-center px-6 pb-24 pt-8 md:px-8"
+          className="flex flex-row justify-center px-2 pb-24 pt-8 md:px-8"
         >
           {children}
         </View>
