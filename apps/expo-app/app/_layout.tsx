@@ -44,7 +44,13 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Stack />
+      <Stack
+        screenOptions={{
+          contentStyle: {
+            overflow: "hidden",
+          },
+        }}
+      />
       <PortalHost />
     </QueryClientProvider>
   );

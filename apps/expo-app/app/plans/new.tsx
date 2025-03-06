@@ -16,7 +16,7 @@ import {
   StretchHorizontal,
   Waypoints,
 } from "lucide-react-native";
-import { AnimatePresence, MotiView } from "moti";
+import { AnimatePresence, MotiView, ScrollView } from "moti";
 import { useCallback, useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import * as z from "zod";
@@ -405,7 +405,7 @@ export default function PlansNew() {
           }}
         />
       )}
-      <View className="max-w-3xl flex-1 p-4">
+      <ScrollView className="max-h-[calc(100vh-170px)] max-w-3xl flex-1 px-4 pt-4">
         <Pressable onPress={() => setMapMode(true)}>
           <GroupWithTitle title="Trip details">
             <AnimatePresence>
@@ -660,7 +660,7 @@ export default function PlansNew() {
             </MotiView>
           )}
         </AnimatePresence>
-      </View>
+      </ScrollView>
     </ScreenFrame>
   );
 }
