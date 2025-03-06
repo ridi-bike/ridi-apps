@@ -120,37 +120,12 @@ export default function LocationSearch() {
     }
   }, [navState.index, navState.routes, router]);
 
-  const visRef = useRef(window.visualViewport?.height || 0);
-  const scrRef = useRef(window.screen.height);
-  const [keyboardOffset, setKeyboardOffset] = useState(0);
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && "visualViewport" in window) {
-      const listener = () => {
-        if (scrRef.current === window.screen.height) {
-          setKeyboardOffset(
-            visRef.current - (window.visualViewport?.height || 0),
-          );
-        }
-      };
-      if (typeof visualViewport != "undefined") {
-        window.visualViewport?.addEventListener("resize", listener);
-      }
-      return () => {
-        if (typeof visualViewport != "undefined") {
-          window.visualViewport?.removeEventListener("resize", listener);
-        }
-      };
-    }
-  }, []);
-
   return (
     <ScreenFrame
       title="Search"
       floating={
         <MotiView
-          className="fixed w-full border-t-2 border-black bg-white dark:border-gray-700 dark:bg-gray-900"
-          animate={{ bottom: keyboardOffset }}
+          className="fixed top-16 w-full border-b-2 border-black bg-white dark:border-gray-700 dark:bg-gray-900"
           transition={{ type: "timing" }}
         >
           <View className="p-4">
@@ -199,8 +174,8 @@ export default function LocationSearch() {
         </MotiView>
       }
     >
-      <View className="mx-2 max-w-5xl flex-1">
-        <ScrollView className="h-[calc(100vh-250px)]">
+      <View className="mx-2 mt-36 max-w-5xl flex-1">
+        <ScrollView className="h-[calc(100vh-240px)]">
           <View className="mr-2 grid grid-cols-1 gap-6 md:grid-cols-3">
             {locations.length > 0 ? (
               <>
