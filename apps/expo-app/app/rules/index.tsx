@@ -15,7 +15,7 @@ import {
 } from "lucide-react-native";
 import { AnimatePresence, MotiView } from "moti";
 import { useCallback, useState } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, ScrollView } from "react-native";
 import { generate } from "xksuid";
 import { z } from "zod";
 
@@ -254,75 +254,79 @@ export default function RuleSetList() {
               animate={{ opacity: 1 }}
               className="grid grid-cols-1 gap-6 pb-12 md:grid-cols-3"
             >
-              {!!error && status !== "pending" && (
-                <View className="mx-2 max-w-5xl flex-1">
-                  <ErrorBox error={error} retry={refetch} />
-                </View>
-              )}
-              {!ruleSets && !error && (
-                <Loading className="size-12 text-[#ff4a25]" />
-              )}
-              {ruleSets.map((ruleSet) => (
-                <View
-                  key={ruleSet.id}
-                  className={cn(
-                    "border-[3px] border-black rounded-2xl p-4 dark:border-gray-700",
+              <ScrollView className="h-[calc(100vh-130px)]">
+                <View className="mr-2 grid grid-cols-1 gap-6 pb-12 md:grid-cols-3">
+                  {!!error && status !== "pending" && (
+                    <View className="mx-2 max-w-5xl flex-1">
+                      <ErrorBox error={error} retry={refetch} />
+                    </View>
                   )}
-                >
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center gap-3">
-                      <View className="text-gray-400 dark:text-gray-500">
-                        {ruleSet.isSystem ? (
-                          <Settings className="size-5" />
-                        ) : (
-                          <User className="size-5" />
-                        )}
-                      </View>
-                      <View className="flex-row items-center gap-2">
-                        <Text className="font-medium dark:text-gray-200">
-                          {ruleSet.name}
-                        </Text>
+                  {!ruleSets && !error && (
+                    <Loading className="size-12 text-[#ff4a25]" />
+                  )}
+                  {ruleSets.map((ruleSet) => (
+                    <View
+                      key={ruleSet.id}
+                      className={cn(
+                        "border-[3px] border-black rounded-2xl p-4 dark:border-gray-700",
+                      )}
+                    >
+                      <View className="flex-row items-center justify-between">
+                        <View className="flex-row items-center gap-3">
+                          <View className="text-gray-400 dark:text-gray-500">
+                            {ruleSet.isSystem ? (
+                              <Settings className="size-5" />
+                            ) : (
+                              <User className="size-5" />
+                            )}
+                          </View>
+                          <View className="flex-row items-center gap-2">
+                            <Text className="font-medium dark:text-gray-200">
+                              {ruleSet.name}
+                            </Text>
+                          </View>
+                        </View>
+                        <View className="flex-row gap-2">
+                          <Pressable
+                            onPress={() => {
+                              setSelectedId(ruleSet.id);
+                              gotoNewScreen();
+                              router.setParams({
+                                rule: JSON.stringify(ruleSet.id),
+                              });
+                            }}
+                            className={cn(
+                              "text-gray-400 dark:text-gray-500 h-12 w-12 flex-row items-center justify-center rounded-xl border-[3px] transition-colors",
+                              {
+                                "border-[#FF5937] bg-[#FF5937] text-white":
+                                  ruleSet.id === selectedId,
+                                "border-gray-200 hover:border-gray-300 dark:border-gray-700":
+                                  ruleSet.id !== selectedId,
+                              },
+                            )}
+                          >
+                            <Check className="size-5" />
+                          </Pressable>
+                          <ActionDialog
+                            ruleSet={ruleSet}
+                            onDuplicate={() => duplicateRuleSet(ruleSet)}
+                            onDelete={() => {
+                              if (selectedId === ruleSet.id) {
+                                setSelectedId(ruleSets[0].id);
+                              }
+                              ruleSetDelete(ruleSet.id);
+                            }}
+                          >
+                            <Pressable className="size-12 flex-row items-center justify-center rounded-xl border-[3px] border-gray-200 text-gray-400 transition-colors hover:border-gray-300 dark:border-gray-700 dark:text-gray-500">
+                              <MoreVertical className="size-5" />
+                            </Pressable>
+                          </ActionDialog>
+                        </View>
                       </View>
                     </View>
-                    <View className="flex-row gap-2">
-                      <Pressable
-                        onPress={() => {
-                          setSelectedId(ruleSet.id);
-                          gotoNewScreen();
-                          router.setParams({
-                            rule: JSON.stringify(ruleSet.id),
-                          });
-                        }}
-                        className={cn(
-                          "text-gray-400 dark:text-gray-500 h-12 w-12 flex-row items-center justify-center rounded-xl border-[3px] transition-colors",
-                          {
-                            "border-[#FF5937] bg-[#FF5937] text-white":
-                              ruleSet.id === selectedId,
-                            "border-gray-200 hover:border-gray-300 dark:border-gray-700":
-                              ruleSet.id !== selectedId,
-                          },
-                        )}
-                      >
-                        <Check className="size-5" />
-                      </Pressable>
-                      <ActionDialog
-                        ruleSet={ruleSet}
-                        onDuplicate={() => duplicateRuleSet(ruleSet)}
-                        onDelete={() => {
-                          if (selectedId === ruleSet.id) {
-                            setSelectedId(ruleSets[0].id);
-                          }
-                          ruleSetDelete(ruleSet.id);
-                        }}
-                      >
-                        <Pressable className="size-12 flex-row items-center justify-center rounded-xl border-[3px] border-gray-200 text-gray-400 transition-colors hover:border-gray-300 dark:border-gray-700 dark:text-gray-500">
-                          <MoreVertical className="size-5" />
-                        </Pressable>
-                      </ActionDialog>
-                    </View>
-                  </View>
+                  ))}
                 </View>
-              ))}
+              </ScrollView>
             </MotiView>
           )}
         </AnimatePresence>

@@ -13,7 +13,7 @@ import {
 import { useLocalSearchParams } from "expo-router";
 import { ChevronDown, ChevronUp, RotateCcw } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { View, Text, Pressable, TextInput } from "react-native";
+import { View, Text, Pressable, TextInput, ScrollView } from "react-native";
 
 import { ScreenCard } from "~/components/screen-card";
 import { ScreenFrame } from "~/components/screen-frame";
@@ -41,7 +41,7 @@ function roadTagsDefined<T>(v: T | undefined): asserts v is T {
 export default function RulePackDetails() {
   const { ruleSetId } = useLocalSearchParams();
   const { data: ruleSets, error, ruleSetSet, status } = useStoreRuleSets();
-  const ruleSet = ruleSets.find((rp) => rp.id === ruleSetId);
+  const ruleSet = ruleSets?.find((rp) => rp.id === ruleSetId);
   const [roadTags, setRoadTags] = useState(ruleSet?.roadTags);
   const [groupsExpanded, setGroupsExpanded] = useState<number[]>([]);
   const [ruleSetName, setRuleSetName] = useState(ruleSet?.name);
@@ -241,195 +241,205 @@ export default function RulePackDetails() {
               />
             )}
           </View>
-          {ruleGroups.map((group, groupIdx) => (
-            <View
-              key={groupIdx}
-              className={cn("overflow-hidden rounded-2xl border-[3px]", {
-                "border-black dark:border-gray-700": isGroupEnabled(group),
-                "border-gray-200 dark:border-gray-700": !isGroupEnabled(group),
-              })}
-            >
-              <View className="space-y-4 p-4">
-                <View className="flex flex-row items-center justify-between gap-4">
-                  <Text
-                    className={cn("font-medium text-xl", {
-                      "text-gray-400 dark:text-gray-200":
-                        !isGroupEnabled(group),
-                      "dark:text-gray-200": isGroupEnabled(group),
-                    })}
-                  >
-                    {group[0]}
-                  </Text>
-                  <View className="flex flex-row items-center gap-2">
-                    <Pressable
-                      onPress={() => toggleGroupExpanded(groupIdx)}
-                      className={cn(
-                        "border-[3px] mx-4 flex flex-row justify-center items-center w-24 dark:border-gray-700 border-black text-[#FF5937] rounded-lg p-1 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800",
-                        {
+          <ScrollView className="h-[calc(100vh-130px)]">
+            <View className="mr-2 flex flex-col gap-6 pb-12">
+              {ruleGroups.map((group, groupIdx) => (
+                <View
+                  key={groupIdx}
+                  className={cn("overflow-hidden rounded-2xl border-[3px]", {
+                    "border-black dark:border-gray-700": isGroupEnabled(group),
+                    "border-gray-200 dark:border-gray-700":
+                      !isGroupEnabled(group),
+                  })}
+                >
+                  <View className="space-y-4 p-4">
+                    <View className="flex flex-row items-center justify-between gap-4">
+                      <Text
+                        className={cn("font-medium text-xl", {
                           "text-gray-400 dark:text-gray-200":
                             !isGroupEnabled(group),
-                        },
-                      )}
-                    >
-                      {groupsExpanded.includes(groupIdx) ? (
-                        <ChevronUp className="size-5" />
-                      ) : (
-                        <ChevronDown className="size-5" />
-                      )}
-                    </Pressable>
-                    <Pressable
-                      className={cn(
-                        "h-8 w-14 rounded-full p-1 transition-colors",
-                        {
-                          "bg-[#FF5937]": isGroupEnabled(group),
-                          "bg-gray-200 dark:bg-gray-700":
-                            !isGroupEnabled(group),
-                        },
-                      )}
-                      onPress={() => toggleGroup(group)}
-                    >
-                      <View
-                        className={cn(
-                          "size-6 rounded-full bg-white transition-transform dark:bg-gray-900",
-                          {
-                            "translate-x-6": isGroupEnabled(group),
-                          },
-                        )}
-                      />
-                    </Pressable>
-                  </View>
-                </View>
-                {isGroupEnabled(group) && (
-                  <View className="space-y-2">
-                    <View className="flex flex-row items-center justify-between">
-                      <Text className="text-sm font-medium dark:text-gray-200">
-                        Group Priority
+                          "dark:text-gray-200": isGroupEnabled(group),
+                        })}
+                      >
+                        {group[0]}
                       </Text>
-                    </View>
-                    <View className="h-20 space-y-1">
-                      {!isGroupInSync(group) && (
+                      <View className="flex flex-row items-center gap-2">
                         <Pressable
-                          onPress={() => setGroupValue(group, 0)}
-                          className="flex h-12 w-full flex-row items-center justify-center rounded-lg border border-black p-1 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+                          onPress={() => toggleGroupExpanded(groupIdx)}
+                          className={cn(
+                            "border-[3px] mx-4 flex flex-row justify-center items-center w-24 dark:border-gray-700 border-black text-[#FF5937] rounded-lg p-1 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800",
+                            {
+                              "text-gray-400 dark:text-gray-200":
+                                !isGroupEnabled(group),
+                            },
+                          )}
                         >
-                          <RotateCcw className="size-4 text-gray-500 dark:text-gray-400" />
+                          {groupsExpanded.includes(groupIdx) ? (
+                            <ChevronUp className="size-5" />
+                          ) : (
+                            <ChevronDown className="size-5" />
+                          )}
                         </Pressable>
-                      )}
-                      {isGroupInSync(group) && (
-                        <>
-                          <View className="relative h-12 w-full">
-                            <View className="absolute inset-0 flex flex-row items-center">
-                              <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
-                            </View>
-                            <Slider
-                              renderThumbComponent={() => (
-                                <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
-                              )}
-                              trackClickable={true}
-                              step={1}
-                              value={getGroupTags(group)[0][1] || 0}
-                              maximumValue={255}
-                              minimumValue={0}
-                              trackStyle={{ backgroundColor: "transparent" }}
-                              minimumTrackStyle={{
-                                backgroundColor: "transparent",
-                              }}
-                              maximumTrackStyle={{
-                                backgroundColor: "transparent",
-                              }}
-                              onValueChange={(value) => {
-                                setGroupValue(group, value[0]);
-                              }}
-                            />
-                          </View>
-                          <View className="flex flex-row justify-between px-1">
-                            <Text className="text-xs text-gray-500 dark:text-gray-400">
-                              Low
-                            </Text>
-                            <Text className="text-xs text-gray-500 dark:text-gray-400">
-                              High
-                            </Text>
-                          </View>
-                        </>
-                      )}
-                    </View>
-                  </View>
-                )}
-              </View>
-              {groupsExpanded.includes(groupIdx) && (
-                <View className="space-y-4 border-t-2 border-black p-4 dark:border-gray-700">
-                  {getGroupTags(group).map((tag) => (
-                    <View
-                      key={tag[0]}
-                      className="space-y-3 rounded-xl border-2 border-black p-4 dark:border-gray-700"
-                    >
-                      <View className="flex flex-row items-center justify-between gap-4">
-                        <Text className="flex-1 text-sm dark:text-gray-200">
-                          {tag[0]}
-                        </Text>
                         <Pressable
                           className={cn(
                             "h-8 w-14 rounded-full p-1 transition-colors",
                             {
-                              "bg-[#FF5937]": tag[1] !== null,
-                              "bg-gray-200 dark:bg-gray-700": tag[1] === null,
+                              "bg-[#FF5937]": isGroupEnabled(group),
+                              "bg-gray-200 dark:bg-gray-700":
+                                !isGroupEnabled(group),
                             },
                           )}
-                          onPress={() => toggleTag(tag)}
+                          onPress={() => toggleGroup(group)}
                         >
                           <View
                             className={cn(
                               "size-6 rounded-full bg-white transition-transform dark:bg-gray-900",
                               {
-                                "translate-x-6": tag[1] !== null,
+                                "translate-x-6": isGroupEnabled(group),
                               },
                             )}
                           />
                         </Pressable>
                       </View>
-                      {tag[1] !== null && (
-                        <View className="space-y-1">
-                          <View className="relative h-12 w-full">
-                            <View className="absolute inset-0 flex flex-row items-center">
-                              <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
-                            </View>
-                            <Slider
-                              renderThumbComponent={() => (
-                                <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
-                              )}
-                              trackClickable={true}
-                              step={1}
-                              value={tag[1] as number}
-                              maximumValue={255}
-                              minimumValue={0}
-                              trackStyle={{ backgroundColor: "transparent" }}
-                              minimumTrackStyle={{
-                                backgroundColor: "transparent",
-                              }}
-                              maximumTrackStyle={{
-                                backgroundColor: "transparent",
-                              }}
-                              onValueChange={(value) =>
-                                setTagValue(tag, value[0])
-                              }
-                            />
-                          </View>
-                          <View className="flex flex-row justify-between px-1">
-                            <Text className="text-xs text-gray-500 dark:text-gray-400">
-                              Low
-                            </Text>
-                            <Text className="text-xs text-gray-500 dark:text-gray-400">
-                              High
-                            </Text>
-                          </View>
-                        </View>
-                      )}
                     </View>
-                  ))}
+                    {isGroupEnabled(group) && (
+                      <View className="space-y-2">
+                        <View className="flex flex-row items-center justify-between">
+                          <Text className="text-sm font-medium dark:text-gray-200">
+                            Group Priority
+                          </Text>
+                        </View>
+                        <View className="h-20 space-y-1">
+                          {!isGroupInSync(group) && (
+                            <Pressable
+                              onPress={() => setGroupValue(group, 0)}
+                              className="flex h-12 w-full flex-row items-center justify-center rounded-lg border border-black p-1 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+                            >
+                              <RotateCcw className="size-4 text-gray-500 dark:text-gray-400" />
+                            </Pressable>
+                          )}
+                          {isGroupInSync(group) && (
+                            <>
+                              <View className="relative h-12 w-full">
+                                <View className="absolute inset-0 flex flex-row items-center">
+                                  <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
+                                </View>
+                                <Slider
+                                  renderThumbComponent={() => (
+                                    <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
+                                  )}
+                                  trackClickable={true}
+                                  step={1}
+                                  value={getGroupTags(group)[0][1] || 0}
+                                  maximumValue={255}
+                                  minimumValue={0}
+                                  trackStyle={{
+                                    backgroundColor: "transparent",
+                                  }}
+                                  minimumTrackStyle={{
+                                    backgroundColor: "transparent",
+                                  }}
+                                  maximumTrackStyle={{
+                                    backgroundColor: "transparent",
+                                  }}
+                                  onValueChange={(value) => {
+                                    setGroupValue(group, value[0]);
+                                  }}
+                                />
+                              </View>
+                              <View className="flex flex-row justify-between px-1">
+                                <Text className="text-xs text-gray-500 dark:text-gray-400">
+                                  Low
+                                </Text>
+                                <Text className="text-xs text-gray-500 dark:text-gray-400">
+                                  High
+                                </Text>
+                              </View>
+                            </>
+                          )}
+                        </View>
+                      </View>
+                    )}
+                  </View>
+                  {groupsExpanded.includes(groupIdx) && (
+                    <View className="space-y-4 border-t-2 border-black p-4 dark:border-gray-700">
+                      {getGroupTags(group).map((tag) => (
+                        <View
+                          key={tag[0]}
+                          className="space-y-3 rounded-xl border-2 border-black p-4 dark:border-gray-700"
+                        >
+                          <View className="flex flex-row items-center justify-between gap-4">
+                            <Text className="flex-1 text-sm dark:text-gray-200">
+                              {tag[0]}
+                            </Text>
+                            <Pressable
+                              className={cn(
+                                "h-8 w-14 rounded-full p-1 transition-colors",
+                                {
+                                  "bg-[#FF5937]": tag[1] !== null,
+                                  "bg-gray-200 dark:bg-gray-700":
+                                    tag[1] === null,
+                                },
+                              )}
+                              onPress={() => toggleTag(tag)}
+                            >
+                              <View
+                                className={cn(
+                                  "size-6 rounded-full bg-white transition-transform dark:bg-gray-900",
+                                  {
+                                    "translate-x-6": tag[1] !== null,
+                                  },
+                                )}
+                              />
+                            </Pressable>
+                          </View>
+                          {tag[1] !== null && (
+                            <View className="space-y-1">
+                              <View className="relative h-12 w-full">
+                                <View className="absolute inset-0 flex flex-row items-center">
+                                  <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
+                                </View>
+                                <Slider
+                                  renderThumbComponent={() => (
+                                    <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
+                                  )}
+                                  trackClickable={true}
+                                  step={1}
+                                  value={tag[1] as number}
+                                  maximumValue={255}
+                                  minimumValue={0}
+                                  trackStyle={{
+                                    backgroundColor: "transparent",
+                                  }}
+                                  minimumTrackStyle={{
+                                    backgroundColor: "transparent",
+                                  }}
+                                  maximumTrackStyle={{
+                                    backgroundColor: "transparent",
+                                  }}
+                                  onValueChange={(value) =>
+                                    setTagValue(tag, value[0])
+                                  }
+                                />
+                              </View>
+                              <View className="flex flex-row justify-between px-1">
+                                <Text className="text-xs text-gray-500 dark:text-gray-400">
+                                  Low
+                                </Text>
+                                <Text className="text-xs text-gray-500 dark:text-gray-400">
+                                  High
+                                </Text>
+                              </View>
+                            </View>
+                          )}
+                        </View>
+                      ))}
+                    </View>
+                  )}
                 </View>
-              )}
+              ))}
             </View>
-          ))}
+          </ScrollView>
         </View>
       </View>
     </ScreenFrame>

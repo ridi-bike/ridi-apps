@@ -9,13 +9,7 @@ import {
 } from "lucide-react-native";
 import { MotiView } from "moti";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  KeyboardAvoidingView,
-} from "react-native";
+import { View, Text, TextInput, Pressable, ScrollView } from "react-native";
 
 import { GeoMapStatic } from "~/components/geo-map/geo-map-static";
 import { PointSelectDialog } from "~/components/point-select-dialog";
@@ -206,23 +200,25 @@ export default function LocationSearch() {
       }
     >
       <View className="mx-2 max-w-5xl flex-1">
-        <View className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {locations.length > 0 ? (
-            <>
-              {locations.map((location, index) => (
-                <LocationCard
-                  key={index}
-                  location={location}
-                  gotoNewScreen={gotoNewScreen}
-                />
-              ))}
-            </>
-          ) : (
-            <Text className="p-4 text-center text-gray-500 dark:text-gray-200">
-              Search for a location to see results
-            </Text>
-          )}
-        </View>
+        <ScrollView className="h-[calc(100vh-250px)]">
+          <View className="mr-2 grid grid-cols-1 gap-6 md:grid-cols-3">
+            {locations.length > 0 ? (
+              <>
+                {locations.map((location, index) => (
+                  <LocationCard
+                    key={index}
+                    location={location}
+                    gotoNewScreen={gotoNewScreen}
+                  />
+                ))}
+              </>
+            ) : (
+              <Text className="p-4 text-center text-gray-500 dark:text-gray-200">
+                Search for a location to see results
+              </Text>
+            )}
+          </View>
+        </ScrollView>
       </View>
     </ScreenFrame>
   );

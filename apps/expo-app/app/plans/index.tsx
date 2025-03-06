@@ -6,7 +6,7 @@ import {
   type MotiPressableProp,
 } from "moti/interactions";
 import { useEffect, useMemo } from "react";
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
 
 import { ErrorBox } from "~/components/error";
 import { Loading } from "~/components/loading";
@@ -104,31 +104,33 @@ export default function PlansPage() {
               duration: 500,
             }}
           >
-            <View className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {plans.map((plan, index) => (
-                <MotiPressable
-                  key={index}
-                  onPress={() => router.navigate(`/plans/${plan.id}`)}
-                  animate={animate}
-                  transition={transition}
-                >
-                  <PlanCard
-                    startDesc={plan.startDesc}
-                    finishDesc={plan.finishDesc}
-                    startCoords={{ lat: plan.startLat, lon: plan.startLon }}
-                    finishCoords={
-                      plan.finishLat && plan.finishLon
-                        ? { lat: plan.finishLat, lon: plan.finishLon }
-                        : null
-                    }
-                    bearing={plan.bearing}
-                    distance={plan.distance}
-                    tripType={plan.tripType}
-                    state={plan.state}
-                  />
-                </MotiPressable>
-              ))}
-            </View>
+            <ScrollView className="h-[calc(100vh-100px)]">
+              <View className="grid size-full grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {plans.map((plan, index) => (
+                  <MotiPressable
+                    key={index}
+                    onPress={() => router.navigate(`/plans/${plan.id}`)}
+                    animate={animate}
+                    transition={transition}
+                  >
+                    <PlanCard
+                      startDesc={plan.startDesc}
+                      finishDesc={plan.finishDesc}
+                      startCoords={{ lat: plan.startLat, lon: plan.startLon }}
+                      finishCoords={
+                        plan.finishLat && plan.finishLon
+                          ? { lat: plan.finishLat, lon: plan.finishLon }
+                          : null
+                      }
+                      bearing={plan.bearing}
+                      distance={plan.distance}
+                      tripType={plan.tripType}
+                      state={plan.state}
+                    />
+                  </MotiPressable>
+                ))}
+              </View>
+            </ScrollView>
           </MotiView>
         )}
       </AnimatePresence>
