@@ -7,8 +7,15 @@ import {
   Pin,
   Hourglass,
 } from "lucide-react-native";
-import { useCallback, useState } from "react";
-import { View, Text, TextInput, Pressable } from "react-native";
+import { MotiView } from "moti";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  KeyboardAvoidingView,
+} from "react-native";
 
 import { GeoMapStatic } from "~/components/geo-map/geo-map-static";
 import { PointSelectDialog } from "~/components/point-select-dialog";
@@ -119,11 +126,39 @@ export default function LocationSearch() {
     }
   }, [navState.index, navState.routes, router]);
 
+  const visRef = useRef(window.visualViewport?.height || 0);
+  const scrRef = useRef(window.screen.height);
+  const [keyboardOffset, setKeyboardOffset] = useState(0);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && "visualViewport" in window) {
+      const listener = () => {
+        if (scrRef.current === window.screen.height) {
+          setKeyboardOffset(
+            visRef.current - (window.visualViewport?.height || 0),
+          );
+        }
+      };
+      if (typeof visualViewport != "undefined") {
+        window.visualViewport?.addEventListener("resize", listener);
+      }
+      return () => {
+        if (typeof visualViewport != "undefined") {
+          window.visualViewport?.removeEventListener("resize", listener);
+        }
+      };
+    }
+  }, []);
+
   return (
     <ScreenFrame
       title="Search"
       floating={
-        <View className="absolute inset-x-0 bottom-0 border-t-2 border-black bg-white dark:border-gray-700 dark:bg-gray-900">
+        <MotiView
+          className="fixed w-full border-t-2 border-black bg-white dark:border-gray-700 dark:bg-gray-900"
+          animate={{ bottom: keyboardOffset }}
+          transition={{ type: "timing" }}
+        >
           <View className="p-4">
             <Pressable
               onPress={() => {
@@ -167,7 +202,7 @@ export default function LocationSearch() {
               </Pressable>
             </View>
           </View>
-        </View>
+        </MotiView>
       }
     >
       <View className="mx-2 max-w-5xl flex-1">
