@@ -2,7 +2,7 @@ import * as turf from "@turf/turf";
 import { type MapRef } from "@vis.gl/react-maplibre";
 import { Map as MapLibre } from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { CirclePauseIcon, CirclePlayIcon, RotateCw } from "lucide-react-native";
+import { CirclePauseIcon, CirclePlayIcon } from "lucide-react-native";
 import maplibre from "maplibre-gl";
 import { useEffect, useMemo, useRef } from "react";
 import { View } from "react-native";
@@ -54,7 +54,6 @@ export function GeoMapPlanView(props: GeoMapPlanView) {
     }
   }, [bbox]);
 
-  console.log({ rountdTripLayer, roundTripPolygon });
 
   return (
     <View className={cn("size-full", props.className)}>

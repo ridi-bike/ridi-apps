@@ -343,8 +343,6 @@ export default function PlansNew() {
               selectionMode={centerSelectionMode ? "center" : "tap"}
               setStart={(c) => setStartCoords(c ? [c.lat, c.lon] : undefined)}
               setFinish={(c) => setFinishCoords(c ? [c.lat, c.lon] : undefined)}
-              bearing={bearing}
-              distance={selectedDistance}
             >
               <View className="flex flex-col items-end justify-start gap-2 p-4">
                 <Pressable
@@ -554,7 +552,7 @@ export default function PlansNew() {
           <GroupWithTitle title="Overview" className="h-48">
             <GeoMapPlanView
               bearing={isRoundTrip ? (bearing ?? null) : null}
-              distance={selectedDistance || 0}
+              distance={(selectedDistance || 0) * 1000}
               start={
                 startCoords
                   ? {

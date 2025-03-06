@@ -18,26 +18,81 @@ export function createRoundTripPolygon(
   bearing: number,
   distance: number,
 ) {
-  const start = turf.point(startPoint);
-  const leftBearing = (bearing - 90 + 360) % 360;
-  const rightBearing = (bearing + 90 + 360) % 360;
-  const points = [];
-  points.push(start.geometry.coordinates);
-  const rightPoint = turf.destination(start, distance / 10, rightBearing, {
-    units: "kilometers",
-  });
-  points.push(rightPoint.geometry.coordinates);
-  const apexPoint = turf.destination(start, distance / 10, bearing, {
-    units: "kilometers",
-  });
-  points.push(apexPoint.geometry.coordinates);
-  const leftPoint = turf.destination(start, distance / 10, leftBearing, {
-    units: "kilometers",
-  });
-  points.push(leftPoint.geometry.coordinates);
-  points.push(start.geometry.coordinates);
-  const polygon = turf.polygon([points]);
+  const originalStart = turf.point(startPoint);
+  const arrowLength = distance / 10; // Arrow length is 1/10 of the provided distance
 
+  // Calculate a new starting point 5km away from the original in the direction of bearing
+  const arrowStartPoint = turf.destination(originalStart, 2, bearing, {
+    units: "kilometers",
+  });
+  const start = arrowStartPoint;
+
+  // Calculate bearings for the arrow shape
+  const leftBearing = (bearing - 30 + 360) % 360; // Narrower angle for arrow head
+  const rightBearing = (bearing + 30 + 360) % 360; // Narrower angle for arrow head
+  const leftBaseBearing = (bearing - 15 + 360) % 360; // For the base of the arrow
+  const rightBaseBearing = (bearing + 15 + 360) % 360; // For the base of the arrow
+
+  // Create arrow points
+  const points = [];
+
+  // Start at the base center
+  points.push(start.geometry.coordinates);
+
+  // Right base corner
+  const rightBasePoint = turf.destination(
+    start,
+    arrowLength * 0.4,
+    rightBaseBearing,
+    {
+      units: "kilometers",
+    },
+  );
+  points.push(rightBasePoint.geometry.coordinates);
+
+  // Right wing point
+  const rightWingPoint = turf.destination(
+    start,
+    arrowLength * 0.4,
+    rightBearing,
+    {
+      units: "kilometers",
+    },
+  );
+  points.push(rightWingPoint.geometry.coordinates);
+
+  // Arrow tip
+  const arrowTip = turf.destination(start, arrowLength, bearing, {
+    units: "kilometers",
+  });
+  points.push(arrowTip.geometry.coordinates);
+
+  // Left wing point
+  const leftWingPoint = turf.destination(
+    start,
+    arrowLength * 0.4,
+    leftBearing,
+    {
+      units: "kilometers",
+    },
+  );
+  points.push(leftWingPoint.geometry.coordinates);
+
+  // Left base corner
+  const leftBasePoint = turf.destination(
+    start,
+    arrowLength * 0.4,
+    leftBaseBearing,
+    {
+      units: "kilometers",
+    },
+  );
+  points.push(leftBasePoint.geometry.coordinates);
+
+  // Close the polygon
+  points.push(start.geometry.coordinates);
+
+  const polygon = turf.polygon([points]);
   return polygon;
 }
 
@@ -67,7 +122,7 @@ export function useRoundTripPolygon(
         source: routeLayerId,
         paint: {
           "fill-color": "#FF5937",
-          "fill-opacity": 0.3,
+          "fill-opacity": 1,
         },
       };
       return (
