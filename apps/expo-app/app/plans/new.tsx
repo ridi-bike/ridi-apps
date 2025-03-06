@@ -413,11 +413,11 @@ export default function PlansNew() {
                 from={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 1 }}
-                className="flex h-14 flex-col items-start justify-start p-2"
+                className="flex h-14 w-full flex-col items-start justify-start p-2"
               >
-                <View className="flex flex-row items-center gap-2">
+                <View className="flex w-full flex-row items-center gap-2">
                   <CirclePlayIcon className="size-4 text-[#FF5937]" />
-                  <Text className="text-sm dark:text-gray-200">
+                  <Text className="w-full truncate text-sm dark:text-gray-200">
                     {isRoundTrip ? "Start/Finish Point: " : "Start: "}
                     {startCoords
                       ? startDesc ||
@@ -428,7 +428,7 @@ export default function PlansNew() {
                 {!isRoundTrip && (
                   <View className="flex flex-row items-center gap-2">
                     <CirclePauseIcon className="size-4 text-[#FF5937]" />
-                    <Text className="text-sm dark:text-gray-200">
+                    <Text className="overflow-hidden text-ellipsis text-nowrap text-sm dark:text-gray-200">
                       Finish:{" "}
                       {finishCoords
                         ? finishDesc ||
