@@ -16,71 +16,20 @@ const DATA_VERSION = "v1";
 export type RuleSet = RuleSetsListResponse["data"][number];
 export type RuleSetNew = RuleSetsSetRequest["data"];
 
-type SyncStatus = {
-  isSyncPending: boolean;
-  isDeleted?: true;
-};
+export const RULE_SETS_QUERY_KEY = ["rule-sets", DATA_VERSION];
 
 export function useStoreRuleSets() {
   const queryClient = useQueryClient();
 
-  const updateLocalRuleSetsPending = useCallback(
-    (id: string, ruleSetIn: RuleSet | null, isDeleted?: true) => {
-      queryClient.setQueryData<(RuleSet & SyncStatus)[]>(
-        [DATA_VERSION, "rule-sets"],
-        (ruleSetList) => {
-          if (ruleSetList?.some((ruleSet) => ruleSet.id === id)) {
-            return ruleSetList.map((ruleSet) => {
-              if (ruleSet.id === id) {
-                return {
-                  ...(ruleSetIn || ruleSet),
-                  isSyncPending: true,
-                  isDeleted,
-                };
-              }
-              return ruleSet;
-            });
-          }
-          return ruleSetList;
-        },
-      );
-    },
-    [queryClient],
-  );
-
-  const updateLocalRuleSetsSynced = useCallback(
-    (id: string, isDeleted?: true) => {
-      queryClient.setQueryData<(RuleSet & SyncStatus)[]>(
-        [DATA_VERSION, "rule-sets"],
-        (ruleSetList) => {
-          if (ruleSetList?.some((ruleSet) => ruleSet.id === id)) {
-            if (isDeleted) {
-              return ruleSetList.filter((ruleSet) => ruleSet.id !== id);
-            }
-            return ruleSetList.map((ruleSet) => {
-              if (ruleSet.id === id) {
-                return { ...ruleSet, isSyncPending: false };
-              }
-              return ruleSet;
-            });
-          }
-          return ruleSetList;
-        },
-      );
-    },
-    [queryClient],
-  );
-
   const { data, error, status, refetch } = useQuery({
-    queryKey: ["rule-sets"],
+    queryKey: RULE_SETS_QUERY_KEY,
     queryFn: () =>
       apiClient
         .ruleSetsList({ query: { version: DATA_VERSION } })
         .then((r) => getSuccessResponseOrThrow(200, r).data),
   });
 
-  const { mutate: mutateSet } = useMutation({
-    mutationKey: ["rule-sets"],
+  const { mutate: mutateSet, isPending: setIsPending } = useMutation({
     mutationFn: (ruleSet: RuleSet) =>
       apiClient
         .ruleSetSet({
@@ -90,31 +39,18 @@ export function useStoreRuleSets() {
           },
         })
         .then((r) => getSuccessResponseOrThrow(201, r).data),
-    onMutate: async (ruleSet: RuleSet) => {
-      await queryClient.cancelQueries({
-        queryKey: [DATA_VERSION, "plans"],
-      });
-      updateLocalRuleSetsPending(ruleSet.id, ruleSet);
-    },
-    onSuccess(data) {
-      updateLocalRuleSetsSynced(data.id);
+    onMutate: () => {
+      queryClient.invalidateQueries({ queryKey: RULE_SETS_QUERY_KEY });
     },
   });
 
-  const { mutate: mutateDelete } = useMutation({
-    mutationKey: ["rule-sets"],
+  const { mutate: mutateDelete, isPending: deleteIsPending } = useMutation({
     mutationFn: (id: string) =>
       apiClient
         .ruleSetDelete({ body: { id } })
         .then((r) => getSuccessResponseOrThrow(204, r)),
-    onMutate: async (id: string) => {
-      await queryClient.cancelQueries({
-        queryKey: [DATA_VERSION, "plans"],
-      });
-      updateLocalRuleSetsPending(id, null, true);
-    },
-    onSuccess(data) {
-      updateLocalRuleSetsSynced(data.id, true);
+    onMutate: () => {
+      queryClient.invalidateQueries({ queryKey: RULE_SETS_QUERY_KEY });
     },
   });
 
@@ -156,7 +92,9 @@ export function useStoreRuleSets() {
     error,
     status,
     ruleSetSet,
+    ruleSetSetIsPending: setIsPending,
     ruleSetDelete: mutateDelete,
+    ruleSetDeleteIsPending: deleteIsPending,
     refetch,
   };
 }

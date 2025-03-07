@@ -1,4 +1,4 @@
-import { Link, useLocalSearchParams } from "expo-router";
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import {
   Bell,
   Bug,
@@ -6,11 +6,14 @@ import {
   Map,
   MapPin,
   Navigation,
+  Ruler,
+  Trash2,
 } from "lucide-react-native";
 import { AnimatePresence, MotiView } from "moti";
 import { useEffect, useState } from "react";
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, Pressable } from "react-native";
 
+import { Button } from "~/components/button";
 import { ErrorBox } from "~/components/error";
 import {
   getCardinalDirection,
@@ -20,8 +23,70 @@ import { Loading } from "~/components/loading";
 import { RouteCard } from "~/components/route-card";
 import { ScreenCard } from "~/components/screen-card";
 import { ScreenFrame } from "~/components/screen-frame";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
 import { useStorePlans } from "~/lib/stores/plans-store";
 import { cn } from "~/lib/utils";
+
+function DeleteConfirmDialog({
+  children,
+  onDelete,
+}: {
+  children: React.ReactNode;
+  onDelete: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <AlertDialog
+      className="w-full"
+      open={open}
+      onOpenChange={(open) => setOpen(open)}
+    >
+      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+      <AlertDialogContent className="w-full border-black bg-white dark:border-gray-700 dark:bg-gray-800">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex flex-row items-center justify-between dark:text-gray-100">
+            Delete Rule Set
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            <Text>
+              Are you sure you want to delete this plan? This action is
+              permanent.
+            </Text>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="flex w-full flex-col items-center justify-between">
+          <View className="flex w-full flex-col items-center justify-between gap-6">
+            <Button
+              variant="primary"
+              className="flex w-full flex-row items-center justify-center"
+              onPress={() => {
+                setOpen(false);
+                onDelete();
+              }}
+            >
+              <Text className="dark:text-gray-200">Delete</Text>
+            </Button>
+            <Button
+              variant="secondary"
+              className="flex w-full flex-row items-center justify-center"
+              onPress={() => setOpen(false)}
+            >
+              <Text className="dark:text-gray-200">Cancel</Text>
+            </Button>
+          </View>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
 
 const loadingMessages = [
   "Teaching squirrels to navigate traffic...",
@@ -219,12 +284,13 @@ function GeneratingRoutes({ createdAt }: { createdAt: Date }) {
 }
 
 export default function PlanDetails() {
+  const router = useRouter();
   const { planId } = useLocalSearchParams();
-  const { data: plans, error, status, refetch } = useStorePlans();
+  const { data: plans, error, status, refetch, planDelete } = useStorePlans();
   const plan = plans?.find((p) => p.id === planId);
-
+  console.log({ plan });
   return (
-    <ScreenFrame title="Plan routes">
+    <ScreenFrame title="Plan routes" onGoBack={() => router.replace("/plans")}>
       <AnimatePresence exitBeforeEnter>
         {!plans && !error && <Loading className="size-12 text-[#ff4a25]" />}
         {!!error && status !== "pending" && (
@@ -286,21 +352,24 @@ export default function PlanDetails() {
                             </View>
                           </View>
                         )}
+                        <View className="flex flex-row items-start gap-3">
+                          <Ruler className="mt-1 size-6 text-[#FF5937]" />
+                          <View>
+                            <Text className="text-sm font-bold text-[#FF5937]">
+                              {plan.tripType === "round-trip"
+                                ? "Target distance"
+                                : "Straigt line distance"}
+                            </Text>
+                            <Text className="text-base font-medium dark:text-gray-200">
+                              {metersToDisplay(plan.distance)}
+                            </Text>
+                          </View>
+                        </View>
                       </View>
                     </>
                   }
                   bottom={
                     <View className="flex flex-row items-center justify-between">
-                      <View className="flex flex-col items-start justify-start">
-                        <Text className="font-bold dark:text-gray-100">
-                          {plan.tripType === "round-trip"
-                            ? "Target distance"
-                            : "Straigt line distance"}
-                        </Text>
-                        <Text className="font-medium dark:text-gray-200">
-                          {metersToDisplay(plan.distance)}
-                        </Text>
-                      </View>
                       <View className="flex flex-col items-end justify-center">
                         <Text className="font-bold dark:text-gray-100">
                           Status
@@ -315,6 +384,22 @@ export default function PlanDetails() {
                         >
                           {plan.state}
                         </Text>
+                      </View>
+                      <View className="flex flex-col items-end justify-center">
+                        <DeleteConfirmDialog
+                          onDelete={() => {
+                            planDelete(plan.id);
+                            router.replace("/plans");
+                          }}
+                        >
+                          <Pressable
+                            className={cn(
+                              "dark:border-red-700 dark:hover:bg-red-950 w-full h-14 flex-row items-center px-4 gap-3 rounded-xl border-[3px] border-red-500 text-red-500 hover:bg-red-50 transition-colors",
+                            )}
+                          >
+                            <Trash2 className="size-4" />
+                          </Pressable>
+                        </DeleteConfirmDialog>
                       </View>
                     </View>
                   }

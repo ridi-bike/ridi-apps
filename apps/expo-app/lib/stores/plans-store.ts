@@ -25,63 +25,21 @@ type PlanPending = {
   tripType: "round-trip" | "start-finish";
   ruleSetId: string;
 };
-type SyncStatus = {
-  isSyncPending: boolean;
-};
+
+export const PLANS_QUERY_KEY = ["plans", DATA_VERSION];
 
 export function useStorePlans() {
   const queryClient = useQueryClient();
 
   const { data, status, isLoading, error, refetch } = useQuery({
-    queryKey: [DATA_VERSION, "plans"],
+    queryKey: PLANS_QUERY_KEY,
     queryFn: () =>
       apiClient
         .plansList({ query: { version: DATA_VERSION } })
         .then((r) => getSuccessResponseOrThrow(200, r).data),
   });
 
-  const updateLocalPlansListPending = useCallback(
-    (planIn: Plan) => {
-      queryClient.setQueryData<(Plan & SyncStatus)[]>(
-        [DATA_VERSION, "plans"],
-        (planList) => {
-          if (planList?.some((plan) => plan.id === planIn.id)) {
-            return planList.map((plan) => {
-              if (plan.id === planIn.id) {
-                return { ...planIn, isSyncPending: true };
-              }
-              return plan;
-            });
-          }
-          return [...(planList || []), { ...planIn, isSyncPending: true }];
-        },
-      );
-    },
-    [queryClient],
-  );
-
-  const updateLocalPlansListSynced = useCallback(
-    (id: string) => {
-      queryClient.setQueryData<(Plan & SyncStatus)[]>(
-        [DATA_VERSION, "plans"],
-        (planList) => {
-          if (planList?.some((plan) => plan.id === id)) {
-            return planList.map((plan) => {
-              if (plan.id === id) {
-                return { ...plan, isSyncPending: false };
-              }
-              return plan;
-            });
-          }
-          return planList;
-        },
-      );
-    },
-    [queryClient],
-  );
-
   const { mutate } = useMutation({
-    mutationKey: [],
     mutationFn: (plan: Plan) =>
       apiClient
         .planCreate({
@@ -94,14 +52,35 @@ export function useStorePlans() {
           },
         })
         .then((r) => getSuccessResponseOrThrow(201, r).data),
-    onMutate: async (plan: Plan) => {
-      await queryClient.cancelQueries({
-        queryKey: [DATA_VERSION, "plans"],
+    onMutate: async (rowIn) => {
+      await queryClient.cancelQueries({ queryKey: PLANS_QUERY_KEY });
+      queryClient.setQueryData<Plan[]>(PLANS_QUERY_KEY, (plansList) => {
+        return plansList
+          ? plansList.map((p) => ({
+              ...p,
+              ...rowIn,
+            }))
+          : [rowIn];
       });
-      updateLocalPlansListPending(plan);
     },
-    onSuccess(data) {
-      updateLocalPlansListSynced(data.id);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: PLANS_QUERY_KEY });
+    },
+  });
+
+  const { mutate: mutateDelete, isPending } = useMutation({
+    mutationFn: (id: string) =>
+      apiClient
+        .planDelete({ params: { planId: id } })
+        .then((r) => getSuccessResponseOrThrow(204, r)),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: PLANS_QUERY_KEY });
+      queryClient.setQueryData<Plan[]>(PLANS_QUERY_KEY, (plansList) => {
+        return plansList?.filter((p) => p.id !== id);
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: PLANS_QUERY_KEY });
     },
   });
 
@@ -149,5 +128,14 @@ export function useStorePlans() {
     };
   }, [refetch]);
 
-  return { data, status, isLoading, error, planAdd, refetch };
+  return {
+    data,
+    status,
+    isLoading,
+    error,
+    planAdd,
+    planDelete: mutateDelete,
+    planDeleteIsPending: isPending,
+    refetch,
+  };
 }

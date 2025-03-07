@@ -8,7 +8,7 @@ import {
   Hourglass,
 } from "lucide-react-native";
 import { MotiView } from "moti";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { View, Text, TextInput, Pressable, ScrollView } from "react-native";
 
 import { GeoMapStatic } from "~/components/geo-map/geo-map-static";
@@ -123,6 +123,7 @@ export default function LocationSearch() {
   return (
     <ScreenFrame
       title="Search"
+      onGoBack={() => router.back()}
       floating={
         <MotiView
           className="fixed top-16 w-full border-b-2 border-black bg-white dark:border-gray-700 dark:bg-gray-900"

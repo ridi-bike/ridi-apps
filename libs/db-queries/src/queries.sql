@@ -3,6 +3,27 @@ update plans
 set region = $1
 where id = $2;
 
+-- name: PlanDelete :one
+update plans
+set is_deleted = true
+where id = $1
+  and user_id = $2
+returning *;
+
+-- name: RouteDelete :one
+update routes
+set is_deleted = true
+where id = $1
+  and user_id = $2
+returning *;
+
+-- name: RouteDeleteByPlanId :one
+update routes
+set is_deleted = true
+where plan_id = $1
+  and user_id = $2
+returning *;
+
 -- name: RegionInsertOrUpdate :one
 insert into regions (region, geojson, polygon)
 values ($1, $2, $3)
@@ -85,6 +106,7 @@ with points_array as (
 	from routes r, postgis.st_dumppoints(r.linestring) p
 	where r.user_id = $1
 		and r.id = $2
+    and r.is_deleted = false
 	group by r.id
 ) 
 select 
@@ -100,11 +122,13 @@ select
 	p.state as plan_state
 from routes r
 inner join plans p
-	on p.id = r.plan_id
+	on p.id = r.plan_id 
+    and p.is_deleted = false
 inner join points_array pa
 	on pa.id = r.id
 where r.user_id = $1
 	and r.id = $2
+  and r.is_deleted = false
 order by 
 	r.created_at desc;
 
@@ -135,7 +159,9 @@ select
 from plans p
 left join routes r 
 	on r.plan_id = p.id
+  and r.is_deleted = false
 where p.user_id = $1
+  and p.is_deleted = false
 order by
 	p.created_at desc;
 

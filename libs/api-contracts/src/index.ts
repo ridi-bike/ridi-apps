@@ -338,7 +338,30 @@ export const apiContract = c.router({
     },
     summary: "Get a route by ID",
   },
-
+  routeDelete: {
+    method: "DELETE",
+    path: "/user/routes/:routeId",
+    responses: {
+      204: z.object({ id: z.string() }),
+      400: z.object({ message: z.string() }),
+      401: z.object({ message: z.string() }),
+      404: z.object({ message: z.string() }),
+      500: z.object({ message: z.string() }),
+    },
+    summary: "Delete route by ID",
+  },
+  planDelete: {
+    method: "DELETE",
+    path: "/user/plans/:planId",
+    responses: {
+      204: z.object({ id: z.string() }),
+      400: z.object({ message: z.string() }),
+      401: z.object({ message: z.string() }),
+      404: z.object({ message: z.string() }),
+      500: z.object({ message: z.string() }),
+    },
+    summary: "Delete plan by ID",
+  },
   plansList: {
     method: "GET",
     path: "/user/plans",

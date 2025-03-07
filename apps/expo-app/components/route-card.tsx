@@ -99,7 +99,7 @@ export function RouteCard({ routeId, plan }: RouteCardProps) {
               </Text>
               <View className="flex flex-row gap-2 text-sm">
                 <AnimatePresence>
-                  {breakdown && (
+                  {!!breakdown && (
                     <View className="flex-1">
                       {breakdown[0] && (
                         <>
@@ -119,7 +119,7 @@ export function RouteCard({ routeId, plan }: RouteCardProps) {
                   )}
                 </AnimatePresence>
                 <AnimatePresence>
-                  {breakdown && (
+                  {!!breakdown && (
                     <View className="flex-1">
                       {breakdown[1] && (
                         <>
@@ -139,7 +139,7 @@ export function RouteCard({ routeId, plan }: RouteCardProps) {
                   )}
                 </AnimatePresence>
                 <AnimatePresence>
-                  {breakdown && (
+                  {!!breakdown && (
                     <View className="flex-1">
                       {breakdown[2] && (
                         <>

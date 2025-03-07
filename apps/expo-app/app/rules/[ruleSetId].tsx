@@ -10,7 +10,7 @@ import {
   roadTypeSmallKeys,
   roadTypeTinyKeys,
 } from "@ridi/api-contracts";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { ChevronDown, ChevronUp, RotateCcw } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { View, Text, Pressable, TextInput, ScrollView } from "react-native";
@@ -39,6 +39,7 @@ function roadTagsDefined<T>(v: T | undefined): asserts v is T {
 }
 
 export default function RulePackDetails() {
+  const router = useRouter();
   const { ruleSetId } = useLocalSearchParams();
   const { data: ruleSets, error, ruleSetSet, status } = useStoreRuleSets();
   const ruleSet = ruleSets?.find((rp) => rp.id === ruleSetId);
@@ -191,6 +192,9 @@ export default function RulePackDetails() {
   return (
     <ScreenFrame
       title="Routing rules"
+      onGoBack={() =>
+        router.canGoBack() ? router.back() : router.replace("/rules")
+      }
       floating={
         !ruleSet.isSystem && (
           <View className="fixed bottom-0 w-full bg-white p-4 dark:bg-gray-800">

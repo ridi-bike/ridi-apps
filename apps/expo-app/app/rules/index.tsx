@@ -63,8 +63,8 @@ function DeleteConfirmDialog({
           </AlertDialogTitle>
           <AlertDialogDescription>
             <Text>
-              Are you sure you want to delete rule set
-              <Text>{ruleSet.name}</Text>? This action is permanent.
+              Are you sure you want to delete this rule set
+              <Text>&apos;{ruleSet.name}&apos;</Text>? This action is permanent.
             </Text>
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -181,6 +181,7 @@ function ActionDialog({
 }
 
 export default function RuleSetList() {
+  const router = useRouter();
   const {
     data: ruleSets,
     ruleSetSet,
@@ -221,7 +222,6 @@ export default function RuleSetList() {
     [ruleSetSet],
   );
 
-  const router = useRouter();
   const navState = useRootNavigationState();
   const gotoNewScreen = useCallback(() => {
     if (navState.routes[(navState.index || 0) - 1]?.name === "plans/new") {
@@ -234,6 +234,7 @@ export default function RuleSetList() {
   return (
     <ScreenFrame
       title="Rule sets"
+      onGoBack={() => router.back()}
       floating={
         <View className="fixed bottom-0 w-full bg-white p-4 dark:bg-gray-800">
           <Pressable

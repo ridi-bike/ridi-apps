@@ -16,6 +16,168 @@ export async function planSetRegion(sql: Sql, args: PlanSetRegionArgs): Promise<
     await sql.unsafe(planSetRegionQuery, [args.region, args.id]);
 }
 
+export const planDeleteQuery = `-- name: PlanDelete :one
+update plans
+set is_deleted = true
+where id = $1
+  and user_id = $2
+returning id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc, rule_set_id, region, is_deleted`;
+
+export interface PlanDeleteArgs {
+    id: string;
+    userId: string;
+}
+
+export interface PlanDeleteRow {
+    id: string;
+    userId: string;
+    createdAt: Date;
+    modifiedAt: Date | null;
+    startLat: string;
+    startLon: string;
+    finishLat: string | null;
+    finishLon: string | null;
+    state: "new" | "planning" | "done" | "error";
+    name: string;
+    error: string | null;
+    tripType: "round-trip" | "start-finish";
+    distance: string;
+    bearing: string | null;
+    startDesc: string;
+    finishDesc: string | null;
+    ruleSetId: string;
+    region: string | null;
+    isDeleted: boolean;
+}
+
+export async function planDelete(sql: Sql, args: PlanDeleteArgs): Promise<PlanDeleteRow | null> {
+    const rows = await sql.unsafe(planDeleteQuery, [args.id, args.userId]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        userId: row[1],
+        createdAt: row[2],
+        modifiedAt: row[3],
+        startLat: row[4],
+        startLon: row[5],
+        finishLat: row[6],
+        finishLon: row[7],
+        state: row[8],
+        name: row[9],
+        error: row[10],
+        tripType: row[11],
+        distance: row[12],
+        bearing: row[13],
+        startDesc: row[14],
+        finishDesc: row[15],
+        ruleSetId: row[16],
+        region: row[17],
+        isDeleted: row[18]
+    };
+}
+
+export const routeDeleteQuery = `-- name: RouteDelete :one
+update routes
+set is_deleted = true
+where id = $1
+  and user_id = $2
+returning id, user_id, created_at, plan_id, name, linestring, stats_len_m, stats_score, stats_junction_count, is_deleted`;
+
+export interface RouteDeleteArgs {
+    id: string;
+    userId: string;
+}
+
+export interface RouteDeleteRow {
+    id: string;
+    userId: string;
+    createdAt: Date;
+    planId: string;
+    name: string;
+    linestring: string | null;
+    statsLenM: string;
+    statsScore: string;
+    statsJunctionCount: string;
+    isDeleted: boolean;
+}
+
+export async function routeDelete(sql: Sql, args: RouteDeleteArgs): Promise<RouteDeleteRow | null> {
+    const rows = await sql.unsafe(routeDeleteQuery, [args.id, args.userId]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        userId: row[1],
+        createdAt: row[2],
+        planId: row[3],
+        name: row[4],
+        linestring: row[5],
+        statsLenM: row[6],
+        statsScore: row[7],
+        statsJunctionCount: row[8],
+        isDeleted: row[9]
+    };
+}
+
+export const routeDeleteByPlanIdQuery = `-- name: RouteDeleteByPlanId :one
+update routes
+set is_deleted = true
+where plan_id = $1
+  and user_id = $2
+returning id, user_id, created_at, plan_id, name, linestring, stats_len_m, stats_score, stats_junction_count, is_deleted`;
+
+export interface RouteDeleteByPlanIdArgs {
+    planId: string;
+    userId: string;
+}
+
+export interface RouteDeleteByPlanIdRow {
+    id: string;
+    userId: string;
+    createdAt: Date;
+    planId: string;
+    name: string;
+    linestring: string | null;
+    statsLenM: string;
+    statsScore: string;
+    statsJunctionCount: string;
+    isDeleted: boolean;
+}
+
+export async function routeDeleteByPlanId(sql: Sql, args: RouteDeleteByPlanIdArgs): Promise<RouteDeleteByPlanIdRow | null> {
+    const rows = await sql.unsafe(routeDeleteByPlanIdQuery, [args.planId, args.userId]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        userId: row[1],
+        createdAt: row[2],
+        planId: row[3],
+        name: row[4],
+        linestring: row[5],
+        statsLenM: row[6],
+        statsScore: row[7],
+        statsJunctionCount: row[8],
+        isDeleted: row[9]
+    };
+}
+
 export const regionInsertOrUpdateQuery = `-- name: RegionInsertOrUpdate :one
 insert into regions (region, geojson, polygon)
 values ($1, $2, $3)
@@ -290,6 +452,7 @@ with points_array as (
 	from routes r, postgis.st_dumppoints(r.linestring) p
 	where r.user_id = $1
 		and r.id = $2
+    and r.is_deleted = false
 	group by r.id
 ) 
 select 
@@ -305,11 +468,13 @@ select
 	p.state as plan_state
 from routes r
 inner join plans p
-	on p.id = r.plan_id
+	on p.id = r.plan_id 
+    and p.is_deleted = false
 inner join points_array pa
 	on pa.id = r.id
 where r.user_id = $1
 	and r.id = $2
+  and r.is_deleted = false
 order by 
 	r.created_at desc`;
 
@@ -400,7 +565,9 @@ select
 from plans p
 left join routes r 
 	on r.plan_id = p.id
+  and r.is_deleted = false
 where p.user_id = $1
+  and p.is_deleted = false
 order by
 	p.created_at desc`;
 
@@ -580,7 +747,7 @@ export async function regionGetCount(sql: Sql): Promise<RegionGetCountRow | null
 }
 
 export const planGetByIdQuery = `-- name: PlanGetById :one
-select id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc, rule_set_id, region from plans
+select id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc, rule_set_id, region, is_deleted from plans
 where plans.id = $1`;
 
 export interface PlanGetByIdArgs {
@@ -606,6 +773,7 @@ export interface PlanGetByIdRow {
     finishDesc: string | null;
     ruleSetId: string;
     region: string | null;
+    isDeleted: boolean;
 }
 
 export async function planGetById(sql: Sql, args: PlanGetByIdArgs): Promise<PlanGetByIdRow | null> {
@@ -635,12 +803,13 @@ export async function planGetById(sql: Sql, args: PlanGetByIdArgs): Promise<Plan
         startDesc: row[14],
         finishDesc: row[15],
         ruleSetId: row[16],
-        region: row[17]
+        region: row[17],
+        isDeleted: row[18]
     };
 }
 
 export const plansGetNewQuery = `-- name: PlansGetNew :many
-select id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc, rule_set_id, region from plans
+select id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc, rule_set_id, region, is_deleted from plans
 where state = 'new'`;
 
 export interface PlansGetNewRow {
@@ -662,6 +831,7 @@ export interface PlansGetNewRow {
     finishDesc: string | null;
     ruleSetId: string;
     region: string | null;
+    isDeleted: boolean;
 }
 
 export async function plansGetNew(sql: Sql): Promise<PlansGetNewRow[]> {
@@ -683,7 +853,8 @@ export async function plansGetNew(sql: Sql): Promise<PlansGetNewRow[]> {
         startDesc: row[14],
         finishDesc: row[15],
         ruleSetId: row[16],
-        region: row[17]
+        region: row[17],
+        isDeleted: row[18]
     }));
 }
 
@@ -730,7 +901,7 @@ values (
 		)
 	)
 )
-returning id, user_id, created_at, plan_id, name, linestring, stats_len_m, stats_score, stats_junction_count`;
+returning id, user_id, created_at, plan_id, name, linestring, stats_len_m, stats_score, stats_junction_count, is_deleted`;
 
 export interface RouteInsertArgs {
     name: string;
@@ -752,6 +923,7 @@ export interface RouteInsertRow {
     statsLenM: string;
     statsScore: string;
     statsJunctionCount: string;
+    isDeleted: boolean;
 }
 
 export async function routeInsert(sql: Sql, args: RouteInsertArgs): Promise<RouteInsertRow | null> {
@@ -772,7 +944,8 @@ export async function routeInsert(sql: Sql, args: RouteInsertArgs): Promise<Rout
         linestring: row[5],
         statsLenM: row[6],
         statsScore: row[7],
-        statsJunctionCount: row[8]
+        statsJunctionCount: row[8],
+        isDeleted: row[9]
     };
 }
 

@@ -1,19 +1,84 @@
-import { useLocalSearchParams } from "expo-router";
-import { Trophy, Navigation } from "lucide-react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { Trophy, Navigation, Trash2 } from "lucide-react-native";
 import { AnimatePresence, MotiView } from "moti";
-import { useMemo } from "react";
-import { View, Text, ScrollView } from "react-native";
+import { useMemo, useState } from "react";
+import { View, Text, ScrollView, Pressable } from "react-native";
 
+import { Button } from "~/components/button";
 import { ErrorBox } from "~/components/error";
 import { GeoMapRouteView } from "~/components/geo-map/geo-map-route-view";
 import { metersToDisplay } from "~/components/geo-map/util";
 import { Loading } from "~/components/loading";
 import { ScreenCard } from "~/components/screen-card";
 import { ScreenFrame } from "~/components/screen-frame";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
 import { useStorePlans } from "~/lib/stores/plans-store";
 import { useStoreRoute } from "~/lib/stores/routes-store";
+import { cn } from "~/lib/utils";
+
+function DeleteConfirmDialog({
+  children,
+  onDelete,
+}: {
+  children: React.ReactNode;
+  onDelete: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <AlertDialog
+      className="w-full"
+      open={open}
+      onOpenChange={(open) => setOpen(open)}
+    >
+      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+      <AlertDialogContent className="w-full border-black bg-white dark:border-gray-700 dark:bg-gray-800">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex flex-row items-center justify-between dark:text-gray-100">
+            Delete Rule Set
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            <Text>
+              Are you sure you want to delete this route? This action is
+              permanent.
+            </Text>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="flex w-full flex-col items-center justify-between">
+          <View className="flex w-full flex-col items-center justify-between gap-6">
+            <Button
+              variant="primary"
+              className="flex w-full flex-row items-center justify-center"
+              onPress={() => {
+                setOpen(false);
+                onDelete();
+              }}
+            >
+              <Text className="dark:text-gray-200">Delete</Text>
+            </Button>
+            <Button
+              variant="secondary"
+              className="flex w-full flex-row items-center justify-center"
+              onPress={() => setOpen(false)}
+            >
+              <Text className="dark:text-gray-200">Cancel</Text>
+            </Button>
+          </View>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
 
 export default function RouteDetails() {
+  const router = useRouter();
   const { routeId, planId } = useLocalSearchParams();
   const {
     data: plans,
@@ -27,6 +92,7 @@ export default function RouteDetails() {
     data: route,
     error,
     status,
+    routeDelete,
   } = useStoreRoute(planRoute?.routeId || "");
 
   const breakdownSurface = useMemo(() => {
@@ -58,7 +124,10 @@ export default function RouteDetails() {
   }, [route]);
 
   return (
-    <ScreenFrame title="Route details">
+    <ScreenFrame
+      title="Route details"
+      onGoBack={() => router.replace(`/plans/${planId}`)}
+    >
       <AnimatePresence>
         {(!plans && !planError) ||
           (!route && !error && <Loading className="size-12 text-[#ff4a25]" />)}
@@ -109,12 +178,30 @@ export default function RouteDetails() {
                       </>
                     }
                     bottom={
-                      <>
-                        <Navigation className="size-5 text-[#FF5937]" />
-                        <Text className="font-bold dark:text-gray-200">
-                          {metersToDisplay(route.data.stats.lenM)}
-                        </Text>
-                      </>
+                      <View className="flex flex-row items-center justify-between">
+                        <View className="flex flex-col items-end justify-center">
+                          <Navigation className="size-5 text-[#FF5937]" />
+                          <Text className="font-bold dark:text-gray-200">
+                            {metersToDisplay(route.data.stats.lenM)}
+                          </Text>
+                        </View>
+                        <View className="flex flex-col items-end justify-center">
+                          <DeleteConfirmDialog
+                            onDelete={() => {
+                              routeDelete(route.data.id);
+                              router.replace(`/plans/${planId}`);
+                            }}
+                          >
+                            <Pressable
+                              className={cn(
+                                "dark:border-red-700 dark:hover:bg-red-950 w-full h-14 flex-row items-center px-4 gap-3 rounded-xl border-[3px] border-red-500 text-red-500 hover:bg-red-50 transition-colors",
+                              )}
+                            >
+                              <Trash2 className="size-4" />
+                            </Pressable>
+                          </DeleteConfirmDialog>
+                        </View>
+                      </View>
                     }
                   />
                   <ScreenCard

@@ -2,7 +2,7 @@ const ReactCompilerConfig = {
   /* ... */
 };
 module.exports = (api) => {
-  api.cache(true);
+  api.cache(false);
   return {
     plugins: [
       // ["babel-plugin-react-compiler", ReactCompilerConfig], // must run first!

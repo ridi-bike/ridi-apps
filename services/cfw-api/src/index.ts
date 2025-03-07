@@ -21,6 +21,9 @@ import {
   ruleSetRoadTagsList,
   ruleSetSetDeleted,
   regionFindFromCoords,
+  routeDelete,
+  planDelete,
+  routeDeleteByPlanId,
 } from "@ridi/db-queries";
 import { RidiLogger } from "@ridi/logger";
 import { lookupCooordsInfo } from "@ridi/maps-api";
@@ -324,6 +327,33 @@ const router = tsr
       body: validated.data,
     };
   },
+  planDelete: async ({ params: { planId } }, ctx) => {
+    const deletedPlan = await planDelete(ctx.db, {
+      id: planId,
+      userId: ctx.request.user.id,
+    });
+
+    if (!deletedPlan) {
+      return {
+        status: 400,
+        body: {
+          message: "Record not found",
+        },
+      };
+    }
+
+    await routeDeleteByPlanId(ctx.db, {
+      planId,
+      userId: ctx.request.user.id,
+    });
+
+    return {
+      status: 204,
+      body: {
+        id: deletedPlan.id,
+      },
+    };
+  },
   routeGet: async ({ params: { routeId }, query: { version } }, ctx) => {
     if (version !== "v1") {
       return {
@@ -393,6 +423,28 @@ const router = tsr
         },
       } as const;
     }
+  },
+  routeDelete: async ({ params: { routeId } }, ctx) => {
+    const deletedRoute = await routeDelete(ctx.db, {
+      id: routeId,
+      userId: ctx.request.user.id,
+    });
+
+    if (!deletedRoute) {
+      return {
+        status: 400,
+        body: {
+          message: "Row not found",
+        },
+      };
+    }
+
+    return {
+      status: 204,
+      body: {
+        id: deletedRoute.id,
+      },
+    };
   },
 });
 
