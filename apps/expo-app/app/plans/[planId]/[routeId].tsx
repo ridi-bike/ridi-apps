@@ -1,5 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Trophy, Navigation, Trash2 } from "lucide-react-native";
+import { buildGPX, BaseBuilder } from "gpx-builder";
+import { Trophy, Navigation, Trash2, Route, Ruler } from "lucide-react-native";
 import { AnimatePresence, MotiView } from "moti";
 import { useMemo, useState } from "react";
 import { View, Text, ScrollView, Pressable } from "react-native";
@@ -24,6 +25,55 @@ import { useStorePlans } from "~/lib/stores/plans-store";
 import { useStoreRoute } from "~/lib/stores/routes-store";
 import { cn } from "~/lib/utils";
 
+function DownloadGpxDialog({
+  children,
+  onDownload,
+}: {
+  children: React.ReactNode;
+  onDownload: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <AlertDialog
+      className="w-full"
+      open={open}
+      onOpenChange={(open) => setOpen(open)}
+    >
+      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+      <AlertDialogContent className="w-full border-black bg-white dark:border-gray-700 dark:bg-gray-800">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex flex-row items-center justify-between dark:text-gray-100">
+            Download GPX route file
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            <Text>This will take a momnet</Text>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="flex w-full flex-col items-center justify-between">
+          <View className="flex w-full flex-col items-center justify-between gap-6">
+            <Button
+              variant="primary"
+              className="flex w-full flex-row items-center justify-center"
+              onPress={() => {
+                setOpen(false);
+                onDownload();
+              }}
+            >
+              <Text className="dark:text-gray-200">Download</Text>
+            </Button>
+            <Button
+              variant="secondary"
+              className="flex w-full flex-row items-center justify-center"
+              onPress={() => setOpen(false)}
+            >
+              <Text className="dark:text-gray-200">Cancel</Text>
+            </Button>
+          </View>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
 function DeleteConfirmDialog({
   children,
   onDelete,
@@ -179,8 +229,8 @@ export default function RouteDetails() {
                     }
                     bottom={
                       <View className="flex flex-row items-center justify-between">
-                        <View className="flex flex-col items-end justify-center">
-                          <Navigation className="size-5 text-[#FF5937]" />
+                        <View className="flex flex-row items-center justify-start">
+                          <Ruler className="size-5 text-[#FF5937]" />
                           <Text className="font-bold dark:text-gray-200">
                             {metersToDisplay(route.data.stats.lenM)}
                           </Text>
@@ -200,6 +250,34 @@ export default function RouteDetails() {
                               <Trash2 className="size-4" />
                             </Pressable>
                           </DeleteConfirmDialog>
+                        </View>
+                        <View className="flex flex-col items-end justify-center">
+                          <DownloadGpxDialog
+                            onDownload={() => {
+                              const { Point } = BaseBuilder.MODELS;
+                              const points = route.data.latLonArray.map(
+                                (latLon) => new Point(latLon[0], latLon[1]),
+                              );
+
+                              const gpxData = new BaseBuilder();
+
+                              gpxData.setSegmentPoints(points);
+
+                              const link = document.createElement("a");
+
+                              link.href = `data:text/plain;charset=utf-8,${encodeURIComponent(buildGPX(gpxData.toObject()))}`;
+                              link.download = "route.gpx";
+                              link.click();
+                            }}
+                          >
+                            <Pressable
+                              className={cn(
+                                "dark:border-green-700 dark:hover:bg-green-950 w-full h-14 flex-row items-center px-4 gap-3 rounded-xl border-[3px] border-red-500 text-red-500 hover:bg-red-50 transition-colors",
+                              )}
+                            >
+                              <Route className="size-4" />
+                            </Pressable>
+                          </DownloadGpxDialog>
                         </View>
                       </View>
                     }

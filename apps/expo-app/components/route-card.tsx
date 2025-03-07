@@ -1,5 +1,5 @@
 import { Trophy } from "lucide-react-native";
-import { AnimatePresence, MotiView, MotiText } from "moti";
+import { AnimatePresence, MotiView } from "moti";
 import { useMemo } from "react";
 import { View, Text } from "react-native";
 
