@@ -229,55 +229,57 @@ export default function RouteDetails() {
                     }
                     bottom={
                       <View className="flex flex-row items-center justify-between">
-                        <View className="flex flex-row items-center justify-start">
+                        <View className="flex flex-row items-center justify-start gap-2">
                           <Ruler className="size-5 text-[#FF5937]" />
                           <Text className="font-bold dark:text-gray-200">
                             {metersToDisplay(route.data.stats.lenM)}
                           </Text>
                         </View>
-                        <View className="flex flex-col items-end justify-center">
-                          <DeleteConfirmDialog
-                            onDelete={() => {
-                              routeDelete(route.data.id);
-                              router.replace(`/plans/${planId}`);
-                            }}
-                          >
-                            <Pressable
-                              className={cn(
-                                "dark:border-red-700 dark:hover:bg-red-950 w-full h-14 flex-row items-center px-4 gap-3 rounded-xl border-[3px] border-red-500 text-red-500 hover:bg-red-50 transition-colors",
-                              )}
+                        <View className="flex flex-row items-center justify-center gap-4">
+                          <View className="flex flex-col items-end justify-center">
+                            <DeleteConfirmDialog
+                              onDelete={() => {
+                                routeDelete(route.data.id);
+                                router.replace(`/plans/${planId}`);
+                              }}
                             >
-                              <Trash2 className="size-4" />
-                            </Pressable>
-                          </DeleteConfirmDialog>
-                        </View>
-                        <View className="flex flex-col items-end justify-center">
-                          <DownloadGpxDialog
-                            onDownload={() => {
-                              const { Point } = BaseBuilder.MODELS;
-                              const points = route.data.latLonArray.map(
-                                (latLon) => new Point(latLon[0], latLon[1]),
-                              );
+                              <Pressable
+                                className={cn(
+                                  "dark:border-red-700 dark:hover:bg-red-950 w-full h-14 flex-row items-center px-4 gap-3 rounded-xl border-[3px] border-red-500 text-red-500 hover:bg-red-50 transition-colors",
+                                )}
+                              >
+                                <Trash2 className="size-4" />
+                              </Pressable>
+                            </DeleteConfirmDialog>
+                          </View>
+                          <View className="flex flex-col items-end justify-center">
+                            <DownloadGpxDialog
+                              onDownload={() => {
+                                const { Point } = BaseBuilder.MODELS;
+                                const points = route.data.latLonArray.map(
+                                  (latLon) => new Point(latLon[0], latLon[1]),
+                                );
 
-                              const gpxData = new BaseBuilder();
+                                const gpxData = new BaseBuilder();
 
-                              gpxData.setSegmentPoints(points);
+                                gpxData.setSegmentPoints(points);
 
-                              const link = document.createElement("a");
+                                const link = document.createElement("a");
 
-                              link.href = `data:text/plain;charset=utf-8,${encodeURIComponent(buildGPX(gpxData.toObject()))}`;
-                              link.download = "route.gpx";
-                              link.click();
-                            }}
-                          >
-                            <Pressable
-                              className={cn(
-                                "dark:border-green-700 dark:hover:bg-green-950 w-full h-14 flex-row items-center px-4 gap-3 rounded-xl border-[3px] border-red-500 text-red-500 hover:bg-red-50 transition-colors",
-                              )}
+                                link.href = `data:application/gpx+xml;charset=utf-8,${encodeURIComponent(buildGPX(gpxData.toObject()))}`;
+                                link.download = "route.gpx";
+                                link.click();
+                              }}
                             >
-                              <Route className="size-4" />
-                            </Pressable>
-                          </DownloadGpxDialog>
+                              <Pressable
+                                className={cn(
+                                  "dark:border-green-700 dark:hover:bg-green-950 w-full h-14 flex-row items-center px-4 gap-3 rounded-xl border-[3px] border-green-500 text-green-500 hover:bg-green-50 transition-colors",
+                                )}
+                              >
+                                <Route className="size-4" />
+                              </Pressable>
+                            </DownloadGpxDialog>
+                          </View>
                         </View>
                       </View>
                     }
