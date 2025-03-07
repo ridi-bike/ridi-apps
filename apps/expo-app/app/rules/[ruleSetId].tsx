@@ -10,8 +10,14 @@ import {
   roadTypeSmallKeys,
   roadTypeTinyKeys,
 } from "@ridi/api-contracts";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { ChevronDown, ChevronUp, RotateCcw } from "lucide-react-native";
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
+import {
+  ChevronDown,
+  ChevronUp,
+  CircleHelp,
+  RotateCcw,
+} from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { View, Text, Pressable, TextInput, ScrollView } from "react-native";
 
@@ -21,16 +27,30 @@ import { useStoreRuleSets } from "~/lib/stores/rules-store";
 import { cn } from "~/lib/utils";
 
 const ruleGroups = [
-  ["Large Roads", roadTypeLargeKeys],
-  ["Medium Roads", roadTypeMedKeys],
-  ["Small Roads", roadTypeSmallKeys],
-  ["Residential Roads", roadTypeResidentalKeys],
-  ["Tiny Roads", roadTypeTinyKeys],
-  ["Paved Surface", roadSurfacePavedKeys],
-  ["Unpaved Surface", roadSurfaceUnpavedKeys],
-  ["Special Surface", roadSurfaceSpecialKeys],
-  ["Smoothness", roadSmoothnessKeys],
+  ["Large Roads", roadTypeLargeKeys, "highway"],
+  ["Medium Roads", roadTypeMedKeys, "highway"],
+  ["Small Roads", roadTypeSmallKeys, "highway"],
+  ["Residential Roads", roadTypeResidentalKeys, "highway"],
+  ["Tiny Roads", roadTypeTinyKeys, "highway"],
+  ["Paved Surface", roadSurfacePavedKeys, "surface"],
+  ["Unpaved Surface", roadSurfaceUnpavedKeys, "surface"],
+  ["Special Surface", roadSurfaceSpecialKeys, "surface"],
+  ["Smoothness", roadSmoothnessKeys, "smoothness"],
 ] as const;
+
+const tagValueToTagName = new Map<string, string>();
+function addTagValues<T extends readonly string[]>(vals: T, tagName: string) {
+  vals.forEach((v) => tagValueToTagName.set(v, tagName));
+}
+addTagValues(roadTypeLargeKeys, "highway");
+addTagValues(roadTypeMedKeys, "highway");
+addTagValues(roadTypeSmallKeys, "highway");
+addTagValues(roadTypeResidentalKeys, "highway");
+addTagValues(roadTypeTinyKeys, "highway");
+addTagValues(roadSurfacePavedKeys, "surface");
+addTagValues(roadSurfaceUnpavedKeys, "surface");
+addTagValues(roadSurfaceSpecialKeys, "surface");
+addTagValues(roadSmoothnessKeys, "smoothness");
 
 function roadTagsDefined<T>(v: T | undefined): asserts v is T {
   if (!v) {
@@ -268,22 +288,7 @@ export default function RulePackDetails() {
                         {group[0]}
                       </Text>
                       <View className="flex flex-row items-center gap-2">
-                        <Pressable
-                          onPress={() => toggleGroupExpanded(groupIdx)}
-                          className={cn(
-                            "border-[3px] mx-4 flex flex-row justify-center items-center w-24 dark:border-gray-700 border-black text-[#FF5937] rounded-lg p-1 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800",
-                            {
-                              "text-gray-400 dark:text-gray-200":
-                                !isGroupEnabled(group),
-                            },
-                          )}
-                        >
-                          {groupsExpanded.includes(groupIdx) ? (
-                            <ChevronUp className="size-5" />
-                          ) : (
-                            <ChevronDown className="size-5" />
-                          )}
-                        </Pressable>
+                        <Text className="dark:text-gray-200">Allowed:</Text>
                         <Pressable
                           className={cn(
                             "h-8 w-14 rounded-full p-1 transition-colors",
@@ -303,6 +308,22 @@ export default function RulePackDetails() {
                               },
                             )}
                           />
+                        </Pressable>
+                        <Pressable
+                          onPress={() => toggleGroupExpanded(groupIdx)}
+                          className={cn(
+                            "border-[3px] mx-4 flex flex-row justify-center items-center w-24 dark:border-gray-700 border-black text-[#FF5937] rounded-lg p-1 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800",
+                            {
+                              "text-gray-400 dark:text-gray-200":
+                                !isGroupEnabled(group),
+                            },
+                          )}
+                        >
+                          {groupsExpanded.includes(groupIdx) ? (
+                            <ChevronUp className="size-5" />
+                          ) : (
+                            <ChevronDown className="size-5" />
+                          )}
                         </Pressable>
                       </View>
                     </View>
@@ -373,9 +394,20 @@ export default function RulePackDetails() {
                           className="space-y-3 rounded-xl border-2 border-black p-4 dark:border-gray-700"
                         >
                           <View className="flex flex-row items-center justify-between gap-4">
-                            <Text className="flex-1 text-sm dark:text-gray-200">
-                              {tag[0]}
-                            </Text>
+                            <View className="flex flex-row items-center justify-start gap-2">
+                              <Text className="flex-1 text-sm dark:text-gray-200">
+                                {tag[0]}
+                              </Text>
+                              <Pressable
+                                onPress={() => {
+                                  WebBrowser.openBrowserAsync(
+                                    `https://wiki.openstreetmap.org/wiki/Tag:${tagValueToTagName.get(tag[0])}%3D${tag[0]}`,
+                                  );
+                                }}
+                              >
+                                <CircleHelp className="size-6 text-[#FF5937]" />
+                              </Pressable>
+                            </View>
                             <Pressable
                               className={cn(
                                 "h-8 w-14 rounded-full p-1 transition-colors",
