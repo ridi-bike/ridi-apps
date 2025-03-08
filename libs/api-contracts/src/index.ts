@@ -249,6 +249,17 @@ export const ruleSetSetSchema = z.discriminatedUnion("version", [
 export type RuleSetsSetRequest = z.infer<typeof ruleSetSetSchema>;
 
 export const apiContract = c.router({
+  stripeCheckout: {
+    method: "GET",
+    path: "/user/checkout",
+    responses: {
+      302: z.void(),
+      400: z.object({ message: z.string() }),
+      401: z.object({ message: z.string() }),
+      404: z.object({ message: z.string() }),
+      500: z.object({ message: z.string() }),
+    },
+  },
   regionGet: {
     method: "GET",
     path: "/region/:lat/:lon",
@@ -395,25 +406,6 @@ export const apiContract = c.router({
       500: z.object({ message: z.string() }),
     },
     summary: "Create a new plan",
-  },
-
-  coordsSelect: {
-    method: "POST",
-    path: "/user/coords/selected",
-    body: z.discriminatedUnion("version", [
-      z.object({
-        version: z.literal("v1"),
-        lat: latIn,
-        lon: lonIn,
-      }),
-    ]),
-    responses: {
-      200: z.object({ ok: z.boolean() }),
-      400: z.object({ message: z.string() }),
-      401: z.object({ message: z.string() }),
-      500: z.object({ message: z.string() }),
-    },
-    summary: "Record selected coordinates",
   },
 });
 
