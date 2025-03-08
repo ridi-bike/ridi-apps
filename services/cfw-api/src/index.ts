@@ -55,6 +55,13 @@ const router = tsr
     logger: RidiLogger;
   }>()
   .routerWithMiddleware(apiContract)<{ user: User }>({
+  stripeCheckout: async (_, ctx) => {
+    ctx.responseHeaders.set("location", "https:///google.com");
+    return {
+      status: 302,
+      body: undefined,
+    };
+  },
   regionGet: async ({ params: { lon, lat } }, ctx) => {
     const regions = await regionFindFromCoords(ctx.db, {
       lat,
@@ -188,24 +195,6 @@ const router = tsr
       status: 204,
       body: {
         id: body.id,
-      },
-    };
-  },
-  coordsSelect: async ({ body: { version, lon, lat } }, ctx) => {
-    if (version !== "v1") {
-      return {
-        status: 400,
-        body: {
-          message: "wrong version",
-        },
-      };
-    }
-
-    await ctx.messaging.send("coords-activty", { lat, lon });
-    return {
-      status: 200,
-      body: {
-        ok: true,
       },
     };
   },
@@ -471,6 +460,10 @@ export default {
       return new Response();
     }
 
+    if (new URL(request.url).pathname.startsWith("/public")) {
+      return new Response("this is public");
+    }
+
     const supabaseClient = createClient(
       env.SUPABASE_URL,
       env.SUPABASE_SERVICE_ROLE_KEY,
@@ -484,17 +477,10 @@ export default {
       contract: apiContract,
       router,
       options: {
+        basePath: "/private",
         requestMiddleware: [
           tsr.middleware<{ timeStartMs: number }>((request) => {
             request.timeStartMs = Date.now();
-          }),
-          tsr.middleware<{ timeStartMs: number }>(async (request) => {
-            const netAddr = request.headers.get("CF-Connecting-IP");
-            if (netAddr) {
-              await messaging.send("net-addr-activity", {
-                netAddr,
-              });
-            }
           }),
           tsr.middleware<{ user: User; timeStartMs: number }>(
             async (request) => {
