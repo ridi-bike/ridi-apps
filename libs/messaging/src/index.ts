@@ -21,8 +21,6 @@ type MessageHandler<TName extends keyof Messages> = (args: {
 }) => Promise<void>;
 
 type Messages = {
-  "net-addr-activity": { netAddr: string };
-  "coords-activty": { lat: string; lon: string };
   "new-plan": { planId: string };
 };
 

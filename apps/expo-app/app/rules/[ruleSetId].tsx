@@ -10,7 +10,7 @@ import {
   roadTypeSmallKeys,
   roadTypeTinyKeys,
 } from "@ridi/api-contracts";
-import { Link, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import {
   ChevronDown,

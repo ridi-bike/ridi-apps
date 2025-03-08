@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { buildGPX, BaseBuilder } from "gpx-builder";
-import { Trophy, Navigation, Trash2, Route, Ruler } from "lucide-react-native";
+import { Trophy, Trash2, Route, Ruler } from "lucide-react-native";
 import { AnimatePresence, MotiView } from "moti";
 import { useMemo, useState } from "react";
 import { View, Text, ScrollView, Pressable } from "react-native";

@@ -7,7 +7,6 @@ import { useEffect } from "react";
 
 import { supabase } from "~/lib/supabase";
 
-import { Button } from "./button";
 import { Link } from "./link";
 import { Text } from "./ui/text";
 
