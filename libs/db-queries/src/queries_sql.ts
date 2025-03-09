@@ -2,6 +2,179 @@
 
 import type  { Sql } from "postgres";
 
+export const stripeUsersInsertWithCustomerIdQuery = `-- name: StripeUsersInsertWithCustomerId :exec
+insert into private.stripe_users (user_id, stripe_customer_id, flow_status)
+values ($1, $2, 'none')`;
+
+export interface StripeUsersInsertWithCustomerIdArgs {
+    userId: string;
+    stripeCustomerId: string;
+}
+
+export async function stripeUsersInsertWithCustomerId(sql: Sql, args: StripeUsersInsertWithCustomerIdArgs): Promise<void> {
+    await sql.unsafe(stripeUsersInsertWithCustomerIdQuery, [args.userId, args.stripeCustomerId]);
+}
+
+export const stripeUsersUpdateStripeDataQuery = `-- name: StripeUsersUpdateStripeData :exec
+update private.stripe_users
+set stripe_status = $1,
+  stripe_subscription_id = $3,
+  stripe_price_id = $4,
+  stripe_current_period_end = $5,
+  stripe_current_period_start = $6,
+  stripe_cancel_at_period_end = $7,
+  stripe_payment_method = $8,
+  flow_status = 'confirmed'
+where user_id = $2`;
+
+export interface StripeUsersUpdateStripeDataArgs {
+    stripeStatus: string | null;
+    userId: string;
+    stripeSubscriptionId: string | null;
+    stripePriceId: string | null;
+    stripeCurrentPeriodEnd: Date | null;
+    stripeCurrentPeriodStart: Date | null;
+    stripeCancelAtPeriodEnd: string | null;
+    stripePaymentMethod: string | null;
+}
+
+export async function stripeUsersUpdateStripeData(sql: Sql, args: StripeUsersUpdateStripeDataArgs): Promise<void> {
+    await sql.unsafe(stripeUsersUpdateStripeDataQuery, [args.stripeStatus, args.userId, args.stripeSubscriptionId, args.stripePriceId, args.stripeCurrentPeriodEnd, args.stripeCurrentPeriodStart, args.stripeCancelAtPeriodEnd, args.stripePaymentMethod]);
+}
+
+export const stripeUsersUpdateInitiatedQuery = `-- name: StripeUsersUpdateInitiated :exec
+update private.stripe_users
+set stripe_status = 'initiated',
+  stripe_checkout_id = $1
+where user_id = $2`;
+
+export interface StripeUsersUpdateInitiatedArgs {
+    stripeCheckoutId: string | null;
+    userId: string;
+}
+
+export async function stripeUsersUpdateInitiated(sql: Sql, args: StripeUsersUpdateInitiatedArgs): Promise<void> {
+    await sql.unsafe(stripeUsersUpdateInitiatedQuery, [args.stripeCheckoutId, args.userId]);
+}
+
+export const stripeUsersUpdateCompletedQuery = `-- name: StripeUsersUpdateCompleted :exec
+update private.stripe_users
+set flow_status = 'completed'
+where user_id = $1`;
+
+export interface StripeUsersUpdateCompletedArgs {
+    userId: string;
+}
+
+export async function stripeUsersUpdateCompleted(sql: Sql, args: StripeUsersUpdateCompletedArgs): Promise<void> {
+    await sql.unsafe(stripeUsersUpdateCompletedQuery, [args.userId]);
+}
+
+export const stripeUsersUpdateStripeStatusNoneQuery = `-- name: StripeUsersUpdateStripeStatusNone :exec
+update private.stripe_users
+set stripe_status = 'none'
+where user_id = $1`;
+
+export interface StripeUsersUpdateStripeStatusNoneArgs {
+    userId: string;
+}
+
+export async function stripeUsersUpdateStripeStatusNone(sql: Sql, args: StripeUsersUpdateStripeStatusNoneArgs): Promise<void> {
+    await sql.unsafe(stripeUsersUpdateStripeStatusNoneQuery, [args.userId]);
+}
+
+export const stripeUsersGetRowQuery = `-- name: StripeUsersGetRow :one
+select user_id, flow_status, stripe_customer_id, stripe_status, stripe_checkout_id, stripe_subscription_id, stripe_price_id, stripe_current_period_end, stripe_current_period_start, stripe_cancel_at_period_end, stripe_payment_method from private.stripe_users
+where user_id = $1`;
+
+export interface StripeUsersGetRowArgs {
+    userId: string;
+}
+
+export interface StripeUsersGetRowRow {
+    userId: string;
+    flowStatus: "none" | "initiated" | "completed" | "confirmed";
+    stripeCustomerId: string;
+    stripeStatus: string | null;
+    stripeCheckoutId: string | null;
+    stripeSubscriptionId: string | null;
+    stripePriceId: string | null;
+    stripeCurrentPeriodEnd: Date | null;
+    stripeCurrentPeriodStart: Date | null;
+    stripeCancelAtPeriodEnd: boolean | null;
+    stripePaymentMethod: string | null;
+}
+
+export async function stripeUsersGetRow(sql: Sql, args: StripeUsersGetRowArgs): Promise<StripeUsersGetRowRow | null> {
+    const rows = await sql.unsafe(stripeUsersGetRowQuery, [args.userId]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        userId: row[0],
+        flowStatus: row[1],
+        stripeCustomerId: row[2],
+        stripeStatus: row[3],
+        stripeCheckoutId: row[4],
+        stripeSubscriptionId: row[5],
+        stripePriceId: row[6],
+        stripeCurrentPeriodEnd: row[7],
+        stripeCurrentPeriodStart: row[8],
+        stripeCancelAtPeriodEnd: row[9],
+        stripePaymentMethod: row[10]
+    };
+}
+
+export const stripeUsersGetRowByStripeCustomerIdQuery = `-- name: StripeUsersGetRowByStripeCustomerId :one
+select user_id, flow_status, stripe_customer_id, stripe_status, stripe_checkout_id, stripe_subscription_id, stripe_price_id, stripe_current_period_end, stripe_current_period_start, stripe_cancel_at_period_end, stripe_payment_method from private.stripe_users
+where stripe_customer_id = $1`;
+
+export interface StripeUsersGetRowByStripeCustomerIdArgs {
+    stripeCustomerId: string;
+}
+
+export interface StripeUsersGetRowByStripeCustomerIdRow {
+    userId: string;
+    flowStatus: "none" | "initiated" | "completed" | "confirmed";
+    stripeCustomerId: string;
+    stripeStatus: string | null;
+    stripeCheckoutId: string | null;
+    stripeSubscriptionId: string | null;
+    stripePriceId: string | null;
+    stripeCurrentPeriodEnd: Date | null;
+    stripeCurrentPeriodStart: Date | null;
+    stripeCancelAtPeriodEnd: boolean | null;
+    stripePaymentMethod: string | null;
+}
+
+export async function stripeUsersGetRowByStripeCustomerId(sql: Sql, args: StripeUsersGetRowByStripeCustomerIdArgs): Promise<StripeUsersGetRowByStripeCustomerIdRow | null> {
+    const rows = await sql.unsafe(stripeUsersGetRowByStripeCustomerIdQuery, [args.stripeCustomerId]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        userId: row[0],
+        flowStatus: row[1],
+        stripeCustomerId: row[2],
+        stripeStatus: row[3],
+        stripeCheckoutId: row[4],
+        stripeSubscriptionId: row[5],
+        stripePriceId: row[6],
+        stripeCurrentPeriodEnd: row[7],
+        stripeCurrentPeriodStart: row[8],
+        stripeCancelAtPeriodEnd: row[9],
+        stripePaymentMethod: row[10]
+    };
+}
+
 export const planSetRegionQuery = `-- name: PlanSetRegion :exec
 update plans
 set region = $1

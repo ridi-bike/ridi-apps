@@ -28,6 +28,7 @@ import {
 import { RidiLogger } from "@ridi/logger";
 import { lookupCooordsInfo } from "@ridi/maps-api";
 import { Messaging } from "@ridi/messaging";
+import { StripeApi } from "@ridi/stripe-api";
 import { type User } from "@supabase/supabase-js";
 import { createClient } from "@supabase/supabase-js";
 import {
@@ -55,11 +56,56 @@ const router = tsr
     logger: RidiLogger;
   }>()
   .routerWithMiddleware(apiContract)<{ user: User }>({
-  stripeCheckout: async (_, ctx) => {
-    ctx.responseHeaders.set("location", "https:///google.com");
+  stripeSuccess: async (_, ctx) => {
+    const stripeApi = new StripeApi(
+      ctx.db,
+      ctx.logger,
+      ctx.workerEnv.STRIPE_SECRET_KEY,
+      ctx.workerEnv.RIDI_APP_URL,
+      ctx.workerEnv.STRIPE_PRICE_ID_MONTLY,
+      ctx.workerEnv.STRIPE_PRICE_ID_YEARLY,
+    );
+
+    const subFound = await stripeApi.syncStripeData({
+      type: "ridi",
+      id: ctx.request.user.id,
+    });
+
     return {
-      status: 302,
-      body: undefined,
+      status: 200,
+      body: { subFound },
+    };
+  },
+  stripeCheckout: async ({ query: { priceType } }, ctx) => {
+    const stripeApi = new StripeApi(
+      ctx.db,
+      ctx.logger,
+      ctx.workerEnv.STRIPE_SECRET_KEY,
+      ctx.workerEnv.RIDI_APP_URL,
+      ctx.workerEnv.STRIPE_PRICE_ID_MONTLY,
+      ctx.workerEnv.STRIPE_PRICE_ID_YEARLY,
+    );
+
+    const email = ctx.request.user.email;
+    if (!email) {
+      throw ctx.logger.error("User does not have an email address", {
+        userId: ctx.request.user.id,
+      });
+    }
+
+    const url = await stripeApi.createStripeCheckoutUrl(
+      {
+        id: ctx.request.user.id,
+        email,
+      },
+      priceType,
+    );
+
+    return {
+      status: 200,
+      body: {
+        stripeUrl: url,
+      },
     };
   },
   regionGet: async ({ params: { lon, lat } }, ctx) => {
@@ -460,10 +506,6 @@ export default {
       return new Response();
     }
 
-    if (new URL(request.url).pathname.startsWith("/public")) {
-      return new Response("this is public");
-    }
-
     const supabaseClient = createClient(
       env.SUPABASE_URL,
       env.SUPABASE_SERVICE_ROLE_KEY,
@@ -471,6 +513,19 @@ export default {
 
     const db = postgres(env.SUPABASE_DB_URL);
     const messaging = new Messaging(db, ridiLogger);
+
+    if (new URL(request.url).pathname.startsWith("/stripe-webhook")) {
+      const stripeApi = new StripeApi(
+        db,
+        ridiLogger,
+        env.STRIPE_SECRET_KEY,
+        env.RIDI_APP_URL,
+        env.STRIPE_WEBHOOK_SECRET,
+        env.STRIPE_PRICE_ID_MONTLY,
+        env.STRIPE_PRICE_ID_YEARLY,
+      );
+      return stripeApi.processWebhook(request, ctx.waitUntil);
+    }
 
     const response = await fetchRequestHandler({
       request,

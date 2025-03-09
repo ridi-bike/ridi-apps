@@ -249,11 +249,25 @@ export const ruleSetSetSchema = z.discriminatedUnion("version", [
 export type RuleSetsSetRequest = z.infer<typeof ruleSetSetSchema>;
 
 export const apiContract = c.router({
+  stripeSuccess: {
+    method: "GET",
+    path: "/user/success",
+    responses: {
+      200: z.object({ subFound: z.boolean() }),
+      400: z.object({ message: z.string() }),
+      401: z.object({ message: z.string() }),
+      404: z.object({ message: z.string() }),
+      500: z.object({ message: z.string() }),
+    },
+  },
   stripeCheckout: {
     method: "GET",
     path: "/user/checkout",
+    query: z.object({
+      priceType: z.union([z.literal("montly"), z.literal("yearly")]),
+    }),
     responses: {
-      302: z.void(),
+      200: z.object({ stripeUrl: z.string() }),
       400: z.object({ message: z.string() }),
       401: z.object({ message: z.string() }),
       404: z.object({ message: z.string() }),
