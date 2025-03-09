@@ -7,9 +7,18 @@ import {
   ChevronRight,
   LogOut,
 } from "lucide-react-native";
+import { useState } from "react";
 import { View, Text, Pressable } from "react-native";
 
+import { apiClient } from "~/lib/api";
+import { getSuccessResponseOrThrow } from "~/lib/stores/util";
+
 export default function UserSettings() {
+  const [loading, setLoading] = useState(false);
+
+  if (loading) {
+    return <Text>Loading</Text>;
+  }
   return (
     <View
       role="main"
@@ -97,8 +106,46 @@ export default function UserSettings() {
           </View>
           <ChevronRight className="size-5 text-gray-400" />
         </Pressable>
-        <Pressable>Sub Montly</Pressable>
-        <Pressable>Sub yearly</Pressable>
+        <Pressable
+          onPress={() => {
+            setLoading(true);
+            apiClient
+              .stripeCheckout({
+                query: {
+                  priceType: "montly",
+                },
+              })
+              .then(
+                (urlResp) =>
+                  (window.location.href = getSuccessResponseOrThrow(
+                    200,
+                    urlResp,
+                  ).stripeUrl),
+              );
+          }}
+        >
+          Sub Montly
+        </Pressable>
+        <Pressable
+          onPress={() => {
+            setLoading(true);
+            apiClient
+              .stripeCheckout({
+                query: {
+                  priceType: "yearly",
+                },
+              })
+              .then(
+                (urlResp) =>
+                  (window.location.href = getSuccessResponseOrThrow(
+                    200,
+                    urlResp,
+                  ).stripeUrl),
+              );
+          }}
+        >
+          Sub yearly
+        </Pressable>
       </View>
 
       {/* Sign Out Button */}
