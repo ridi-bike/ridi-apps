@@ -97,6 +97,8 @@ export default function UserSettings() {
           </View>
           <ChevronRight className="size-5 text-gray-400" />
         </Pressable>
+        <Pressable>Sub Montly</Pressable>
+        <Pressable>Sub yearly</Pressable>
       </View>
 
       {/* Sign Out Button */}

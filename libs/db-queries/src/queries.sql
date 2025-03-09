@@ -1,3 +1,43 @@
+-- name: StripeUsersInsertWithCustomerId :exec
+insert into private.stripe_users (user_id, stripe_customer_id, flow_status)
+values ($1, $2, 'none');
+
+-- name: StripeUsersUpdateStripeData :exec
+update private.stripe_users
+set stripe_status = $1,
+  stripe_subscription_id = $3,
+  stripe_price_id = $4,
+  stripe_current_period_end = $5,
+  stripe_current_period_start = $6,
+  stripe_cancel_at_period_end = $7,
+  stripe_payment_method = $8,
+  flow_status = 'confirmed'
+where user_id = $2;
+
+-- name: StripeUsersUpdateInitiated :exec
+update private.stripe_users
+set stripe_status = 'initiated',
+  stripe_checkout_id = $1
+where user_id = $2;
+
+-- name: StripeUsersUpdateCompleted :exec
+update private.stripe_users
+set flow_status = 'completed'
+where user_id = $1;
+
+-- name: StripeUsersUpdateStripeStatusNone :exec
+update private.stripe_users
+set stripe_status = 'none'
+where user_id = $1;
+
+-- name: StripeUsersGetRow :one
+select * from private.stripe_users
+where user_id = $1;
+
+-- name: StripeUsersGetRowByStripeCustomerId :one
+select * from private.stripe_users
+where stripe_customer_id = $1;
+
 -- name: PlanSetRegion :exec
 update plans
 set region = $1

@@ -1,0 +1,11 @@
+{
+  "name": "@ridi/stripe-api",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "type": "module",
+  "dependencies": {
+    "@ridi/db-queries": "workspace:^",
+    "@ridi/logger": "workspace:^",
+    "stripe": "^17.7.0"
+  }
+}
