@@ -1,0 +1,28 @@
+vector:
+  customConfig:
+    sinks:
+      better_stack_http_sink:
+        uri: "$URI_LOGS"
+        auth:
+          strategy: "bearer"
+          token: "$TOKEN"
+      better_stack_http_metrics_sink:
+        uri: "$URI_METRICS"
+        auth:
+          strategy: "bearer"
+          token: "$TOKEN"
+    sources:
+      better_stack_kubernetes_metrics_nodes:
+        endpoint: "https://metrics-server.kube-system/apis/metrics.k8s.io/v1beta1/nodes"
+        tls:
+          verify_certificate: false
+          verify_hostname: false
+      better_stack_kubernetes_metrics_pods:
+        endpoint: "https://metrics-server.kube-system/apis/metrics.k8s.io/v1beta1/pods"
+        tls:
+          verify_certificate: false
+          verify_hostname: false
+
+# Metrics server is already installed
+metrics-server:
+  enabled: false

@@ -194,7 +194,7 @@ const grafanaMonitoring = new k8s.helm.v3.Release(
   "grafana-k8s-monitoring",
   {
     chart: "k8s-monitoring",
-    namespace: "monitoring",
+    namespace: k8sNamespace.metadata.name,
     repositoryOpts: {
       repo: "https://grafana.github.io/helm-charts",
     },
