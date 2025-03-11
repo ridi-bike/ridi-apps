@@ -48,7 +48,7 @@ regions.reduce((prevDelay, region) => {
       failedJobsHistoryLimit: 3,
       jobTemplate: {
         spec: {
-          backoffLimit: 1,
+          backoffLimit: 10,
           template: {
             spec: {
               hostNetwork: stackName === "dev",

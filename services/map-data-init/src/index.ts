@@ -40,11 +40,10 @@ try {
         flag: "w+",
       },
     );
-    fs.renameSync(kmlDownloadFilename, env.KML_LOCATION);
 
     logger.info("KML download done");
 
-    const kmlFileContents = await fs.promises.readFile(env.KML_LOCATION, {
+    const kmlFileContents = await fs.promises.readFile(kmlDownloadFilename, {
       encoding: "utf8",
     });
 
@@ -74,6 +73,9 @@ try {
       geojson: converted,
       polygon: `POLYGON((${polygonCoordsList}))`,
     });
+
+    fs.renameSync(kmlDownloadFilename, env.KML_LOCATION);
+
     logger.info("KML saved to db");
   }
 } catch (error) {
