@@ -9,6 +9,7 @@ import {
 import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
 
+import { useCreateSessionFromUrl } from "~/components/Auth";
 import { supabase } from "~/lib/supabase";
 import { useEffectOnce } from "~/lib/utils";
 
@@ -23,6 +24,8 @@ const queryClient = new QueryClient({
 });
 
 export default function App() {
+  useCreateSessionFromUrl();
+
   useEffect(() => {
     // eslint-disable-next-line import/no-named-as-default-member
     return NetInfo.addEventListener((state) => {
