@@ -8,7 +8,28 @@ export class RidiLogger {
 
   static init(context: Record<string, unknown>) {
     const innerLogger = pino({
-      serializers: pino.stdSerializers,
+      nestedKey: "payload",
+      serializers: {
+        payload: (data) => {
+          return Object.entries(data).reduce(
+            (serialized, [key, value]) => {
+              serialized[key] = value;
+              if (value instanceof Error) {
+                serialized[key] = pino.stdSerializers.err(value);
+              }
+              if (value instanceof Request) {
+                serialized[key] = pino.stdSerializers.req(value);
+              }
+              if (value instanceof Response) {
+                serialized[key] = pino.stdSerializers.res(value);
+              }
+              return serialized;
+            },
+            {} as Record<string, unknown>,
+          );
+          return data;
+        },
+      },
       formatters: {
         level: (label) => {
           return {
