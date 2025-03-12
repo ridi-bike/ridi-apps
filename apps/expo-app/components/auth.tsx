@@ -1,39 +1,54 @@
 import * as QueryParams from "expo-auth-session/build/QueryParams";
 import * as Linking from "expo-linking";
+import { type Href } from "expo-router";
 import { useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 import { supabase } from "~/lib/supabase";
 
 export function useCreateSessionFromUrl() {
   const url = Linking.useURL();
+  const {
+    params: { access_token, refresh_token },
+    errorCode,
+  } = QueryParams.getQueryParams(url || "");
+
   const router = useRouter();
 
-  useEffect(() => {
+  const clearUrlParas = useCallback(() => {
     if (url) {
-      const { params, errorCode } = QueryParams.getQueryParams(url);
-
-      if (errorCode) {
-        throw new Error(errorCode);
-      }
-
-      const { access_token, refresh_token } = params;
-      console.log({ access_token, refresh_token });
-
-      if (!access_token) {
-        return;
-      }
-
-      if (access_token || refresh_token) {
-        console.log("clearing");
-        router.setParams({ access_token: undefined, refresh_token: undefined });
-      }
-
-      console.log("set session");
-      supabase.auth.setSession({
-        access_token,
-        refresh_token,
-      });
+      const clearedUrl = new URL(url);
+      clearedUrl.hash = "";
+      router.replace(clearedUrl.toString() as Href<string>);
     }
   }, [router, url]);
+
+  useEffect(() => {
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
+
+    if (!access_token) {
+      return;
+    }
+
+    supabase.auth
+      .setSession({
+        access_token,
+        refresh_token,
+      })
+      .then(() => {
+        clearUrlParas();
+      })
+      .catch((error) => {
+        console.error("error on set session", error);
+        clearUrlParas();
+      });
+  }, [access_token, clearUrlParas, errorCode, refresh_token, router, url]);
+
+  if (access_token || refresh_token) {
+    return true;
+  }
+
+  return false;
 }
