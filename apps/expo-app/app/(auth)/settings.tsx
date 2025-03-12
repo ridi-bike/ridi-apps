@@ -12,6 +12,7 @@ import { View, Text, Pressable } from "react-native";
 
 import { apiClient } from "~/lib/api";
 import { getSuccessResponseOrThrow } from "~/lib/stores/util";
+import { supabase } from "~/lib/supabase";
 
 export default function UserSettings() {
   const [loading, setLoading] = useState(false);
@@ -124,7 +125,7 @@ export default function UserSettings() {
               );
           }}
         >
-          Sub Montly
+          <Text>Sub Montly</Text>
         </Pressable>
         <Pressable
           onPress={() => {
@@ -144,16 +145,15 @@ export default function UserSettings() {
               );
           }}
         >
-          Sub yearly
+          <Text>Sub yearly</Text>
         </Pressable>
       </View>
 
-      {/* Sign Out Button */}
       <View className="p-4">
         <Pressable
           role="button"
           className="flex w-full flex-row items-center justify-center gap-2 rounded-xl border-2 border-black px-4 py-3 text-[#FF5937] hover:bg-[#FF5937]/5"
-          onPress={() => console.log("Sign out")}
+          onPress={() => supabase.auth.signOut()}
         >
           <LogOut className="size-5" />
           <Text className="font-medium">Sign Out</Text>

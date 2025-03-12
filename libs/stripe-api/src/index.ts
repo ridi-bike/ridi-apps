@@ -53,9 +53,9 @@ export class StripeApi {
     this.logger = logger.withContext({ module: "stripe-api" });
     this.stripe = new Stripe(stripeSecretKey);
     this.appBaseUrl = appBaseUrl;
-    (this.priceMontly = priceMontly),
-      (this.priceYearly = priceYearly),
-      (this.stripeWebhookSecret = stripeWebhookSecret);
+    this.priceMontly = priceMontly;
+    this.priceYearly = priceYearly;
+    this.stripeWebhookSecret = stripeWebhookSecret;
   }
   async createStripeCheckoutUrl(
     user: { id: string; email: string },
@@ -87,6 +87,7 @@ export class StripeApi {
     const checkout = await this.stripe.checkout.sessions.create({
       customer: stripeCustomerId,
       success_url: `${this.appBaseUrl}/stripe-success`,
+      mode: "subscription",
       line_items: [
         {
           price: priceType === "montly" ? this.priceMontly : this.priceYearly,

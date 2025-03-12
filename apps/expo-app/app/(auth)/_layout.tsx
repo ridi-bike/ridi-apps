@@ -1,12 +1,13 @@
 import NetInfo from "@react-native-community/netinfo";
 import { PortalHost } from "@rn-primitives/portal";
+import { type Session } from "@supabase/supabase-js";
 import {
   QueryClientProvider,
   QueryClient,
   onlineManager,
 } from "@tanstack/react-query";
-import { Stack } from "expo-router";
-import { useEffect } from "react";
+import { router, Stack } from "expo-router";
+import { useEffect, useState } from "react";
 
 import { supabase } from "~/lib/supabase";
 
@@ -21,6 +22,8 @@ const queryClient = new QueryClient({
 });
 
 export default function App() {
+  const [session, setSession] = useState<Session | null>(null);
+
   useEffect(() => {
     // eslint-disable-next-line import/no-named-as-default-member
     return NetInfo.addEventListener((state) => {
@@ -32,20 +35,23 @@ export default function App() {
   useEffect(() => {
     return supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
-        supabase.auth.signInAnonymously();
+        router.replace("/");
       }
+      setSession(session);
     }).data.subscription.unsubscribe;
   }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Stack
-        screenOptions={{
-          contentStyle: {
-            overflow: "hidden",
-          },
-        }}
-      />
+      {session && (
+        <Stack
+          screenOptions={{
+            contentStyle: {
+              overflow: "hidden",
+            },
+          }}
+        />
+      )}
       <PortalHost />
     </QueryClientProvider>
   );
