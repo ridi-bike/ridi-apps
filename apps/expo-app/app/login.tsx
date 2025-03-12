@@ -1,12 +1,13 @@
 import { type Provider } from "@supabase/supabase-js";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import { Github, MailIcon } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View, Text } from "react-native";
 
 import { Button } from "~/components/button";
 import { Input } from "~/components/input";
 import { supabase } from "~/lib/supabase";
+import { cn } from "~/lib/utils";
 
 async function performOAuth(provider: Provider) {
   const { error } = await supabase.auth.signInWithOAuth({
@@ -17,9 +18,9 @@ async function performOAuth(provider: Provider) {
   }
 }
 
-async function performOTPAuth() {
+async function performOTPAuth(email: string) {
   const { error } = await supabase.auth.signInWithOtp({
-    email: "valid.email@supabase.io",
+    email,
   });
   if (error) {
     throw error;
@@ -47,6 +48,14 @@ async function validateOTPAuth(email: string, token: string) {
 }
 
 export default function LoginScreen() {
+  useEffect(() => {
+    return supabase.auth.onAuthStateChange((_event, session) => {
+      if (session && !session.user.is_anonymous) {
+        router.replace("/plans");
+      }
+    }).data.subscription.unsubscribe;
+  }, []);
+
   const [showEmailInput, setShowEmailInput] = useState(false);
   const [showCodeInput, setShowCodeInput] = useState(false);
   const [email, setEmail] = useState("");
@@ -131,8 +140,15 @@ export default function LoginScreen() {
                 <Button
                   disabled={!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)}
                   variant="primary"
+                  className={cn({
+                    "opacity-40":
+                      !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+                  })}
                   fullWidth
-                  onPress={performOTPAuth}
+                  onPress={() => {
+                    performOTPAuth(email);
+                    setShowCodeInput(true);
+                  }}
                 >
                   <Text className="text-gray-500 dark:text-gray-200">
                     Send Code
