@@ -9,6 +9,7 @@ import { Button } from "~/components/button";
 import { ErrorBox } from "~/components/error";
 import { GeoMapRouteView } from "~/components/geo-map/geo-map-route-view";
 import { metersToDisplay } from "~/components/geo-map/util";
+import { GpxIcon } from "~/components/icons/gpx";
 import { Loading } from "~/components/loading";
 import { ScreenCard } from "~/components/screen-card";
 import { ScreenFrame } from "~/components/screen-frame";
@@ -248,7 +249,7 @@ export default function RouteDetails() {
                                   "dark:border-red-700 dark:hover:bg-red-950 w-full h-14 flex-row items-center px-4 gap-3 rounded-xl border-[3px] border-red-500 text-red-500 hover:bg-red-50 transition-colors",
                                 )}
                               >
-                                <Trash2 className="size-4" />
+                                <Trash2 className="size-6" />
                               </Pressable>
                             </DeleteConfirmDialog>
                           </View>
@@ -276,7 +277,7 @@ export default function RouteDetails() {
                                   "dark:border-green-700 dark:hover:bg-green-950 w-full h-14 flex-row items-center px-4 gap-3 rounded-xl border-[3px] border-green-500 text-green-500 hover:bg-green-50 transition-colors",
                                 )}
                               >
-                                <Route className="size-4" />
+                                <GpxIcon className="size-6 fill-green-700" />
                               </Pressable>
                             </DownloadGpxDialog>
                           </View>
