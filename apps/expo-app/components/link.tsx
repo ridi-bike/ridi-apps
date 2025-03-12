@@ -6,8 +6,10 @@ import { cn } from "~/lib/utils";
 const baseStyles =
   "px-6 py-3 rounded-xl font-medium text-lg transition-all duration-200 active:scale-95";
 const variantStyles = {
-  primary: "bg-[#FF5937] text-white border-2 border-black hover:bg-[#ff4a25]",
-  secondary: "bg-white text-[#FF5937] border-2 border-black hover:bg-gray-50",
+  primary:
+    "bg-[#FF5937] text-white border-2 border-black dark:border-gray-700 hover:bg-[#ff4a25]",
+  secondary:
+    "bg-white dark:bg-gray-800 text-[#FF5937] border-2 border-black dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700",
 };
 
 type LinkProps = {

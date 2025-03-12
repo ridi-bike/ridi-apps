@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { View, Text } from "react-native";
 
 import { Button } from "~/components/button";
+import { GithubIcon } from "~/components/icons/github";
+import { GoogleIcon } from "~/components/icons/google";
 import { Input } from "~/components/input";
 import { supabase } from "~/lib/supabase";
 import { cn } from "~/lib/utils";
@@ -72,7 +74,7 @@ export default function LoginScreen() {
           <Text
             role="heading"
             aria-level={1}
-            className="text-6xl font-bold tracking-tight text-[#FF5937] dark:text-gray-100"
+            className="text-6xl font-bold tracking-tight text-[#FF5937]"
           >
             Ridi
           </Text>
@@ -85,7 +87,7 @@ export default function LoginScreen() {
               fullWidth
               onPress={() => performOAuth("github")}
             >
-              <Github size={24} />
+              <GithubIcon className="size-6" />
 
               <Text className="text-gray-500 dark:text-gray-200">
                 Continue with GitHub
@@ -97,7 +99,7 @@ export default function LoginScreen() {
               fullWidth
               onPress={() => performOAuth("google")}
             >
-              <Github size={24} />
+              <GoogleIcon className="size-6" />
 
               <Text className="text-gray-500 dark:text-gray-200">
                 Continue with Google
