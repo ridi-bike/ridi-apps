@@ -27,7 +27,7 @@ export const Input = ({ label, className, ...props }: InputProps) => {
         aria-labelledby={labelId}
         aria-label="input"
         className={cn(
-          "w-full px-4 py-2 border-2 border-black dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FF5937]",
+          "w-full px-4 py-2 border-2 border-black text-gray-700 dark:text-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FF5937]",
           className,
         )}
         nativeID=""

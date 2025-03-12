@@ -107,7 +107,7 @@ enable_manual_linking = true
 
 [auth.email]
 # Allow/disallow new user signups via email to your project.
-enable_signup = false
+enable_signup = true
 # If enabled, a user will be required to confirm any email change on both the old, and new email
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
@@ -119,13 +119,13 @@ secure_password_change = false
 max_frequency = "1s"
 
 # Use a production-ready SMTP server
-# [auth.email.smtp]
-# host = "smtp.sendgrid.net"
-# port = 587
-# user = "apikey"
-# pass = "env(SENDGRID_API_KEY)"
-# admin_email = "admin@email.com"
-# sender_name = "Admin"
+[auth.email.smtp]
+host = "smtp.resend.com"
+port = 587
+user = "resend"
+pass = "env(SUPABSE_AUTH_EMAIL_API_KEY)"
+admin_email = "app-dev@email.ridi.bike"
+sender_name = "Ridi App Dev"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]
@@ -134,7 +134,7 @@ max_frequency = "1s"
 
 [auth.sms]
 # Allow/disallow new user signups via SMS to your project.
-enable_signup = true
+enable_signup = false
 # If enabled, users need to confirm their phone number before signing in.
 enable_confirmations = false
 # Template for sending OTP to users
