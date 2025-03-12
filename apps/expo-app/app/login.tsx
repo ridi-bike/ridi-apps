@@ -77,7 +77,10 @@ export default function LoginScreen() {
               onPress={() => performOAuth("github")}
             >
               <Github size={24} />
-              Continue with GitHub
+
+              <Text className="text-gray-500 dark:text-gray-200">
+                Continue with GitHub
+              </Text>
             </Button>
             <Button
               className="flex flex-row items-center justify-center gap-2"
@@ -86,7 +89,10 @@ export default function LoginScreen() {
               onPress={() => performOAuth("google")}
             >
               <Github size={24} />
-              Continue with Google
+
+              <Text className="text-gray-500 dark:text-gray-200">
+                Continue with Google
+              </Text>
             </Button>
             <View className="relative w-full py-4">
               <View className="absolute inset-0 flex flex-row items-center">
@@ -105,7 +111,10 @@ export default function LoginScreen() {
               onPress={() => setShowEmailInput(true)}
             >
               <MailIcon size={24} />
-              Continue with Email
+
+              <Text className="text-gray-500 dark:text-gray-200">
+                Continue with Email
+              </Text>
             </Button>
           </View>
         ) : (
@@ -125,7 +134,9 @@ export default function LoginScreen() {
                   fullWidth
                   onPress={performOTPAuth}
                 >
-                  Send Code
+                  <Text className="text-gray-500 dark:text-gray-200">
+                    Send Code
+                  </Text>
                 </Button>
               </>
             ) : (
@@ -142,7 +153,9 @@ export default function LoginScreen() {
                   fullWidth
                   onPress={() => validateOTPAuth(email, code)}
                 >
-                  Verify Code
+                  <Text className="text-gray-500 dark:text-gray-200">
+                    Verify Code
+                  </Text>
                 </Button>
               </>
             )}
@@ -156,7 +169,7 @@ export default function LoginScreen() {
                 setCode("");
               }}
             >
-              Back
+              <Text className="text-gray-500 dark:text-gray-200">Back</Text>
             </Button>
           </View>
         )}

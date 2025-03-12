@@ -1,27 +1,29 @@
 import { type Session } from "@supabase/supabase-js";
 import { useRouter, Stack } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
+import { useCreateSessionFromUrl } from "~/components/auth";
 import { Link } from "~/components/link";
 import { supabase } from "~/lib/supabase";
-import { useEffectOnce } from "~/lib/utils";
 
 export default function Index() {
-  const router = useRouter();
+  const isAuthCallback = useCreateSessionFromUrl();
 
+  const router = useRouter();
   const [session, setSession] = useState<Session | null>(null);
 
-  useEffectOnce(() => {
+  useEffect(() => {
     return supabase.auth.onAuthStateChange((_event, session) => {
-      console.log({ session });
       if (session && !session.user.is_anonymous) {
         router.replace("/plans");
       } else {
-        setSession(session);
+        if (!isAuthCallback) {
+          setSession(session);
+        }
       }
     }).data.subscription.unsubscribe;
-  });
+  }, [isAuthCallback, router]);
 
   return (
     <View className="flex min-h-screen w-full flex-col items-center justify-center bg-white p-6 dark:bg-gray-700">

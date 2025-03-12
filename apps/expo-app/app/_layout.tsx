@@ -1,17 +1,14 @@
 import NetInfo from "@react-native-community/netinfo";
 import { PortalHost } from "@rn-primitives/portal";
-import { type Session } from "@supabase/supabase-js";
 import {
   QueryClientProvider,
   QueryClient,
   onlineManager,
 } from "@tanstack/react-query";
 import { Stack } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
-import { useCreateSessionFromUrl } from "~/components/Auth";
 import { supabase } from "~/lib/supabase";
-import { useEffectOnce } from "~/lib/utils";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,8 +21,6 @@ const queryClient = new QueryClient({
 });
 
 export default function App() {
-  useCreateSessionFromUrl();
-
   useEffect(() => {
     // eslint-disable-next-line import/no-named-as-default-member
     return NetInfo.addEventListener((state) => {
@@ -33,17 +28,14 @@ export default function App() {
       onlineManager.setOnline(status);
     });
   }, []);
-  const [_session, setSession] = useState<Session | null>(null);
 
-  useEffectOnce(() => {
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
+  useEffect(() => {
+    return supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
         supabase.auth.signInAnonymously();
       }
-    });
-    supabase.auth.getSession();
-  });
+    }).data.subscription.unsubscribe;
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
