@@ -274,6 +274,38 @@ export const apiContract = c.router({
       500: z.object({ message: z.string() }),
     },
   },
+  billingGet: {
+    method: "GET",
+    path: "/user/billing",
+    responses: {
+      200: z.object({
+        subscription: z
+          .object({
+            isActive: z.boolean(),
+            status: z.string().nullable(),
+            priceType: z
+              .union([z.literal("montly"), z.literal("yearly")])
+              .nullable(),
+            currentPeriodEndDate: z.date().nullable(),
+            currentPeriodWillRenew: z.boolean().nullable(),
+          })
+          .nullable(),
+        stripeUrl: z.string().nullable(),
+        prices: z.array(
+          z.object({
+            id: z.union([z.literal("montly"), z.literal("yearly")]),
+            priceType: z.union([z.literal("montly"), z.literal("yearly")]),
+            price: z.number(),
+            priceMontly: z.number(),
+          }),
+        ),
+      }),
+      400: z.object({ message: z.string() }),
+      401: z.object({ message: z.string() }),
+      404: z.object({ message: z.string() }),
+      500: z.object({ message: z.string() }),
+    },
+  },
   regionGet: {
     method: "GET",
     path: "/region/:lat/:lon",
