@@ -57,7 +57,15 @@ const router = tsr
     logger: RidiLogger;
   }>()
   .routerWithMiddleware(apiContract)<{ user: User }>({
-  billingGet: async (_, ctx) => {
+  billingGet: async ({ query: { version } }, ctx) => {
+    if (version !== "v1") {
+      return {
+        status: 400,
+        body: {
+          message: "wrong version",
+        },
+      };
+    }
     const stripeApi = new StripeApi(
       ctx.db,
       ctx.logger,
@@ -69,31 +77,30 @@ const router = tsr
     const stripeUser = await stripeUsersGetRow(ctx.db, {
       userId: ctx.request.user.id,
     });
+    const prices = await stripeApi.getPrices();
     return {
       status: 200,
       body: {
-        prices: stripeApi.getPrices(),
-        subscription: stripeUser
-          ? {
-              isActive: stripeUser.stripeStatus === "active",
-              status: stripeUser.stripeStatus,
-              priceType:
-                stripeUser.stripePriceId ===
-                ctx.workerEnv.STRIPE_PRICE_ID_MONTLY
-                  ? "montly"
-                  : stripeUser.stripePriceId ===
-                      ctx.workerEnv.STRIPE_PRICE_ID_YEARLY
-                    ? "yearly"
-                    : null,
-              currentPeriodEndDate: stripeUser.stripeCurrentPeriodEnd,
-              currentPeriodWillRenew: stripeUser.stripeCancelAtPeriodEnd,
-            }
-          : null,
-        stripeUrl: stripeUser
-          ? await stripeApi.getStripeBillingPortalSessionUrl({
-              id: ctx.request.user.id,
-            })
-          : null,
+        version: "v1" as const,
+        data: {
+          prices,
+          subscription: stripeUser
+            ? {
+                isActive: stripeUser.stripeStatus === "active",
+                status: stripeUser.stripeStatus,
+                price:
+                  prices.find((p) => p.id === stripeUser.stripePriceId) || null,
+                currentPeriodEndDate:
+                  stripeUser.stripeCurrentPeriodEnd?.toString() || null,
+                currentPeriodWillRenew: !stripeUser.stripeCancelAtPeriodEnd,
+              }
+            : null,
+          stripeUrl: stripeUser
+            ? await stripeApi.getStripeBillingPortalSessionUrl({
+                id: ctx.request.user.id,
+              })
+            : null,
+        },
       },
     };
   },
