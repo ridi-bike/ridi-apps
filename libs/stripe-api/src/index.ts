@@ -86,7 +86,7 @@ export class StripeApi {
 
     const checkout = await this.stripe.checkout.sessions.create({
       customer: stripeCustomerId,
-      success_url: `${this.appBaseUrl}/stripe-success`,
+      success_url: `${this.appBaseUrl}/settings/billing?stripe=true`,
       mode: "subscription",
       line_items: [
         {
@@ -174,6 +174,8 @@ export class StripeApi {
       });
     }
 
+    console.log("cancel_at_period_end", subscription.cancel_at_period_end);
+
     await stripeUsersUpdateStripeData(this.dbClient, {
       stripeSubscriptionId: subscription.id,
       stripeStatus: subscription.status,
@@ -182,7 +184,8 @@ export class StripeApi {
       stripeCurrentPeriodStart: new Date(
         subscription.current_period_start * 1000,
       ),
-      stripeCancelAtPeriodEnd: subscription.cancel_at_period_end.toString(),
+      stripeCancelAtPeriodEnd:
+        subscription.cancel_at_period_end as unknown as string, // sqlc bug for specifying boolean
       stripePaymentMethod:
         subscription.default_payment_method &&
         typeof subscription.default_payment_method !== "string"
@@ -277,16 +280,16 @@ export class StripeApi {
     return portal.url;
   }
 
-  getPrices() {
+  async getPrices() {
     return [
       {
-        id: "montly",
+        id: this.priceMontly,
         priceType: "montly",
         price: 2.95,
         priceMontly: 2.95,
       } as const,
       {
-        id: "yearly",
+        id: this.priceYearly,
         priceType: "yearly",
         price: 19.8,
         priceMontly: 1.65,

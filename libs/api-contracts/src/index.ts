@@ -248,6 +248,13 @@ export const ruleSetSetSchema = z.discriminatedUnion("version", [
 ]);
 export type RuleSetsSetRequest = z.infer<typeof ruleSetSetSchema>;
 
+const priceSchema = z.object({
+  id: z.string(),
+  priceType: z.union([z.literal("montly"), z.literal("yearly")]),
+  price: z.number(),
+  priceMontly: z.number(),
+});
+
 export const apiContract = c.router({
   stripeSuccess: {
     method: "GET",
@@ -277,28 +284,27 @@ export const apiContract = c.router({
   billingGet: {
     method: "GET",
     path: "/user/billing",
+    query: z.discriminatedUnion("version", [
+      z.object({
+        version: z.literal("v1"),
+      }),
+    ]),
     responses: {
       200: z.object({
-        subscription: z
-          .object({
-            isActive: z.boolean(),
-            status: z.string().nullable(),
-            priceType: z
-              .union([z.literal("montly"), z.literal("yearly")])
-              .nullable(),
-            currentPeriodEndDate: z.date().nullable(),
-            currentPeriodWillRenew: z.boolean().nullable(),
-          })
-          .nullable(),
-        stripeUrl: z.string().nullable(),
-        prices: z.array(
-          z.object({
-            id: z.union([z.literal("montly"), z.literal("yearly")]),
-            priceType: z.union([z.literal("montly"), z.literal("yearly")]),
-            price: z.number(),
-            priceMontly: z.number(),
-          }),
-        ),
+        version: z.literal("v1"),
+        data: z.object({
+          subscription: z
+            .object({
+              isActive: z.boolean(),
+              status: z.string().nullable(),
+              price: priceSchema.nullable(),
+              currentPeriodEndDate: z.string().nullable(),
+              currentPeriodWillRenew: z.boolean().nullable(),
+            })
+            .nullable(),
+          stripeUrl: z.string().nullable(),
+          prices: z.array(priceSchema),
+        }),
       }),
       400: z.object({ message: z.string() }),
       401: z.object({ message: z.string() }),
