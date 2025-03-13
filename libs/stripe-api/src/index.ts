@@ -178,8 +178,10 @@ export class StripeApi {
       stripeSubscriptionId: subscription.id,
       stripeStatus: subscription.status,
       stripePriceId: priceId,
-      stripeCurrentPeriodEnd: new Date(subscription.current_period_end),
-      stripeCurrentPeriodStart: new Date(subscription.current_period_start),
+      stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      stripeCurrentPeriodStart: new Date(
+        subscription.current_period_start * 1000,
+      ),
       stripeCancelAtPeriodEnd: subscription.cancel_at_period_end.toString(),
       stripePaymentMethod:
         subscription.default_payment_method &&
@@ -254,5 +256,41 @@ export class StripeApi {
         "content-type": "application/json",
       },
     });
+  }
+
+  async getStripeBillingPortalSessionUrl(user: { id: string }) {
+    this.logger.info("Creating Stripe Billing Portal Session", {
+      userId: user.id,
+    });
+    const stripeUser = await stripeUsersGetRow(this.dbClient, {
+      userId: user.id,
+    });
+
+    if (!stripeUser) {
+      return null;
+    }
+
+    const portal = await this.stripe.billingPortal.sessions.create({
+      customer: stripeUser.stripeCustomerId,
+    });
+
+    return portal.url;
+  }
+
+  getPrices() {
+    return [
+      {
+        id: "montly",
+        priceType: "montly",
+        price: 2.95,
+        priceMontly: 2.95,
+      } as const,
+      {
+        id: "yearly",
+        priceType: "yearly",
+        price: 19.8,
+        priceMontly: 1.65,
+      } as const,
+    ];
   }
 }

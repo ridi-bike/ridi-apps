@@ -24,6 +24,7 @@ import {
   routeDelete,
   planDelete,
   routeDeleteByPlanId,
+  stripeUsersGetRow,
 } from "@ridi/db-queries";
 import { RidiLogger } from "@ridi/logger";
 import { lookupCooordsInfo } from "@ridi/maps-api";
@@ -56,6 +57,46 @@ const router = tsr
     logger: RidiLogger;
   }>()
   .routerWithMiddleware(apiContract)<{ user: User }>({
+  billingGet: async (_, ctx) => {
+    const stripeApi = new StripeApi(
+      ctx.db,
+      ctx.logger,
+      ctx.workerEnv.STRIPE_SECRET_KEY,
+      ctx.workerEnv.RIDI_APP_URL,
+      ctx.workerEnv.STRIPE_PRICE_ID_MONTLY,
+      ctx.workerEnv.STRIPE_PRICE_ID_YEARLY,
+    );
+    const stripeUser = await stripeUsersGetRow(ctx.db, {
+      userId: ctx.request.user.id,
+    });
+    return {
+      status: 200,
+      body: {
+        prices: stripeApi.getPrices(),
+        subscription: stripeUser
+          ? {
+              isActive: stripeUser.stripeStatus === "active",
+              status: stripeUser.stripeStatus,
+              priceType:
+                stripeUser.stripePriceId ===
+                ctx.workerEnv.STRIPE_PRICE_ID_MONTLY
+                  ? "montly"
+                  : stripeUser.stripePriceId ===
+                      ctx.workerEnv.STRIPE_PRICE_ID_YEARLY
+                    ? "yearly"
+                    : null,
+              currentPeriodEndDate: stripeUser.stripeCurrentPeriodEnd,
+              currentPeriodWillRenew: stripeUser.stripeCancelAtPeriodEnd,
+            }
+          : null,
+        stripeUrl: stripeUser
+          ? await stripeApi.getStripeBillingPortalSessionUrl({
+              id: ctx.request.user.id,
+            })
+          : null,
+      },
+    };
+  },
   stripeSuccess: async (_, ctx) => {
     const stripeApi = new StripeApi(
       ctx.db,
