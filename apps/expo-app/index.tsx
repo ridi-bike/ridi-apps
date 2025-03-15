@@ -1,3 +1,4 @@
+import "@expo/metro-runtime";
 import "./global.css";
 import "react-native-reanimated";
 import "react-native-gesture-handler";

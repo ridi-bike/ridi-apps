@@ -19,6 +19,7 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@expo/metro-runtime": "^4.0.1",
     "@expo/vector-icons": "^14.0.4",
     "@maplibre/maplibre-react-native": "10.0.0-alpha.22",
     "@miblanchard/react-native-slider": "^2.6.0",

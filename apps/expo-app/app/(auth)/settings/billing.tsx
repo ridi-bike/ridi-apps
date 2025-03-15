@@ -44,7 +44,6 @@ export default function BillingPage() {
         .catch(console.error);
     }
   }, [refetch, setStripeSuccess, stripeSuccess]);
-  console.log("omg");
 
   return (
     <ScreenFrame
