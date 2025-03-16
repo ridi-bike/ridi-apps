@@ -127,7 +127,7 @@ export default function BillingPage() {
                   </View>
                 </View>
               ) : (
-                <View className="mb-8 w-full md:max-w-2xl">
+                <View className="mb-8 flex w-full flex-col gap-4 md:max-w-2xl">
                   {data?.prices.map((price) => (
                     <View
                       key={price.id}
@@ -159,14 +159,14 @@ export default function BillingPage() {
                             Plan
                           </Text>
                           <Text className="mt-2 text-2xl font-bold dark:text-gray-100">
-                            {price.price} EUR
+                            {price.price.toFixed(2)} EUR
                             <Text className="text-base font-normal text-gray-600 dark:text-gray-200">
                               /{price.priceType === "yearly" ? "year" : "month"}
                             </Text>
                           </Text>
                           {price.priceType === "yearly" && (
                             <Text className="mt-1 text-sm text-gray-600 dark:text-gray-200">
-                              Only {price.priceMontly} EUR/month
+                              Only {price.priceMontly.toFixed(2)} EUR/month
                             </Text>
                           )}
                         </View>
@@ -179,15 +179,6 @@ export default function BillingPage() {
                           <CheckIcon className="size-5 text-[#FF5937]" />
                           <Text className="dark:text-gray-200">
                             Unlimited route planning
-                          </Text>
-                        </View>
-                        <View
-                          role="listitem"
-                          className="flex flex-row items-center gap-2"
-                        >
-                          <CheckIcon className="size-5 text-[#FF5937]" />
-                          <Text className="dark:text-gray-200">
-                            Save favorite routes
                           </Text>
                         </View>
                       </View>
