@@ -281,18 +281,30 @@ export class StripeApi {
   }
 
   async getPrices() {
+    const [montlyPrice, yearlyPrice] = await Promise.all([
+      this.stripe.prices.retrieve(this.priceMontly),
+      this.stripe.prices.retrieve(this.priceYearly),
+    ]);
+    if (!montlyPrice.unit_amount || !yearlyPrice.unit_amount) {
+      this.logger.error("Price unit_amount missing", {
+        montlyPrice,
+        yearlyPrice,
+      });
+      return [];
+    }
     return [
       {
         id: this.priceMontly,
         priceType: "montly",
-        price: 2.95,
-        priceMontly: 2.95,
+        price: montlyPrice.unit_amount / 100,
+        priceMontly: montlyPrice.unit_amount / 100,
       } as const,
       {
         id: this.priceYearly,
         priceType: "yearly",
-        price: 19.8,
-        priceMontly: 1.65,
+        price: yearlyPrice.unit_amount / 100,
+        priceMontly:
+          Math.round((yearlyPrice.unit_amount / 100 / 12) * 100) / 100,
       } as const,
     ];
   }
