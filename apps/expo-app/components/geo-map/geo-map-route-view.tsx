@@ -1,34 +1,98 @@
-import MapLibreGL from "@maplibre/maplibre-react-native";
-import { View } from "react-native";
+import * as turf from "@turf/turf";
+import {
+  type LineLayer,
+  Layer,
+  Map as MapLibre,
+  Source,
+  type MapRef,
+  NavigationControl,
+} from "@vis.gl/react-maplibre";
+import "maplibre-gl/dist/maplibre-gl.css";
+import { type FeatureCollection } from "geojson";
+import maplibre from "maplibre-gl";
+import { useEffect, useMemo, useRef } from "react";
 
-import { MapView } from "./maplibre/map-view";
-import { type GeoMapRouteViewProps } from "./types";
+import { type GeoMapRouteViewProps } from "~/components/geo-map/types";
 
-// Will be null for most users (only Mapbox authenticates this way).
-// Required on Android. See Android installation notes.
-MapLibreGL.setAccessToken(null);
+import { getMapStyle } from "./style";
+import { combineBBox } from "./util";
 
-// const styles = StyleSheet.create({
-// 	page: {
-// 		flex: 1,
-// 		justifyContent: "center",
-// 		alignItems: "center",
-// 		backgroundColor: "#F5FCFF",
-// 	},
-// 	map: {
-// 		flex: 1,
-// 		alignSelf: "stretch",
-// 	},
-// });
+export function GeoMapRouteView({ route, interactive }: GeoMapRouteViewProps) {
+  const mapRef = useRef<MapRef>(null);
 
-export function GeoMapRouteView(props: GeoMapRouteViewProps) {
+  const mapBounds = useMemo(() => {
+    const allPoints = [...route.map((p) => [p.lon, p.lat])];
+    if (!allPoints.length) {
+      return null;
+    }
+    const features = turf.points(allPoints);
+    const mapBounds = turf.bbox(features);
+    return combineBBox(mapBounds, null);
+  }, [route]);
+
+  useEffect(() => {
+    if (mapRef.current && mapBounds) {
+      mapRef.current.fitBounds(mapBounds);
+    }
+  }, [mapBounds]);
+
+  const routeLayer = useMemo(() => {
+    if (!route) {
+      return null;
+    }
+    const routeLayerId = "route-layer";
+    const layerStyle: LineLayer = {
+      id: "route-layer",
+      type: "line",
+      source: routeLayerId,
+      paint: {
+        "line-color": "#FF5937",
+        "line-width": 3,
+      },
+    };
+    const geojson: FeatureCollection = {
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "LineString",
+            coordinates: route.map((routePoint) => [
+              routePoint.lon,
+              routePoint.lat,
+            ]),
+          },
+        },
+      ],
+    };
+    return (
+      <Source id={routeLayerId} type="geojson" data={geojson}>
+        <Layer {...layerStyle} />
+      </Source>
+    );
+  }, [route]);
+
   return (
-    <View className="size-full flex-1 items-center justify-center bg-slate-100">
-      <MapView
-        className="flex-1 self-stretch"
-        logoEnabled={false}
-        styleURL="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
-      />
-    </View>
+    <MapLibre
+      ref={mapRef}
+      mapLib={maplibre}
+      interactive={interactive}
+      initialViewState={
+        mapBounds
+          ? {
+              bounds: mapBounds,
+            }
+          : {
+              longitude: 24.853,
+              latitude: 57.153,
+              zoom: 4,
+            }
+      }
+      mapStyle={getMapStyle("light")}
+    >
+      {interactive && <NavigationControl position="bottom-right" />}
+      {routeLayer}
+    </MapLibre>
   );
 }

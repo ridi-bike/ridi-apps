@@ -169,7 +169,7 @@ export default function LoginScreen() {
                   disabled={!code}
                   variant="primary"
                   fullWidth
-                  onPress={() => validateOTPAuth(email, code)}
+                  onPress={() => validateOTPAuth(email, code.trim())}
                 >
                   <Text className="text-gray-500 dark:text-gray-200">
                     Verify Code

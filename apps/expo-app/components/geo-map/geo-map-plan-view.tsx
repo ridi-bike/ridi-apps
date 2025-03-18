@@ -10,6 +10,7 @@ import { View } from "react-native";
 import { cn } from "~/lib/utils";
 
 import GeoMapMarker from "./geo-map-marker";
+import { getMapStyle } from "./style";
 import { type Coords } from "./types";
 import { combineBBox, useRoundTripPolygon } from "./util";
 
@@ -54,7 +55,6 @@ export function GeoMapPlanView(props: GeoMapPlanView) {
     }
   }, [bbox]);
 
-
   return (
     <View className={cn("size-full", props.className)}>
       <MapLibre
@@ -71,7 +71,7 @@ export function GeoMapPlanView(props: GeoMapPlanView) {
                 zoom: 4,
               }
         }
-        mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
+        mapStyle={getMapStyle("light")}
         interactive={false}
         attributionControl={false}
       >

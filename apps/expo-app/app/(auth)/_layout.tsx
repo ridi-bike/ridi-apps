@@ -7,6 +7,8 @@ import {
   onlineManager,
 } from "@tanstack/react-query";
 import { router, Stack } from "expo-router";
+import maplibregl from "maplibre-gl";
+import { Protocol } from "pmtiles";
 import { useEffect, useState } from "react";
 
 import { supabase } from "~/lib/supabase";
@@ -22,6 +24,14 @@ const queryClient = new QueryClient({
 });
 
 export default function App() {
+  useEffect(() => {
+    const protocol = new Protocol();
+    maplibregl.addProtocol("pmtiles", protocol.tile);
+    return () => {
+      maplibregl.removeProtocol("pmtiles");
+    };
+  }, []);
+
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {

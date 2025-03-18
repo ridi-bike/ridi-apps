@@ -350,7 +350,7 @@ export default function PlansNew() {
               setStart={(c) => setStartCoords(c ? [c.lat, c.lon] : undefined)}
               setFinish={(c) => setFinishCoords(c ? [c.lat, c.lon] : undefined)}
             >
-              <View className="flex flex-col items-end justify-start gap-2 p-4">
+              <View className="float-right flex flex-col items-end justify-start gap-2 p-4">
                 <Pressable
                   onPress={getCurrentLocation}
                   className={cn(

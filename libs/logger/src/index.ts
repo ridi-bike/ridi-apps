@@ -17,17 +17,10 @@ export class RidiLogger {
               if (value instanceof Error) {
                 serialized[key] = pino.stdSerializers.err(value);
               }
-              if (value instanceof Request) {
-                serialized[key] = pino.stdSerializers.req(value);
-              }
-              if (value instanceof Response) {
-                serialized[key] = pino.stdSerializers.res(value);
-              }
               return serialized;
             },
             {} as Record<string, unknown>,
           );
-          return data;
         },
       },
       formatters: {

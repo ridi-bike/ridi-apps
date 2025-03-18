@@ -8,6 +8,7 @@ import { View } from "react-native";
 import { cn } from "~/lib/utils";
 
 import GeoMapMarker from "./geo-map-marker";
+import { getMapStyle } from "./style";
 import { type Coords } from "./types";
 
 type GeoMapStaticProps = {
@@ -35,7 +36,7 @@ export function GeoMapStatic(props: GeoMapStaticProps) {
             bbox[3] + 0.03,
           ],
         }}
-        mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
+        mapStyle={getMapStyle("light")}
         interactive={false}
         attributionControl={false}
       >
