@@ -174,19 +174,19 @@ export class MessageHandlerNewPlan {
       filter(0, 1),
       filter(1, 1.5),
       filter(1.5, 2),
-      filter(2, 2.5),
-      filter(2.5, 3),
-      filter(3, 0),
+      // filter(2, 2.5),
+      // filter(2.5, 3),
+      // filter(3, 0),
     ];
-    const num_of_best_routes = 6;
+    const num_of_best_routes = 8;
     const bestRoutes: typeof okRoutes = [];
     if (okRoutes.length <= num_of_best_routes) {
       bestRoutes.push(...okRoutes);
     } else {
       let step = 0;
       while (bestRoutes.length < num_of_best_routes) {
-        const bucket = step % num_of_best_routes;
-        const iter = Math.floor(step / num_of_best_routes);
+        const bucket = step % filterBuckes.length;
+        const iter = Math.floor(step / filterBuckes.length);
         const route = okRoutes.filter(filterBuckes[bucket]!).sort(sort)[iter];
         if (route) {
           bestRoutes.push(route);

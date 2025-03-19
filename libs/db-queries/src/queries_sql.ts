@@ -734,7 +734,8 @@ select
   p.rule_set_id,
 	r.id as route_id,
 	r.name as route_name,
-	r.created_at as route_created_at
+	r.created_at as route_created_at,
+  r.stats_len_m
 from plans p
 left join routes r 
 	on r.plan_id = p.id
@@ -742,7 +743,8 @@ left join routes r
 where p.user_id = $1
   and p.is_deleted = false
 order by
-	p.created_at desc`;
+	p.created_at desc,
+  r.stats_len_m asc`;
 
 export interface PlanListArgs {
     userId: string;
@@ -766,6 +768,7 @@ export interface PlanListRow {
     routeId: string | null;
     routeName: string | null;
     routeCreatedAt: Date | null;
+    statsLenM: string | null;
 }
 
 export async function planList(sql: Sql, args: PlanListArgs): Promise<PlanListRow[]> {
@@ -786,7 +789,8 @@ export async function planList(sql: Sql, args: PlanListArgs): Promise<PlanListRo
         ruleSetId: row[13],
         routeId: row[14],
         routeName: row[15],
-        routeCreatedAt: row[16]
+        routeCreatedAt: row[16],
+        statsLenM: row[17]
     }));
 }
 

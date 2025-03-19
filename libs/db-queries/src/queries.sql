@@ -195,7 +195,8 @@ select
   p.rule_set_id,
 	r.id as route_id,
 	r.name as route_name,
-	r.created_at as route_created_at
+	r.created_at as route_created_at,
+  r.stats_len_m
 from plans p
 left join routes r 
 	on r.plan_id = p.id
@@ -203,7 +204,8 @@ left join routes r
 where p.user_id = $1
   and p.is_deleted = false
 order by
-	p.created_at desc;
+	p.created_at desc,
+  r.stats_len_m asc;
 
 -- name: PlanCreate :one
 insert into plans (
