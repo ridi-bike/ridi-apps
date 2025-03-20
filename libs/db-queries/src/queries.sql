@@ -1,9 +1,31 @@
--- name: StripeUsersInsertWithCustomerId :exec
-insert into private.stripe_users (user_id, stripe_customer_id, flow_status)
-values ($1, $2, 'none');
+-- name: PrivateCodeGet :one
+select * from private.codes
+where code = $1;
 
--- name: StripeUsersUpdateStripeData :exec
-update private.stripe_users
+-- name: PrivateCodeClaim :exec
+update private.codes
+set claimed_at = now(), 
+    claimed_by_user_id = $1
+where code = $2;
+
+-- name: PrivateUsersUpdateWithSubscriptionCode :exec
+update private.users 
+set sub_type = $1
+where user_id = $2
+returning *;
+
+-- name: PrivateUsersUpdateStripeCustomerId :exec
+update private.users
+set stripe_customer_id = $1
+where user_id = $2;
+
+-- name: PrivateUsersUpdateSubType :exec
+update private.users
+set sub_type = $1
+where user_id = $2;
+
+-- name: PrivateUsersUpdateStripeData :exec
+update private.users
 set stripe_status = $1,
   stripe_subscription_id = $3,
   stripe_price_id = $4,
@@ -11,31 +33,32 @@ set stripe_status = $1,
   stripe_current_period_start = $6,
   stripe_cancel_at_period_end = $7,
   stripe_payment_method = $8,
-  flow_status = 'confirmed'
+  stripe_flow_status = 'confirmed',
+  sub_type = $9
 where user_id = $2;
 
--- name: StripeUsersUpdateInitiated :exec
-update private.stripe_users
+-- name: PrivateUsersUpdateInitiated :exec
+update private.users
 set stripe_status = 'initiated',
   stripe_checkout_id = $1
 where user_id = $2;
 
--- name: StripeUsersUpdateCompleted :exec
-update private.stripe_users
-set flow_status = 'completed'
+-- name: PrivateUsersUpdateCompleted :exec
+update private.users
+set stripe_flow_status = 'completed'
 where user_id = $1;
 
--- name: StripeUsersUpdateStripeStatusNone :exec
-update private.stripe_users
+-- name: PrivateUsersUpdateStripeStatusNone :exec
+update private.users
 set stripe_status = 'none'
 where user_id = $1;
 
--- name: StripeUsersGetRow :one
-select * from private.stripe_users
+-- name: PrivateUsersGetRow :one
+select * from private.users
 where user_id = $1;
 
--- name: StripeUsersGetRowByStripeCustomerId :one
-select * from private.stripe_users
+-- name: PrivateUsersGetRowByStripeCustomerId :one
+select * from private.users
 where stripe_customer_id = $1;
 
 -- name: PlanSetRegion :exec

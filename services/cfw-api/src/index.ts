@@ -24,7 +24,10 @@ import {
   routeDelete,
   planDelete,
   routeDeleteByPlanId,
-  stripeUsersGetRow,
+  privateUsersGetRow,
+  privateUsersUpdateSubType,
+  privateCodeGet,
+  privateCodeClaim,
 } from "@ridi/db-queries";
 import { RidiLogger } from "@ridi/logger";
 import { lookupCooordsInfo } from "@ridi/maps-api";
@@ -57,6 +60,101 @@ const router = tsr
     logger: RidiLogger;
   }>()
   .routerWithMiddleware(apiContract)<{ user: User }>({
+  codeClaim: async ({ body }, ctx) => {
+    if (body.version !== "v1") {
+      return {
+        status: 400,
+        body: {
+          message: "wrong version",
+        },
+      };
+    }
+
+    const privateUser = await privateUsersGetRow(ctx.db, {
+      userId: ctx.request.user.id,
+    });
+
+    if (!privateUser) {
+      return {
+        status: 500,
+        body: {
+          message: "Missing user record",
+        },
+      };
+    }
+
+    if (privateUser?.subType !== "none") {
+      return {
+        status: 400,
+        body: {
+          message:
+            "Existing subscription in place. Cancel before claiming a code",
+        },
+      };
+    }
+
+    const code = await privateCodeGet(ctx.db, {
+      code: body.data.code,
+    });
+
+    if (!code) {
+      return {
+        status: 400,
+        body: {
+          message: "Code does not exist",
+        },
+      };
+    }
+
+    if (code.claimedByUserId) {
+      return {
+        status: 400,
+        body: {
+          message: "Code already claimed",
+        },
+      };
+    }
+
+    await privateCodeClaim(ctx.db, {
+      code: body.data.code,
+      claimedByUserId: ctx.request.user.id,
+    });
+
+    await privateUsersUpdateSubType(ctx.db, {
+      subType: "code",
+      userId: ctx.request.user.id,
+    });
+
+    return {
+      status: 201,
+      body: undefined,
+    };
+  },
+  userGet: async ({ query: { version } }, ctx) => {
+    if (version !== "v1") {
+      return {
+        status: 400,
+        body: {
+          message: "wrong version",
+        },
+      };
+    }
+    const privateUser = await privateUsersGetRow(ctx.db, {
+      userId: ctx.request.user.id,
+    });
+    return {
+      status: 200,
+      body: {
+        version: "v1" as const,
+        data: {
+          userId: ctx.request.user.id,
+          isAnonymous: !!ctx.request.user.is_anonymous,
+          subType: privateUser?.subType || "none",
+          email: ctx.request.user.email || null,
+        },
+      },
+    };
+  },
   billingGet: async ({ query: { version } }, ctx) => {
     if (version !== "v1") {
       return {
@@ -74,28 +172,44 @@ const router = tsr
       ctx.workerEnv.STRIPE_PRICE_ID_MONTLY,
       ctx.workerEnv.STRIPE_PRICE_ID_YEARLY,
     );
-    const stripeUser = await stripeUsersGetRow(ctx.db, {
+    const privateUser = await privateUsersGetRow(ctx.db, {
       userId: ctx.request.user.id,
     });
+    if (privateUser?.subType === "code") {
+      return {
+        status: 200,
+        body: {
+          version: "v1" as const,
+          data: {
+            subType: "code",
+            prices: null,
+            subscription: null,
+            stripeUrl: null,
+          },
+        },
+      };
+    }
     const prices = await stripeApi.getPrices();
     return {
       status: 200,
       body: {
         version: "v1" as const,
         data: {
+          subType: privateUser?.subType || "none",
           prices,
-          subscription: stripeUser
+          subscription: privateUser
             ? {
-                isActive: stripeUser.stripeStatus === "active",
-                status: stripeUser.stripeStatus,
+                isActive: privateUser.stripeStatus === "active",
+                status: privateUser.stripeStatus,
                 price:
-                  prices.find((p) => p.id === stripeUser.stripePriceId) || null,
+                  prices.find((p) => p.id === privateUser.stripePriceId) ||
+                  null,
                 currentPeriodEndDate:
-                  stripeUser.stripeCurrentPeriodEnd?.toString() || null,
-                currentPeriodWillRenew: !stripeUser.stripeCancelAtPeriodEnd,
+                  privateUser.stripeCurrentPeriodEnd?.toString() || null,
+                currentPeriodWillRenew: !privateUser.stripeCancelAtPeriodEnd,
               }
             : null,
-          stripeUrl: stripeUser
+          stripeUrl: privateUser?.stripeCustomerId
             ? await stripeApi.getStripeBillingPortalSessionUrl({
                 id: ctx.request.user.id,
               })

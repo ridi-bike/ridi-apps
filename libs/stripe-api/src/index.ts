@@ -1,11 +1,11 @@
 import {
-  stripeUsersGetRow,
-  stripeUsersGetRowByStripeCustomerId,
-  stripeUsersInsertWithCustomerId,
-  stripeUsersUpdateCompleted,
-  stripeUsersUpdateInitiated,
-  stripeUsersUpdateStripeData,
-  stripeUsersUpdateStripeStatusNone,
+  privateUsersGetRow,
+  privateUsersGetRowByStripeCustomerId,
+  privateUsersUpdateCompleted,
+  privateUsersUpdateInitiated,
+  privateUsersUpdateStripeCustomerId,
+  privateUsersUpdateStripeData,
+  privateUsersUpdateStripeStatusNone,
 } from "@ridi/db-queries";
 import { type RidiLogger } from "@ridi/logger";
 import Stripe from "stripe";
@@ -32,7 +32,7 @@ const allowedEvents: Stripe.Event.Type[] = [
 ];
 
 export class StripeApi {
-  private readonly dbClient: Parameters<typeof stripeUsersGetRow>[0];
+  private readonly dbClient: Parameters<typeof privateUsersGetRow>[0];
   private readonly logger: RidiLogger;
   private readonly stripe: Stripe;
   private readonly appBaseUrl: string;
@@ -41,7 +41,7 @@ export class StripeApi {
   private readonly stripeWebhookSecret?: string;
 
   constructor(
-    dbClient: Parameters<typeof stripeUsersGetRow>[0],
+    dbClient: Parameters<typeof privateUsersGetRow>[0],
     logger: RidiLogger,
     stripeSecretKey: string,
     appBaseUrl: string,
@@ -62,13 +62,17 @@ export class StripeApi {
     priceType: "montly" | "yearly",
   ) {
     this.logger.info("Creating Stripe checkout", { userId: user.id });
-    const stripeUser = await stripeUsersGetRow(this.dbClient, {
+    const privateUser = await privateUsersGetRow(this.dbClient, {
       userId: user.id,
     });
 
-    let stripeCustomerId = stripeUser?.stripeCustomerId || "";
+    if (privateUser?.subType !== "none") {
+      throw this.logger.error("Subscription already in place", { privateUser });
+    }
 
-    if (!stripeUser) {
+    let stripeCustomerId = privateUser?.stripeCustomerId || "";
+
+    if (!privateUser.stripeCustomerId) {
       this.logger.info("Creating stripe customer", { userId: user.id });
       const newCustomer = await this.stripe.customers.create({
         email: user.email,
@@ -77,7 +81,7 @@ export class StripeApi {
         },
       });
 
-      await stripeUsersInsertWithCustomerId(this.dbClient, {
+      await privateUsersUpdateStripeCustomerId(this.dbClient, {
         stripeCustomerId: newCustomer.id,
         userId: user.id,
       });
@@ -96,7 +100,7 @@ export class StripeApi {
       ],
     });
 
-    await stripeUsersUpdateInitiated(this.dbClient, {
+    await privateUsersUpdateInitiated(this.dbClient, {
       userId: user.id,
       stripeCheckoutId: checkout.id,
     });
@@ -115,32 +119,36 @@ export class StripeApi {
   async syncStripeData({ type, id }: { type: "stripe" | "ridi"; id: string }) {
     this.logger.info("Sync stripe data", { type, id });
 
-    const stripeUser =
+    const privateUser =
       type === "ridi"
-        ? await stripeUsersGetRow(this.dbClient, {
+        ? await privateUsersGetRow(this.dbClient, {
             userId: id,
           })
-        : await stripeUsersGetRowByStripeCustomerId(this.dbClient, {
+        : await privateUsersGetRowByStripeCustomerId(this.dbClient, {
             stripeCustomerId: id,
           });
 
-    if (!stripeUser) {
+    if (!privateUser) {
       throw this.logger.error("Missing Stripe user, it must exist", {
         type,
         id,
       });
     }
 
-    const userId = stripeUser.userId;
+    const userId = privateUser.userId;
 
-    if (stripeUser.flowStatus === "initiated") {
-      await stripeUsersUpdateCompleted(this.dbClient, {
+    if (privateUser.stripeFlowStatus === "initiated") {
+      await privateUsersUpdateCompleted(this.dbClient, {
         userId,
       });
     }
 
+    if (!privateUser.stripeCustomerId) {
+      throw this.logger.error("Stripe customer id is missing", { privateUser });
+    }
+
     const subscriptions = await this.stripe.subscriptions.list({
-      customer: stripeUser.stripeCustomerId,
+      customer: privateUser.stripeCustomerId,
       limit: 1,
       status: "all",
       expand: ["data.default_payment_method"],
@@ -149,7 +157,7 @@ export class StripeApi {
     if (subscriptions.data.length === 0) {
       this.logger.info("Stripe data no subscriptions", { userId });
 
-      await stripeUsersUpdateStripeStatusNone(this.dbClient, {
+      await privateUsersUpdateStripeStatusNone(this.dbClient, {
         userId,
       });
 
@@ -176,7 +184,7 @@ export class StripeApi {
 
     console.log("cancel_at_period_end", subscription.cancel_at_period_end);
 
-    await stripeUsersUpdateStripeData(this.dbClient, {
+    await privateUsersUpdateStripeData(this.dbClient, {
       stripeSubscriptionId: subscription.id,
       stripeStatus: subscription.status,
       stripePriceId: priceId,
@@ -194,6 +202,7 @@ export class StripeApi {
             ? subscription.default_payment_method
             : null,
       userId,
+      subType: subscription.status === "active" ? "stripe" : "none",
     });
 
     return true;
@@ -265,16 +274,16 @@ export class StripeApi {
     this.logger.info("Creating Stripe Billing Portal Session", {
       userId: user.id,
     });
-    const stripeUser = await stripeUsersGetRow(this.dbClient, {
+    const privateUser = await privateUsersGetRow(this.dbClient, {
       userId: user.id,
     });
 
-    if (!stripeUser) {
+    if (!privateUser?.stripeCustomerId) {
       return null;
     }
 
     const portal = await this.stripe.billingPortal.sessions.create({
-      customer: stripeUser.stripeCustomerId,
+      customer: privateUser.stripeCustomerId,
     });
 
     return portal.url;

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
 import { useCreateSessionFromUrl } from "~/components/auth";
+import { Button } from "~/components/button";
 import { MotorcycleIcon } from "~/components/icons/motorcycle";
 import { Link } from "~/components/link";
 import { supabase } from "~/lib/supabase";
@@ -21,9 +22,7 @@ export default function Index() {
         router.replace("/plans");
       } else {
         if (!isAuthCallback) {
-          if (!session) {
-            supabase.auth.signInAnonymously();
-          } else {
+          if (session) {
             setSession(session);
           }
         }
@@ -117,16 +116,21 @@ export default function Index() {
           </View>
         </View>
         <View className="w-full space-y-4">
-          {session && (
-            <>
-              <Link variant="primary" fullWidth href="/login" replace>
-                <Text className="dark:text-gray-200">Sign in</Text>
-              </Link>
-              <Link variant="secondary" fullWidth href="/plans" replace>
-                <Text className="dark:text-gray-200">Try it out</Text>
-              </Link>
-            </>
-          )}
+          <Link variant="primary" fullWidth href="/login" replace>
+            <Text className="dark:text-gray-200">Sign in</Text>
+          </Link>
+          <Button
+            variant="secondary"
+            fullWidth
+            onPress={async () => {
+              if (!session) {
+                await supabase.auth.signInAnonymously();
+              }
+              router.replace("/plans");
+            }}
+          >
+            <Text className="dark:text-gray-200">Try it out</Text>
+          </Button>
         </View>
       </View>
     </View>

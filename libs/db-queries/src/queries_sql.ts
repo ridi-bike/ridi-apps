@@ -2,21 +2,115 @@
 
 import type  { Sql } from "postgres";
 
-export const stripeUsersInsertWithCustomerIdQuery = `-- name: StripeUsersInsertWithCustomerId :exec
-insert into private.stripe_users (user_id, stripe_customer_id, flow_status)
-values ($1, $2, 'none')`;
+export const privateCodeGetQuery = `-- name: PrivateCodeGet :one
+select id, code, created_at, claimed_at, claimed_by_user_id from private.codes
+where code = $1`;
 
-export interface StripeUsersInsertWithCustomerIdArgs {
+export interface PrivateCodeGetArgs {
+    code: string;
+}
+
+export interface PrivateCodeGetRow {
+    id: string;
+    code: string;
+    createdAt: Date;
+    claimedAt: Date | null;
+    claimedByUserId: string | null;
+}
+
+export async function privateCodeGet(sql: Sql, args: PrivateCodeGetArgs): Promise<PrivateCodeGetRow | null> {
+    const rows = await sql.unsafe(privateCodeGetQuery, [args.code]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        code: row[1],
+        createdAt: row[2],
+        claimedAt: row[3],
+        claimedByUserId: row[4]
+    };
+}
+
+export const privateCodeClaimQuery = `-- name: PrivateCodeClaim :exec
+update private.codes
+set claimed_at = now(), 
+    claimed_by_user_id = $1
+where code = $2`;
+
+export interface PrivateCodeClaimArgs {
+    claimedByUserId: string | null;
+    code: string;
+}
+
+export async function privateCodeClaim(sql: Sql, args: PrivateCodeClaimArgs): Promise<void> {
+    await sql.unsafe(privateCodeClaimQuery, [args.claimedByUserId, args.code]);
+}
+
+export const privateUsersUpdateWithSubscriptionCodeQuery = `-- name: PrivateUsersUpdateWithSubscriptionCode :exec
+update private.users 
+set sub_type = $1
+where user_id = $2
+returning user_id, stripe_flow_status, stripe_customer_id, stripe_status, stripe_checkout_id, stripe_subscription_id, stripe_price_id, stripe_current_period_end, stripe_current_period_start, stripe_cancel_at_period_end, stripe_payment_method, sub_type`;
+
+export interface PrivateUsersUpdateWithSubscriptionCodeArgs {
+    subType: string;
     userId: string;
-    stripeCustomerId: string;
 }
 
-export async function stripeUsersInsertWithCustomerId(sql: Sql, args: StripeUsersInsertWithCustomerIdArgs): Promise<void> {
-    await sql.unsafe(stripeUsersInsertWithCustomerIdQuery, [args.userId, args.stripeCustomerId]);
+export interface PrivateUsersUpdateWithSubscriptionCodeRow {
+    userId: string;
+    stripeFlowStatus: "none" | "initiated" | "completed" | "confirmed";
+    stripeCustomerId: string | null;
+    stripeStatus: string | null;
+    stripeCheckoutId: string | null;
+    stripeSubscriptionId: string | null;
+    stripePriceId: string | null;
+    stripeCurrentPeriodEnd: Date | null;
+    stripeCurrentPeriodStart: Date | null;
+    stripeCancelAtPeriodEnd: boolean | null;
+    stripePaymentMethod: string | null;
+    subType: "none" | "stripe" | "code";
 }
 
-export const stripeUsersUpdateStripeDataQuery = `-- name: StripeUsersUpdateStripeData :exec
-update private.stripe_users
+export async function privateUsersUpdateWithSubscriptionCode(sql: Sql, args: PrivateUsersUpdateWithSubscriptionCodeArgs): Promise<void> {
+    await sql.unsafe(privateUsersUpdateWithSubscriptionCodeQuery, [args.subType, args.userId]);
+}
+
+export const privateUsersUpdateStripeCustomerIdQuery = `-- name: PrivateUsersUpdateStripeCustomerId :exec
+update private.users
+set stripe_customer_id = $1
+where user_id = $2`;
+
+export interface PrivateUsersUpdateStripeCustomerIdArgs {
+    stripeCustomerId: string | null;
+    userId: string;
+}
+
+export async function privateUsersUpdateStripeCustomerId(sql: Sql, args: PrivateUsersUpdateStripeCustomerIdArgs): Promise<void> {
+    await sql.unsafe(privateUsersUpdateStripeCustomerIdQuery, [args.stripeCustomerId, args.userId]);
+}
+
+export const privateUsersUpdateSubTypeQuery = `-- name: PrivateUsersUpdateSubType :exec
+update private.users
+set sub_type = $1
+where user_id = $2`;
+
+export interface PrivateUsersUpdateSubTypeArgs {
+    subType: string;
+    userId: string;
+}
+
+export async function privateUsersUpdateSubType(sql: Sql, args: PrivateUsersUpdateSubTypeArgs): Promise<void> {
+    await sql.unsafe(privateUsersUpdateSubTypeQuery, [args.subType, args.userId]);
+}
+
+export const privateUsersUpdateStripeDataQuery = `-- name: PrivateUsersUpdateStripeData :exec
+update private.users
 set stripe_status = $1,
   stripe_subscription_id = $3,
   stripe_price_id = $4,
@@ -24,10 +118,11 @@ set stripe_status = $1,
   stripe_current_period_start = $6,
   stripe_cancel_at_period_end = $7,
   stripe_payment_method = $8,
-  flow_status = 'confirmed'
+  stripe_flow_status = 'confirmed',
+  sub_type = $9
 where user_id = $2`;
 
-export interface StripeUsersUpdateStripeDataArgs {
+export interface PrivateUsersUpdateStripeDataArgs {
     stripeStatus: string | null;
     userId: string;
     stripeSubscriptionId: string | null;
@@ -36,65 +131,66 @@ export interface StripeUsersUpdateStripeDataArgs {
     stripeCurrentPeriodStart: Date | null;
     stripeCancelAtPeriodEnd: string | null;
     stripePaymentMethod: string | null;
+    subType: string;
 }
 
-export async function stripeUsersUpdateStripeData(sql: Sql, args: StripeUsersUpdateStripeDataArgs): Promise<void> {
-    await sql.unsafe(stripeUsersUpdateStripeDataQuery, [args.stripeStatus, args.userId, args.stripeSubscriptionId, args.stripePriceId, args.stripeCurrentPeriodEnd, args.stripeCurrentPeriodStart, args.stripeCancelAtPeriodEnd, args.stripePaymentMethod]);
+export async function privateUsersUpdateStripeData(sql: Sql, args: PrivateUsersUpdateStripeDataArgs): Promise<void> {
+    await sql.unsafe(privateUsersUpdateStripeDataQuery, [args.stripeStatus, args.userId, args.stripeSubscriptionId, args.stripePriceId, args.stripeCurrentPeriodEnd, args.stripeCurrentPeriodStart, args.stripeCancelAtPeriodEnd, args.stripePaymentMethod, args.subType]);
 }
 
-export const stripeUsersUpdateInitiatedQuery = `-- name: StripeUsersUpdateInitiated :exec
-update private.stripe_users
+export const privateUsersUpdateInitiatedQuery = `-- name: PrivateUsersUpdateInitiated :exec
+update private.users
 set stripe_status = 'initiated',
   stripe_checkout_id = $1
 where user_id = $2`;
 
-export interface StripeUsersUpdateInitiatedArgs {
+export interface PrivateUsersUpdateInitiatedArgs {
     stripeCheckoutId: string | null;
     userId: string;
 }
 
-export async function stripeUsersUpdateInitiated(sql: Sql, args: StripeUsersUpdateInitiatedArgs): Promise<void> {
-    await sql.unsafe(stripeUsersUpdateInitiatedQuery, [args.stripeCheckoutId, args.userId]);
+export async function privateUsersUpdateInitiated(sql: Sql, args: PrivateUsersUpdateInitiatedArgs): Promise<void> {
+    await sql.unsafe(privateUsersUpdateInitiatedQuery, [args.stripeCheckoutId, args.userId]);
 }
 
-export const stripeUsersUpdateCompletedQuery = `-- name: StripeUsersUpdateCompleted :exec
-update private.stripe_users
-set flow_status = 'completed'
+export const privateUsersUpdateCompletedQuery = `-- name: PrivateUsersUpdateCompleted :exec
+update private.users
+set stripe_flow_status = 'completed'
 where user_id = $1`;
 
-export interface StripeUsersUpdateCompletedArgs {
+export interface PrivateUsersUpdateCompletedArgs {
     userId: string;
 }
 
-export async function stripeUsersUpdateCompleted(sql: Sql, args: StripeUsersUpdateCompletedArgs): Promise<void> {
-    await sql.unsafe(stripeUsersUpdateCompletedQuery, [args.userId]);
+export async function privateUsersUpdateCompleted(sql: Sql, args: PrivateUsersUpdateCompletedArgs): Promise<void> {
+    await sql.unsafe(privateUsersUpdateCompletedQuery, [args.userId]);
 }
 
-export const stripeUsersUpdateStripeStatusNoneQuery = `-- name: StripeUsersUpdateStripeStatusNone :exec
-update private.stripe_users
+export const privateUsersUpdateStripeStatusNoneQuery = `-- name: PrivateUsersUpdateStripeStatusNone :exec
+update private.users
 set stripe_status = 'none'
 where user_id = $1`;
 
-export interface StripeUsersUpdateStripeStatusNoneArgs {
+export interface PrivateUsersUpdateStripeStatusNoneArgs {
     userId: string;
 }
 
-export async function stripeUsersUpdateStripeStatusNone(sql: Sql, args: StripeUsersUpdateStripeStatusNoneArgs): Promise<void> {
-    await sql.unsafe(stripeUsersUpdateStripeStatusNoneQuery, [args.userId]);
+export async function privateUsersUpdateStripeStatusNone(sql: Sql, args: PrivateUsersUpdateStripeStatusNoneArgs): Promise<void> {
+    await sql.unsafe(privateUsersUpdateStripeStatusNoneQuery, [args.userId]);
 }
 
-export const stripeUsersGetRowQuery = `-- name: StripeUsersGetRow :one
-select user_id, flow_status, stripe_customer_id, stripe_status, stripe_checkout_id, stripe_subscription_id, stripe_price_id, stripe_current_period_end, stripe_current_period_start, stripe_cancel_at_period_end, stripe_payment_method from private.stripe_users
+export const privateUsersGetRowQuery = `-- name: PrivateUsersGetRow :one
+select user_id, stripe_flow_status, stripe_customer_id, stripe_status, stripe_checkout_id, stripe_subscription_id, stripe_price_id, stripe_current_period_end, stripe_current_period_start, stripe_cancel_at_period_end, stripe_payment_method, sub_type from private.users
 where user_id = $1`;
 
-export interface StripeUsersGetRowArgs {
+export interface PrivateUsersGetRowArgs {
     userId: string;
 }
 
-export interface StripeUsersGetRowRow {
+export interface PrivateUsersGetRowRow {
     userId: string;
-    flowStatus: "none" | "initiated" | "completed" | "confirmed";
-    stripeCustomerId: string;
+    stripeFlowStatus: "none" | "initiated" | "completed" | "confirmed";
+    stripeCustomerId: string | null;
     stripeStatus: string | null;
     stripeCheckoutId: string | null;
     stripeSubscriptionId: string | null;
@@ -103,10 +199,11 @@ export interface StripeUsersGetRowRow {
     stripeCurrentPeriodStart: Date | null;
     stripeCancelAtPeriodEnd: boolean | null;
     stripePaymentMethod: string | null;
+    subType: "none" | "stripe" | "code";
 }
 
-export async function stripeUsersGetRow(sql: Sql, args: StripeUsersGetRowArgs): Promise<StripeUsersGetRowRow | null> {
-    const rows = await sql.unsafe(stripeUsersGetRowQuery, [args.userId]).values();
+export async function privateUsersGetRow(sql: Sql, args: PrivateUsersGetRowArgs): Promise<PrivateUsersGetRowRow | null> {
+    const rows = await sql.unsafe(privateUsersGetRowQuery, [args.userId]).values();
     if (rows.length !== 1) {
         return null;
     }
@@ -116,7 +213,7 @@ export async function stripeUsersGetRow(sql: Sql, args: StripeUsersGetRowArgs): 
     }
     return {
         userId: row[0],
-        flowStatus: row[1],
+        stripeFlowStatus: row[1],
         stripeCustomerId: row[2],
         stripeStatus: row[3],
         stripeCheckoutId: row[4],
@@ -125,22 +222,23 @@ export async function stripeUsersGetRow(sql: Sql, args: StripeUsersGetRowArgs): 
         stripeCurrentPeriodEnd: row[7],
         stripeCurrentPeriodStart: row[8],
         stripeCancelAtPeriodEnd: row[9],
-        stripePaymentMethod: row[10]
+        stripePaymentMethod: row[10],
+        subType: row[11]
     };
 }
 
-export const stripeUsersGetRowByStripeCustomerIdQuery = `-- name: StripeUsersGetRowByStripeCustomerId :one
-select user_id, flow_status, stripe_customer_id, stripe_status, stripe_checkout_id, stripe_subscription_id, stripe_price_id, stripe_current_period_end, stripe_current_period_start, stripe_cancel_at_period_end, stripe_payment_method from private.stripe_users
+export const privateUsersGetRowByStripeCustomerIdQuery = `-- name: PrivateUsersGetRowByStripeCustomerId :one
+select user_id, stripe_flow_status, stripe_customer_id, stripe_status, stripe_checkout_id, stripe_subscription_id, stripe_price_id, stripe_current_period_end, stripe_current_period_start, stripe_cancel_at_period_end, stripe_payment_method, sub_type from private.users
 where stripe_customer_id = $1`;
 
-export interface StripeUsersGetRowByStripeCustomerIdArgs {
-    stripeCustomerId: string;
+export interface PrivateUsersGetRowByStripeCustomerIdArgs {
+    stripeCustomerId: string | null;
 }
 
-export interface StripeUsersGetRowByStripeCustomerIdRow {
+export interface PrivateUsersGetRowByStripeCustomerIdRow {
     userId: string;
-    flowStatus: "none" | "initiated" | "completed" | "confirmed";
-    stripeCustomerId: string;
+    stripeFlowStatus: "none" | "initiated" | "completed" | "confirmed";
+    stripeCustomerId: string | null;
     stripeStatus: string | null;
     stripeCheckoutId: string | null;
     stripeSubscriptionId: string | null;
@@ -149,10 +247,11 @@ export interface StripeUsersGetRowByStripeCustomerIdRow {
     stripeCurrentPeriodStart: Date | null;
     stripeCancelAtPeriodEnd: boolean | null;
     stripePaymentMethod: string | null;
+    subType: "none" | "stripe" | "code";
 }
 
-export async function stripeUsersGetRowByStripeCustomerId(sql: Sql, args: StripeUsersGetRowByStripeCustomerIdArgs): Promise<StripeUsersGetRowByStripeCustomerIdRow | null> {
-    const rows = await sql.unsafe(stripeUsersGetRowByStripeCustomerIdQuery, [args.stripeCustomerId]).values();
+export async function privateUsersGetRowByStripeCustomerId(sql: Sql, args: PrivateUsersGetRowByStripeCustomerIdArgs): Promise<PrivateUsersGetRowByStripeCustomerIdRow | null> {
+    const rows = await sql.unsafe(privateUsersGetRowByStripeCustomerIdQuery, [args.stripeCustomerId]).values();
     if (rows.length !== 1) {
         return null;
     }
@@ -162,7 +261,7 @@ export async function stripeUsersGetRowByStripeCustomerId(sql: Sql, args: Stripe
     }
     return {
         userId: row[0],
-        flowStatus: row[1],
+        stripeFlowStatus: row[1],
         stripeCustomerId: row[2],
         stripeStatus: row[3],
         stripeCheckoutId: row[4],
@@ -171,7 +270,8 @@ export async function stripeUsersGetRowByStripeCustomerId(sql: Sql, args: Stripe
         stripeCurrentPeriodEnd: row[7],
         stripeCurrentPeriodStart: row[8],
         stripeCancelAtPeriodEnd: row[9],
-        stripePaymentMethod: row[10]
+        stripePaymentMethod: row[10],
+        subType: row[11]
     };
 }
 

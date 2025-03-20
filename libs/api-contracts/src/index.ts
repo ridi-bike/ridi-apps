@@ -247,6 +247,11 @@ export const ruleSetSetSchema = z.discriminatedUnion("version", [
   }),
 ]);
 export type RuleSetsSetRequest = z.infer<typeof ruleSetSetSchema>;
+const userSubType = z.union([
+  z.literal("none"),
+  z.literal("stripe"),
+  z.literal("code"),
+]);
 
 const priceSchema = z.object({
   id: z.string(),
@@ -256,6 +261,25 @@ const priceSchema = z.object({
 });
 
 export const apiContract = c.router({
+  codeClaim: {
+    method: "POST",
+    path: "/user/code",
+    body: z.discriminatedUnion("version", [
+      z.object({
+        version: z.literal("v1"),
+        data: z.object({
+          code: z.string(),
+        }),
+      }),
+    ]),
+    responses: {
+      201: z.void(),
+      400: z.object({ message: z.string() }),
+      401: z.object({ message: z.string() }),
+      404: z.object({ message: z.string() }),
+      500: z.object({ message: z.string() }),
+    },
+  },
   stripeSuccess: {
     method: "GET",
     path: "/user/success",
@@ -281,6 +305,30 @@ export const apiContract = c.router({
       500: z.object({ message: z.string() }),
     },
   },
+  userGet: {
+    method: "GET",
+    path: "/user",
+    query: z.discriminatedUnion("version", [
+      z.object({
+        version: z.literal("v1"),
+      }),
+    ]),
+    responses: {
+      200: z.object({
+        version: z.literal("v1"),
+        data: z.object({
+          userId: z.string(),
+          isAnonymous: z.boolean(),
+          subType: userSubType,
+          email: z.string().nullable(),
+        }),
+      }),
+      400: z.object({ message: z.string() }),
+      401: z.object({ message: z.string() }),
+      404: z.object({ message: z.string() }),
+      500: z.object({ message: z.string() }),
+    },
+  },
   billingGet: {
     method: "GET",
     path: "/user/billing",
@@ -293,6 +341,7 @@ export const apiContract = c.router({
       200: z.object({
         version: z.literal("v1"),
         data: z.object({
+          subType: userSubType,
           subscription: z
             .object({
               isActive: z.boolean(),
@@ -303,7 +352,7 @@ export const apiContract = c.router({
             })
             .nullable(),
           stripeUrl: z.string().nullable(),
-          prices: z.array(priceSchema),
+          prices: z.array(priceSchema).nullable(),
         }),
       }),
       400: z.object({ message: z.string() }),

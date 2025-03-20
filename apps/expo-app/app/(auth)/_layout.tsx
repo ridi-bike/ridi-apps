@@ -1,11 +1,6 @@
-import NetInfo from "@react-native-community/netinfo";
 import { PortalHost } from "@rn-primitives/portal";
 import { type Session } from "@supabase/supabase-js";
-import {
-  QueryClientProvider,
-  QueryClient,
-  onlineManager,
-} from "@tanstack/react-query";
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { router, Stack } from "expo-router";
 import maplibregl from "maplibre-gl";
 import { Protocol } from "pmtiles";
@@ -18,7 +13,6 @@ const queryClient = new QueryClient({
     queries: {
       gcTime: Infinity,
       staleTime: Infinity,
-      // persister,
     },
   },
 });
@@ -33,14 +27,6 @@ export default function App() {
   }, []);
 
   const [session, setSession] = useState<Session | null>(null);
-
-  useEffect(() => {
-    // eslint-disable-next-line import/no-named-as-default-member
-    return NetInfo.addEventListener((state) => {
-      const status = !!state.isConnected;
-      onlineManager.setOnline(status);
-    });
-  }, []);
 
   useEffect(() => {
     return supabase.auth.onAuthStateChange((_event, session) => {
