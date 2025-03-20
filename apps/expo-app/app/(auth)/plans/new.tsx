@@ -248,6 +248,7 @@ export default function PlansNew() {
           </AnimatePresence>
           {mapMode && (
             <Pressable
+              role="button"
               onPress={() => setMapMode(false)}
               aria-disabled={!canCreateRoute()}
               className={cn(
@@ -263,6 +264,7 @@ export default function PlansNew() {
           )}
           {!mapMode && (
             <Pressable
+              role="button"
               onPress={() => {
                 if (canCreateRoute()) {
                   if (!startCoords || !ruleSetId) {
@@ -352,6 +354,7 @@ export default function PlansNew() {
             >
               <View className="float-right flex flex-col items-end justify-start gap-2 p-4">
                 <Pressable
+                  role="button"
                   onPress={getCurrentLocation}
                   className={cn(
                     "flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 p-4",
@@ -366,6 +369,7 @@ export default function PlansNew() {
                   <Locate className="size-4 dark:text-gray-200" />
                 </Pressable>
                 <Pressable
+                  role="button"
                   onPress={() => setCenterSelectionMode(!centerSelectionMode)}
                   className={cn(
                     "flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 p-4",
@@ -389,6 +393,7 @@ export default function PlansNew() {
                 )}
                 {searchPoints?.length && (
                   <Pressable
+                    role="button"
                     onPress={() => {
                       setSearchPoints();
                     }}
@@ -410,7 +415,7 @@ export default function PlansNew() {
         />
       )}
       <ScrollView className="max-h-[calc(100vh-170px)] max-w-3xl flex-1 px-4 pt-4">
-        <Pressable onPress={() => setMapMode(true)}>
+        <Pressable role="button" onPress={() => setMapMode(true)}>
           <GroupWithTitle title="Trip details">
             <AnimatePresence>
               <MotiView
@@ -463,6 +468,7 @@ export default function PlansNew() {
         </Pressable>
         <GroupWithTitle title="Trip type">
           <Pressable
+            role="button"
             onPress={() => {
               setIsRoundTrip(false);
             }}
@@ -479,6 +485,7 @@ export default function PlansNew() {
             <Text className="text-sm dark:text-gray-200">Start to Finish</Text>
           </Pressable>
           <Pressable
+            role="button"
             onPress={() => {
               setIsRoundTrip(true);
             }}
@@ -508,6 +515,7 @@ export default function PlansNew() {
             .filter((rs) => rs.isSystem)
             .map((rs) => (
               <Pressable
+                role="button"
                 key={rs.id}
                 onPress={() => {
                   if (typeof rs.id === "string") {
@@ -530,6 +538,7 @@ export default function PlansNew() {
               </Pressable>
             ))}
           <Pressable
+            role="button"
             onPress={() => {
               router.navigate("/rules");
               router.setParams({
@@ -554,7 +563,7 @@ export default function PlansNew() {
             <Text className="text-sm dark:text-gray-200">Custom</Text>
           </Pressable>
         </GroupWithTitle>
-        <Pressable onPress={() => setMapMode(true)}>
+        <Pressable role="button" onPress={() => setMapMode(true)}>
           <GroupWithTitle title="Overview" className="h-48">
             <GeoMapPlanView
               bearing={isRoundTrip ? (bearing ?? null) : null}

@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from "react";
 import { View, Text, Pressable } from "react-native";
 
 import { ErrorBox } from "~/components/error";
+import { Link as AppLink } from "~/components/link";
 import { Loading } from "~/components/loading";
 import { ScreenFrame } from "~/components/screen-frame";
 import { supabase } from "~/lib/supabase";
@@ -47,21 +48,28 @@ export default function UserSettings() {
           >
             {/* Profile Section */}
             <View className="border-b-2 border-black p-4 dark:border-gray-700">
-              <View className="flex flex-row items-center gap-4">
-                <View className="flex size-16 items-center justify-center rounded-full border-2 border-black bg-gray-100 dark:border-gray-700 dark:bg-gray-700">
-                  <User className="size-8" />
+              <View className="flex flex-row items-center justify-between gap-4">
+                <View className="flex flex-row items-center justify-start gap-4">
+                  <View className="flex size-16 items-center justify-center rounded-full border-2 border-black bg-gray-100 dark:border-gray-700 dark:bg-gray-700">
+                    <User className="size-8" />
+                  </View>
+                  <View>
+                    <Text
+                      role="heading"
+                      aria-level={2}
+                      className="font-medium dark:text-gray-100"
+                    >
+                      {user.data.user.is_anonymous
+                        ? "Anonymous"
+                        : user.data.user.email || ""}
+                    </Text>
+                  </View>
                 </View>
-                <View>
-                  <Text
-                    role="heading"
-                    aria-level={2}
-                    className="font-medium dark:text-gray-100"
-                  >
-                    {user.data.user.is_anonymous
-                      ? "Anonymous"
-                      : user.data.user.email || ""}
-                  </Text>
-                </View>
+                {user.data.user?.is_anonymous && (
+                  <AppLink variant="primary" href="/login">
+                    Login
+                  </AppLink>
+                )}
               </View>
             </View>
 

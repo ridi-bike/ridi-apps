@@ -1,58 +1,110 @@
 import { type Provider } from "@supabase/supabase-js";
 import { useQueryClient } from "@tanstack/react-query";
 import { router, Stack } from "expo-router";
-import { Github, MailIcon } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { MailIcon } from "lucide-react-native";
+import { useCallback, useEffect, useState } from "react";
 import { View, Text } from "react-native";
 
 import { Button } from "~/components/button";
 import { GithubIcon } from "~/components/icons/github";
 import { GoogleIcon } from "~/components/icons/google";
 import { Input } from "~/components/input";
+import { apiClient } from "~/lib/api";
 import { supabase } from "~/lib/supabase";
 import { cn } from "~/lib/utils";
 
 export default function LoginScreen() {
   const queryClient = useQueryClient();
-  async function performOAuth(provider: Provider) {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider,
-    });
-    queryClient.clear();
-    if (error) {
-      throw error;
-    }
-  }
 
-  async function performOTPAuth(email: string) {
+  const performOAuth = useCallback(
+    async (provider: Provider) => {
+      let fromUserAccessToken: string | undefined = undefined;
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session) {
+        fromUserAccessToken = session.access_token;
+      }
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+      });
+
+      queryClient.clear();
+
+      if (fromUserAccessToken) {
+        await apiClient.userClaimData({
+          body: {
+            version: "v1",
+            data: {
+              fromUserAccessToken,
+            },
+          },
+        });
+      }
+      if (error) {
+        throw error;
+      }
+    },
+    [queryClient],
+  );
+
+  const performOTPAuth = useCallback(async (email: string) => {
     const { error } = await supabase.auth.signInWithOtp({
       email,
     });
     if (error) {
       throw error;
     }
-  }
+  }, []);
 
-  async function validateOTPAuth(email: string, token: string) {
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.verifyOtp({
-      email,
-      token,
-      type: "email",
-    });
-    if (error) {
-      throw error;
-    }
-    if (session) {
-      queryClient.clear();
-      const { error } = await supabase.auth.setSession(session);
+  const validateOTPAuth = useCallback(
+    async (email: string, token: string) => {
+      let fromUserAccessToken: string | undefined = undefined;
+
+      const {
+        data: { session: oldSession },
+      } = await supabase.auth.getSession();
+
+      if (oldSession) {
+        fromUserAccessToken = oldSession.access_token;
+      }
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type: "email",
+      });
       if (error) {
         throw error;
       }
-    }
-  }
+      if (session) {
+        queryClient.clear();
+
+        const { error } = await supabase.auth.setSession(session);
+        if (error) {
+          throw error;
+        }
+
+        if (fromUserAccessToken) {
+          await apiClient.userClaimData({
+            body: {
+              version: "v1",
+              data: {
+                fromUserAccessToken,
+              },
+            },
+          });
+        }
+      }
+    },
+    [queryClient],
+  );
+
   useEffect(() => {
     return supabase.auth.onAuthStateChange((_event, session) => {
       if (session && !session.user.is_anonymous) {
@@ -141,8 +193,15 @@ export default function LoginScreen() {
                   value={email}
                   onChangeText={(email) => setEmail(email)}
                   placeholder="Enter your email"
+                  onSubmitEditing={() => {
+                    if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                      performOTPAuth(email);
+                      setShowCodeInput(true);
+                    }
+                  }}
                 />
                 <Button
+                  role="button"
                   disabled={!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)}
                   variant="primary"
                   className={cn({
@@ -167,6 +226,7 @@ export default function LoginScreen() {
                   placeholder="Enter 6-digit code"
                   value={code}
                   onChangeText={(code) => setCode(code)}
+                  onSubmitEditing={() => validateOTPAuth(email, code.trim())}
                 />
                 <Button
                   disabled={!code}

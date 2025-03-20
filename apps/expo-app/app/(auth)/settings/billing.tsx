@@ -184,6 +184,7 @@ export default function BillingPage() {
                         </View>
                         <View className="flex flex-row gap-3">
                           <Pressable
+                            role="button"
                             onPress={() => {
                               window.location.href = data.stripeUrl || "";
                             }}
@@ -257,6 +258,7 @@ export default function BillingPage() {
                             </View>
                           </View>
                           <Pressable
+                            role="button"
                             onPress={() => {
                               setLoading(true);
                               apiClient
@@ -316,6 +318,7 @@ export default function BillingPage() {
                           </View>
                         </View>
                         <Pressable
+                          role="button"
                           onPress={() => {
                             if (code) {
                               codeClaim(code);

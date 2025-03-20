@@ -131,6 +131,7 @@ export default function LocationSearch() {
         >
           <View className="p-4">
             <Pressable
+              role="button"
               onPress={() => {
                 gotoNewScreen();
                 router.setParams({
@@ -158,6 +159,7 @@ export default function LocationSearch() {
                 className="flex-1 rounded-xl border-2 border-black bg-white px-4 py-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
               />
               <Pressable
+                role="button"
                 onPress={handleSearch}
                 className={cn(
                   "flex-row items-center justify-center rounded-xl bg-[#FF5937] px-6 py-3",

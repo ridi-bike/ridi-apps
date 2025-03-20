@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { buildGPX, BaseBuilder } from "gpx-builder";
-import { Trophy, Trash2, Route, Ruler } from "lucide-react-native";
+import { Trophy, Trash2, Ruler } from "lucide-react-native";
 import { AnimatePresence, MotiView } from "moti";
 import { useMemo, useState } from "react";
 import { View, Text, ScrollView, Pressable } from "react-native";
@@ -288,6 +288,7 @@ export default function RouteDetails() {
                               }}
                             >
                               <Pressable
+                                role="button"
                                 className={cn(
                                   "dark:border-red-700 dark:hover:bg-red-950 w-full h-14 flex-row items-center px-4 gap-3 rounded-xl border-[3px] border-red-500 text-red-500 hover:bg-red-50 transition-colors",
                                 )}
@@ -316,6 +317,7 @@ export default function RouteDetails() {
                               }}
                             >
                               <Pressable
+                                role="button"
                                 className={cn(
                                   "dark:border-green-700 dark:hover:bg-green-950 w-full h-14 flex-row items-center px-4 gap-3 rounded-xl border-[3px] border-green-500 text-green-500 hover:bg-green-50 transition-colors",
                                 )}

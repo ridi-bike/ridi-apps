@@ -26,6 +26,7 @@ export const Button = ({
 }: ButtonProps) => {
   return (
     <Pressable
+      role="button"
       className={cn(baseStyles, variantStyles[variant], className, {
         "w-full": fullWidth,
       })}

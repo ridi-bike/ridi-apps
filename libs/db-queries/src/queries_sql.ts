@@ -2,6 +2,76 @@
 
 import type  { Sql } from "postgres";
 
+export const userClaimPlansQuery = `-- name: UserClaimPlans :exec
+update plans
+set user_id = $1
+where user_id = $2`;
+
+export interface UserClaimPlansArgs {
+    toUserId: string;
+    fromUserId: string;
+}
+
+export async function userClaimPlans(sql: Sql, args: UserClaimPlansArgs): Promise<void> {
+    await sql.unsafe(userClaimPlansQuery, [args.toUserId, args.fromUserId]);
+}
+
+export const userClaimRoutesQuery = `-- name: UserClaimRoutes :exec
+update routes
+set user_id = $1
+where user_id = $2`;
+
+export interface UserClaimRoutesArgs {
+    toUserId: string;
+    fromUserId: string;
+}
+
+export async function userClaimRoutes(sql: Sql, args: UserClaimRoutesArgs): Promise<void> {
+    await sql.unsafe(userClaimRoutesQuery, [args.toUserId, args.fromUserId]);
+}
+
+export const userClaimRouteBreakdownStatsQuery = `-- name: UserClaimRouteBreakdownStats :exec
+update route_breakdown_stats
+set user_id = $1
+where user_id = $2`;
+
+export interface UserClaimRouteBreakdownStatsArgs {
+    toUserId: string;
+    fromUserId: string;
+}
+
+export async function userClaimRouteBreakdownStats(sql: Sql, args: UserClaimRouteBreakdownStatsArgs): Promise<void> {
+    await sql.unsafe(userClaimRouteBreakdownStatsQuery, [args.toUserId, args.fromUserId]);
+}
+
+export const userClaimRuleSetsQuery = `-- name: UserClaimRuleSets :exec
+update rule_sets
+set user_id = $1
+where user_id = $2`;
+
+export interface UserClaimRuleSetsArgs {
+    toUserId: string | null;
+    fromUserId: string | null;
+}
+
+export async function userClaimRuleSets(sql: Sql, args: UserClaimRuleSetsArgs): Promise<void> {
+    await sql.unsafe(userClaimRuleSetsQuery, [args.toUserId, args.fromUserId]);
+}
+
+export const userClaimRuleSetRoadTagsQuery = `-- name: UserClaimRuleSetRoadTags :exec
+update rule_set_road_tags
+set user_id = $1
+where user_id = $2`;
+
+export interface UserClaimRuleSetRoadTagsArgs {
+    toUserId: string | null;
+    fromUserId: string | null;
+}
+
+export async function userClaimRuleSetRoadTags(sql: Sql, args: UserClaimRuleSetRoadTagsArgs): Promise<void> {
+    await sql.unsafe(userClaimRuleSetRoadTagsQuery, [args.toUserId, args.fromUserId]);
+}
+
 export const privateCodeGetQuery = `-- name: PrivateCodeGet :one
 select id, code, created_at, claimed_at, claimed_by_user_id from private.codes
 where code = $1`;

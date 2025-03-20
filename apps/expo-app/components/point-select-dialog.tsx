@@ -37,7 +37,7 @@ export function PointSelectDialog({
   return (
     <AlertDialog open={open} onOpenChange={(open) => setOpen(open)}>
       <AlertDialogTrigger asChild>
-        <Pressable>{children}</Pressable>
+        <Pressable role="button">{children}</Pressable>
       </AlertDialogTrigger>
       <AlertDialogContent className="w-full border-black bg-white dark:border-gray-700 dark:bg-gray-800">
         <AlertDialogHeader>

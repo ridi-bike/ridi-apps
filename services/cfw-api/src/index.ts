@@ -28,6 +28,11 @@ import {
   privateUsersUpdateSubType,
   privateCodeGet,
   privateCodeClaim,
+  userClaimPlans,
+  userClaimRoutes,
+  userClaimRouteBreakdownStats,
+  userClaimRuleSets,
+  userClaimRuleSetRoadTags,
 } from "@ridi/db-queries";
 import { RidiLogger } from "@ridi/logger";
 import { lookupCooordsInfo } from "@ridi/maps-api";
@@ -60,6 +65,51 @@ const router = tsr
     logger: RidiLogger;
   }>()
   .routerWithMiddleware(apiContract)<{ user: User }>({
+  userClaimData: async ({ body }, ctx) => {
+    if (body.version !== "v1") {
+      return {
+        status: 400,
+        body: {
+          message: "wrong version",
+        },
+      };
+    }
+    const { data } = await ctx.supabaseClient.auth.getUser(
+      body.data.fromUserAccessToken,
+    );
+    const userFrom = data.user;
+    if (userFrom && userFrom.is_anonymous) {
+      await userClaimPlans(ctx.db, {
+        fromUserId: userFrom.id,
+        toUserId: ctx.request.user.id,
+      });
+
+      await userClaimRoutes(ctx.db, {
+        fromUserId: userFrom.id,
+        toUserId: ctx.request.user.id,
+      });
+
+      await userClaimRouteBreakdownStats(ctx.db, {
+        fromUserId: userFrom.id,
+        toUserId: ctx.request.user.id,
+      });
+
+      await userClaimRuleSets(ctx.db, {
+        fromUserId: userFrom.id,
+        toUserId: ctx.request.user.id,
+      });
+
+      await userClaimRuleSetRoadTags(ctx.db, {
+        fromUserId: userFrom.id,
+        toUserId: ctx.request.user.id,
+      });
+    }
+
+    return {
+      status: 201,
+      body: undefined,
+    };
+  },
   codeClaim: async ({ body }, ctx) => {
     if (body.version !== "v1") {
       return {

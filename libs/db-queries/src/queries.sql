@@ -1,3 +1,28 @@
+-- name: UserClaimPlans :exec
+update plans
+set user_id = sqlc.arg(to_user_id)
+where user_id = sqlc.arg(from_user_id);
+
+-- name: UserClaimRoutes :exec
+update routes
+set user_id = sqlc.arg(to_user_id)
+where user_id = sqlc.arg(from_user_id);
+
+-- name: UserClaimRouteBreakdownStats :exec
+update route_breakdown_stats
+set user_id = sqlc.arg(to_user_id)
+where user_id = sqlc.arg(from_user_id);
+
+-- name: UserClaimRuleSets :exec
+update rule_sets
+set user_id = sqlc.arg(to_user_id)
+where user_id = sqlc.arg(from_user_id);
+
+-- name: UserClaimRuleSetRoadTags :exec
+update rule_set_road_tags
+set user_id = sqlc.arg(to_user_id)
+where user_id = sqlc.arg(from_user_id);
+
 -- name: PrivateCodeGet :one
 select * from private.codes
 where code = $1;

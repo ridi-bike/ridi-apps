@@ -261,6 +261,25 @@ const priceSchema = z.object({
 });
 
 export const apiContract = c.router({
+  userClaimData: {
+    method: "POST",
+    path: "/user/data/claim",
+    body: z.discriminatedUnion("version", [
+      z.object({
+        version: z.literal("v1"),
+        data: z.object({
+          fromUserAccessToken: z.string(),
+        }),
+      }),
+    ]),
+    responses: {
+      201: z.void(),
+      400: z.object({ message: z.string() }),
+      401: z.object({ message: z.string() }),
+      404: z.object({ message: z.string() }),
+      500: z.object({ message: z.string() }),
+    },
+  },
   codeClaim: {
     method: "POST",
     path: "/user/code",

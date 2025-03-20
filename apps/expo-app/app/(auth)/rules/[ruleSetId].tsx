@@ -219,6 +219,7 @@ export default function RulePackDetails() {
         !ruleSet.isSystem && (
           <View className="fixed bottom-0 w-full bg-white p-4 dark:bg-gray-800">
             <Pressable
+              role="button"
               onPress={() => {
                 if (unsavedChangesExist) {
                   ruleSetSet({
@@ -290,6 +291,7 @@ export default function RulePackDetails() {
                       <View className="flex flex-row items-center gap-2">
                         <Text className="dark:text-gray-200">Allowed:</Text>
                         <Pressable
+                          role="button"
                           className={cn(
                             "h-8 w-14 rounded-full p-1 transition-colors",
                             {
@@ -310,6 +312,7 @@ export default function RulePackDetails() {
                           />
                         </Pressable>
                         <Pressable
+                          role="button"
                           onPress={() => toggleGroupExpanded(groupIdx)}
                           className={cn(
                             "border-[3px] mx-4 flex flex-row justify-center items-center w-24 dark:border-gray-700 border-black text-[#FF5937] rounded-lg p-1 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800",
@@ -337,6 +340,7 @@ export default function RulePackDetails() {
                         <View className="h-20 space-y-1">
                           {!isGroupInSync(group) && (
                             <Pressable
+                              role="button"
                               onPress={() => setGroupValue(group, 0)}
                               className="flex h-12 w-full flex-row items-center justify-center rounded-lg border border-black p-1 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
                             >
@@ -399,6 +403,7 @@ export default function RulePackDetails() {
                                 {tag[0]}
                               </Text>
                               <Pressable
+                                role="button"
                                 onPress={() => {
                                   WebBrowser.openBrowserAsync(
                                     `https://wiki.openstreetmap.org/wiki/Tag:${tagValueToTagName.get(tag[0])}%3D${tag[0]}`,
@@ -409,6 +414,7 @@ export default function RulePackDetails() {
                               </Pressable>
                             </View>
                             <Pressable
+                              role="button"
                               className={cn(
                                 "h-8 w-14 rounded-full p-1 transition-colors",
                                 {

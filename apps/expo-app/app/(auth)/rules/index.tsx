@@ -122,6 +122,7 @@ function ActionDialog({
           <AlertDialogDescription>
             <View className="flex w-full flex-col items-center justify-between gap-2">
               <Pressable
+                role="button"
                 onPress={() => {
                   setOpen(false);
                   router.navigate(`/rules/${ruleSet.id}`);
@@ -134,6 +135,7 @@ function ActionDialog({
                 </Text>
               </Pressable>
               <Pressable
+                role="button"
                 onPress={() => {
                   setOpen(false);
                   onDuplicate();
@@ -154,6 +156,7 @@ function ActionDialog({
                   }}
                 >
                   <Pressable
+                    role="button"
                     className={cn(
                       "dark:border-red-700 dark:hover:bg-red-950 w-full h-14 flex-row items-center px-4 gap-3 rounded-xl border-[3px] border-red-500 text-red-500 hover:bg-red-50 transition-colors",
                     )}
@@ -238,6 +241,7 @@ export default function RuleSetList() {
       floating={
         <View className="fixed bottom-0 w-full bg-white p-4 dark:bg-gray-800">
           <Pressable
+            role="button"
             aria-label="Create new rule set"
             className="fixed bottom-8 right-8 flex size-24 items-center justify-center rounded-full bg-[#FF5937] shadow-lg transition-colors hover:bg-[#ff4a25]"
             onPress={addRuleSet}
@@ -289,6 +293,7 @@ export default function RuleSetList() {
                         </View>
                         <View className="flex-row gap-2">
                           <Pressable
+                            role="button"
                             onPress={() => {
                               setSelectedId(ruleSet.id);
                               gotoNewScreen();
@@ -318,7 +323,10 @@ export default function RuleSetList() {
                               ruleSetDelete(ruleSet.id);
                             }}
                           >
-                            <Pressable className="size-12 flex-row items-center justify-center rounded-xl border-[3px] border-gray-200 text-gray-400 transition-colors hover:border-gray-300 dark:border-gray-700 dark:text-gray-500">
+                            <Pressable
+                              role="button"
+                              className="size-12 flex-row items-center justify-center rounded-xl border-[3px] border-gray-200 text-gray-400 transition-colors hover:border-gray-300 dark:border-gray-700 dark:text-gray-500"
+                            >
                               <MoreVertical className="size-5" />
                             </Pressable>
                           </ActionDialog>
