@@ -24,6 +24,7 @@ import {
 } from "~/components/ui/alert-dialog";
 import { useStorePlans } from "~/lib/stores/plans-store";
 import { useStoreRoute } from "~/lib/stores/routes-store";
+import { useUser } from "~/lib/useUser";
 import { cn } from "~/lib/utils";
 
 function DownloadGpxDialog({
@@ -33,6 +34,8 @@ function DownloadGpxDialog({
   children: React.ReactNode;
   onDownload: () => void;
 }) {
+  const router = useRouter();
+  const user = useUser();
   const [open, setOpen] = useState(false);
   return (
     <AlertDialog
@@ -47,21 +50,61 @@ function DownloadGpxDialog({
             Download GPX route file
           </AlertDialogTitle>
           <AlertDialogDescription>
-            <Text>This will take a momnet</Text>
+            {user.user && (
+              <>
+                {user.user.subType === "none" && (
+                  <Text>GPX download is a premium feature</Text>
+                )}
+                {user.user.subType !== "none" && (
+                  <Text>
+                    Start the GPX download and open the file in your favourite
+                    navigatior
+                  </Text>
+                )}
+              </>
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="flex w-full flex-col items-center justify-between">
           <View className="flex w-full flex-col items-center justify-between gap-6">
-            <Button
-              variant="primary"
-              className="flex w-full flex-row items-center justify-center"
-              onPress={() => {
-                setOpen(false);
-                onDownload();
-              }}
-            >
-              <Text className="dark:text-gray-200">Download</Text>
-            </Button>
+            {user.user && user.user.isAnonymous && (
+              <Button
+                variant="primary"
+                className="flex w-full flex-row items-center justify-center"
+                onPress={() => {
+                  router.replace("/login");
+                }}
+              >
+                <Text className="dark:text-gray-200">Login</Text>
+              </Button>
+            )}
+            {user.user &&
+              !user.user.isAnonymous &&
+              user.user.subType === "none" && (
+                <Button
+                  variant="primary"
+                  className="flex w-full flex-row items-center justify-center"
+                  onPress={() => {
+                    router.replace("/settings/billing");
+                  }}
+                >
+                  <Text className="dark:text-gray-200">Login</Text>
+                </Button>
+              )}
+            {user.user &&
+              !user.user.isAnonymous &&
+              user.user.subType !== "none" && (
+                <Button
+                  variant="primary"
+                  className="flex w-full flex-row items-center justify-center"
+                  onPress={() => {
+                    setOpen(false);
+                    onDownload();
+                  }}
+                >
+                  <Text className="dark:text-gray-200">Billing</Text>
+                </Button>
+              )}
             <Button
               variant="secondary"
               className="flex w-full flex-row items-center justify-center"

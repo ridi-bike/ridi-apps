@@ -1,4 +1,5 @@
 import { type Provider } from "@supabase/supabase-js";
+import { useQueryClient } from "@tanstack/react-query";
 import { router, Stack } from "expo-router";
 import { Github, MailIcon } from "lucide-react-native";
 import { useEffect, useState } from "react";
@@ -11,45 +12,47 @@ import { Input } from "~/components/input";
 import { supabase } from "~/lib/supabase";
 import { cn } from "~/lib/utils";
 
-async function performOAuth(provider: Provider) {
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider,
-  });
-  if (error) {
-    throw error;
-  }
-}
-
-async function performOTPAuth(email: string) {
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-  });
-  if (error) {
-    throw error;
-  }
-}
-
-async function validateOTPAuth(email: string, token: string) {
-  const {
-    data: { session },
-    error,
-  } = await supabase.auth.verifyOtp({
-    email,
-    token,
-    type: "email",
-  });
-  if (error) {
-    throw error;
-  }
-  if (session) {
-    const { error } = await supabase.auth.setSession(session);
+export default function LoginScreen() {
+  const queryClient = useQueryClient();
+  async function performOAuth(provider: Provider) {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+    });
+    queryClient.clear();
     if (error) {
       throw error;
     }
   }
-}
 
-export default function LoginScreen() {
+  async function performOTPAuth(email: string) {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+    });
+    if (error) {
+      throw error;
+    }
+  }
+
+  async function validateOTPAuth(email: string, token: string) {
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: "email",
+    });
+    if (error) {
+      throw error;
+    }
+    if (session) {
+      queryClient.clear();
+      const { error } = await supabase.auth.setSession(session);
+      if (error) {
+        throw error;
+      }
+    }
+  }
   useEffect(() => {
     return supabase.auth.onAuthStateChange((_event, session) => {
       if (session && !session.user.is_anonymous) {
