@@ -1,4 +1,5 @@
 import { PortalHost } from "@rn-primitives/portal";
+import * as Sentry from "@sentry/react-native";
 import { type Session } from "@supabase/supabase-js";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { router, Stack } from "expo-router";
@@ -7,6 +8,17 @@ import { Protocol } from "pmtiles";
 import { useEffect, useState } from "react";
 
 import { supabase } from "~/lib/supabase";
+
+Sentry.init({
+  enabled: !__DEV__,
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  autoSessionTracking: true,
+  attachScreenshot: true,
+  environment: __DEV__ ? "dev" : "prod",
+  sendDefaultPii: true,
+  tracesSampleRate: 1.0,
+  profilesSampleRate: 1.0,
+});
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -17,7 +29,7 @@ const queryClient = new QueryClient({
   },
 });
 
-export default function App() {
+export default Sentry.wrap(function App() {
   useEffect(() => {
     const protocol = new Protocol();
     maplibregl.addProtocol("pmtiles", protocol.tile);
@@ -51,4 +63,4 @@ export default function App() {
       <PortalHost />
     </QueryClientProvider>
   );
-}
+});

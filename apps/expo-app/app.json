@@ -49,7 +49,15 @@
       ],
       "expo-router",
       "@maplibre/maplibre-react-native",
-      "expo-font"
+      "expo-font",
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "ridi-apps-expo",
+          "organization": "hood-software"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
