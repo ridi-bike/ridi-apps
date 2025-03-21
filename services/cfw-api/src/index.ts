@@ -68,12 +68,7 @@ const router = tsr
   .routerWithMiddleware(apiContract)<{ user: User }>({
   userClaimData: async ({ body }, ctx) => {
     if (body.version !== "v1") {
-      return {
-        status: 400,
-        body: {
-          message: "wrong version",
-        },
-      };
+      throw ctx.logger.error("Wrong version", { version: body.version });
     }
     const { data } = await ctx.supabaseClient.auth.getUser(
       body.data.fromUserAccessToken,
@@ -113,12 +108,7 @@ const router = tsr
   },
   codeClaim: async ({ body }, ctx) => {
     if (body.version !== "v1") {
-      return {
-        status: 400,
-        body: {
-          message: "wrong version",
-        },
-      };
+      throw ctx.logger.error("Wrong version", { version: body.version });
     }
 
     const privateUser = await privateUsersGetRow(ctx.db, {
@@ -126,22 +116,16 @@ const router = tsr
     });
 
     if (!privateUser) {
-      return {
-        status: 500,
-        body: {
-          message: "Missing user record",
-        },
-      };
+      throw ctx.logger.error("Missing user record", {
+        userId: ctx.request.user.id,
+      });
     }
 
     if (privateUser?.subType !== "none") {
-      return {
-        status: 400,
-        body: {
-          message:
-            "Existing subscription in place. Cancel before claiming a code",
-        },
-      };
+      throw ctx.logger.error("Existing subscription in place", {
+        userId: ctx.request.user.id,
+        subType: privateUser.subType,
+      });
     }
 
     const code = await privateCodeGet(ctx.db, {
@@ -149,21 +133,18 @@ const router = tsr
     });
 
     if (!code) {
-      return {
-        status: 400,
-        body: {
-          message: "Code does not exist",
-        },
-      };
+      throw ctx.logger.error("Code does not exist", {
+        code: body.data.code,
+        userId: ctx.request.user.id,
+      });
     }
 
     if (code.claimedByUserId) {
-      return {
-        status: 400,
-        body: {
-          message: "Code already claimed",
-        },
-      };
+      throw ctx.logger.error("Code already claimed", {
+        code: body.data.code,
+        claimedByUserId: code.claimedByUserId,
+        userId: ctx.request.user.id,
+      });
     }
 
     await privateCodeClaim(ctx.db, {
@@ -183,12 +164,7 @@ const router = tsr
   },
   userGet: async ({ query: { version } }, ctx) => {
     if (version !== "v1") {
-      return {
-        status: 400,
-        body: {
-          message: "wrong version",
-        },
-      };
+      throw ctx.logger.error("Wrong version", { version });
     }
     const privateUser = await privateUsersGetRow(ctx.db, {
       userId: ctx.request.user.id,
@@ -208,12 +184,7 @@ const router = tsr
   },
   billingGet: async ({ query: { version } }, ctx) => {
     if (version !== "v1") {
-      return {
-        status: 400,
-        body: {
-          message: "wrong version",
-        },
-      };
+      throw ctx.logger.error("Wrong version", { version });
     }
     const stripeApi = new StripeApi(
       ctx.db,
@@ -337,12 +308,7 @@ const router = tsr
   },
   ruleSetsList: async ({ query }, ctx) => {
     if (query.version !== "v1") {
-      return {
-        status: 400,
-        body: {
-          message: "wrong version",
-        },
-      };
+      throw ctx.logger.error("Wrong version", { version: query.version });
     }
     const rules = await ruleSetsList(ctx.db, {
       userId: ctx.request.user.id,
@@ -368,12 +334,10 @@ const router = tsr
     const validated = ruleSetsListSchema.safeParse(data);
 
     if (!validated.success) {
-      return {
-        status: 500,
-        body: {
-          message: validated.error.toString(),
-        },
-      };
+      throw ctx.logger.error("Validation error in ruleSetsList", {
+        error: validated.error.toString(),
+        userId: ctx.request.user.id,
+      });
     }
 
     return {
@@ -383,12 +347,7 @@ const router = tsr
   },
   ruleSetSet: async ({ body }, ctx) => {
     if (body.version !== "v1") {
-      return {
-        status: 400,
-        body: {
-          message: "wrong version",
-        },
-      };
+      throw ctx.logger.error("Wrong version", { version: body.version });
     }
 
     const ruleSetCheck = await ruleSetGet(ctx.db, {
@@ -396,12 +355,10 @@ const router = tsr
     });
 
     if (ruleSetCheck && !ruleSetCheck.userId) {
-      return {
-        status: 400,
-        body: {
-          message: "Cannot modify system rule sets",
-        },
-      };
+      throw ctx.logger.error("Cannot modify system rule sets", {
+        ruleSetId: body.data.id,
+        userId: ctx.request.user.id,
+      });
     }
     const updatedRec = await ruleSetUpsert(ctx.db, {
       userId: ctx.request.user.id,
@@ -439,12 +396,10 @@ const router = tsr
     });
 
     if (ruleSetCheck && !ruleSetCheck.userId) {
-      return {
-        status: 400,
-        body: {
-          message: "Cannot modify system rule sets",
-        },
-      };
+      throw ctx.logger.error("Cannot delete system rule sets", {
+        ruleSetId: body.id,
+        userId: ctx.request.user.id,
+      });
     }
 
     await ruleSetSetDeleted(ctx.db, {
@@ -460,12 +415,7 @@ const router = tsr
   },
   planCreate: async ({ body: { version, data } }, ctx) => {
     if (version !== "v1") {
-      return {
-        status: 400,
-        body: {
-          message: "wrong version",
-        },
-      };
+      throw ctx.logger.error("Wrong version", { version });
     }
     let startFinishDesc: [string, null | string];
     try {
@@ -527,12 +477,7 @@ const router = tsr
   },
   plansList: async ({ query: { version } }, ctx) => {
     if (version !== "v1") {
-      return {
-        status: 400,
-        body: {
-          message: "wrong version",
-        },
-      };
+      throw ctx.logger.error("Wrong version", { version });
     }
     const plansFlat = await planList(ctx.db, {
       userId: ctx.request.user.id,
@@ -563,12 +508,10 @@ const router = tsr
     });
 
     if (!validated.success) {
-      return {
-        status: 500,
-        body: {
-          message: validated.error.toString(),
-        },
-      };
+      throw ctx.logger.error("Validation error in plansList", {
+        error: validated.error.toString(),
+        userId: ctx.request.user.id,
+      });
     }
 
     return {
@@ -583,12 +526,10 @@ const router = tsr
     });
 
     if (!deletedPlan) {
-      return {
-        status: 400,
-        body: {
-          message: "Record not found",
-        },
-      };
+      throw ctx.logger.error("Plan record not found", {
+        planId,
+        userId: ctx.request.user.id,
+      });
     }
 
     await routeDeleteByPlanId(ctx.db, {
@@ -605,12 +546,7 @@ const router = tsr
   },
   routeGet: async ({ params: { routeId }, query: { version } }, ctx) => {
     if (version !== "v1") {
-      return {
-        status: 400,
-        body: {
-          message: "wrong version",
-        },
-      } as const;
+      throw ctx.logger.error("Wrong version", { version });
     }
 
     try {
@@ -620,12 +556,10 @@ const router = tsr
       });
 
       if (!routesFlat.length) {
-        return {
-          status: 404,
-          body: {
-            message: `Id ${routeId} not found`,
-          },
-        };
+        throw ctx.logger.error("Route not found", {
+          routeId,
+          userId: ctx.request.user.id,
+        });
       }
 
       const statsBreakdown = await routeStatsGet(ctx.db, {
@@ -652,25 +586,22 @@ const router = tsr
 
       const validated = routeGetRespopnseSchema.safeParse(response);
       if (!validated.success) {
-        return {
-          status: 500,
-          body: {
-            message: validated.error.toString(),
-          },
-        };
+        throw ctx.logger.error("Validation error in routeGet", {
+          error: validated.error.toString(),
+          routeId,
+          userId: ctx.request.user.id,
+        });
       }
       return {
         status: 200,
         body: validated.data,
       };
     } catch (error) {
-      ctx.logger.error("Route get error", { error });
-      return {
-        status: 500,
-        body: {
-          message: "internal error",
-        },
-      } as const;
+      throw ctx.logger.error("Route get error", {
+        error,
+        routeId,
+        userId: ctx.request.user.id,
+      });
     }
   },
   routeDelete: async ({ params: { routeId } }, ctx) => {
@@ -680,12 +611,10 @@ const router = tsr
     });
 
     if (!deletedRoute) {
-      return {
-        status: 400,
-        body: {
-          message: "Row not found",
-        },
-      };
+      throw ctx.logger.error("Route not found for deletion", {
+        routeId,
+        userId: ctx.request.user.id,
+      });
     }
 
     return {
@@ -703,8 +632,6 @@ export default Sentry.withSentry(
   (env: CloudflareBindings) => ({
     enabled: env.RIDI_ENV === "prod",
     dsn: env.SENTRY_DSN,
-    autoSessionTracking: true,
-    attachScreenshot: true,
     environment: env.RIDI_ENV,
     sendDefaultPii: true,
     tracesSampleRate: 1.0,
@@ -762,6 +689,17 @@ export default Sentry.withSentry(
           contract: apiContract,
           router,
           options: {
+            errorHandler(err, req) {
+              Sentry.captureException(err, {
+                data: {
+                  req,
+                },
+              });
+              return TsRestResponse.fromJson(
+                { message: "Server error" },
+                { status: 500 },
+              );
+            },
             basePath: "/private",
             requestMiddleware: [
               tsr.middleware<{ timeStartMs: number }>((request) => {
