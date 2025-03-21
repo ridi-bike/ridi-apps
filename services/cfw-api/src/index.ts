@@ -411,16 +411,26 @@ const router = tsr
       throw new Error("can't happen");
     }
 
+    console.log(
+      "received rule set set",
+      body.data.id,
+      body.data.name,
+      Object.keys(body.data.roadTags).length,
+    );
+
     await Promise.all(
-      Object.entries(body.data.roadTags).map(([tagKey, value]) =>
-        ruleSetRoadTagsUpsert(ctx.db, {
+      Object.entries(body.data.roadTags).map(([tagKey, value]) => {
+        console.log({ tagKey, value });
+        return ruleSetRoadTagsUpsert(ctx.db, {
           ruleSetId: updatedRec.id,
           tagKey,
           value: value as string | null, // it's number but sqlc incorrectly wants a string
           userId: ctx.request.user.id,
-        }),
-      ),
+        });
+      }),
     );
+
+    console.log("ruel set set done");
     return {
       status: 201,
       body: {
