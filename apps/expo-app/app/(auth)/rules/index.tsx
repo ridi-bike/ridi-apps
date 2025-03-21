@@ -234,8 +234,6 @@ export default function RuleSetList() {
     }
   }, [navState.index, navState.routes, router]);
 
-  console.log({ ruleSets });
-
   return (
     <ScreenFrame
       title="Rule sets"

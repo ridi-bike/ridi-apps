@@ -411,16 +411,8 @@ const router = tsr
       throw new Error("can't happen");
     }
 
-    console.log(
-      "received rule set set",
-      body.data.id,
-      body.data.name,
-      Object.keys(body.data.roadTags).length,
-    );
-
     await Promise.all(
       Object.entries(body.data.roadTags).map(([tagKey, value]) => {
-        console.log({ tagKey, value });
         return ruleSetRoadTagsUpsert(ctx.db, {
           ruleSetId: updatedRec.id,
           tagKey,
@@ -430,7 +422,6 @@ const router = tsr
       }),
     );
 
-    console.log("ruel set set done");
     return {
       status: 201,
       body: {
@@ -733,68 +724,80 @@ export default {
       env.SUPABASE_SERVICE_ROLE_KEY,
     );
 
-    const db = postgres(env.SUPABASE_DB_URL);
-    const messaging = new Messaging(db, ridiLogger);
+    const dbCon = postgres(env.SUPABASE_DB_URL);
 
-    if (new URL(request.url).pathname.startsWith("/stripe-webhook")) {
-      const stripeApi = new StripeApi(
-        db,
-        ridiLogger,
-        env.STRIPE_SECRET_KEY,
-        env.RIDI_APP_URL,
-        env.STRIPE_WEBHOOK_SECRET,
-        env.STRIPE_PRICE_ID_MONTLY,
-        env.STRIPE_PRICE_ID_YEARLY,
-      );
-      return stripeApi.processWebhook(request, ctx.waitUntil);
+    let response: Response | undefined;
+
+    await dbCon.begin(async (tx) => {
+      const messaging = new Messaging(tx, ridiLogger);
+
+      if (new URL(request.url).pathname.startsWith("/stripe-webhook")) {
+        const stripeApi = new StripeApi(
+          tx,
+          ridiLogger,
+          env.STRIPE_SECRET_KEY,
+          env.RIDI_APP_URL,
+          env.STRIPE_WEBHOOK_SECRET,
+          env.STRIPE_PRICE_ID_MONTLY,
+          env.STRIPE_PRICE_ID_YEARLY,
+        );
+        response = await stripeApi.processWebhook(request, ctx.waitUntil);
+        return;
+      }
+
+      response = await fetchRequestHandler({
+        request,
+        contract: apiContract,
+        router,
+        options: {
+          basePath: "/private",
+          requestMiddleware: [
+            tsr.middleware<{ timeStartMs: number }>((request) => {
+              request.timeStartMs = Date.now();
+            }),
+            tsr.middleware<{ user: User; timeStartMs: number }>(
+              async (request) => {
+                const authHeader = request.headers.get("Authorization");
+                const token = authHeader?.replace("Bearer ", "") || "";
+                const { data } = await supabaseClient.auth.getUser(token);
+                const user = data.user;
+                if (!user) {
+                  return TsRestResponse.fromJson(
+                    { message: "Unauthorized" },
+                    { status: 401 },
+                  );
+                }
+                request.user = user;
+              },
+            ),
+          ],
+          responseHandlers: [
+            (_response, request) => {
+              ridiLogger.info("Req finished", {
+                ms: Date.now() - request.timeStartMs,
+              });
+            },
+          ],
+        },
+        platformContext: {
+          workerRequest: request as unknown as WorkerRequest,
+          workerEnv: env,
+          workerContext: ctx,
+          supabaseClient,
+          messaging,
+          db: tx,
+          logger: ridiLogger,
+        },
+      });
+    });
+
+    if (!response) {
+      throw ridiLogger.error("Reponse is undefined", { request, response });
     }
 
-    const response = await fetchRequestHandler({
-      request,
-      contract: apiContract,
-      router,
-      options: {
-        basePath: "/private",
-        requestMiddleware: [
-          tsr.middleware<{ timeStartMs: number }>((request) => {
-            request.timeStartMs = Date.now();
-          }),
-          tsr.middleware<{ user: User; timeStartMs: number }>(
-            async (request) => {
-              const authHeader = request.headers.get("Authorization");
-              const token = authHeader?.replace("Bearer ", "") || "";
-              const { data } = await supabaseClient.auth.getUser(token);
-              const user = data.user;
-              if (!user) {
-                return TsRestResponse.fromJson(
-                  { message: "Unauthorized" },
-                  { status: 401 },
-                );
-              }
-              request.user = user;
-            },
-          ),
-        ],
-        responseHandlers: [
-          (_response, request) => {
-            ridiLogger.info("Req finished", {
-              ms: Date.now() - request.timeStartMs,
-            });
-          },
-        ],
-      },
-      platformContext: {
-        workerRequest: request as unknown as WorkerRequest,
-        workerEnv: env,
-        workerContext: ctx,
-        supabaseClient,
-        messaging,
-        db,
-        logger: ridiLogger,
-      },
-    });
     response.headers.set("Access-Control-Allow-Origin", env.RIDI_APP_URL);
     response.headers.set("Access-Control-Allow-Credentials", "true");
+
     return response;
   },
 };

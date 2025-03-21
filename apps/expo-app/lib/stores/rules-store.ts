@@ -59,12 +59,6 @@ export function useStoreRuleSets() {
       ruleSetNewValues: Omit<RuleSetNew, "id"> & { id: string | null },
     ): string => {
       const id = ruleSetNewValues.id || generate();
-      console.log("ruleSetSet", {
-        ...ruleSetNewValues,
-        isSystem: false,
-        isDefault: false,
-        id,
-      });
       mutateSet({
         ...ruleSetNewValues,
         isSystem: false,
