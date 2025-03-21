@@ -9,4 +9,6 @@ interface CloudflareBindings {
 	STRIPE_PRICE_ID_MONTLY: string;
 	STRIPE_PRICE_ID_YEARLY: string;
 	STRIPE_WEBHOOK_SECRET: string;
+	SENTRY_DSN: string;
+	RIDI_ENV: string;
 }

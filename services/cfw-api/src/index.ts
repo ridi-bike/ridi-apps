@@ -38,6 +38,7 @@ import { RidiLogger } from "@ridi/logger";
 import { lookupCooordsInfo } from "@ridi/maps-api";
 import { Messaging } from "@ridi/messaging";
 import { StripeApi } from "@ridi/stripe-api";
+import * as Sentry from "@sentry/cloudflare";
 import { type User } from "@supabase/supabase-js";
 import { createClient } from "@supabase/supabase-js";
 import {
@@ -698,106 +699,118 @@ const router = tsr
 
 const ridiLogger = RidiLogger.init({ service: "cfw-api" });
 
-export default {
-  async fetch(
-    request: Request,
-    env: CloudflareBindings,
-    ctx: ExecutionContext,
-  ): Promise<Response> {
-    if (request.method === "OPTIONS") {
-      return new Response("ok", {
-        headers: {
-          "Access-Control-Allow-Origin": env.RIDI_APP_URL,
-          "Access-Control-Allow-Credentials": "true",
-          "Access-Control-Allow-Headers":
-            "authorization, origin, content-type, accept",
-          "Access-Control-Allow-Methods": "GET, POST, DELETE",
-        },
-      });
-    }
-    if (request.method === "HEAD") {
-      return new Response();
-    }
-
-    const supabaseClient = createClient(
-      env.SUPABASE_URL,
-      env.SUPABASE_SERVICE_ROLE_KEY,
-    );
-
-    const dbCon = postgres(env.SUPABASE_DB_URL);
-
-    let response: Response | undefined;
-
-    await dbCon.begin(async (tx) => {
-      const messaging = new Messaging(tx, ridiLogger);
-
-      if (new URL(request.url).pathname.startsWith("/stripe-webhook")) {
-        const stripeApi = new StripeApi(
-          tx,
-          ridiLogger,
-          env.STRIPE_SECRET_KEY,
-          env.RIDI_APP_URL,
-          env.STRIPE_WEBHOOK_SECRET,
-          env.STRIPE_PRICE_ID_MONTLY,
-          env.STRIPE_PRICE_ID_YEARLY,
-        );
-        response = await stripeApi.processWebhook(request, ctx.waitUntil);
-        return;
+export default Sentry.withSentry(
+  (env: CloudflareBindings) => ({
+    enabled: env.RIDI_ENV === "prod",
+    dsn: env.SENTRY_DSN,
+    autoSessionTracking: true,
+    attachScreenshot: true,
+    environment: env.RIDI_ENV,
+    sendDefaultPii: true,
+    tracesSampleRate: 1.0,
+    profilesSampleRate: 1.0,
+  }),
+  {
+    async fetch(
+      request: Request,
+      env: CloudflareBindings,
+      ctx: ExecutionContext,
+    ): Promise<Response> {
+      if (request.method === "OPTIONS") {
+        return new Response("ok", {
+          headers: {
+            "Access-Control-Allow-Origin": env.RIDI_APP_URL,
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Headers":
+              "authorization, origin, content-type, accept",
+            "Access-Control-Allow-Methods": "GET, POST, DELETE",
+          },
+        });
+      }
+      if (request.method === "HEAD") {
+        return new Response();
       }
 
-      response = await fetchRequestHandler({
-        request,
-        contract: apiContract,
-        router,
-        options: {
-          basePath: "/private",
-          requestMiddleware: [
-            tsr.middleware<{ timeStartMs: number }>((request) => {
-              request.timeStartMs = Date.now();
-            }),
-            tsr.middleware<{ user: User; timeStartMs: number }>(
-              async (request) => {
-                const authHeader = request.headers.get("Authorization");
-                const token = authHeader?.replace("Bearer ", "") || "";
-                const { data } = await supabaseClient.auth.getUser(token);
-                const user = data.user;
-                if (!user) {
-                  return TsRestResponse.fromJson(
-                    { message: "Unauthorized" },
-                    { status: 401 },
-                  );
-                }
-                request.user = user;
+      const supabaseClient = createClient(
+        env.SUPABASE_URL,
+        env.SUPABASE_SERVICE_ROLE_KEY,
+      );
+
+      const dbCon = postgres(env.SUPABASE_DB_URL);
+
+      let response: Response | undefined;
+
+      await dbCon.begin(async (tx) => {
+        const messaging = new Messaging(tx, ridiLogger);
+
+        if (new URL(request.url).pathname.startsWith("/stripe-webhook")) {
+          const stripeApi = new StripeApi(
+            tx,
+            ridiLogger,
+            env.STRIPE_SECRET_KEY,
+            env.RIDI_APP_URL,
+            env.STRIPE_WEBHOOK_SECRET,
+            env.STRIPE_PRICE_ID_MONTLY,
+            env.STRIPE_PRICE_ID_YEARLY,
+          );
+          response = await stripeApi.processWebhook(request, ctx.waitUntil);
+          return;
+        }
+
+        response = await fetchRequestHandler({
+          request,
+          contract: apiContract,
+          router,
+          options: {
+            basePath: "/private",
+            requestMiddleware: [
+              tsr.middleware<{ timeStartMs: number }>((request) => {
+                request.timeStartMs = Date.now();
+              }),
+              tsr.middleware<{ user: User; timeStartMs: number }>(
+                async (request) => {
+                  const authHeader = request.headers.get("Authorization");
+                  const token = authHeader?.replace("Bearer ", "") || "";
+                  const { data } = await supabaseClient.auth.getUser(token);
+                  const user = data.user;
+                  if (!user) {
+                    return TsRestResponse.fromJson(
+                      { message: "Unauthorized" },
+                      { status: 401 },
+                    );
+                  }
+                  request.user = user;
+                },
+              ),
+            ],
+            responseHandlers: [
+              (_response, request) => {
+                ridiLogger.info("Req finished", {
+                  ms: Date.now() - request.timeStartMs,
+                });
               },
-            ),
-          ],
-          responseHandlers: [
-            (_response, request) => {
-              ridiLogger.info("Req finished", {
-                ms: Date.now() - request.timeStartMs,
-              });
-            },
-          ],
-        },
-        platformContext: {
-          workerRequest: request as unknown as WorkerRequest,
-          workerEnv: env,
-          workerContext: ctx,
-          supabaseClient,
-          messaging,
-          db: tx,
-          logger: ridiLogger,
-        },
+            ],
+          },
+          platformContext: {
+            workerRequest: request as unknown as WorkerRequest,
+            workerEnv: env,
+            workerContext: ctx,
+            supabaseClient,
+            messaging,
+            db: tx,
+            logger: ridiLogger,
+          },
+        });
       });
-    });
 
-    if (!response) {
-      throw ridiLogger.error("Reponse is undefined", { request, response });
-    }
+      if (!response) {
+        throw ridiLogger.error("Reponse is undefined", { request, response });
+      }
 
-    response.headers.set("Access-Control-Allow-Origin", env.RIDI_APP_URL);
-    response.headers.set("Access-Control-Allow-Credentials", "true");
+      response.headers.set("Access-Control-Allow-Origin", env.RIDI_APP_URL);
+      response.headers.set("Access-Control-Allow-Credentials", "true");
 
-    return response;
-  },
-};
+      return response;
+    },
+  } satisfies ExportedHandler<CloudflareBindings>,
+);

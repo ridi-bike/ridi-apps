@@ -468,6 +468,9 @@ importers:
       '@ridi/stripe-api':
         specifier: workspace:^
         version: link:../../libs/stripe-api
+      '@sentry/cloudflare':
+        specifier: ^9.8.0
+        version: 9.8.0(@cloudflare/workers-types@4.20250313.0)
       '@supabase/supabase-js':
         specifier: ^2.48.1
         version: 2.49.1
@@ -3242,9 +3245,22 @@ packages:
     engines: {node: '>= 10'}
     hasBin: true
 
+  '@sentry/cloudflare@9.8.0':
+    resolution: {integrity: sha512-yxGaiYW9VAC7LwZWk6NcDknkdZjmv39+pHgCg1xmiU+sIh5KRq9qYWMJjSaOi1cy7Os6oHJ/N1rhDIOZK9k1mg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@cloudflare/workers-types': ^4.x
+    peerDependenciesMeta:
+      '@cloudflare/workers-types':
+        optional: true
+
   '@sentry/core@8.54.0':
     resolution: {integrity: sha512-03bWf+D1j28unOocY/5FDB6bUHtYlm6m6ollVejhg45ZmK9iPjdtxNWbrLsjT1WRym0Tjzowu+A3p+eebYEv0Q==}
     engines: {node: '>=14.18'}
+
+  '@sentry/core@9.8.0':
+    resolution: {integrity: sha512-EnN2yLWCbWjooWBPzwlXdZoJG/Bqn3ymbuXX++DUJuBGjSmtixQeTf/hKeVzj4zbib3BbbYsNBasRVjq8Rk5ng==}
+    engines: {node: '>=18'}
 
   '@sentry/react-native@6.9.1':
     resolution: {integrity: sha512-f/JsOeQdTKJBXsXaUzb3INLIWWLIFbc2nmOASgLmk9tY2k3fyjpn/XwyZnH2TE1iMlBLeVXofzdiVsSY8OXlaQ==}
@@ -14449,7 +14465,15 @@ snapshots:
       - encoding
       - supports-color
 
+  '@sentry/cloudflare@9.8.0(@cloudflare/workers-types@4.20250313.0)':
+    dependencies:
+      '@sentry/core': 9.8.0
+    optionalDependencies:
+      '@cloudflare/workers-types': 4.20250313.0
+
   '@sentry/core@8.54.0': {}
+
+  '@sentry/core@9.8.0': {}
 
   '@sentry/react-native@6.9.1(encoding@0.1.13)(expo@51.0.39(@babel/core@7.26.10)(encoding@0.1.13))(react-native@0.74.5(@babel/core@7.26.10)(@types/react@18.2.79)(encoding@0.1.13)(react@18.2.0))(react@18.2.0)':
     dependencies:

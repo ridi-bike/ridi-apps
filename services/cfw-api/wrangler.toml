@@ -11,6 +11,8 @@ enabled = true
 [vars]
 SUPABASE_URL = "https://sb.ridi.bike"
 RIDI_APP_URL = "https://app.ridi.bike"
+SENTRY_DSN = "https://57ef996c2cdb0754386a7cfa02783c4f@o337283.ingest.us.sentry.io/4509016159420416"
+RIDI_ENV = "prod"
 
 # Note: Use secrets to store sensitive data.
 # https://developers.cloudflare.com/workers/configuration/secrets/
