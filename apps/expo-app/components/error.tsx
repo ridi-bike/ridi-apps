@@ -1,15 +1,11 @@
+import * as Sentry from "@sentry/react-native";
 import * as Clipboard from "expo-clipboard";
 import { AlertCircle, Copy, RefreshCcw } from "lucide-react-native";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import { generate } from "xksuid";
 
 import { MotiPressable } from "~/lib/nativewind";
-import { useEffectOnce } from "~/lib/utils";
-
-const copyToClipboard = async () => {
-  await Clipboard.setStringAsync("hello world");
-};
 
 export function ErrorBox({
   retry,
@@ -21,7 +17,17 @@ export function ErrorBox({
   refId?: string;
 }) {
   const [errorId] = useState(refId || generate());
-  useEffectOnce(() => console.error(error));
+
+  useEffect(() => {
+    Sentry.captureException(error, {
+      event_id: errorId,
+    });
+  }, [error, errorId]);
+
+  const copyToClipboard = useCallback(
+    () => Clipboard.setStringAsync(errorId),
+    [errorId],
+  );
 
   return (
     <View
@@ -72,7 +78,7 @@ export function ErrorBox({
                 "ml-auto w-full rounded-md p-1 transition-colors hover:bg-[#FFF5F3] dark:hover:bg-gray-800"
               }
             >
-              <Copy className="size-5 text-[#FF5937]" />
+              <Copy className="size-4 text-[#FF5937]" />
             </MotiPressable>
           </View>
         </View>

@@ -234,6 +234,8 @@ export default function RuleSetList() {
     }
   }, [navState.index, navState.routes, router]);
 
+  console.log({ ruleSets });
+
   return (
     <ScreenFrame
       title="Rule sets"
@@ -257,10 +259,10 @@ export default function RuleSetList() {
             <MotiView
               from={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="grid grid-cols-1 gap-6 pb-12 md:grid-cols-3"
+              className="w-full"
             >
               <ScrollView className="h-[calc(100vh-130px)]">
-                <View className="mr-2 grid grid-cols-1 gap-6 pb-12 md:grid-cols-3">
+                <View className="mr-2 grid grid-cols-1 gap-6 pb-12 md:grid-cols-2 lg:grid-cols-3">
                   {!!error && status !== "pending" && (
                     <View className="mx-2 max-w-5xl flex-1">
                       <ErrorBox error={error} retry={refetch} />
