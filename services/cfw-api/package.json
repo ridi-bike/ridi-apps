@@ -12,6 +12,7 @@
     "@ridi/maps-api": "workspace:^",
     "@ridi/messaging": "workspace:^",
     "@ridi/stripe-api": "workspace:^",
+    "@sentry/cli": "^2.42.4",
     "@sentry/cloudflare": "^9.8.0",
     "@supabase/supabase-js": "^2.48.1",
     "@ts-rest/serverless": "^3.51.0",

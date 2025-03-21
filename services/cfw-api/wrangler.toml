@@ -2,6 +2,7 @@ name = "ridi-apps-api"
 main = "src/index.ts"
 compatibility_date = "2025-01-29"
 compatibility_flags = ["nodejs_compat"]
+upload_source_maps = true
 
 [observability]
 enabled = true
