@@ -417,7 +417,7 @@ export const apiContract = c.router({
       id: z.string(),
     }),
     responses: {
-      204: z.object({ id: z.string() }),
+      200: z.object({ id: z.string() }),
       500: z.object({ message: z.string() }),
     },
     summary: "Delete a route by ID",
@@ -440,7 +440,7 @@ export const apiContract = c.router({
     method: "DELETE",
     path: "/user/routes/:routeId",
     responses: {
-      204: z.object({ id: z.string() }),
+      200: z.object({ id: z.string() }),
       500: z.object({ message: z.string() }),
     },
     summary: "Delete route by ID",
@@ -449,7 +449,7 @@ export const apiContract = c.router({
     method: "DELETE",
     path: "/user/plans/:planId",
     responses: {
-      204: z.object({ id: z.string() }),
+      200: z.object({ id: z.string() }),
       500: z.object({ message: z.string() }),
     },
     summary: "Delete plan by ID",

@@ -407,7 +407,7 @@ const router = tsr
     });
 
     return {
-      status: 204,
+      status: 200,
       body: {
         id: body.id,
       },
@@ -538,7 +538,7 @@ const router = tsr
     });
 
     return {
-      status: 204,
+      status: 200,
       body: {
         id: deletedPlan.id,
       },
@@ -618,7 +618,7 @@ const router = tsr
     }
 
     return {
-      status: 204,
+      status: 200,
       body: {
         id: deletedRoute.id,
       },
@@ -748,7 +748,9 @@ export default Sentry.withSentry(
       response.headers.set("Access-Control-Allow-Origin", env.RIDI_APP_URL);
       response.headers.set("Access-Control-Allow-Credentials", "true");
 
+
       return response;
     },
-  } satisfies ExportedHandler<CloudflareBindings>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as ExportedHandler<any, unknown, unknown>,
 );
