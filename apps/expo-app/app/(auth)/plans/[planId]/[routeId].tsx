@@ -241,7 +241,7 @@ export default function RouteDetails() {
               animate={{ opacity: 1 }}
               className="mx-2 max-w-5xl flex-1 gap-4"
             >
-              <ScrollView className="h-[calc(100vh-100px)]">
+              <ScrollView className="h-[calc(100vh-100px)] pb-12">
                 <View className="mx-2 max-w-5xl flex-1 gap-4">
                   <ScreenCard
                     topClassName="h-[65vh]"

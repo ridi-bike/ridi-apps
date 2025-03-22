@@ -104,7 +104,7 @@ export default function PlansPage() {
               duration: 500,
             }}
           >
-            <ScrollView className="h-[calc(100vh-100px)]">
+            <ScrollView className="h-[calc(100vh-100px)] pb-24">
               <View className="grid size-full grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {plans.map((plan, index) => (
                   <MotiPressable

@@ -6,7 +6,6 @@ import {
   CirclePlay,
   Compass,
   Map,
-  MapPin,
   Navigation,
   Ruler,
   Trash2,
@@ -270,8 +269,7 @@ function GeneratingRoutes({ createdAt }: { createdAt: Date }) {
                 longer.
               </Text>
               <View className="flex flex-row items-center gap-2">
-                <Bell className="size-8 p-4 text-[#FF5937]" />
-                <Text className="text-lg font-medium text-[#FF5937]">
+                <Text className="flex-1 text-lg font-medium text-[#FF5937]">
                   You can come back later and the routes will be waiting for
                   you! Or create more plans in the meantime.
                 </Text>
@@ -289,7 +287,7 @@ export default function PlanDetails() {
   const { planId } = useLocalSearchParams();
   const { data: plans, error, status, refetch, planDelete } = useStorePlans();
   const plan = plans?.find((p) => p.id === planId);
-  console.log({ plan });
+
   return (
     <ScreenFrame title="Plan routes" onGoBack={() => router.replace("/plans")}>
       <AnimatePresence exitBeforeEnter>
@@ -309,7 +307,7 @@ export default function PlanDetails() {
             animate={{ opacity: 1 }}
             className="mx-2 max-w-5xl flex-1"
           >
-            <ScrollView className="h-[calc(100vh-100px)]">
+            <ScrollView className="h-[calc(100vh-100px)] pb-12">
               <View className="mx-2 max-w-5xl flex-1">
                 <ScreenCard
                   middle={

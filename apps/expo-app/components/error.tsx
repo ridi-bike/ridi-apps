@@ -59,27 +59,29 @@ export function ErrorBox({
           >
             <Text
               className={
-                "w-full font-mono font-bold text-[#FF5937] dark:text-gray-200"
+                "max-w-[calc(100%-1.5rem)] font-mono font-bold text-[#FF5937] dark:text-gray-200"
               }
             >
               {errorId}
             </Text>
-            <MotiPressable
-              animate={({ pressed }) => {
-                "worklet";
+            <View>
+              <MotiPressable
+                animate={({ pressed }) => {
+                  "worklet";
 
-                return {
-                  scale: pressed ? 1.2 : 1,
-                };
-              }}
-              onPress={copyToClipboard}
-              accessibilityLabel="Copy error ID"
-              className={
-                "ml-auto w-full rounded-md p-1 transition-colors hover:bg-[#FFF5F3] dark:hover:bg-gray-800"
-              }
-            >
-              <Copy className="size-4 text-[#FF5937]" />
-            </MotiPressable>
+                  return {
+                    scale: pressed ? 1.2 : 1,
+                  };
+                }}
+                onPress={copyToClipboard}
+                accessibilityLabel="Copy error ID"
+                className={
+                  "ml-auto w-full rounded-md p-1 transition-colors hover:bg-[#FFF5F3] dark:hover:bg-gray-800"
+                }
+              >
+                <Copy className="size-4 text-[#FF5937]" />
+              </MotiPressable>
+            </View>
           </View>
         </View>
       </View>
