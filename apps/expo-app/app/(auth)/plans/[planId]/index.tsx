@@ -2,6 +2,8 @@ import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import {
   Bell,
   Bug,
+  CirclePause,
+  CirclePlay,
   Compass,
   Map,
   MapPin,
@@ -270,9 +272,8 @@ function GeneratingRoutes({ createdAt }: { createdAt: Date }) {
               <View className="flex flex-row items-center gap-2">
                 <Bell className="size-8 p-4 text-[#FF5937]" />
                 <Text className="text-lg font-medium text-[#FF5937]">
-                  Don&apos;t worry - we&apos;ll send you a notification when
-                  your routes are ready! Feel free to create more plans in the
-                  meantime.
+                  You can come back later and the routes will be waiting for
+                  you! Or create more plans in the meantime.
                 </Text>
               </View>
             </View>
@@ -315,24 +316,28 @@ export default function PlanDetails() {
                     <>
                       <View className="space-y-4">
                         <View className="flex flex-row items-start gap-3">
-                          <MapPin className="mt-1 size-6 text-[#FF5937]" />
                           <View>
+                            <CirclePlay className="mt-1 size-6 text-[#FF5937]" />
+                          </View>
+                          <View className="flex-1">
                             <Text className="text-sm font-bold text-[#FF5937]">
                               Start
                             </Text>
-                            <Text className="text-base font-medium dark:text-gray-200">
+                            <Text className="truncate text-base font-medium dark:text-gray-200">
                               {plan.startDesc}
                             </Text>
                           </View>
                         </View>
                         {plan.tripType === "start-finish" && (
                           <View className="flex flex-row items-start gap-3">
-                            <Navigation className="mt-1 size-6 text-[#FF5937]" />
                             <View>
+                              <CirclePause className="mt-1 size-6 text-[#FF5937]" />
+                            </View>
+                            <View className="flex-1">
                               <Text className="text-sm font-bold text-[#FF5937]">
                                 Finish
                               </Text>
-                              <Text className="text-base font-medium dark:text-gray-200">
+                              <Text className="truncate text-base font-medium dark:text-gray-200">
                                 {plan?.finishDesc}
                               </Text>
                             </View>

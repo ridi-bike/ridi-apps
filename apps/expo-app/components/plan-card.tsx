@@ -1,4 +1,4 @@
-import { MapPin, Navigation } from "lucide-react-native";
+import { CirclePause, CirclePlay, Navigation } from "lucide-react-native";
 import { View, Text } from "react-native";
 
 import { type Plan } from "~/lib/stores/plans-store";
@@ -42,9 +42,11 @@ export const PlanCard = ({
       }
       middle={
         <>
-          <View className="flex flex-row items-start gap-3">
-            <MapPin className="mt-1 size-6 text-[#FF5937]" />
+          <View className="flex w-full flex-row items-start gap-3">
             <View>
+              <CirclePlay className="mt-1 size-6 w-full text-[#FF5937]" />
+            </View>
+            <View className="flex-1">
               <Text
                 role="heading"
                 aria-level={2}
@@ -52,7 +54,7 @@ export const PlanCard = ({
               >
                 Start
               </Text>
-              <Text className="text-base font-medium dark:text-gray-200">
+              <Text className="truncate text-base font-medium dark:text-gray-200">
                 {startDesc}
               </Text>
             </View>
@@ -76,8 +78,10 @@ export const PlanCard = ({
           )}
           {tripType === "start-finish" && (
             <View className="flex flex-row items-start gap-3">
-              <Navigation className="mt-1 size-6 text-[#FF5937]" />
               <View>
+                <CirclePause className="mt-1 size-6 text-[#FF5937]" />
+              </View>
+              <View className="flex-1">
                 <Text
                   role="heading"
                   aria-level={2}
@@ -85,7 +89,7 @@ export const PlanCard = ({
                 >
                   Finish
                 </Text>
-                <Text className="text-base font-medium dark:text-gray-200">
+                <Text className="truncate text-base font-medium dark:text-gray-200">
                   {finishDesc}
                 </Text>
               </View>

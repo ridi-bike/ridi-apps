@@ -25,16 +25,16 @@ export function ScreenCard({
       {!!top && (
         <View
           className={cn(
-            "mb-6 h-56 overflow-hidden rounded-xl border-2 border-black dark:border-gray-700",
+            "mb-6 h-56 w-full overflow-hidden rounded-xl border-2 border-black dark:border-gray-700",
             topClassName,
           )}
         >
           {top}
         </View>
       )}
-      {!!middle && <View className="mb-4">{middle}</View>}
+      {!!middle && <View className="mb-4 w-full">{middle}</View>}
       {!!bottom && (
-        <View className="border-t-2 border-black pt-4 text-base dark:border-gray-700">
+        <View className="w-full border-t-2 border-black pt-4 text-base dark:border-gray-700">
           {bottom}
         </View>
       )}

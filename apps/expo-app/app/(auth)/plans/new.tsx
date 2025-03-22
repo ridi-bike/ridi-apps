@@ -445,7 +445,7 @@ export default function PlansNew() {
                 {!isRoundTrip && (
                   <View className="flex flex-row items-center gap-2">
                     <CirclePauseIcon className="size-4 text-[#FF5937]" />
-                    <Text className="overflow-hidden text-ellipsis text-nowrap text-sm dark:text-gray-200">
+                    <Text className="truncate text-sm dark:text-gray-200">
                       Finish:{" "}
                       {finishCoords
                         ? finishDesc ||
