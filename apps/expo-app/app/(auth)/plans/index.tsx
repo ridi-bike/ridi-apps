@@ -25,7 +25,7 @@ export default function PlansPage() {
 
         return {
           opacity: pressed ? 0.5 : 1,
-          scale: hovered ? 1.01 : 1,
+          scale: hovered ? 0.99 : 1,
         };
       },
     [],

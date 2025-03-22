@@ -259,7 +259,7 @@ export default function PlansNew() {
                 },
               )}
             >
-              <Text className="text-center text-white">Close map</Text>
+              <Text className="text-center text-white">OK</Text>
             </Pressable>
           )}
           {!mapMode && (
@@ -352,56 +352,64 @@ export default function PlansNew() {
               setStart={(c) => setStartCoords(c ? [c.lat, c.lon] : undefined)}
               setFinish={(c) => setFinishCoords(c ? [c.lat, c.lon] : undefined)}
             >
-              <View className="float-right flex flex-col items-end justify-start gap-2 p-4">
-                <Pressable
-                  role="button"
-                  onPress={getCurrentLocation}
-                  className={cn(
-                    "flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 p-4",
-
-                    {
-                      "border-[#FF5937] bg-[#FF5937] text-white": currentCoords,
-                      "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
-                        !currentCoords,
-                    },
-                  )}
-                >
-                  <Locate className="size-4 dark:text-gray-200" />
-                </Pressable>
-                <Pressable
-                  role="button"
-                  onPress={() => setCenterSelectionMode(!centerSelectionMode)}
-                  className={cn(
-                    "flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 p-4",
-                    {
-                      "border-[#FF5937] bg-[#FF5937] text-white":
-                        centerSelectionMode,
-                      "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
-                        !centerSelectionMode,
-                    },
-                  )}
-                >
-                  <MapPinned className="size-4 dark:text-gray-200" />
-                </Pressable>
-                {!searchPoints && (
-                  <Link
-                    href="/search"
-                    className="flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 border-black bg-white p-4 dark:border-gray-700 dark:bg-gray-900"
-                  >
-                    <Search className="size-4 dark:text-gray-200" />
-                  </Link>
-                )}
-                {searchPoints?.length && (
+              <View className="pointer-events-none flex w-full flex-row items-start justify-center">
+                <View className="flex flex-1 flex-row items-start justify-center p-4">
+                  <Text className="ml-10 rounded-lg bg-gray-400 px-2 py-1 text-sm text-gray-200">
+                    Tap on map to start
+                  </Text>
+                </View>
+                <View className="float-right flex flex-col items-end justify-start gap-2 p-4">
                   <Pressable
                     role="button"
-                    onPress={() => {
-                      setSearchPoints();
-                    }}
-                    className="flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 border-[#FF5937] bg-[#FF5937] p-4 text-white"
+                    onPress={getCurrentLocation}
+                    className={cn(
+                      "flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 p-4",
+
+                      {
+                        "border-[#FF5937] bg-[#FF5937] text-white":
+                          currentCoords,
+                        "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
+                          !currentCoords,
+                      },
+                    )}
                   >
-                    <Search className="size-4 dark:text-gray-200" />
+                    <Locate className="size-4 dark:text-gray-200" />
                   </Pressable>
-                )}
+                  <Pressable
+                    role="button"
+                    onPress={() => setCenterSelectionMode(!centerSelectionMode)}
+                    className={cn(
+                      "flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 p-4",
+                      {
+                        "border-[#FF5937] bg-[#FF5937] text-white":
+                          centerSelectionMode,
+                        "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
+                          !centerSelectionMode,
+                      },
+                    )}
+                  >
+                    <MapPinned className="size-4 dark:text-gray-200" />
+                  </Pressable>
+                  {!searchPoints && (
+                    <Link
+                      href="/search"
+                      className="flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 border-black bg-white p-4 dark:border-gray-700 dark:bg-gray-900"
+                    >
+                      <Search className="size-4 dark:text-gray-200" />
+                    </Link>
+                  )}
+                  {searchPoints?.length && (
+                    <Pressable
+                      role="button"
+                      onPress={() => {
+                        setSearchPoints();
+                      }}
+                      className="flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 border-[#FF5937] bg-[#FF5937] p-4 text-white"
+                    >
+                      <Search className="size-4 dark:text-gray-200" />
+                    </Pressable>
+                  )}
+                </View>
               </View>
             </GeoMapCoordsSelector>
           </MotiView>
