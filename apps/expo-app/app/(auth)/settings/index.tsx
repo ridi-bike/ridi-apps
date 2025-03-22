@@ -30,7 +30,7 @@ export default function UserSettings() {
   return (
     <ScreenFrame
       onGoBack={() =>
-        router.canGoBack() ? router.back() : router.push("/plans")
+        router.canGoBack() ? router.back() : router.replace("/plans")
       }
       title="Settings"
     >

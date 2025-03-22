@@ -82,12 +82,7 @@ export default function BillingPage() {
   }
 
   return (
-    <ScreenFrame
-      onGoBack={() =>
-        router.canGoBack() ? router.back() : router.push("/plans")
-      }
-      title="Billing"
-    >
+    <ScreenFrame onGoBack={() => router.replace("/settings")} title="Billing">
       <View className="flex size-full flex-col items-center justify-start">
         <AnimatePresence>
           {user?.subType === "code" && (
