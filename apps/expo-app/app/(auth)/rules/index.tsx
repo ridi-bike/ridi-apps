@@ -237,7 +237,7 @@ export default function RuleSetList() {
   return (
     <ScreenFrame
       title="Rule sets"
-      onGoBack={() => router.back()}
+      onGoBack={gotoNewScreen}
       floating={
         <View className="fixed bottom-0 w-full bg-white p-4 dark:bg-gray-800">
           <Pressable

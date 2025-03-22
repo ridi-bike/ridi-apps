@@ -21,6 +21,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { View, Text, Pressable, TextInput, ScrollView } from "react-native";
 
+import { ErrorBox } from "~/components/error";
 import { ScreenCard } from "~/components/screen-card";
 import { ScreenFrame } from "~/components/screen-frame";
 import { useStoreRuleSets } from "~/lib/stores/rules-store";
@@ -61,7 +62,7 @@ function roadTagsDefined<T>(v: T | undefined): asserts v is T {
 export default function RulePackDetails() {
   const router = useRouter();
   const { ruleSetId } = useLocalSearchParams();
-  const { data: ruleSets, error, ruleSetSet, status } = useStoreRuleSets();
+  const { data: ruleSets, error, ruleSetSet, refetch } = useStoreRuleSets();
   const ruleSet = ruleSets?.find((rp) => rp.id === ruleSetId);
   const [roadTags, setRoadTags] = useState(ruleSet?.roadTags);
   const [groupsExpanded, setGroupsExpanded] = useState<number[]>([]);
@@ -191,7 +192,10 @@ export default function RulePackDetails() {
 
   if (!ruleSet || !roadTags) {
     return (
-      <ScreenFrame title="Plan routes">
+      <ScreenFrame
+        title="Plan routes"
+        onGoBack={() => router.replace("/rules")}
+      >
         <View className="mx-2 max-w-5xl flex-1">
           <ScreenCard
             middle={
@@ -212,9 +216,7 @@ export default function RulePackDetails() {
   return (
     <ScreenFrame
       title="Routing rules"
-      onGoBack={() =>
-        router.canGoBack() ? router.back() : router.replace("/rules")
-      }
+      onGoBack={() => router.replace("/rules")}
       floating={
         !ruleSet.isSystem && (
           <View className="fixed bottom-0 w-full bg-white p-4 dark:bg-gray-800">
@@ -247,6 +249,11 @@ export default function RulePackDetails() {
     >
       <View className="mx-2 max-w-5xl flex-1">
         <View className="flex flex-col gap-6 pb-12">
+          {!!error && (
+            <View>
+              <ErrorBox error={error} retry={refetch} />
+            </View>
+          )}
           <View
             className={cn(
               "border-black dark:border-gray-700 overflow-hidden rounded-2xl border-[3px]",

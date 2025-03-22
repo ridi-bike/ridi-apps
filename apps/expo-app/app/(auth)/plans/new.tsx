@@ -225,13 +225,7 @@ export default function PlansNew() {
   return (
     <ScreenFrame
       title="New plan"
-      onGoBack={() =>
-        mapMode
-          ? setMapMode(false)
-          : router.canGoBack()
-            ? router.back()
-            : router.replace("/plans")
-      }
+      onGoBack={() => (mapMode ? setMapMode(false) : router.replace("/plans"))}
       floating={
         <View className="fixed bottom-0 w-full bg-white p-4 dark:bg-gray-800">
           <AnimatePresence>
