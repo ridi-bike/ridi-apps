@@ -61,6 +61,7 @@ export function useStoreRuleSets() {
       const id = ruleSetNewValues.id || generate();
       mutateSet({
         ...ruleSetNewValues,
+        icon: null,
         isSystem: false,
         isDefault: false,
         id,

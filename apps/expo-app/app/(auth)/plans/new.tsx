@@ -26,6 +26,9 @@ import { GeoMapPlanView } from "~/components/geo-map/geo-map-plan-view";
 import { DIRECTIONS, getCardinalDirection } from "~/components/geo-map/util";
 import { LocationPermsNotGiven } from "~/components/LocationPermsNotGiven";
 import { ScreenFrame } from "~/components/screen-frame";
+import { AdvIcon } from "~/lib/icons/adv";
+import { DualsportIcon } from "~/lib/icons/dualsport";
+import { TouringIcon } from "~/lib/icons/touring";
 import { findRegions, type Region } from "~/lib/regions";
 import { useStorePlans } from "~/lib/stores/plans-store";
 import { useStoreRuleSets } from "~/lib/stores/rules-store";
@@ -510,6 +513,7 @@ export default function PlansNew() {
             Array(3).map((_, id) => ({
               id,
               isSystem: true,
+              icon: null,
               name: "...",
               isDefault: false,
             }))
@@ -533,10 +537,18 @@ export default function PlansNew() {
                   },
                 )}
               >
-                <Waypoints className="size-4 dark:text-gray-200" />
-                <Text className="text-center text-sm dark:text-gray-200">
-                  {rs.name}
-                </Text>
+                {rs.icon === "adv" && (
+                  <AdvIcon className="size-12 dark:fill-gray-200" />
+                )}
+                {rs.icon === "touring" && (
+                  <TouringIcon className="size-12 dark:fill-gray-200" />
+                )}
+                {rs.icon === "dualsport" && (
+                  <DualsportIcon className="size-12 dark:fill-gray-200" />
+                )}
+                {!rs.icon && (
+                  <Waypoints className="size-12 dark:text-gray-200" />
+                )}
               </Pressable>
             ))}
           <Pressable
@@ -561,8 +573,7 @@ export default function PlansNew() {
               },
             )}
           >
-            <Settings className="size-4 dark:text-gray-200" />
-            <Text className="text-sm dark:text-gray-200">Custom</Text>
+            <Settings className="size-6 dark:text-gray-200" />
           </Pressable>
         </GroupWithTitle>
         <Pressable role="button" onPress={() => setMapMode(true)}>

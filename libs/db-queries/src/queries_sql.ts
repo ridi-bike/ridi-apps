@@ -558,7 +558,7 @@ export async function regionInsertOrUpdate(sql: Sql, args: RegionInsertOrUpdateA
 }
 
 export const ruleSetsListQuery = `-- name: RuleSetsList :many
-select id, user_id, name, default_set, is_deleted from rule_sets
+select id, user_id, name, default_set, is_deleted, icon from rule_sets
 where (rule_sets.user_id = $1
   or rule_sets.user_id is null)
   and is_deleted = false
@@ -574,6 +574,7 @@ export interface RuleSetsListRow {
     name: string;
     defaultSet: boolean;
     isDeleted: boolean;
+    icon: ("touring" | "dualsport" | "adv") | null;
 }
 
 export async function ruleSetsList(sql: Sql, args: RuleSetsListArgs): Promise<RuleSetsListRow[]> {
@@ -582,7 +583,8 @@ export async function ruleSetsList(sql: Sql, args: RuleSetsListArgs): Promise<Ru
         userId: row[1],
         name: row[2],
         defaultSet: row[3],
-        isDeleted: row[4]
+        isDeleted: row[4],
+        icon: row[5]
     }));
 }
 
@@ -657,7 +659,7 @@ values (
 )
 on conflict (id) do update
 set name = excluded.name
-returning id, user_id, name, default_set, is_deleted`;
+returning id, user_id, name, default_set, is_deleted, icon`;
 
 export interface RuleSetUpsertArgs {
     id: string;
@@ -671,6 +673,7 @@ export interface RuleSetUpsertRow {
     name: string;
     defaultSet: boolean;
     isDeleted: boolean;
+    icon: ("touring" | "dualsport" | "adv") | null;
 }
 
 export async function ruleSetUpsert(sql: Sql, args: RuleSetUpsertArgs): Promise<RuleSetUpsertRow | null> {
@@ -687,7 +690,8 @@ export async function ruleSetUpsert(sql: Sql, args: RuleSetUpsertArgs): Promise<
         userId: row[1],
         name: row[2],
         defaultSet: row[3],
-        isDeleted: row[4]
+        isDeleted: row[4],
+        icon: row[5]
     };
 }
 
@@ -740,7 +744,7 @@ export async function ruleSetRoadTagsUpsert(sql: Sql, args: RuleSetRoadTagsUpser
 }
 
 export const ruleSetGetQuery = `-- name: RuleSetGet :one
-select id, user_id, name, default_set, is_deleted from rule_sets
+select id, user_id, name, default_set, is_deleted, icon from rule_sets
 where rule_sets.id = $1
   and rule_sets.is_deleted = false`;
 
@@ -754,6 +758,7 @@ export interface RuleSetGetRow {
     name: string;
     defaultSet: boolean;
     isDeleted: boolean;
+    icon: ("touring" | "dualsport" | "adv") | null;
 }
 
 export async function ruleSetGet(sql: Sql, args: RuleSetGetArgs): Promise<RuleSetGetRow | null> {
@@ -770,7 +775,8 @@ export async function ruleSetGet(sql: Sql, args: RuleSetGetArgs): Promise<RuleSe
         userId: row[1],
         name: row[2],
         defaultSet: row[3],
-        isDeleted: row[4]
+        isDeleted: row[4],
+        icon: row[5]
     };
 }
 

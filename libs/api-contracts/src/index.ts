@@ -227,6 +227,13 @@ export const ruleSetsListSchema = z.discriminatedUnion("version", [
       z.object({
         id: z.string(),
         name: z.string(),
+        icon: z
+          .union([
+            z.literal("adv"),
+            z.literal("touring"),
+            z.literal("dualsport"),
+          ])
+          .nullable(),
         isSystem: z.boolean(),
         isDefault: z.boolean(),
         roadTags: ruleRoadTagchema,
