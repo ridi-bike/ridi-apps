@@ -144,9 +144,7 @@ export default function LoginScreen() {
             >
               <GithubIcon className="size-6" />
 
-              <Text className="text-gray-500 dark:text-gray-200">
-                Continue with GitHub
-              </Text>
+              <Text className="dark:text-gray-500">Continue with GitHub</Text>
             </Button>
             <Button
               className="flex flex-row items-center justify-center gap-2"
@@ -156,9 +154,7 @@ export default function LoginScreen() {
             >
               <GoogleIcon className="size-6" />
 
-              <Text className="text-gray-500 dark:text-gray-200">
-                Continue with Google
-              </Text>
+              <Text className="dark:text-gray-500">Continue with Google</Text>
             </Button>
             <View className="relative w-full py-4">
               <View className="absolute inset-0 flex flex-row items-center">
@@ -178,9 +174,7 @@ export default function LoginScreen() {
             >
               <MailIcon size={24} />
 
-              <Text className="text-gray-500 dark:text-gray-200">
-                Continue with Email
-              </Text>
+              <Text className="dark:text-gray-200">Continue with Email</Text>
             </Button>
           </View>
         ) : (
@@ -214,9 +208,7 @@ export default function LoginScreen() {
                     setShowCodeInput(true);
                   }}
                 >
-                  <Text className="text-gray-500 dark:text-gray-200">
-                    Send Code
-                  </Text>
+                  <Text className="dark:text-gray-200">Send Code</Text>
                 </Button>
               </>
             ) : (
@@ -234,9 +226,7 @@ export default function LoginScreen() {
                   fullWidth
                   onPress={() => validateOTPAuth(email, code.trim())}
                 >
-                  <Text className="text-gray-500 dark:text-gray-200">
-                    Verify Code
-                  </Text>
+                  <Text className="dark:text-gray-200">Verify Code</Text>
                 </Button>
               </>
             )}
@@ -250,7 +240,7 @@ export default function LoginScreen() {
                 setCode("");
               }}
             >
-              <Text className="text-gray-500 dark:text-gray-200">Back</Text>
+              <Text className="dark:text-gray-200">Back</Text>
             </Button>
           </View>
         )}

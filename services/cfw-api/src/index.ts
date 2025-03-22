@@ -99,6 +99,8 @@ const router = tsr
         fromUserId: userFrom.id,
         toUserId: ctx.request.user.id,
       });
+
+      await ctx.supabaseClient.auth.admin.deleteUser(userFrom.id);
     }
 
     return {
@@ -747,7 +749,6 @@ export default Sentry.withSentry(
 
       response.headers.set("Access-Control-Allow-Origin", env.RIDI_APP_URL);
       response.headers.set("Access-Control-Allow-Credentials", "true");
-
 
       return response;
     },

@@ -65,11 +65,6 @@ export default function UserSettings() {
                     </Text>
                   </View>
                 </View>
-                {user.data.user?.is_anonymous && (
-                  <AppLink variant="primary" href="/login">
-                    Login
-                  </AppLink>
-                )}
               </View>
             </View>
 
@@ -106,17 +101,30 @@ export default function UserSettings() {
             )}
 
             <View className="p-4">
-              <Pressable
-                role="button"
-                className="flex w-full flex-row items-center justify-center gap-2 rounded-xl border-2 border-black px-4 py-3 text-[#FF5937] hover:bg-[#FF5937]/5 dark:border-gray-700"
-                onPress={() => {
-                  queryClient.clear();
-                  supabase.auth.signOut();
-                }}
-              >
-                <LogOut className="size-5" />
-                <Text className="font-medium dark:text-gray-100">Sign Out</Text>
-              </Pressable>
+              {!user.data.user.is_anonymous && (
+                <Pressable
+                  role="button"
+                  className="flex w-full flex-row items-center justify-center gap-2 rounded-xl border-2 border-black px-4 py-3 text-[#FF5937] hover:bg-[#FF5937]/5 dark:border-gray-700"
+                  onPress={() => {
+                    queryClient.clear();
+                    supabase.auth.signOut();
+                  }}
+                >
+                  <LogOut className="size-5" />
+                  <Text className="font-medium dark:text-gray-100">
+                    Sign Out
+                  </Text>
+                </Pressable>
+              )}
+              {user.data.user?.is_anonymous && (
+                <AppLink
+                  variant="primary"
+                  className="flex w-full flex-row items-center justify-center"
+                  href="/login"
+                >
+                  Login
+                </AppLink>
+              )}
             </View>
           </MotiView>
         )}
