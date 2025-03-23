@@ -131,6 +131,10 @@ for (const region of regions) {
                 resources: {
                   requests: {
                     memory: getRouterMemoryRequest(region.peakMemoryUsageMb),
+                    cpu: "0.01",
+                  },
+                  limits: {
+                    cpu: "2",
                   },
                 },
                 ports: [
@@ -146,9 +150,9 @@ for (const region of regions) {
                     port: "api",
                     scheme: "HTTP",
                   },
-                  initialDelaySeconds: 1,
-                  periodSeconds: 1,
-                  timeoutSeconds: 5,
+                  initialDelaySeconds: 15,
+                  periodSeconds: 15,
+                  timeoutSeconds: 120,
                   successThreshold: 1,
                   failureThreshold: 600,
                 },
@@ -159,10 +163,10 @@ for (const region of regions) {
                     scheme: "HTTP",
                   },
                   initialDelaySeconds: 15,
-                  periodSeconds: 2,
-                  timeoutSeconds: 1,
+                  periodSeconds: 15,
+                  timeoutSeconds: 120,
                   successThreshold: 1,
-                  failureThreshold: 3,
+                  failureThreshold: 100,
                 },
               },
             ],

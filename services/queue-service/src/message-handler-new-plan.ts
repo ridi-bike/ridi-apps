@@ -32,7 +32,8 @@ export class MessageHandlerNewPlan {
       id: planId,
     });
     if (!planRecord) {
-      throw this.logger.error("Plan record not found from id", { planId });
+      this.logger.warn("Plan record not found from id", { planId });
+      return;
     }
 
     if (planRecord.tripType === "round-trip") {

@@ -45,6 +45,9 @@ export class RouterServer {
       const text = buf.toString("utf8");
       if (text.split(";").find((t) => t === "RIDI_ROUTER SERVER READY")) {
         this.state = "running";
+
+        spawn("bash", ["renice-ridi-router.sh"]);
+
         this.logger.info("Router server ready", { text });
       }
     });
