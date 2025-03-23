@@ -1,9 +1,14 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+import { join } from "path";
+import { fileURLToPath } from "url";
 
 import { type RidiLogger } from "@ridi/logger";
 import { NdJson } from "json-nd";
 
 import { env } from "./env.ts";
+
+const dirname = fileURLToPath(new URL(".", import.meta.url));
+const reniceScriptName = join(dirname, "../renice-ridi-router.sh");
 
 export class RouterServer {
   private logger: RidiLogger;
@@ -46,7 +51,17 @@ export class RouterServer {
       if (text.split(";").find((t) => t === "RIDI_ROUTER SERVER READY")) {
         this.state = "running";
 
-        spawn("bash", ["renice-ridi-router.sh"]);
+        const reniceProcess = spawn("bash", [reniceScriptName]);
+        reniceProcess.stdout.on("data", (data) => {
+          const buf: Buffer = data;
+          const text = buf.toString("utf8");
+          this.logger.info("Renice script stdout", { text });
+        });
+        reniceProcess.stderr.on("data", (data) => {
+          const buf: Buffer = data;
+          const text = buf.toString("utf8");
+          this.logger.error("Renice script stderr", { text });
+        });
 
         this.logger.info("Router server ready", { text });
       }

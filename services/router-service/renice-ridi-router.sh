@@ -2,7 +2,8 @@
 # Script to renice the ridi-router process to priority 20
 
 # Find the PID of the ridi-router process started with 'start-server'
-ROUTER_PID=$(ps aux | grep "[s]tart-server" | grep "ridi-router" | awk '{print $2}')
+# Only select the first PID if multiple are found
+ROUTER_PID=$(ps aux | grep "[s]tart-server" | grep "ridi-router" | awk '{print $2}' | head -n 1)
 
 if [ -z "$ROUTER_PID" ]; then
   echo "Error: ridi-router process not found. Make sure it's running with 'start-server'."
