@@ -35,7 +35,11 @@ export default function UserSettings() {
       title="Settings"
     >
       <AnimatePresence>
-        {!user && <Loading className="size-12 text-[#ff4a25]" />}
+        {!user && (
+          <View className="flex w-full flex-row items-center justify-center">
+            <Loading className="size-12 text-[#ff4a25]" />
+          </View>
+        )}
         {!!user?.error && (
           <View className="mx-2 max-w-5xl flex-1">
             <ErrorBox error={user.error} retry={getUser} />

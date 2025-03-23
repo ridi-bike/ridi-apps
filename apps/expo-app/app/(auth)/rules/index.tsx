@@ -267,7 +267,9 @@ export default function RuleSetList() {
                     </View>
                   )}
                   {!ruleSets && !error && (
-                    <Loading className="size-12 text-[#ff4a25]" />
+                    <View className="flex w-full flex-row items-center justify-center">
+                      <Loading className="size-12 text-[#ff4a25]" />
+                    </View>
                   )}
                   {ruleSets.map((ruleSet) => (
                     <View
