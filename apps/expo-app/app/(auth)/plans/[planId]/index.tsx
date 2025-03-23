@@ -1,6 +1,5 @@
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import {
-  Bell,
   Bug,
   CirclePause,
   CirclePlay,
@@ -271,7 +270,7 @@ function GeneratingRoutes({ createdAt }: { createdAt: Date }) {
               <View className="flex flex-row items-center gap-2">
                 <Text className="flex-1 text-lg font-medium text-[#FF5937]">
                   You can come back later and the routes will be waiting for
-                  you! Or create more plans in the meantime.
+                  you! Go and create more plans in the meantime!
                 </Text>
               </View>
             </View>
@@ -291,7 +290,11 @@ export default function PlanDetails() {
   return (
     <ScreenFrame title="Plan routes" onGoBack={() => router.replace("/plans")}>
       <AnimatePresence exitBeforeEnter>
-        {!plans && !error && <Loading className="size-12 text-[#ff4a25]" />}
+        {!plans && !error && (
+          <View className="flex w-full flex-row items-center justify-center">
+            <Loading className="size-12 text-[#ff4a25]" />
+          </View>
+        )}
         {!!error && status !== "pending" && (
           <MotiView
             from={{ opacity: 0 }}

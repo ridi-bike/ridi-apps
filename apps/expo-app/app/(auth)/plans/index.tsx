@@ -85,7 +85,11 @@ export default function PlansPage() {
             <ErrorBox error={error} retry={refetch} />
           </View>
         )}
-        {!plans && !error && <Loading className="size-12 text-[#ff4a25]" />}
+        {!plans && !error && (
+          <View className="flex w-full flex-row items-center justify-center">
+            <Loading className="size-12 text-[#ff4a25]" />
+          </View>
+        )}
         {!!plans && (
           <MotiView
             className="mx-2 max-w-5xl flex-1"

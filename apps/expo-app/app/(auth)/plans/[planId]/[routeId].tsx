@@ -224,7 +224,11 @@ export default function RouteDetails() {
     >
       <AnimatePresence>
         {(!plans && !planError) ||
-          (!route && !error && <Loading className="size-12 text-[#ff4a25]" />)}
+          (!route && !error && (
+            <View className="flex w-full flex-row items-center justify-center">
+              <Loading className="size-12 text-[#ff4a25]" />
+            </View>
+          ))}
         {!!error && status !== "pending" && (
           <ErrorBox error={error} retry={refetch} />
         )}

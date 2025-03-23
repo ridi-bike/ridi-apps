@@ -355,7 +355,7 @@ export default function PlansNew() {
                     Tap on map to start
                   </Text>
                 </View>
-                <View className="float-right flex flex-col items-end justify-start gap-2 p-4">
+                <View className="pointer-events-auto float-right flex flex-col items-end justify-start gap-2 p-4">
                   <Pressable
                     role="button"
                     onPress={getCurrentLocation}
@@ -419,7 +419,7 @@ export default function PlansNew() {
           }}
         />
       )}
-      <ScrollView className="max-h-[calc(100vh-170px)] max-w-3xl flex-1 px-4 pt-4">
+      <ScrollView className="max-h-[calc(100vh-170px)] max-w-3xl flex-1 px-4 pb-28 pt-4">
         <Pressable role="button" onPress={() => setMapMode(true)}>
           <GroupWithTitle title="Trip details">
             <AnimatePresence>

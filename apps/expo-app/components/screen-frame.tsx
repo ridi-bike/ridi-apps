@@ -39,10 +39,7 @@ export function ScreenFrame({
             ),
           }}
         />
-        <View
-          role="main"
-          className="flex flex-col justify-center px-2 pb-24 pt-8 md:px-8"
-        >
+        <View role="main" className="flex flex-col px-2 pb-24 pt-8 md:px-8">
           {children}
         </View>
       </View>
