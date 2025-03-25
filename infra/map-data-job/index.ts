@@ -8,7 +8,7 @@ import { getRouterCacheInitContainer } from "../router-cache-init";
 import { ridiDataVolumeSetup } from "../storage";
 import { getNameSafe, getSafeResourceName } from "../util";
 
-const baseHour = 12;
+const baseHour = 1;
 
 function calculateCronSchedule(region: (typeof regions)[0], prevDelay: number) {
   const mbPerMin = 2 * 60;
@@ -25,8 +25,13 @@ function calculateCronSchedule(region: (typeof regions)[0], prevDelay: number) {
 }
 
 regions.reduce((prevDelay, region) => {
-  const { cron, delayMin } = calculateCronSchedule(region, prevDelay);
+  let regDelayMin = 0;
   k3sNodes.forEach((node, idx) => {
+    const { cron, delayMin } = calculateCronSchedule(
+      region,
+      prevDelay + 15 * idx,
+    );
+    regDelayMin = delayMin;
     const mapDataJobName =
       pulumi.interpolate`map-${node.metadata.name.apply((v) => v.split("-")[2])}-${getNameSafe(region.region)}`.apply(
         (v) => getSafeResourceName(v),
@@ -79,5 +84,5 @@ regions.reduce((prevDelay, region) => {
     );
   });
 
-  return delayMin;
+  return regDelayMin;
 }, 0);
