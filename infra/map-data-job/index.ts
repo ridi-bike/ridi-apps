@@ -1,7 +1,8 @@
 import * as k8s from "@pulumi/kubernetes";
+import * as pulumi from "@pulumi/pulumi";
 
 import { mapDataVersionDateNext, regions, routerVersionNext } from "../config";
-import { ghcrSecret, ridiNamespace, stackName } from "../k8s";
+import { ghcrSecret, k3sNodes, ridiNamespace, stackName } from "../k8s";
 import { getMapDataInitContainer } from "../map-data-init";
 import { getRouterCacheInitContainer } from "../router-cache-init";
 import { ridiDataVolumeSetup } from "../storage";
@@ -25,47 +26,57 @@ function calculateCronSchedule(region: (typeof regions)[0], prevDelay: number) {
 
 regions.reduce((prevDelay, region) => {
   const { cron, delayMin } = calculateCronSchedule(region, prevDelay);
-  const mapDataJobName = getSafeResourceName(
-    `map-data-job-${getNameSafe(region.region)}`,
-  );
-  new k8s.batch.v1.CronJob(mapDataJobName, {
-    metadata: {
-      name: mapDataJobName,
-      namespace: ridiNamespace.metadata.name,
-      labels: {
-        name: mapDataJobName,
-      },
-      annotations: {
-        "ridi.bike/mapDataVersionDateNext": mapDataVersionDateNext,
-        "ridi.bike/routerVersionNext": routerVersionNext,
-      },
-    },
-    spec: {
-      timeZone: "Etc/UTC",
-      schedule: cron,
-      concurrencyPolicy: "Forbid",
-      successfulJobsHistoryLimit: 3,
-      failedJobsHistoryLimit: 3,
-      jobTemplate: {
+  k3sNodes.forEach((node, idx) => {
+    const mapDataJobName =
+      pulumi.interpolate`map-${node.metadata.name.apply((v) => v.split("-")[2])}-${getNameSafe(region.region)}`.apply(
+        (v) => getSafeResourceName(v),
+      );
+
+    new k8s.batch.v1.CronJob(
+      `map-job-node-${idx}-${getNameSafe(region.region)}`,
+      {
+        metadata: {
+          name: mapDataJobName,
+          namespace: ridiNamespace.metadata.name,
+          labels: {
+            name: mapDataJobName,
+          },
+          annotations: {
+            "ridi.bike/mapDataVersionDateNext": mapDataVersionDateNext,
+            "ridi.bike/routerVersionNext": routerVersionNext,
+          },
+        },
         spec: {
-          backoffLimit: 10,
-          template: {
+          timeZone: "Etc/UTC",
+          schedule: cron,
+          concurrencyPolicy: "Forbid",
+          successfulJobsHistoryLimit: 1,
+          failedJobsHistoryLimit: 1,
+          jobTemplate: {
             spec: {
-              hostNetwork: stackName === "dev",
-              restartPolicy: "OnFailure",
-              initContainers: [getMapDataInitContainer(region)],
-              containers: [getRouterCacheInitContainer(region)],
-              volumes: [ridiDataVolumeSetup.volume],
-              imagePullSecrets: [
-                {
-                  name: ghcrSecret.metadata.name,
+              backoffLimit: 10,
+              template: {
+                spec: {
+                  nodeSelector: {
+                    "node.ridi.bike/name": node.metadata.name,
+                  },
+                  hostNetwork: stackName === "dev",
+                  restartPolicy: "OnFailure",
+                  initContainers: [getMapDataInitContainer(region)],
+                  containers: [getRouterCacheInitContainer(region)],
+                  volumes: [ridiDataVolumeSetup.volume],
+                  imagePullSecrets: [
+                    {
+                      name: ghcrSecret.metadata.name,
+                    },
+                  ],
                 },
-              ],
+              },
             },
           },
         },
       },
-    },
+    );
   });
 
   return delayMin;

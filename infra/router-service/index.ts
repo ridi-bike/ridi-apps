@@ -158,7 +158,7 @@ for (const region of regions) {
                   periodSeconds: 30,
                   timeoutSeconds: 1,
                   successThreshold: 1,
-                  failureThreshold: 20,
+                  failureThreshold: 50,
                 },
                 livenessProbe: {
                   httpGet: {

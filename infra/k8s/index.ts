@@ -43,11 +43,14 @@ export const ghcrSecret = new k8s.core.v1.Secret(ghrSecretName, {
   },
 });
 
-Object.entries(nodes).forEach(([hostname, node]) => {
-  new k8s.core.v1.NodePatch(hostname, {
+export const k3sNodes = Object.entries(nodes).map(([hostname, node]) => {
+  return new k8s.core.v1.NodePatch(hostname, {
     metadata: {
       name: hostname,
-      labels: node.labels,
+      labels: {
+        ...node.labels,
+        "node.ridi.bike/name": hostname,
+      },
     },
   });
 });
