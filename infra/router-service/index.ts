@@ -127,6 +127,10 @@ for (const region of regions) {
                     name: "PORT",
                     value: port.toString(),
                   },
+                  {
+                    name: "RAYON_NUM_THREADS",
+                    value: "5",
+                  },
                 ],
                 resources: {
                   requests: {
@@ -134,7 +138,7 @@ for (const region of regions) {
                     cpu: "0.01",
                   },
                   limits: {
-                    cpu: "2",
+                    cpu: "6",
                   },
                 },
                 ports: [
@@ -151,10 +155,10 @@ for (const region of regions) {
                     scheme: "HTTP",
                   },
                   initialDelaySeconds: 15,
-                  periodSeconds: 15,
-                  timeoutSeconds: 120,
+                  periodSeconds: 30,
+                  timeoutSeconds: 1,
                   successThreshold: 1,
-                  failureThreshold: 600,
+                  failureThreshold: 20,
                 },
                 livenessProbe: {
                   httpGet: {
@@ -163,10 +167,10 @@ for (const region of regions) {
                     scheme: "HTTP",
                   },
                   initialDelaySeconds: 15,
-                  periodSeconds: 15,
-                  timeoutSeconds: 120,
+                  periodSeconds: 30,
+                  timeoutSeconds: 1,
                   successThreshold: 1,
-                  failureThreshold: 100,
+                  failureThreshold: 10,
                 },
               },
             ],
