@@ -310,383 +310,396 @@ export default function PlansNew() {
         </View>
       }
     >
-      <AnimatePresence>
-        {mapMode && (
-          <MotiView
-            id="omg"
-            className="fixed top-0 z-50 mt-16 w-full bg-white p-4 pb-40 dark:bg-gray-900"
-            from={{ height: "0%" }}
-            animate={{ height: "100%" }}
-            exit={{ height: "0%" }}
-            transition={{ type: "timing" }}
-          >
-            <GeoMapCoordsSelector
-              regions={
-                errorMessage
-                  ? (startRegions || []).concat(finishRegions || [])
-                  : null
-              }
-              isRoundTrip={isRoundTrip || false}
-              start={
-                startCoords
-                  ? { lat: startCoords[0], lon: startCoords[1] }
-                  : null
-              }
-              finish={
-                finishCoords
-                  ? { lat: finishCoords[0], lon: finishCoords[1] }
-                  : null
-              }
-              current={
-                currentCoords
-                  ? { lat: currentCoords[0], lon: currentCoords[1] }
-                  : null
-              }
-              points={searchPoints?.map((c) => ({
-                coords: { lat: c[0], lon: c[1] },
-              }))}
-              selectionMode={centerSelectionMode ? "center" : "tap"}
-              setStart={(c) => setStartCoords(c ? [c.lat, c.lon] : undefined)}
-              setFinish={(c) => setFinishCoords(c ? [c.lat, c.lon] : undefined)}
+      <View className="flex flex-col items-center justify-start">
+        <AnimatePresence>
+          {mapMode && (
+            <MotiView
+              id="omg"
+              className="fixed top-0 z-50 mt-16 w-[98vw] bg-white p-4 pb-40 dark:bg-gray-900"
+              from={{ height: "0%" }}
+              animate={{ height: "100%" }}
+              exit={{ height: "0%" }}
+              transition={{ type: "timing" }}
             >
-              <View className="pointer-events-none flex w-full flex-row items-start justify-center">
-                <View className="flex flex-1 flex-row items-start justify-center p-4">
-                  <Text className="ml-10 rounded-lg bg-gray-400 px-2 py-1 text-sm text-gray-200">
-                    Tap on map to start
-                  </Text>
-                </View>
-                <View className="pointer-events-auto float-right flex flex-col items-end justify-start gap-2 p-4">
-                  <Pressable
-                    role="button"
-                    onPress={getCurrentLocation}
-                    className={cn(
-                      "flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 p-4",
-
-                      {
-                        "border-[#FF5937] bg-[#FF5937] text-white":
-                          currentCoords,
-                        "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
-                          !currentCoords,
-                      },
-                    )}
-                  >
-                    <Locate className="size-4 dark:text-gray-200" />
-                  </Pressable>
-                  <Pressable
-                    role="button"
-                    onPress={() => setCenterSelectionMode(!centerSelectionMode)}
-                    className={cn(
-                      "flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 p-4",
-                      {
-                        "border-[#FF5937] bg-[#FF5937] text-white":
-                          centerSelectionMode,
-                        "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
-                          !centerSelectionMode,
-                      },
-                    )}
-                  >
-                    <MapPinned className="size-4 dark:text-gray-200" />
-                  </Pressable>
-                  {!searchPoints && (
-                    <Link
-                      href="/search"
-                      className="flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 border-black bg-white p-4 dark:border-gray-700 dark:bg-gray-900"
-                    >
-                      <Search className="size-4 dark:text-gray-200" />
-                    </Link>
-                  )}
-                  {searchPoints?.length && (
-                    <Pressable
-                      role="button"
-                      onPress={() => {
-                        setSearchPoints();
-                      }}
-                      className="flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 border-[#FF5937] bg-[#FF5937] p-4 text-white"
-                    >
-                      <Search className="size-4 dark:text-gray-200" />
-                    </Pressable>
-                  )}
-                </View>
-              </View>
-            </GeoMapCoordsSelector>
-          </MotiView>
-        )}
-      </AnimatePresence>
-      {showLocationAlert && (
-        <LocationPermsNotGiven
-          close={() => {
-            setShowLocationAlert(false);
-          }}
-        />
-      )}
-      <ScrollView className="max-h-[calc(100vh-170px)] max-w-3xl flex-1 px-4 pb-28 pt-4">
-        <Pressable role="button" onPress={() => setMapMode(true)}>
-          <GroupWithTitle title="Trip details">
-            <AnimatePresence>
-              <MotiView
-                from={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 1 }}
-                className="flex h-14 w-full flex-col items-start justify-start p-2"
+              <GeoMapCoordsSelector
+                regions={
+                  errorMessage
+                    ? (startRegions || []).concat(finishRegions || [])
+                    : null
+                }
+                isRoundTrip={isRoundTrip || false}
+                start={
+                  startCoords
+                    ? { lat: startCoords[0], lon: startCoords[1] }
+                    : null
+                }
+                finish={
+                  finishCoords
+                    ? { lat: finishCoords[0], lon: finishCoords[1] }
+                    : null
+                }
+                current={
+                  currentCoords
+                    ? { lat: currentCoords[0], lon: currentCoords[1] }
+                    : null
+                }
+                points={searchPoints?.map((c) => ({
+                  coords: { lat: c[0], lon: c[1] },
+                }))}
+                selectionMode={centerSelectionMode ? "center" : "tap"}
+                setStart={(c) => setStartCoords(c ? [c.lat, c.lon] : undefined)}
+                setFinish={(c) =>
+                  setFinishCoords(c ? [c.lat, c.lon] : undefined)
+                }
               >
-                <View className="flex w-full flex-row items-center gap-2">
-                  <CirclePlayIcon className="size-4 text-[#FF5937]" />
-                  <Text className="w-full truncate text-sm dark:text-gray-200">
-                    {isRoundTrip ? "Start/Finish Point: " : "Start: "}
-                    {startCoords
-                      ? startDesc ||
-                        `${startCoords[0].toFixed(4)}, ${startCoords[1].toFixed(4)}`
-                      : "Not set"}
-                  </Text>
-                </View>
-                {!isRoundTrip && (
-                  <View className="flex flex-row items-center gap-2">
-                    <CirclePauseIcon className="size-4 text-[#FF5937]" />
-                    <Text className="truncate text-sm dark:text-gray-200">
-                      Finish:{" "}
-                      {finishCoords
-                        ? finishDesc ||
-                          `${finishCoords[0].toFixed(4)}, ${finishCoords[1].toFixed(4)}`
-                        : "Not set"}
+                <View className="pointer-events-none flex w-full flex-row items-start justify-center">
+                  <View className="flex flex-1 flex-row items-start justify-center p-4">
+                    <Text className="ml-10 rounded-lg bg-gray-400 px-2 py-1 text-sm text-gray-200">
+                      Tap on map to start
                     </Text>
                   </View>
-                )}
-                {isRoundTrip && (
-                  <View className="flex flex-row items-center gap-6">
-                    <View className="flex flex-row items-center gap-2">
-                      <StretchHorizontal className="size-4 text-[#FF5937]" />
-                      <Text className="text-sm dark:text-gray-200">
-                        Trip: ~{selectedDistance}km
-                      </Text>
-                    </View>
-                    <View className="flex flex-row items-center gap-2">
-                      <Compass className="size-4 text-[#FF5937]" />
-                      <Text className="text-sm dark:text-gray-200">
-                        {getCardinalDirection(bearing || 0)} ({bearing || 0}°)
-                      </Text>
-                    </View>
-                  </View>
-                )}
-              </MotiView>
-            </AnimatePresence>
-          </GroupWithTitle>
-        </Pressable>
-        <GroupWithTitle title="Trip type">
-          <Pressable
-            role="button"
-            onPress={() => {
-              setIsRoundTrip(false);
-            }}
-            className={cn(
-              "flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2",
-              {
-                "border-[#FF5937] bg-[#FF5937]": !isRoundTrip,
-                "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
-                  isRoundTrip,
-              },
-            )}
-          >
-            <Route className="size-6 text-sm dark:text-gray-200" />
-            <Text className="text-sm dark:text-gray-200">Start to Finish</Text>
-          </Pressable>
-          <Pressable
-            role="button"
-            onPress={() => {
-              setIsRoundTrip(true);
-            }}
-            className={cn(
-              "flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2",
-              {
-                "border-[#FF5937] bg-[#FF5937]": isRoundTrip,
-                "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
-                  !isRoundTrip,
-              },
-            )}
-          >
-            <RotateCw className="size-6 text-sm dark:text-gray-200" />
-            <Text className="text-sm dark:text-gray-200">Round Trip</Text>
-          </Pressable>
-        </GroupWithTitle>
-        <GroupWithTitle title="Routing rules">
-          {(
-            ruleSets ||
-            Array(3).map((_, id) => ({
-              id,
-              isSystem: true,
-              icon: null,
-              name: "...",
-              isDefault: false,
-            }))
-          )
-            .filter((rs) => rs.isSystem)
-            .map((rs) => (
-              <Pressable
-                role="button"
-                key={rs.id}
-                onPress={() => {
-                  if (typeof rs.id === "string") {
-                    setRuleSetId(rs.id);
-                  }
-                }}
-                className={cn(
-                  "flex flex-1 flex-col items-center justify-center gap-2 rounded-xl border-2 px-4 py-2",
-                  {
-                    "border-[#FF5937] bg-[#FF5937]": rs.id === ruleSetId,
-                    "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
-                      rs.id !== ruleSetId,
-                  },
-                )}
-              >
-                {rs.icon === "adv" && (
-                  <AdvIcon className="size-12 dark:fill-gray-200" />
-                )}
-                {rs.icon === "touring" && (
-                  <TouringIcon className="size-12 dark:fill-gray-200" />
-                )}
-                {rs.icon === "dualsport" && (
-                  <DualsportIcon className="size-12 dark:fill-gray-200" />
-                )}
-                {!rs.icon && (
-                  <Waypoints className="size-12 dark:text-gray-200" />
-                )}
-              </Pressable>
-            ))}
-          <Pressable
-            role="button"
-            onPress={() => {
-              router.navigate("/rules");
-              router.setParams({
-                "selected-rule-id": JSON.stringify(ruleSetId),
-              });
-            }}
-            className={cn(
-              "flex flex-1 flex-col items-center justify-center gap-2 rounded-xl border-2 px-4 py-2",
-              {
-                "border-[#FF5937] bg-[#FF5937]":
-                  ruleSets?.find((rs) => rs.id === ruleSetId)?.isSystem ===
-                  false,
-                "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
-                  ruleSets?.find((rs) => rs.id === ruleSetId)?.isSystem ===
-                    true ||
-                  ruleSets?.find((rs) => rs.id === ruleSetId)?.isSystem ===
-                    undefined,
-              },
-            )}
-          >
-            <Settings className="size-6 dark:text-gray-200" />
-          </Pressable>
-        </GroupWithTitle>
-        <Pressable role="button" onPress={() => setMapMode(true)}>
-          <GroupWithTitle title="Overview" className="h-48">
-            <GeoMapPlanView
-              bearing={isRoundTrip ? (bearing ?? null) : null}
-              distance={(selectedDistance || 0) * 1000}
-              start={
-                startCoords
-                  ? {
-                      lat: startCoords[0],
-                      lon: startCoords[1],
-                    }
-                  : null
-              }
-              finish={
-                finishCoords
-                  ? { lat: finishCoords[0], lon: finishCoords[1] }
-                  : null
-              }
-            />
-          </GroupWithTitle>
-        </Pressable>
-        <AnimatePresence>
-          {isRoundTrip && (
-            <MotiView
-              from={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="space-y-4"
-            >
-              <GroupWithTitle title="Direction">
-                <View className="flex w-full flex-col gap-2">
-                  <View className="flex w-full flex-row justify-between px-2">
-                    {DIRECTIONS.concat(["N"]).map((direction, idx) => (
-                      <Text
-                        key={idx}
-                        className={cn("text-xs font-medium transition-colors", {
-                          "text-[#FF5937]":
-                            getCardinalDirection(bearing || 0) === direction,
-                          "text-gray-400 dark:text-gray-500":
-                            getCardinalDirection(bearing || 0) !== direction,
-                        })}
-                      >
-                        {direction}
-                      </Text>
-                    ))}
-                  </View>
-                  <View className="relative h-12 w-full">
-                    <View className="absolute inset-0 flex flex-row items-center">
-                      <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
-                    </View>
-                    <Slider
-                      renderThumbComponent={() => (
-                        <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
+                  <View className="pointer-events-auto float-right flex flex-col items-end justify-start gap-2 p-4">
+                    <Pressable
+                      role="button"
+                      onPress={getCurrentLocation}
+                      className={cn(
+                        "flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 p-4",
+
+                        {
+                          "border-[#FF5937] bg-[#FF5937] text-white":
+                            currentCoords,
+                          "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
+                            !currentCoords,
+                        },
                       )}
-                      trackClickable={true}
-                      step={1}
-                      value={bearing}
-                      maximumValue={359}
-                      minimumValue={0}
-                      trackStyle={{ backgroundColor: "transparent" }}
-                      minimumTrackStyle={{ backgroundColor: "transparent" }}
-                      maximumTrackStyle={{ backgroundColor: "transparent" }}
-                      onValueChange={(value) => {
-                        setBearing(value[0]);
-                      }}
-                    />
+                    >
+                      <Locate className="size-4 dark:text-gray-200" />
+                    </Pressable>
+                    <Pressable
+                      role="button"
+                      onPress={() =>
+                        setCenterSelectionMode(!centerSelectionMode)
+                      }
+                      className={cn(
+                        "flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 p-4",
+                        {
+                          "border-[#FF5937] bg-[#FF5937] text-white":
+                            centerSelectionMode,
+                          "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
+                            !centerSelectionMode,
+                        },
+                      )}
+                    >
+                      <MapPinned className="size-4 dark:text-gray-200" />
+                    </Pressable>
+                    {!searchPoints && (
+                      <Link
+                        href="/search"
+                        className="flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 border-black bg-white p-4 dark:border-gray-700 dark:bg-gray-900"
+                      >
+                        <Search className="size-4 dark:text-gray-200" />
+                      </Link>
+                    )}
+                    {searchPoints?.length && (
+                      <Pressable
+                        role="button"
+                        onPress={() => {
+                          setSearchPoints();
+                        }}
+                        className="flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 border-[#FF5937] bg-[#FF5937] p-4 text-white"
+                      >
+                        <Search className="size-4 dark:text-gray-200" />
+                      </Pressable>
+                    )}
                   </View>
                 </View>
-              </GroupWithTitle>
-              <GroupWithTitle title="Distance">
-                <View className="flex w-full flex-col gap-2">
-                  <View className="flex w-full flex-row justify-between px-1">
-                    {DISTANCES.map((distance) => (
-                      <Text
-                        key={distance}
-                        className={`text-xs font-medium transition-colors ${
-                          selectedDistance === distance
-                            ? "text-[#FF5937]"
-                            : "text-gray-400 dark:text-gray-500"
-                        }`}
-                      >
-                        {distance}km
-                      </Text>
-                    ))}
-                  </View>
-                  <View className="relative h-12 w-full">
-                    <View className="absolute inset-0 flex flex-row items-center">
-                      <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
-                    </View>
-                    <Slider
-                      renderThumbComponent={() => (
-                        <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
-                      )}
-                      trackClickable={true}
-                      step={1}
-                      value={DISTANCES.indexOf(selectedDistance || 100)}
-                      maximumValue={DISTANCES.length - 1}
-                      trackStyle={{ backgroundColor: "transparent" }}
-                      minimumTrackStyle={{ backgroundColor: "transparent" }}
-                      maximumTrackStyle={{ backgroundColor: "transparent" }}
-                      onValueChange={(value) => {
-                        setSelectedDistance(DISTANCES[value[0]]);
-                      }}
-                    />
-                  </View>
-                </View>
-              </GroupWithTitle>
+              </GeoMapCoordsSelector>
             </MotiView>
           )}
         </AnimatePresence>
-      </ScrollView>
+        {showLocationAlert && (
+          <LocationPermsNotGiven
+            close={() => {
+              setShowLocationAlert(false);
+            }}
+          />
+        )}
+        <ScrollView className="max-h-[calc(100vh-170px)] w-full px-4 pb-28 pt-4">
+          <Pressable role="button" onPress={() => setMapMode(true)}>
+            <GroupWithTitle title="Trip details">
+              <AnimatePresence>
+                <MotiView
+                  from={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 1 }}
+                  className="flex h-14 w-full flex-col items-start justify-start p-2"
+                >
+                  <View className="flex w-full flex-row items-center gap-2">
+                    <CirclePlayIcon className="size-4 text-[#FF5937]" />
+                    <Text className="w-full truncate text-sm dark:text-gray-200">
+                      {isRoundTrip ? "Start/Finish Point: " : "Start: "}
+                      {startCoords
+                        ? startDesc ||
+                          `${startCoords[0].toFixed(4)}, ${startCoords[1].toFixed(4)}`
+                        : "Not set"}
+                    </Text>
+                  </View>
+                  {!isRoundTrip && (
+                    <View className="flex flex-row items-center gap-2">
+                      <CirclePauseIcon className="size-4 text-[#FF5937]" />
+                      <Text className="truncate text-sm dark:text-gray-200">
+                        Finish:{" "}
+                        {finishCoords
+                          ? finishDesc ||
+                            `${finishCoords[0].toFixed(4)}, ${finishCoords[1].toFixed(4)}`
+                          : "Not set"}
+                      </Text>
+                    </View>
+                  )}
+                  {isRoundTrip && (
+                    <View className="flex flex-row items-center gap-6">
+                      <View className="flex flex-row items-center gap-2">
+                        <StretchHorizontal className="size-4 text-[#FF5937]" />
+                        <Text className="text-sm dark:text-gray-200">
+                          Trip: ~{selectedDistance}km
+                        </Text>
+                      </View>
+                      <View className="flex flex-row items-center gap-2">
+                        <Compass className="size-4 text-[#FF5937]" />
+                        <Text className="text-sm dark:text-gray-200">
+                          {getCardinalDirection(bearing || 0)} ({bearing || 0}°)
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+                </MotiView>
+              </AnimatePresence>
+            </GroupWithTitle>
+          </Pressable>
+          <GroupWithTitle title="Trip type">
+            <Pressable
+              role="button"
+              onPress={() => {
+                setIsRoundTrip(false);
+              }}
+              className={cn(
+                "flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2",
+                {
+                  "border-[#FF5937] bg-[#FF5937]": !isRoundTrip,
+                  "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
+                    isRoundTrip,
+                },
+              )}
+            >
+              <Route className="size-6 text-sm dark:text-gray-200" />
+              <Text className="text-sm dark:text-gray-200">
+                Start to Finish
+              </Text>
+            </Pressable>
+            <Pressable
+              role="button"
+              onPress={() => {
+                setIsRoundTrip(true);
+              }}
+              className={cn(
+                "flex flex-1 flex-row items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2",
+                {
+                  "border-[#FF5937] bg-[#FF5937]": isRoundTrip,
+                  "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
+                    !isRoundTrip,
+                },
+              )}
+            >
+              <RotateCw className="size-6 text-sm dark:text-gray-200" />
+              <Text className="text-sm dark:text-gray-200">Round Trip</Text>
+            </Pressable>
+          </GroupWithTitle>
+          <GroupWithTitle title="Routing rules">
+            {(
+              ruleSets ||
+              Array(3).map((_, id) => ({
+                id,
+                isSystem: true,
+                icon: null,
+                name: "...",
+                isDefault: false,
+              }))
+            )
+              .filter((rs) => rs.isSystem)
+              .map((rs) => (
+                <Pressable
+                  role="button"
+                  key={rs.id}
+                  onPress={() => {
+                    if (typeof rs.id === "string") {
+                      setRuleSetId(rs.id);
+                    }
+                  }}
+                  className={cn(
+                    "flex flex-1 flex-col items-center justify-center gap-2 rounded-xl border-2 px-4 py-2",
+                    {
+                      "border-[#FF5937] bg-[#FF5937]": rs.id === ruleSetId,
+                      "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
+                        rs.id !== ruleSetId,
+                    },
+                  )}
+                >
+                  {rs.icon === "adv" && (
+                    <AdvIcon className="size-12 dark:fill-gray-200" />
+                  )}
+                  {rs.icon === "touring" && (
+                    <TouringIcon className="size-12 dark:fill-gray-200" />
+                  )}
+                  {rs.icon === "dualsport" && (
+                    <DualsportIcon className="size-12 dark:fill-gray-200" />
+                  )}
+                  {!rs.icon && (
+                    <Waypoints className="size-12 dark:text-gray-200" />
+                  )}
+                </Pressable>
+              ))}
+            <Pressable
+              role="button"
+              onPress={() => {
+                router.navigate("/rules");
+                router.setParams({
+                  "selected-rule-id": JSON.stringify(ruleSetId),
+                });
+              }}
+              className={cn(
+                "flex flex-1 flex-col items-center justify-center gap-2 rounded-xl border-2 px-4 py-2",
+                {
+                  "border-[#FF5937] bg-[#FF5937]":
+                    ruleSets?.find((rs) => rs.id === ruleSetId)?.isSystem ===
+                    false,
+                  "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
+                    ruleSets?.find((rs) => rs.id === ruleSetId)?.isSystem ===
+                      true ||
+                    ruleSets?.find((rs) => rs.id === ruleSetId)?.isSystem ===
+                      undefined,
+                },
+              )}
+            >
+              <Settings className="size-6 dark:text-gray-200" />
+            </Pressable>
+          </GroupWithTitle>
+          <Pressable role="button" onPress={() => setMapMode(true)}>
+            <GroupWithTitle title="Overview" className="h-48">
+              <GeoMapPlanView
+                bearing={isRoundTrip ? (bearing ?? null) : null}
+                distance={(selectedDistance || 0) * 1000}
+                start={
+                  startCoords
+                    ? {
+                        lat: startCoords[0],
+                        lon: startCoords[1],
+                      }
+                    : null
+                }
+                finish={
+                  finishCoords
+                    ? { lat: finishCoords[0], lon: finishCoords[1] }
+                    : null
+                }
+              />
+            </GroupWithTitle>
+          </Pressable>
+          <AnimatePresence>
+            {isRoundTrip && (
+              <MotiView
+                from={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-4"
+              >
+                <GroupWithTitle title="Direction">
+                  <View className="flex w-full flex-col gap-2">
+                    <View className="flex w-full flex-row justify-between px-2">
+                      {DIRECTIONS.concat(["N"]).map((direction, idx) => (
+                        <Text
+                          key={idx}
+                          className={cn(
+                            "text-xs font-medium transition-colors",
+                            {
+                              "text-[#FF5937]":
+                                getCardinalDirection(bearing || 0) ===
+                                direction,
+                              "text-gray-400 dark:text-gray-500":
+                                getCardinalDirection(bearing || 0) !==
+                                direction,
+                            },
+                          )}
+                        >
+                          {direction}
+                        </Text>
+                      ))}
+                    </View>
+                    <View className="relative h-12 w-full">
+                      <View className="absolute inset-0 flex flex-row items-center">
+                        <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
+                      </View>
+                      <Slider
+                        renderThumbComponent={() => (
+                          <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
+                        )}
+                        trackClickable={true}
+                        step={1}
+                        value={bearing}
+                        maximumValue={359}
+                        minimumValue={0}
+                        trackStyle={{ backgroundColor: "transparent" }}
+                        minimumTrackStyle={{ backgroundColor: "transparent" }}
+                        maximumTrackStyle={{ backgroundColor: "transparent" }}
+                        onValueChange={(value) => {
+                          setBearing(value[0]);
+                        }}
+                      />
+                    </View>
+                  </View>
+                </GroupWithTitle>
+                <GroupWithTitle title="Distance">
+                  <View className="flex w-full flex-col gap-2">
+                    <View className="flex w-full flex-row justify-between px-1">
+                      {DISTANCES.map((distance) => (
+                        <Text
+                          key={distance}
+                          className={`text-xs font-medium transition-colors ${
+                            selectedDistance === distance
+                              ? "text-[#FF5937]"
+                              : "text-gray-400 dark:text-gray-500"
+                          }`}
+                        >
+                          {distance}km
+                        </Text>
+                      ))}
+                    </View>
+                    <View className="relative h-12 w-full">
+                      <View className="absolute inset-0 flex flex-row items-center">
+                        <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
+                      </View>
+                      <Slider
+                        renderThumbComponent={() => (
+                          <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
+                        )}
+                        trackClickable={true}
+                        step={1}
+                        value={DISTANCES.indexOf(selectedDistance || 100)}
+                        maximumValue={DISTANCES.length - 1}
+                        trackStyle={{ backgroundColor: "transparent" }}
+                        minimumTrackStyle={{ backgroundColor: "transparent" }}
+                        maximumTrackStyle={{ backgroundColor: "transparent" }}
+                        onValueChange={(value) => {
+                          setSelectedDistance(DISTANCES[value[0]]);
+                        }}
+                      />
+                    </View>
+                  </View>
+                </GroupWithTitle>
+              </MotiView>
+            )}
+          </AnimatePresence>
+        </ScrollView>
+      </View>
     </ScreenFrame>
   );
 }
