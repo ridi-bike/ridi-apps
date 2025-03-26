@@ -428,7 +428,7 @@ export default function PlansNew() {
             }}
           />
         )}
-        <ScrollView className="max-h-[calc(100vh-170px)] w-full max-w-5xl px-4 pb-28 pt-4">
+        <ScrollView className="max-h-[calc(100vh-170px)] w-full max-w-5xl px-4 pb-36 pt-4">
           <Pressable role="button" onPress={() => setMapMode(true)}>
             <GroupWithTitle title="Trip details">
               <AnimatePresence>

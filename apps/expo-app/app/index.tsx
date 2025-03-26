@@ -2,7 +2,7 @@ import { type Session } from "@supabase/supabase-js";
 import { useRouter, Stack } from "expo-router";
 import { Download, Map } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 
 import { useCreateSessionFromUrl } from "~/components/auth";
 import { Button } from "~/components/button";
@@ -31,12 +31,12 @@ export default function Index() {
   }, [isAuthCallback, router]);
 
   return (
-    <View
+    <ScrollView
       role="main"
       className="flex min-h-screen w-full flex-col items-center justify-center bg-white p-6 dark:bg-gray-900"
     >
       <Stack.Screen options={{ headerShown: false }} />
-      <View className="flex w-full max-w-[375px] flex-col items-center">
+      <View className="flex w-[375px] flex-col items-center">
         <View className="mb-16">
           <Text className="text-6xl font-bold tracking-tight text-[#FF5937]">
             Ridi
@@ -133,6 +133,6 @@ export default function Index() {
           </Button>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
