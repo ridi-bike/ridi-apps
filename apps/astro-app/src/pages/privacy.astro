@@ -1,0 +1,131 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout>
+  <main class="pt-32 pb-20">
+    <div class="max-w-screen-xl mx-auto px-6 lg:px-8 xl:px-10">
+      <div class="max-w-3xl mx-auto">
+        <h1 class="text-4xl font-medium mb-8">Privacy Policy</h1>
+        <p class="text-lg mb-4">Last Updated: 2025-03-26</p>
+        <p class="text-lg mb-8">
+          This Privacy Policy explains how Ridi ("we," "us," or "our") collects,
+          uses, and protects your personal information when you use our route
+          generation application.
+        </p>
+
+        <section class="mb-8">
+          <h2 class="text-2xl font-medium mb-4">1. Information We Collect</h2>
+          <p class="text-lg mb-4">
+            We only collect data that you explicitly provide to us, including:
+          </p>
+          <ul class="list-disc pl-6 text-lg space-y-2">
+            <li>Email address (for account creation and login)</li>
+            <li>Trip plans & route data (start and end points you enter)</li>
+          </ul>
+          <p class="text-lg mt-4 mb-4">We do not collect:</p>
+          <ul class="list-disc pl-6 text-lg space-y-2">
+            <li>
+              Your real-time location (unless manually entered as a route point)
+            </li>
+            <li>Payment information (handled securely by Stripe)</li>
+            <li>Any data beyond what is necessary for app functionality</li>
+          </ul>
+          <h3 class="text-xl font-medium mt-6 mb-3">
+            Automated Data Collection
+          </h3>
+          <ul class="list-disc pl-6 text-lg space-y-2">
+            <li>
+              Sentry (for crash reporting, which may include session data in
+              case of errors)
+            </li>
+            <li>Session cookies (only for authentication, no tracking)</li>
+          </ul>
+        </section>
+
+        <section class="mb-8">
+          <h2 class="text-2xl font-medium mb-4">2. How We Use Your Data</h2>
+          <p class="text-lg mb-4">Your information is used to:</p>
+          <ul class="list-disc pl-6 text-lg space-y-2">
+            <li>Provide route generation services</li>
+            <li>Maintain your account and trip history</li>
+            <li>Improve app stability (via Sentry crash reports)</li>
+          </ul>
+        </section>
+
+        <section class="mb-8">
+          <h2 class="text-2xl font-medium mb-4">3. Data Storage & Security</h2>
+          <p class="text-lg mb-4">
+            All data is stored in Supabase (hosted in the EU).
+          </p>
+          <p class="text-lg">
+            We implement industry-standard security measures to protect your
+            information.
+          </p>
+        </section>
+
+        <section class="mb-8">
+          <h2 class="text-2xl font-medium mb-4">
+            4. Data Sharing & Disclosure
+          </h2>
+          <p class="text-lg mb-4">
+            We do not share your data with third parties except:
+          </p>
+          <ul class="list-disc pl-6 text-lg space-y-2">
+            <li>
+              Stripe (for payment processing, but we never handle payment
+              details).
+            </li>
+            <li>Sentry (only for crash analytics).</li>
+            <li>If required by law (e.g., legal requests).</li>
+          </ul>
+        </section>
+
+        <section class="mb-8">
+          <h2 class="text-2xl font-medium mb-4">5. Your Rights</h2>
+          <p class="text-lg mb-4">You can:</p>
+          <ul class="list-disc pl-6 text-lg space-y-2">
+            <li>Access, correct, or delete your data.</li>
+            <li>Export your trip history.</li>
+            <li>Request account deletion by emailing info@ridi.bike.</li>
+          </ul>
+        </section>
+
+        <section class="mb-8">
+          <h2 class="text-2xl font-medium mb-4">6. Cookies & Tracking</h2>
+          <p class="text-lg mb-4">We only use:</p>
+          <ul class="list-disc pl-6 text-lg space-y-2">
+            <li>Session cookies (for login).</li>
+            <li>No tracking, ads, or behavioral analytics.</li>
+          </ul>
+        </section>
+
+        <section class="mb-8">
+          <h2 class="text-2xl font-medium mb-4">7. Age Restrictions</h2>
+          <p class="text-lg">Our app is not intended for children under 16.</p>
+        </section>
+
+        <section class="mb-8">
+          <h2 class="text-2xl font-medium mb-4">8. Legal Compliance</h2>
+          <p class="text-lg">
+            We comply with EU laws (GDPR) and will notify users of policy
+            changes via email.
+          </p>
+        </section>
+
+        <section class="mb-8">
+          <h2 class="text-2xl font-medium mb-4">9. Contact Us</h2>
+          <p class="text-lg">
+            For privacy concerns, contact:{" "}
+            <a
+              href="mailto:info@ridi.bike"
+              class="text-[#f75835] hover:underline"
+            >
+              info@ridi.bike
+            </a>
+          </p>
+        </section>
+      </div>
+    </div>
+  </main>
+</Layout>
