@@ -2,8 +2,6 @@ import { type SupportedStorage, createClient } from "@supabase/supabase-js";
 import { AppState, Platform } from "react-native";
 import { MMKV } from "react-native-mmkv";
 
-import { type Database } from "../../../services/ridi-router/packages/lib/supabase";
-
 import "react-native-url-polyfill/auto";
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
@@ -28,7 +26,7 @@ class StorageMMKV implements SupportedStorage {
   isServer?: boolean | undefined;
 }
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient<unknown>(supabaseUrl, supabaseAnonKey, {
   auth: {
     storage: Platform.OS !== "web" ? new StorageMMKV() : undefined,
     autoRefreshToken: true,

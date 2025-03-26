@@ -231,7 +231,7 @@ export default function PlansNew() {
       onGoBack={() => (mapMode ? setMapMode(false) : router.replace("/plans"))}
       floating={
         <View className="flex w-full flex-col items-center justify-start">
-          <View className="fixed bottom-0 flex w-full flex-row items-center justify-center bg-white p-4 dark:bg-gray-800">
+          <View className="fixed bottom-0 flex w-full flex-col items-center justify-center bg-white p-4 dark:bg-gray-800">
             <AnimatePresence>
               {!!errorMessage && (
                 <MotiView

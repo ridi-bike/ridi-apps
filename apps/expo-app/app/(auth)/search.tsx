@@ -113,7 +113,9 @@ export default function LocationSearch() {
   };
 
   const gotoNewScreen = useCallback(() => {
-    if (navState.routes[(navState.index || 0) - 1]?.name === "plans/new") {
+    if (
+      navState.routes[(navState.index || 0) - 1]?.name === "(auth)/plans/new"
+    ) {
       router.back(); // TODO not quite working, seems to be replacing
     } else {
       router.replace("/plans/new");
@@ -126,15 +128,16 @@ export default function LocationSearch() {
       onGoBack={() => router.back()}
       floating={
         <MotiView
-          className="fixed top-16 w-full border-b-2 border-black bg-white dark:border-gray-700 dark:bg-gray-900"
+          className="fixed top-16 flex w-full flex-col items-center justify-start border-b-2 border-black bg-white dark:border-gray-700 dark:bg-gray-900"
           transition={{ type: "timing" }}
         >
-          <View className="p-4">
+          <View className="w-full max-w-5xl p-4">
             <Pressable
               role="button"
               onPress={() => {
                 gotoNewScreen();
                 router.setParams({
+                  "map-mode": "true",
                   "search-results": JSON.stringify(
                     locations.map((l) => [
                       parseFloat(l.lat),
@@ -155,7 +158,7 @@ export default function LocationSearch() {
               <TextInput
                 value={searchQuery}
                 onChangeText={setSearchQuery}
-                placeholder="Search location..."
+                placeholder="Search coordinates or location..."
                 className="flex-1 rounded-xl border-2 border-black bg-white px-4 py-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
               />
               <Pressable
@@ -177,26 +180,28 @@ export default function LocationSearch() {
         </MotiView>
       }
     >
-      <View className="mx-2 mt-36 max-w-5xl flex-1">
-        <ScrollView className="h-[calc(100vh-240px)]">
-          <View className="mr-2 grid grid-cols-1 gap-6 md:grid-cols-3">
-            {locations.length > 0 ? (
-              <>
-                {locations.map((location, index) => (
-                  <LocationCard
-                    key={index}
-                    location={location}
-                    gotoNewScreen={gotoNewScreen}
-                  />
-                ))}
-              </>
-            ) : (
-              <Text className="p-4 text-center text-gray-500 dark:text-gray-200">
-                Search for a location to see results
-              </Text>
-            )}
-          </View>
-        </ScrollView>
+      <View className="flex flex-col items-center justify-start">
+        <View className="mx-2 mt-36 w-full max-w-5xl">
+          <ScrollView className="h-[calc(100vh-240px)]">
+            <View className="mr-2 grid grid-cols-1 gap-6 md:grid-cols-3">
+              {locations.length > 0 ? (
+                <>
+                  {locations.map((location, index) => (
+                    <LocationCard
+                      key={index}
+                      location={location}
+                      gotoNewScreen={gotoNewScreen}
+                    />
+                  ))}
+                </>
+              ) : (
+                <Text className="p-4 text-center text-gray-500 dark:text-gray-200">
+                  Search for a location to see results
+                </Text>
+              )}
+            </View>
+          </ScrollView>
+        </View>
       </View>
     </ScreenFrame>
   );
