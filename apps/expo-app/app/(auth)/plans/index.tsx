@@ -79,65 +79,67 @@ export default function PlansPage() {
         </AnimatePresence>
       }
     >
-      <AnimatePresence>
-        {!!error && status !== "pending" && (
-          <View className="mx-2 max-w-5xl flex-1">
-            <ErrorBox error={error} retry={refetch} />
-          </View>
-        )}
-        {!plans && !error && (
-          <View className="flex w-full flex-row items-center justify-center">
-            <Loading className="size-12 text-[#ff4a25]" />
-          </View>
-        )}
-        {!!plans && (
-          <MotiView
-            className="mx-2 max-w-5xl flex-1"
-            from={{
-              opacity: 0,
-            }}
-            animate={{
-              opacity: 1,
-            }}
-            exit={{
-              opacity: 0,
-            }}
-            transition={{
-              type: "timing",
-              delay: 100,
-              duration: 500,
-            }}
-          >
-            <ScrollView className="h-[calc(100vh-100px)] pb-24">
-              <View className="grid size-full grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {plans.map((plan, index) => (
-                  <MotiPressable
-                    key={index}
-                    onPress={() => router.navigate(`/plans/${plan.id}`)}
-                    animate={animate}
-                    transition={transition}
-                  >
-                    <PlanCard
-                      startDesc={plan.startDesc}
-                      finishDesc={plan.finishDesc}
-                      startCoords={{ lat: plan.startLat, lon: plan.startLon }}
-                      finishCoords={
-                        plan.finishLat && plan.finishLon
-                          ? { lat: plan.finishLat, lon: plan.finishLon }
-                          : null
-                      }
-                      bearing={plan.bearing}
-                      distance={plan.distance}
-                      tripType={plan.tripType}
-                      state={plan.state}
-                    />
-                  </MotiPressable>
-                ))}
-              </View>
-            </ScrollView>
-          </MotiView>
-        )}
-      </AnimatePresence>
+      <View className="flex w-full flex-col items-center justify-start">
+        <AnimatePresence>
+          {!!error && status !== "pending" && (
+            <View className="mx-2 max-w-5xl flex-1">
+              <ErrorBox error={error} retry={refetch} />
+            </View>
+          )}
+          {!plans && !error && (
+            <View className="flex w-full flex-row items-center justify-center">
+              <Loading className="size-12 text-[#ff4a25]" />
+            </View>
+          )}
+          {!!plans && (
+            <MotiView
+              className="mx-2 w-full md:max-w-5xl"
+              from={{
+                opacity: 0,
+              }}
+              animate={{
+                opacity: 1,
+              }}
+              exit={{
+                opacity: 0,
+              }}
+              transition={{
+                type: "timing",
+                delay: 100,
+                duration: 500,
+              }}
+            >
+              <ScrollView className="h-[calc(100vh-100px)] pb-24">
+                <View className="grid size-full grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {plans.map((plan, index) => (
+                    <MotiPressable
+                      key={index}
+                      onPress={() => router.navigate(`/plans/${plan.id}`)}
+                      animate={animate}
+                      transition={transition}
+                    >
+                      <PlanCard
+                        startDesc={plan.startDesc}
+                        finishDesc={plan.finishDesc}
+                        startCoords={{ lat: plan.startLat, lon: plan.startLon }}
+                        finishCoords={
+                          plan.finishLat && plan.finishLon
+                            ? { lat: plan.finishLat, lon: plan.finishLon }
+                            : null
+                        }
+                        bearing={plan.bearing}
+                        distance={plan.distance}
+                        tripType={plan.tripType}
+                        state={plan.state}
+                      />
+                    </MotiPressable>
+                  ))}
+                </View>
+              </ScrollView>
+            </MotiView>
+          )}
+        </AnimatePresence>
+      </View>
     </ScreenFrame>
   );
 }

@@ -13,11 +13,13 @@ import maplibre from "maplibre-gl";
 import { useEffect, useMemo, useRef } from "react";
 
 import { type GeoMapRouteViewProps } from "~/components/geo-map/types";
+import { useColorScheme } from "~/lib/useColorScheme";
 
 import { getMapStyle } from "./style";
 import { combineBBox } from "./util";
 
 export function GeoMapRouteView({ route, interactive }: GeoMapRouteViewProps) {
+  const { colorScheme } = useColorScheme();
   const mapRef = useRef<MapRef>(null);
 
   const mapBounds = useMemo(() => {
@@ -46,7 +48,7 @@ export function GeoMapRouteView({ route, interactive }: GeoMapRouteViewProps) {
       type: "line",
       source: routeLayerId,
       paint: {
-        "line-color": "#FF5937",
+        "line-color": "#BD37FF",
         "line-width": 3,
       },
     };
@@ -89,7 +91,7 @@ export function GeoMapRouteView({ route, interactive }: GeoMapRouteViewProps) {
               zoom: 4,
             }
       }
-      mapStyle={getMapStyle("light")}
+      mapStyle={getMapStyle(colorScheme)}
     >
       {interactive && <NavigationControl position="bottom-right" />}
       {routeLayer}

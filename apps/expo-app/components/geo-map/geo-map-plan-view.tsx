@@ -7,6 +7,7 @@ import maplibre from "maplibre-gl";
 import { useEffect, useMemo, useRef } from "react";
 import { View } from "react-native";
 
+import { useColorScheme } from "~/lib/useColorScheme";
 import { cn } from "~/lib/utils";
 
 import GeoMapMarker from "./geo-map-marker";
@@ -23,6 +24,7 @@ type GeoMapPlanView = {
 };
 
 export function GeoMapPlanView(props: GeoMapPlanView) {
+  const { colorScheme } = useColorScheme();
   const { roundTripPolygon, rountdTripLayer } = useRoundTripPolygon(
     props.bearing !== null,
     props.start,
@@ -71,7 +73,7 @@ export function GeoMapPlanView(props: GeoMapPlanView) {
                 zoom: 4,
               }
         }
-        mapStyle={getMapStyle("light")}
+        mapStyle={getMapStyle(colorScheme)}
         interactive={false}
         attributionControl={false}
       >

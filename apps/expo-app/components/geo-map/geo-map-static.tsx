@@ -5,6 +5,7 @@ import maplibre from "maplibre-gl";
 import { useMemo } from "react";
 import { View } from "react-native";
 
+import { useColorScheme } from "~/lib/useColorScheme";
 import { cn } from "~/lib/utils";
 
 import GeoMapMarker from "./geo-map-marker";
@@ -17,6 +18,7 @@ type GeoMapStaticProps = {
 };
 
 export function GeoMapStatic(props: GeoMapStaticProps) {
+  const { colorScheme } = useColorScheme();
   const bbox = useMemo(() => {
     const features = turf.points(
       props.points.map((p) => [p.coords.lon, p.coords.lat]),
@@ -36,7 +38,7 @@ export function GeoMapStatic(props: GeoMapStaticProps) {
             bbox[3] + 0.03,
           ],
         }}
-        mapStyle={getMapStyle("light")}
+        mapStyle={getMapStyle(colorScheme)}
         interactive={false}
         attributionControl={false}
       >

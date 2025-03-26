@@ -289,160 +289,163 @@ export default function PlanDetails() {
 
   return (
     <ScreenFrame title="Plan routes" onGoBack={() => router.replace("/plans")}>
-      <AnimatePresence exitBeforeEnter>
-        {!plans && !error && (
-          <View className="flex w-full flex-row items-center justify-center">
-            <Loading className="size-12 text-[#ff4a25]" />
-          </View>
-        )}
-        {!!error && status !== "pending" && (
-          <MotiView
-            from={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mx-2 max-w-5xl flex-1"
-          >
-            <ErrorBox error={error} retry={refetch} />
-          </MotiView>
-        )}
-        {plan && (
-          <MotiView
-            from={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mx-2 max-w-5xl flex-1"
-          >
-            <ScrollView className="h-[calc(100vh-100px)] pb-12">
-              <View className="mx-2 max-w-5xl flex-1">
-                <ScreenCard
-                  middle={
-                    <>
-                      <View className="space-y-4">
-                        <View className="flex flex-row items-start gap-3">
-                          <View>
-                            <CirclePlay className="mt-1 size-6 text-[#FF5937]" />
-                          </View>
-                          <View className="flex-1">
-                            <Text className="text-sm font-bold text-[#FF5937]">
-                              Start
-                            </Text>
-                            <Text className="truncate text-base font-medium dark:text-gray-200">
-                              {plan.startDesc}
-                            </Text>
-                          </View>
-                        </View>
-                        {plan.tripType === "start-finish" && (
+      <View className="flex w-full flex-col items-center justify-start">
+        <AnimatePresence exitBeforeEnter>
+          {!plans && !error && (
+            <View className="flex w-full flex-row items-center justify-center">
+              <Loading className="size-12 text-[#ff4a25]" />
+            </View>
+          )}
+          {!!error && status !== "pending" && (
+            <MotiView
+              from={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mx-2 max-w-5xl flex-1"
+            >
+              <ErrorBox error={error} retry={refetch} />
+            </MotiView>
+          )}
+          {plan && (
+            <MotiView
+              from={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mx-2 w-full max-w-5xl"
+            >
+              <ScrollView className="h-[calc(100vh-100px)] pb-12">
+                <View className="mx-2 w-full pr-4 md:max-w-5xl">
+                  <ScreenCard
+                    middle={
+                      <>
+                        <View className="space-y-4">
                           <View className="flex flex-row items-start gap-3">
                             <View>
-                              <CirclePause className="mt-1 size-6 text-[#FF5937]" />
+                              <CirclePlay className="mt-1 size-6 text-[#FF5937]" />
                             </View>
                             <View className="flex-1">
                               <Text className="text-sm font-bold text-[#FF5937]">
-                                Finish
+                                Start
                               </Text>
                               <Text className="truncate text-base font-medium dark:text-gray-200">
-                                {plan?.finishDesc}
+                                {plan.startDesc}
                               </Text>
                             </View>
                           </View>
-                        )}
-                        {plan.tripType === "round-trip" && (
+                          {plan.tripType === "start-finish" && (
+                            <View className="flex flex-row items-start gap-3">
+                              <View>
+                                <CirclePause className="mt-1 size-6 text-[#FF5937]" />
+                              </View>
+                              <View className="flex-1">
+                                <Text className="text-sm font-bold text-[#FF5937]">
+                                  Finish
+                                </Text>
+                                <Text className="truncate text-base font-medium dark:text-gray-200">
+                                  {plan?.finishDesc}
+                                </Text>
+                              </View>
+                            </View>
+                          )}
+                          {plan.tripType === "round-trip" && (
+                            <View className="flex flex-row items-start gap-3">
+                              <Navigation className="mt-1 size-6 text-[#FF5937]" />
+                              <View>
+                                <Text className="text-sm font-bold text-[#FF5937]">
+                                  Direction
+                                </Text>
+                                <Text className="text-base font-medium dark:text-gray-200">
+                                  {getCardinalDirection(plan.bearing!)} (
+                                  {plan.bearing}°)
+                                </Text>
+                              </View>
+                            </View>
+                          )}
                           <View className="flex flex-row items-start gap-3">
-                            <Navigation className="mt-1 size-6 text-[#FF5937]" />
+                            <Ruler className="mt-1 size-6 text-[#FF5937]" />
                             <View>
                               <Text className="text-sm font-bold text-[#FF5937]">
-                                Direction
+                                {plan.tripType === "round-trip"
+                                  ? "Target distance"
+                                  : "Straigt line distance"}
                               </Text>
                               <Text className="text-base font-medium dark:text-gray-200">
-                                {getCardinalDirection(plan.bearing!)} (
-                                {plan.bearing}°)
+                                {metersToDisplay(plan.distance)}
                               </Text>
                             </View>
                           </View>
-                        )}
-                        <View className="flex flex-row items-start gap-3">
-                          <Ruler className="mt-1 size-6 text-[#FF5937]" />
-                          <View>
-                            <Text className="text-sm font-bold text-[#FF5937]">
-                              {plan.tripType === "round-trip"
-                                ? "Target distance"
-                                : "Straigt line distance"}
-                            </Text>
-                            <Text className="text-base font-medium dark:text-gray-200">
-                              {metersToDisplay(plan.distance)}
-                            </Text>
-                          </View>
+                        </View>
+                      </>
+                    }
+                    bottom={
+                      <View className="flex flex-row items-center justify-between">
+                        <View className="flex flex-col items-end justify-center">
+                          <Text className="font-bold dark:text-gray-100">
+                            Status
+                          </Text>
+                          <Text
+                            className={cn("font-bold", {
+                              "text-gray-600":
+                                plan.state === "new" ||
+                                plan.state === "planning",
+                              "text-green-500": plan.state === "done",
+                              "text-red-500": plan.state === "error",
+                            })}
+                          >
+                            {plan.state}
+                          </Text>
+                        </View>
+                        <View className="flex flex-col items-end justify-center">
+                          <DeleteConfirmDialog
+                            onDelete={() => {
+                              planDelete(plan.id);
+                              router.replace("/plans");
+                            }}
+                          >
+                            <Pressable
+                              className={cn(
+                                "dark:border-red-700 dark:hover:bg-red-950 w-full h-14 flex-row items-center px-4 gap-3 rounded-xl border-[3px] border-red-500 text-red-500 hover:bg-red-50 transition-colors",
+                              )}
+                            >
+                              <Trash2 className="size-4" />
+                            </Pressable>
+                          </DeleteConfirmDialog>
                         </View>
                       </View>
-                    </>
-                  }
-                  bottom={
-                    <View className="flex flex-row items-center justify-between">
-                      <View className="flex flex-col items-end justify-center">
-                        <Text className="font-bold dark:text-gray-100">
-                          Status
-                        </Text>
-                        <Text
-                          className={cn("font-bold", {
-                            "text-gray-600":
-                              plan.state === "new" || plan.state === "planning",
-                            "text-green-500": plan.state === "done",
-                            "text-red-500": plan.state === "error",
-                          })}
-                        >
-                          {plan.state}
-                        </Text>
-                      </View>
-                      <View className="flex flex-col items-end justify-center">
-                        <DeleteConfirmDialog
-                          onDelete={() => {
-                            planDelete(plan.id);
-                            router.replace("/plans");
-                          }}
-                        >
-                          <Pressable
-                            className={cn(
-                              "dark:border-red-700 dark:hover:bg-red-950 w-full h-14 flex-row items-center px-4 gap-3 rounded-xl border-[3px] border-red-500 text-red-500 hover:bg-red-50 transition-colors",
-                            )}
+                    }
+                  />
+                  {plan.state !== "done" && plan.state !== "error" && (
+                    <GeneratingRoutes createdAt={new Date(plan.createdAt)} />
+                  )}
+                  {plan.state === "error" && <RouteGenError planId={plan.id} />}
+                  {plan.state === "done" && plan.routes.length === 0 && (
+                    <NoRoutes />
+                  )}
+                  {plan.state === "done" && plan.routes.length > 0 && (
+                    <>
+                      <Text
+                        role="heading"
+                        aria-level={2}
+                        className="my-6 text-2xl font-bold dark:text-gray-100"
+                      >
+                        Available Routes
+                      </Text>
+                      <View className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {plan.routes.map((route) => (
+                          <Link
+                            key={route.routeId}
+                            href={`/plans/${plan.id}/${route.routeId}`}
                           >
-                            <Trash2 className="size-4" />
-                          </Pressable>
-                        </DeleteConfirmDialog>
+                            <RouteCard routeId={route.routeId} plan={plan} />
+                          </Link>
+                        ))}
                       </View>
-                    </View>
-                  }
-                />
-                {plan.state !== "done" && plan.state !== "error" && (
-                  <GeneratingRoutes createdAt={new Date(plan.createdAt)} />
-                )}
-                {plan.state === "error" && <RouteGenError planId={plan.id} />}
-                {plan.state === "done" && plan.routes.length === 0 && (
-                  <NoRoutes />
-                )}
-                {plan.state === "done" && plan.routes.length > 0 && (
-                  <>
-                    <Text
-                      role="heading"
-                      aria-level={2}
-                      className="my-6 text-2xl font-bold dark:text-gray-100"
-                    >
-                      Available Routes
-                    </Text>
-                    <View className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                      {plan.routes.map((route) => (
-                        <Link
-                          key={route.routeId}
-                          href={`/plans/${plan.id}/${route.routeId}`}
-                        >
-                          <RouteCard routeId={route.routeId} plan={plan} />
-                        </Link>
-                      ))}
-                    </View>
-                  </>
-                )}
-              </View>
-            </ScrollView>
-          </MotiView>
-        )}
-      </AnimatePresence>
+                    </>
+                  )}
+                </View>
+              </ScrollView>
+            </MotiView>
+          )}
+        </AnimatePresence>
+      </View>
     </ScreenFrame>
   );
 }

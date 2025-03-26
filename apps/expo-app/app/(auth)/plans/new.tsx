@@ -230,83 +230,88 @@ export default function PlansNew() {
       title="New plan"
       onGoBack={() => (mapMode ? setMapMode(false) : router.replace("/plans"))}
       floating={
-        <View className="fixed bottom-0 w-full bg-white p-4 dark:bg-gray-800">
-          <AnimatePresence>
-            {!!errorMessage && (
-              <MotiView
-                from={{ height: 0 }}
-                animate={{ height: 50 }}
-                exit={{ height: 0 }}
-                className="flex h-14 flex-row items-center justify-center"
-              >
-                <Text className="text-xl text-red-500">{errorMessage}</Text>
-              </MotiView>
-            )}
-          </AnimatePresence>
-          {mapMode && (
-            <Pressable
-              role="button"
-              onPress={() => setMapMode(false)}
-              aria-disabled={!canCreateRoute()}
-              className={cn(
-                "w-full rounded-xl px-4 py-3 font-medium text-white transition-colors",
-                {
-                  "bg-[#FF5937] hover:bg-[#FF5937]/90": mapMode,
-                  "cursor-not-allowed bg-gray-200 dark:bg-gray-700": !mapMode,
-                },
+        <View className="flex w-full flex-col items-center justify-start">
+          <View className="fixed bottom-0 flex w-full flex-row items-center justify-center bg-white p-4 dark:bg-gray-800">
+            <AnimatePresence>
+              {!!errorMessage && (
+                <MotiView
+                  from={{ height: 0 }}
+                  animate={{ height: 50 }}
+                  exit={{ height: 0 }}
+                  className="flex h-14 flex-row items-center justify-center"
+                >
+                  <Text className="text-xl text-red-500">{errorMessage}</Text>
+                </MotiView>
               )}
-            >
-              <Text className="text-center text-white">OK</Text>
-            </Pressable>
-          )}
-          {!mapMode && (
-            <Pressable
-              role="button"
-              onPress={() => {
-                if (canCreateRoute()) {
-                  if (!startCoords || !ruleSetId) {
-                    return;
-                  }
-                  let distance = (selectedDistance || 0) * 1000;
-                  if (!isRoundTrip && finishCoords) {
-                    const turfP1 = turf.point([startCoords[1], startCoords[0]]);
-                    const turfP2 = turf.point([
-                      finishCoords[1],
-                      finishCoords[0],
-                    ]);
-                    distance = turf.distance(turfP1, turfP2, {
-                      units: "meters",
+            </AnimatePresence>
+            {mapMode && (
+              <Pressable
+                role="button"
+                onPress={() => setMapMode(false)}
+                aria-disabled={!canCreateRoute()}
+                className={cn(
+                  "w-full rounded-xl px-4 py-3 font-medium text-white transition-colors",
+                  {
+                    "bg-[#FF5937] hover:bg-[#FF5937]/90": mapMode,
+                    "cursor-not-allowed bg-gray-200 dark:bg-gray-700": !mapMode,
+                  },
+                )}
+              >
+                <Text className="text-center text-white">OK</Text>
+              </Pressable>
+            )}
+            {!mapMode && (
+              <Pressable
+                role="button"
+                onPress={() => {
+                  if (canCreateRoute()) {
+                    if (!startCoords || !ruleSetId) {
+                      return;
+                    }
+                    let distance = (selectedDistance || 0) * 1000;
+                    if (!isRoundTrip && finishCoords) {
+                      const turfP1 = turf.point([
+                        startCoords[1],
+                        startCoords[0],
+                      ]);
+                      const turfP2 = turf.point([
+                        finishCoords[1],
+                        finishCoords[0],
+                      ]);
+                      distance = turf.distance(turfP1, turfP2, {
+                        units: "meters",
+                      });
+                    }
+                    const planId = planAdd({
+                      startLat: startCoords[0],
+                      startLon: startCoords[1],
+                      finishLat: finishCoords ? finishCoords[0] : null,
+                      finishLon: finishCoords ? finishCoords[1] : null,
+                      bearing: isRoundTrip ? bearing || 0 : null,
+                      distance,
+                      tripType: isRoundTrip ? "round-trip" : "start-finish",
+                      ruleSetId,
+                    });
+                    router.replace({
+                      pathname: "/plans/[planId]",
+                      params: { planId },
                     });
                   }
-                  const planId = planAdd({
-                    startLat: startCoords[0],
-                    startLon: startCoords[1],
-                    finishLat: finishCoords ? finishCoords[0] : null,
-                    finishLon: finishCoords ? finishCoords[1] : null,
-                    bearing: isRoundTrip ? bearing || 0 : null,
-                    distance,
-                    tripType: isRoundTrip ? "round-trip" : "start-finish",
-                    ruleSetId,
-                  });
-                  router.replace({
-                    pathname: "/plans/[planId]",
-                    params: { planId },
-                  });
-                }
-              }}
-              aria-disabled={!canCreateRoute()}
-              className={cn(
-                "w-full rounded-xl px-4 py-3 font-medium text-white transition-colors",
-                {
-                  "bg-[#FF5937] hover:bg-[#FF5937]/90": canCreateRoute(),
-                  "cursor-not-allowed bg-gray-200 dark:bg-gray-700":
-                    !canCreateRoute(),
-                },
-              )}
-            >
-              <Text className="text-center text-white">OK</Text>
-            </Pressable>
-          )}
+                }}
+                aria-disabled={!canCreateRoute()}
+                className={cn(
+                  "w-full rounded-xl px-4 py-3 max-w-5xl font-medium text-white transition-colors",
+                  {
+                    "bg-[#FF5937] hover:bg-[#FF5937]/90": canCreateRoute(),
+                    "cursor-not-allowed bg-gray-200 dark:bg-gray-700":
+                      !canCreateRoute(),
+                  },
+                )}
+              >
+                <Text className="text-center text-white">OK</Text>
+              </Pressable>
+            )}
+          </View>
         </View>
       }
     >
@@ -314,7 +319,6 @@ export default function PlansNew() {
         <AnimatePresence>
           {mapMode && (
             <MotiView
-              id="omg"
               className="fixed top-0 z-50 mt-16 w-[98vw] bg-white p-4 pb-40 dark:bg-gray-900"
               from={{ height: "0%" }}
               animate={{ height: "100%" }}
@@ -424,7 +428,7 @@ export default function PlansNew() {
             }}
           />
         )}
-        <ScrollView className="max-h-[calc(100vh-170px)] w-full px-4 pb-28 pt-4">
+        <ScrollView className="max-h-[calc(100vh-170px)] w-full max-w-5xl px-4 pb-28 pt-4">
           <Pressable role="button" onPress={() => setMapMode(true)}>
             <GroupWithTitle title="Trip details">
               <AnimatePresence>

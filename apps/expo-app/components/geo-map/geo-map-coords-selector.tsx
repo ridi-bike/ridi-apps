@@ -24,6 +24,7 @@ import {
   type Coords,
   type GeoMapCoordsSelectorProps,
 } from "~/components/geo-map/types";
+import { useColorScheme } from "~/lib/useColorScheme";
 
 import { getMapStyle } from "./style";
 import { combineBBox, useRoundTripPolygon } from "./util";
@@ -63,6 +64,7 @@ export function GeoMapCoordsSelector({
   regions,
   children,
 }: GeoMapCoordsSelectorProps) {
+  const { colorScheme } = useColorScheme();
   const mapRef = useRef<MapRef>(null);
 
   const [findCoordsCurr, setFindCoordsCurr] = useState<
@@ -165,7 +167,7 @@ export function GeoMapCoordsSelector({
               zoom: 4,
             }
       }
-      mapStyle={getMapStyle("light")}
+      mapStyle={getMapStyle(colorScheme)}
       onClick={(event) => {
         if (selectionMode === "tap") {
           setFindCoordsCurr({
