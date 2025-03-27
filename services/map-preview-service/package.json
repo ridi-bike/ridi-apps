@@ -1,25 +1,36 @@
 {
   "name": "@ridi/map-preview-service",
-  "version": "1.0.0",
-  "main": "src/index.ts",
+  "private": true,
+  "version": "0.0.0",
   "type": "module",
-  "author": "",
   "scripts": {
+    "dev": "node --import=tsx --watch-path=./src --env-file=.env.base ./src/server/server.ts --dev | pino-pretty ",
+    "start": "node server.js",
+    "build": "vite build",
     "tsc": "tsc"
   },
-  "license": "ISC",
-  "description": "",
   "dependencies": {
+    "@fastify/vite": "8.0.0-alpha.2",
     "@ridi/logger": "workspace:^",
     "@ridi/map-preview-service-contracts": "workspace:^",
     "@ridi/messaging": "workspace:^",
     "@ts-rest/fastify": "^3.52.0",
     "fastify": "^5.2.1",
     "puppeteer": "^24.4.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "tsx": "^4.19.3",
     "typescript": "^5.8.1-rc",
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "pino-pretty": "^13.0.0"
+    "@eslint/js": "^9.21.0",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "globals": "^15.15.0",
+    "pino-pretty": "^13.0.0",
+    "typescript": "^5.8.1-rc",
+    "vite": "^6.2.0"
   }
 }

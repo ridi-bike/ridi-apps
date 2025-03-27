@@ -6,7 +6,7 @@ const c = initContract();
 export const mapPreviewContract = c.router({
   healthcheck: {
     method: "GET",
-    path: "/",
+    path: "/api/health",
     responses: {
       200: z.object({
         running: z.boolean(),
@@ -15,7 +15,7 @@ export const mapPreviewContract = c.router({
   },
   createPreview: {
     method: "POST",
-    path: "/preview",
+    path: "/api/preview",
     body: z.discriminatedUnion("type", [
       z.object({
         type: z.literal("route"),

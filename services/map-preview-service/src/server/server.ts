@@ -1,3 +1,6 @@
+import path from "node:path";
+
+import FastifyVite from "@fastify/vite";
 import { RidiLogger } from "@ridi/logger";
 import { mapPreviewContract } from "@ridi/map-preview-service-contracts";
 import { initServer } from "@ts-rest/fastify";
@@ -6,11 +9,16 @@ import Fastify from "fastify";
 import { env } from "./env.ts";
 import { handleMapPreviewRequest } from "./map-preview.ts";
 
+const server = Fastify();
+
+await server.register(FastifyVite, {
+  root: path.join(import.meta.url, "../../../"),
+  dev: process.argv.includes("--dev"),
+  spa: true,
+});
 const logger = RidiLogger.init({
   service: "map-preview",
 });
-
-const app = Fastify();
 
 const s = initServer();
 
@@ -55,25 +63,12 @@ const router = s.router(mapPreviewContract, {
   },
 });
 
-app.register(s.plugin(router));
-
-const start = async () => {
-  try {
-    logger.info("Healthcheck listening", { port: env.PORT });
-    await app.listen({ port: env.PORT, host: "0.0.0.0" });
-  } catch (err) {
-    app.log.error(err);
-    process.exit(1);
-  }
-};
-
-process.on("uncaughtException", (error, origin) => {
-  logger.error("uncaughtException", { error, origin });
-  process.exit(1);
-});
-process.on("unhandledRejection", (reason, promise) => {
-  logger.error("unhandledRejection", { reason, promise });
-  process.exit(1);
+server.get("/", (_req, reply) => {
+  return reply.html();
 });
 
-start();
+server.register(s.plugin(router));
+
+await server.vite.ready();
+logger.info("Listening", { port: env.PORT });
+await server.listen({ port: env.PORT, host: "0.0.0.0" });

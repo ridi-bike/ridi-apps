@@ -17,39 +17,43 @@ export async function handleMapPreviewRequest(): Promise<string> {
       event.args(),
     ),
   );
+  await page.goto("http://127.0.0.1:2730");
   // const htmlAsset = await env.MAPS.fetch(new URL("https://assets.local/"));
-  // await page.setContent(await htmlAsset.text());
-  await page.addScriptTag({
-    url: "https://unpkg.com/maplibre-gl@^5.3.0/dist/maplibre-gl.js",
-  });
-  await page.addStyleTag({
-    url: "https://unpkg.com/maplibre-gl@^5.3.0/dist/maplibre-gl.css",
-  });
-  await page.setContent(`
-    <div id="map-container"></div>
-`);
-  await page.evaluate(
-    `
-console.log("ommomomo");
-  //    import { Protocol } from "https://unpkg.com/pmtiles@4.3.0/dist/esm/index.js";
-   //   console.log("test inside", maplibregl);
-   //   const p = new Protocol();
-   //   maplibregl.addProtocol("pmtiles", p.tile);
 
-      const map = new maplibregl.Map({
-        container: "map-container",
-        style: "https://demotiles.maplibre.org/style.json",
-        center: [0, 0],
-        zoom: 1,
-      });
-      map.on("sourcedata", () => {
-        const doneDiv = document.createElement("div")
-        doneDiv.id = "map-load-done"
-        document.querySelector("body")?.appendChild(doneDiv)
-      });
-console.log("aaaaa");
-    `,
-  );
+  // await page.addScriptTag({
+  //   url: "https://unpkg.com/maplibre-gl@^5.3.0/dist/maplibre-gl.js",
+  // });
+  // await page.addStyleTag({
+  //   url: "https://unpkg.com/maplibre-gl@^5.3.0/dist/maplibre-gl.css",
+  // });
+  // await page.setContent(`
+  //     <div id="map-container"></div>
+  // `);
+  // await page.evaluate(
+  //   `
+  // console.log("ommomomo");
+  //   //    import { Protocol } from "https://unpkg.com/pmtiles@4.3.0/dist/esm/index.js";
+  //    //   console.log("test inside", maplibregl);
+  //    //   const p = new Protocol();
+  //    //   maplibregl.addProtocol("pmtiles", p.tile);
+  //
+  //       const map = new maplibregl.Map({
+  //         container: "map-container",
+  //         style: "https://demotiles.maplibre.org/style.json",
+  //         center: [0, 0],
+  //         zoom: 1,
+  //       });
+  //       const done = () => {
+  //         const doneDiv = document.createElement("div")
+  //         doneDiv.id = "map-load-done"
+  //         document.querySelector("body")?.appendChild(doneDiv)
+  //         map.off("sourcedata", done)
+  //       };
+  //       map.on("sourcedata", done);
+  // console.log("aaaaa");
+  //     `,
+  // );
+
   // await page.goto(
   //   `file://${path.join(import.meta.dirname, "../html/index.html")}`,
   // );

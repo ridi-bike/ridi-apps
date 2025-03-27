@@ -32,7 +32,7 @@ procs:
     shell: "pnpm run tsc --watch"
     cwd: "./services/router-service/"
   map-preview-service:
-    shell: "node --import=tsx --watch-path=./src --env-file=.env.base src/index.ts | pino-pretty"
+    shell: "pnpm dev"
     cwd: "./services/map-preview-service/"
   map-preview-service-tsc:
     shell: "pnpm run tsc --watch"
