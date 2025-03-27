@@ -13,6 +13,7 @@ export class RidiLogger {
         payload: (data) => {
           return Object.entries(data).reduce(
             (serialized, [key, value]) => {
+              console.log(key, value);
               serialized[key] = value;
               if (value instanceof Error) {
                 serialized[key] = pino.stdSerializers.err(value);
@@ -41,19 +42,19 @@ export class RidiLogger {
   }
 
   public debug(message: string, properties?: Record<string, unknown>) {
-    this.logger.debug(properties, message);
+    this.logger.debug({ payload: properties }, message);
   }
 
   public info(message: string, properties?: Record<string, unknown>) {
-    this.logger.info(properties, message);
+    this.logger.info({ payload: properties }, message);
   }
 
   public warn(message: string, properties?: Record<string, unknown>) {
-    this.logger.warn(properties, message);
+    this.logger.warn({ payload: properties }, message);
   }
 
   public error(message: string, properties?: Record<string, unknown>) {
-    this.logger.error(properties, message);
+    this.logger.error({ payload: properties }, message);
     return Error(message);
   }
 }

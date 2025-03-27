@@ -8,6 +8,7 @@ import {
   ridiNamespace,
   stackName,
 } from "../k8s";
+import { mapPreviewServiceUrl } from "../map-preview-service";
 import { regionServiceList } from "../router-service";
 
 const projectName = pulumi.getProject();
@@ -97,6 +98,10 @@ new k8s.apps.v1.Deployment(queueServiceName, {
               {
                 name: "ROUTER_SERVICE_LIST",
                 value: serviceListStr,
+              },
+              {
+                name: "MAP_PREVIEW_SERVICE_URL",
+                value: mapPreviewServiceUrl,
               },
             ],
             startupProbe: {

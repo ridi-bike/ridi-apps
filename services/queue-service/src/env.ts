@@ -5,6 +5,7 @@ const envSchema = z.object({
   ROUTER_SERVICE_LIST: z
     .string()
     .transform((v) => JSON.parse(v) as Record<string, string>),
+  MAP_PREVIEW_SERVICE_URL: z.string(),
 });
 
 export const env = envSchema.parse(process.env);
