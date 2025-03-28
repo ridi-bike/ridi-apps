@@ -407,12 +407,6 @@ importers:
         specifier: ^3.4.5
         version: 3.4.5
 
-  libs/geo-maps:
-    dependencies:
-      postgres:
-        specifier: ^3.4.5
-        version: 3.4.5
-
   libs/logger:
     dependencies:
       pino:
@@ -633,6 +627,9 @@ importers:
       '@ridi/logger':
         specifier: workspace:^
         version: link:../../libs/logger
+      '@ridi/map-preview-service-contracts':
+        specifier: workspace:^
+        version: link:../../libs/map-preview-service-contracts
       '@ridi/messaging':
         specifier: workspace:^
         version: link:../../libs/messaging

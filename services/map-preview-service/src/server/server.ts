@@ -25,10 +25,11 @@ const s = initServer();
 const router = s.router(mapPreviewContract, {
   createPreview: async ({ body }) => {
     let stuff = "";
+    logger.info("Map preview call", { reqId: body.reqId });
     try {
       stuff = await handleMapPreviewRequest();
     } catch (error) {
-      logger.error("error on puppeteer", { error });
+      logger.error("error on puppeteer", { error, reqId: body.reqId });
     }
     if (body.type === "route") {
       return {

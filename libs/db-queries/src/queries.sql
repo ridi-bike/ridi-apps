@@ -1,3 +1,9 @@
+-- name: PlanUpdateMapPreview :exec
+update plans
+set map_preview_dark = $1,
+  map_preview_Light = $2
+where id = $3;
+
 -- name: UserClaimPlans :exec
 update plans
 set user_id = sqlc.arg(to_user_id)

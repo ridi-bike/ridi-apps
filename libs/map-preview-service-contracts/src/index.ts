@@ -20,11 +20,13 @@ export const mapPreviewContract = c.router({
       z.object({
         type: z.literal("route"),
         route: z.array(z.tuple([z.number(), z.number()])),
+        reqId: z.string(),
       }),
       z.object({
         type: z.literal("plan"),
         start: z.tuple([z.number(), z.number()]),
         finish: z.tuple([z.number(), z.number()]),
+        reqId: z.string(),
       }),
     ]),
     responses: {

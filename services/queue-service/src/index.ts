@@ -5,6 +5,7 @@ import { Messaging } from "@ridi/messaging";
 import postgres from "postgres";
 
 import { env } from "./env.ts";
+import { MapPreviewServiceClient } from "./map-preview-service-client.ts";
 import { MessageHandlerNewPlan } from "./message-handler-new-plan.ts";
 import { RouterServiceLookup } from "./router-service-lookup.ts";
 
@@ -17,6 +18,7 @@ const messageHandlerNewPlan = new MessageHandlerNewPlan(
   logger,
   pgClient,
   new RouterServiceLookup(logger),
+  new MapPreviewServiceClient(logger),
 );
 
 messaging.listen(

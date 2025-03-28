@@ -5,7 +5,7 @@ import { env } from "./env";
 export async function handleMapPreviewRequest(): Promise<string> {
   const browser = await puppeteer.launch({
     executablePath: env.CHROME_BIN,
-    headless: false,
+    // headless: false,
   });
   const page = await browser.newPage();
   page.on("console", (event) =>
@@ -74,20 +74,24 @@ export async function handleMapPreviewRequest(): Promise<string> {
   //
 
   // await new Promise((resolve) => setTimeout(resolve, 15000));
-  // const data = await page.evaluate(
-  //   () => document.querySelector("*")?.outerHTML,
-  // );
-  //
-  // console.log(data);
 
-  await page.waitForSelector("#map-load-done");
-  await new Promise((resolve) => setTimeout(resolve, 15000));
+  // await page.waitForNetworkIdle({timeout});
+  await new Promise((resolve) => setTimeout(resolve, 5000));
+  const data = await page.evaluate(
+    () => document.querySelector("*")?.outerHTML,
+  );
 
-  const imageData = await page.evaluate(() => {
-    const canvas: HTMLCanvasElement | null =
-      document.querySelector(".maplibregl-canvas");
-    return canvas?.toDataURL();
-  });
+  console.log(data);
+  const mapContainer = await page.waitForSelector("#outer-container");
+  const imageData =
+    "data:image/png;base64," +
+    (await mapContainer?.screenshot({ encoding: "base64" }));
+
+  // const imageData = await page.evaluate(() => {
+  //   const canvas: HTMLCanvasElement | null =
+  //     document.querySelector(".maplibregl-canvas");
+  //   return canvas?.toDataURL();
+  // });
   // const imageData = await canvasHandle?.evaluateHandle((canvas) =>
   //   (canvas as unknown as HTMLCanvasElement).toDataURL(),
   // );

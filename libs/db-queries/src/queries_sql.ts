@@ -2,6 +2,22 @@
 
 import type  { Sql } from "postgres";
 
+export const planUpdateMapPreviewQuery = `-- name: PlanUpdateMapPreview :exec
+update plans
+set map_preview_dark = $1,
+  map_preview_Light = $2
+where id = $3`;
+
+export interface PlanUpdateMapPreviewArgs {
+    mapPreviewDark: string | null;
+    mapPreviewLight: string | null;
+    id: string;
+}
+
+export async function planUpdateMapPreview(sql: Sql, args: PlanUpdateMapPreviewArgs): Promise<void> {
+    await sql.unsafe(planUpdateMapPreviewQuery, [args.mapPreviewDark, args.mapPreviewLight, args.id]);
+}
+
 export const userClaimPlansQuery = `-- name: UserClaimPlans :exec
 update plans
 set user_id = $1
@@ -364,7 +380,7 @@ update plans
 set is_deleted = true
 where id = $1
   and user_id = $2
-returning id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc, rule_set_id, region, is_deleted`;
+returning id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc, rule_set_id, region, is_deleted, map_preview_light, map_preview_dark`;
 
 export interface PlanDeleteArgs {
     id: string;
@@ -391,6 +407,8 @@ export interface PlanDeleteRow {
     ruleSetId: string;
     region: string | null;
     isDeleted: boolean;
+    mapPreviewLight: string | null;
+    mapPreviewDark: string | null;
 }
 
 export async function planDelete(sql: Sql, args: PlanDeleteArgs): Promise<PlanDeleteRow | null> {
@@ -421,7 +439,9 @@ export async function planDelete(sql: Sql, args: PlanDeleteArgs): Promise<PlanDe
         finishDesc: row[15],
         ruleSetId: row[16],
         region: row[17],
-        isDeleted: row[18]
+        isDeleted: row[18],
+        mapPreviewLight: row[19],
+        mapPreviewDark: row[20]
     };
 }
 
@@ -430,7 +450,7 @@ update routes
 set is_deleted = true
 where id = $1
   and user_id = $2
-returning id, user_id, created_at, plan_id, name, linestring, stats_len_m, stats_score, stats_junction_count, is_deleted`;
+returning id, user_id, created_at, plan_id, name, linestring, stats_len_m, stats_score, stats_junction_count, is_deleted, map_preview_light, map_preview_dark`;
 
 export interface RouteDeleteArgs {
     id: string;
@@ -448,6 +468,8 @@ export interface RouteDeleteRow {
     statsScore: string;
     statsJunctionCount: string;
     isDeleted: boolean;
+    mapPreviewLight: string | null;
+    mapPreviewDark: string | null;
 }
 
 export async function routeDelete(sql: Sql, args: RouteDeleteArgs): Promise<RouteDeleteRow | null> {
@@ -469,7 +491,9 @@ export async function routeDelete(sql: Sql, args: RouteDeleteArgs): Promise<Rout
         statsLenM: row[6],
         statsScore: row[7],
         statsJunctionCount: row[8],
-        isDeleted: row[9]
+        isDeleted: row[9],
+        mapPreviewLight: row[10],
+        mapPreviewDark: row[11]
     };
 }
 
@@ -478,7 +502,7 @@ update routes
 set is_deleted = true
 where plan_id = $1
   and user_id = $2
-returning id, user_id, created_at, plan_id, name, linestring, stats_len_m, stats_score, stats_junction_count, is_deleted`;
+returning id, user_id, created_at, plan_id, name, linestring, stats_len_m, stats_score, stats_junction_count, is_deleted, map_preview_light, map_preview_dark`;
 
 export interface RouteDeleteByPlanIdArgs {
     planId: string;
@@ -496,6 +520,8 @@ export interface RouteDeleteByPlanIdRow {
     statsScore: string;
     statsJunctionCount: string;
     isDeleted: boolean;
+    mapPreviewLight: string | null;
+    mapPreviewDark: string | null;
 }
 
 export async function routeDeleteByPlanId(sql: Sql, args: RouteDeleteByPlanIdArgs): Promise<RouteDeleteByPlanIdRow | null> {
@@ -517,7 +543,9 @@ export async function routeDeleteByPlanId(sql: Sql, args: RouteDeleteByPlanIdArg
         statsLenM: row[6],
         statsScore: row[7],
         statsJunctionCount: row[8],
-        isDeleted: row[9]
+        isDeleted: row[9],
+        mapPreviewLight: row[10],
+        mapPreviewDark: row[11]
     };
 }
 
@@ -1100,7 +1128,7 @@ export async function regionGetCount(sql: Sql): Promise<RegionGetCountRow | null
 }
 
 export const planGetByIdQuery = `-- name: PlanGetById :one
-select id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc, rule_set_id, region, is_deleted from plans
+select id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc, rule_set_id, region, is_deleted, map_preview_light, map_preview_dark from plans
 where plans.id = $1`;
 
 export interface PlanGetByIdArgs {
@@ -1127,6 +1155,8 @@ export interface PlanGetByIdRow {
     ruleSetId: string;
     region: string | null;
     isDeleted: boolean;
+    mapPreviewLight: string | null;
+    mapPreviewDark: string | null;
 }
 
 export async function planGetById(sql: Sql, args: PlanGetByIdArgs): Promise<PlanGetByIdRow | null> {
@@ -1157,12 +1187,14 @@ export async function planGetById(sql: Sql, args: PlanGetByIdArgs): Promise<Plan
         finishDesc: row[15],
         ruleSetId: row[16],
         region: row[17],
-        isDeleted: row[18]
+        isDeleted: row[18],
+        mapPreviewLight: row[19],
+        mapPreviewDark: row[20]
     };
 }
 
 export const plansGetNewQuery = `-- name: PlansGetNew :many
-select id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc, rule_set_id, region, is_deleted from plans
+select id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc, rule_set_id, region, is_deleted, map_preview_light, map_preview_dark from plans
 where state = 'new'`;
 
 export interface PlansGetNewRow {
@@ -1185,6 +1217,8 @@ export interface PlansGetNewRow {
     ruleSetId: string;
     region: string | null;
     isDeleted: boolean;
+    mapPreviewLight: string | null;
+    mapPreviewDark: string | null;
 }
 
 export async function plansGetNew(sql: Sql): Promise<PlansGetNewRow[]> {
@@ -1207,7 +1241,9 @@ export async function plansGetNew(sql: Sql): Promise<PlansGetNewRow[]> {
         finishDesc: row[15],
         ruleSetId: row[16],
         region: row[17],
-        isDeleted: row[18]
+        isDeleted: row[18],
+        mapPreviewLight: row[19],
+        mapPreviewDark: row[20]
     }));
 }
 
@@ -1254,7 +1290,7 @@ values (
 		)
 	)
 )
-returning id, user_id, created_at, plan_id, name, linestring, stats_len_m, stats_score, stats_junction_count, is_deleted`;
+returning id, user_id, created_at, plan_id, name, linestring, stats_len_m, stats_score, stats_junction_count, is_deleted, map_preview_light, map_preview_dark`;
 
 export interface RouteInsertArgs {
     name: string;
@@ -1277,6 +1313,8 @@ export interface RouteInsertRow {
     statsScore: string;
     statsJunctionCount: string;
     isDeleted: boolean;
+    mapPreviewLight: string | null;
+    mapPreviewDark: string | null;
 }
 
 export async function routeInsert(sql: Sql, args: RouteInsertArgs): Promise<RouteInsertRow | null> {
@@ -1298,7 +1336,9 @@ export async function routeInsert(sql: Sql, args: RouteInsertArgs): Promise<Rout
         statsLenM: row[6],
         statsScore: row[7],
         statsJunctionCount: row[8],
-        isDeleted: row[9]
+        isDeleted: row[9],
+        mapPreviewLight: row[10],
+        mapPreviewDark: row[11]
     };
 }
 
