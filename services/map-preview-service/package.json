@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node --import=tsx --watch-path=./src --env-file=.env.base ./src/server/server.ts --dev | pino-pretty ",
-    "start": "node server.js",
+    "start": "node --import=tsx --watch-path=./src --env-file=.env.base ./src/server/server.ts | pino-pretty ",
     "build": "vite build",
     "tsc": "tsc"
   },

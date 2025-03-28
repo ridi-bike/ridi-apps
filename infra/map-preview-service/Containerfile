@@ -22,6 +22,8 @@ COPY ./pnpm-workspace.yaml ./pnpm-workspace.yaml
 
 RUN pnpm install --prod
 
+RUN pnpm run build
+
 EXPOSE ${PORT}
 
-CMD ["node", "--import=tsx", "./services/map-preview-service/src/index.ts"]
+CMD ["node", "--import=tsx", "./services/map-preview-service/src/server/server.ts"]
