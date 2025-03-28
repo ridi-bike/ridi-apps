@@ -3,13 +3,13 @@
     "id": 1,
     "name1": "IMAGINE",
     "name2": "How you want to ride",
-    "image": "/public/plan-trip.png"
+    "image": "/plan-trip.png"
   },
   {
     "id": 2,
     "name1": "Set Route",
     "name2": "Preferences",
-    "image": "/public/plan-trip.png"
+    "image": "/options.png"
   },
   {
     "id": 3,
