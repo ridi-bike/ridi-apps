@@ -4,7 +4,8 @@ WORKDIR /app
 
 ARG PORT
 
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV CHROME_BIN=/usr/bin/google-chrome
 
 RUN apt-get update && apt-get install gnupg wget -y && \
   wget --quiet --output-document=- https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor > /etc/apt/trusted.gpg.d/google-archive.gpg && \
@@ -20,10 +21,10 @@ COPY ./services/map-preview-service ./services/map-preview-service
 COPY ./package.json ./package.json
 COPY ./pnpm-workspace.yaml ./pnpm-workspace.yaml
 
-RUN pnpm install --prod
+RUN pnpm install
 
-RUN pnpm run build
+# RUN pnpm run --filter=@ridi/map-preview-service build
 
 EXPOSE ${PORT}
 
-CMD ["node", "--import=tsx", "./services/map-preview-service/src/server/server.ts"]
+CMD ["node", "--import=tsx", "./services/map-preview-service/src/server/server.ts", "--dev"]
