@@ -1,9 +1,0 @@
-{
-  "name": "@ridi/geo-maps",
-  "version": "1.0.0",
-  "main": "src/index.ts",
-  "type": "module",
-  "dependencies": {
-    "postgres": "^3.4.5"
-  }
-}

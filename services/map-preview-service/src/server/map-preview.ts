@@ -72,14 +72,16 @@ export async function handleMapPreviewRequest(): Promise<string> {
   //   (el: HTMLCanvasElement) => el.toDataURL(),
   // )) as string;
   //
-  await new Promise((resolve) => setTimeout(resolve, 15000));
-  const data = await page.evaluate(
-    () => document.querySelector("*")?.outerHTML,
-  );
 
-  console.log(data);
+  // await new Promise((resolve) => setTimeout(resolve, 15000));
+  // const data = await page.evaluate(
+  //   () => document.querySelector("*")?.outerHTML,
+  // );
+  //
+  // console.log(data);
 
   await page.waitForSelector("#map-load-done");
+  await new Promise((resolve) => setTimeout(resolve, 15000));
 
   const imageData = await page.evaluate(() => {
     const canvas: HTMLCanvasElement | null =
@@ -91,6 +93,8 @@ export async function handleMapPreviewRequest(): Promise<string> {
   // );
 
   await browser.close();
+
+  console.log(imageData);
 
   return imageData || "";
 }
