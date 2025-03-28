@@ -1,32 +1,26 @@
 [
-	{
-		"id": 1,
-		"name1": "Choose Start -",
-		"name2": "Finish",
-		"image": "./services/01.svg"
-	},
-	{
-		"id": 2,
-		"name1": "Set Route",
-		"name2": "Preferences",
-		"image": "./services/02.svg"
-	},
-	{
-		"id": 3,
-		"name1": "Examine",
-		"name2": "Generated Routes",
-		"image": "./services/04.svg"
-	},
-	{
-		"id": 4,
-		"name1": "Pick",
-		"name2": "The Best One",
-		"image": "./services/04.svg"
-	},
-	{
-		"id": 5,
-		"name1": "GO",
-		"name2": "",
-		"image": "./services/05.svg"
-	}
+  {
+    "id": 1,
+    "name1": "IMAGINE",
+    "name2": "How you want to ride",
+    "image": "/plan-trip.png"
+  },
+  {
+    "id": 2,
+    "name1": "Set Route",
+    "name2": "Preferences",
+    "image": "/options.png"
+  },
+  {
+    "id": 3,
+    "name1": "Pick",
+    "name2": "The Best One",
+    "image": "/choose-routes.png"
+  },
+  {
+    "id": 4,
+    "name1": "Ride",
+    "name2": "GO",
+    "image": "/go.png"
+  }
 ]

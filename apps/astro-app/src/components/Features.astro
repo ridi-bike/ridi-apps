@@ -1,54 +1,77 @@
 ---
-import Container from "./Container.astro"
+import Container from "./Container.astro";
 import Topic from "./Topic.astro";
-import servicesData from './Data/services.json';
-import {Waitlist} from  '../components/Waitlist.tsx'
-import {cn} from '../utils.ts'
+import servicesData from "./Data/services.json";
+import { Waitlist } from "../components/Waitlist.tsx";
+import { cn } from "../utils.ts";
 ---
+
 <Container>
-<div class="relative flex flex-col items-center md:flex-row" id="features">
-    <Topic title="How it works" description="Ridi is a motorcycle navigation app that creates personalized routes based on rider preferences. Users can specify the type of roads they want, such as curvy highways, green lanes, or mountain and forest tracks, and Ridi generates optimized routes tailored to these choices. Designed to eliminate the need for extensive route planning, the app allows motorcyclists to start their rides quickly while ensuring a more enjoyable and adventurous journey.">
-</div>
+  <div class="relative flex flex-col items-center" id="features">
+    <Topic
+      title="How it works"
+      description="Ridi is a motorcycle navigation app that creates personalized routes based on rider preferences. Users can specify the type of roads they want, such as curvy highways, green lanes, or mountain and forest tracks, and Ridi generates optimized routes tailored to these choices. Designed to eliminate the need for extensive route planning, the app allows motorcyclists to start their rides quickly while ensuring a more enjoyable and adventurous journey."
+    />
 
-<div class="flex-row items-center py-5">
-    <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-4">
-
+    <div class="flex-row items-center py-5">
+      <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-4">
         <!-- card start-->
         {
-			servicesData.map(({ name1, name2, image}, idx ) => (
-			<div class={cn("h-[310px] p-12 bg-zinc-100 rounded-[45px] shadow-card border border-black justify-between items-center flex text-black", {"bg-zinc-100":[0, 3].includes(idx), "bg-ridiorange":[1, 4].includes(idx), "bg-black text-white":[2,5].includes(idx), "md:col-span-2": idx===4})}>
-            <div class="flex-col justify-center p-6 items-start gap-[93px] inline-flex">
-                <div class="flex-col justify-start items-start flex">
-						<div class="px-[7px] rounded-[7px] flex-col justify-start items-start gap-2.5 flex">
-                        <div class=" text-3xl font-medium">{name1}</div>
-                    </div>
-						<div class="px-[7px] rounded-[7px] flex-col justify-start items-start gap-2.5 flex">
-                        <div class="text-3xl font-medium">{name2}</div>
-                    </div>
+          servicesData.map(({ name1, name2, image }, idx) => (
+            <div
+              class={cn(
+                "md:h-[310px] h-[620px] p-12 bg-zinc-100 rounded-[45px] shadow-card border border-black justify-between items-center flex md:flex-row flex-col text-black",
+                {
+                  "bg-zinc-100": [0, 3].includes(idx),
+                  "bg-ridiorange": [1, 4].includes(idx),
+                  "bg-black text-white": [2, 5].includes(idx),
+                  "md:col-span-2": idx === 4,
+                },
+              )}
+            >
+              <div class="flex flex-col justify-center p-6 items-center md:items-start gap-[93px]">
+                <div class="flex flex-col justify-start items-start flex max-w-[50%]">
+                  <div class="px-[7px] rounded-[7px] flex-col justify-start items-start gap-2.5 flex">
+                    <div class=" text-3xl font-medium">{name1}</div>
+                  </div>
+                  <div class="px-[7px] rounded-[7px] flex-col justify-start items-start gap-2.5 flex">
+                    <div class="text-3xl font-medium">{name2}</div>
+                  </div>
                 </div>
+              </div>
+              <div class="pt-0.5 pb-[1.95px] size-full justify-center items-center flex">
+                <img
+                  class="max-h-[270px] size-full object-contain h-full"
+                  src={image}
+                />
+              </div>
             </div>
-            <div class="w-[210px] h-[170px] pt-0.5 pb-[1.95px] justify-center items-center flex">
-                <img class="hidden md:block" src={image} />
-            </div>
-        </div>
-        ))
+          ))
         }
         <!-- card end-->
+      </div>
     </div>
-</div>
 
-<div class="flex-row items-center my-6 p-14 bg-zinc-100 rounded-[45px]">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="justify-start items-center gap-[275px] flex">
-            <div class="flex-col justify-start items-start gap-[26px] inline-flex text-black">
-                <div class="text-3xl font-medium">Get notified</div>
-                <div class="text-lg font-normal">Get notified when we release the app for testing</div>
-								<Waitlist client:visible />
+    <div class="flex-row items-center my-6 p-14 bg-zinc-100 rounded-[45px]">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex-col justify-start items-center gap-[275px] flex">
+          <div
+            class="flex-col justify-start items-start gap-[26px] inline-flex text-black"
+          >
+            <div class="text-3xl font-medium">Get notified</div>
+            <div class="md:hidden flex flex-col items-center justify-center">
+              <img src="/public/email.png" width="80%" alt="cat" />
             </div>
+            <div class="text-lg font-normal">
+              I will email you when big stuff happens
+            </div>
+            <Waitlist client:visible />
+          </div>
         </div>
         <div class="hidden md:grid justify-items-center -m-20">
-            <img src="/services/Illustration.svg" width="50%" alt="cat"/>
+          <img src="/public/email.png" width="70%" alt="me" />
         </div>
+      </div>
     </div>
-</div>
+  </div>
 </Container>
