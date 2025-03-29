@@ -434,7 +434,7 @@ export default function PlanDetails() {
                       >
                         Available Routes
                       </Text>
-                      <View className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                      <View className="grid grid-cols-1 gap-6 pb-24 md:grid-cols-2 lg:grid-cols-3">
                         {plan.routes.map((route) => (
                           <Link
                             key={route.routeId}

@@ -251,7 +251,7 @@ export default function RouteDetails() {
                 className="mx-2 w-full max-w-5xl gap-4"
               >
                 <ScrollView className="h-[calc(100vh-100px)] pb-12">
-                  <View className="mx-2 max-w-5xl flex-1 gap-4">
+                  <View className="mx-2 max-w-5xl flex-1 gap-4 pb-24">
                     <ScreenCard
                       topClassName="h-[65vh]"
                       top={
