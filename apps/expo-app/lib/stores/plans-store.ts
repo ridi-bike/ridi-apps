@@ -72,7 +72,7 @@ export function useStorePlans() {
             })
           : [];
         if (!update) {
-          return [...updatedPlanList, rowIn];
+          return [rowIn, ...updatedPlanList];
         }
       });
     },
