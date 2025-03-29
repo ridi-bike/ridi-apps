@@ -101,7 +101,7 @@ export function RouteCard({ routeId, plan }: RouteCardProps) {
                 <AnimatePresence>
                   {!!breakdown && (
                     <View className="flex-1">
-                      {breakdown[0] && (
+                      {!!breakdown[0] && (
                         <>
                           <View
                             className="mb-1 h-2 rounded-full bg-[#FF5937]"
@@ -121,7 +121,7 @@ export function RouteCard({ routeId, plan }: RouteCardProps) {
                 <AnimatePresence>
                   {!!breakdown && (
                     <View className="flex-1">
-                      {breakdown[1] && (
+                      {!!breakdown[1] && (
                         <>
                           <View
                             className="mb-1 h-2 rounded-full bg-[#FFA37F]"
@@ -141,7 +141,7 @@ export function RouteCard({ routeId, plan }: RouteCardProps) {
                 <AnimatePresence>
                   {!!breakdown && (
                     <View className="flex-1">
-                      {breakdown[2] && (
+                      {!!breakdown[2] && (
                         <>
                           <View
                             className="mb-1 h-2 rounded-full bg-[#FFD7C9]"

@@ -11,14 +11,20 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { type FeatureCollection } from "geojson";
 import maplibre from "maplibre-gl";
 import { useEffect, useMemo, useRef } from "react";
+import { View } from "react-native";
 
 import { type GeoMapRouteViewProps } from "~/components/geo-map/types";
 import { useColorScheme } from "~/lib/useColorScheme";
+import { cn } from "~/lib/utils";
 
 import { getMapStyle } from "./style";
 import { combineBBox } from "./util";
 
-export function GeoMapRouteView({ route, interactive }: GeoMapRouteViewProps) {
+export function GeoMapRouteView({
+  route,
+  interactive,
+  className,
+}: GeoMapRouteViewProps) {
   const { colorScheme } = useColorScheme();
   const mapRef = useRef<MapRef>(null);
 
@@ -76,25 +82,27 @@ export function GeoMapRouteView({ route, interactive }: GeoMapRouteViewProps) {
   }, [route]);
 
   return (
-    <MapLibre
-      ref={mapRef}
-      mapLib={maplibre}
-      interactive={interactive}
-      initialViewState={
-        mapBounds
-          ? {
-              bounds: mapBounds,
-            }
-          : {
-              longitude: 24.853,
-              latitude: 57.153,
-              zoom: 4,
-            }
-      }
-      mapStyle={getMapStyle(colorScheme)}
-    >
-      {interactive && <NavigationControl position="bottom-right" />}
-      {routeLayer}
-    </MapLibre>
+    <View className={cn("size-full", className)}>
+      <MapLibre
+        ref={mapRef}
+        mapLib={maplibre}
+        interactive={interactive}
+        initialViewState={
+          mapBounds
+            ? {
+                bounds: mapBounds,
+              }
+            : {
+                longitude: 24.853,
+                latitude: 57.153,
+                zoom: 4,
+              }
+        }
+        mapStyle={getMapStyle(colorScheme)}
+      >
+        {interactive && <NavigationControl position="bottom-right" />}
+        {routeLayer}
+      </MapLibre>
+    </View>
   );
 }

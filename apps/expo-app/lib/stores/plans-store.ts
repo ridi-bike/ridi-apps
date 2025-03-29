@@ -3,7 +3,8 @@ import {
   type PlansListResponse,
 } from "@ridi/api-contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
+import { debounce } from "throttle-debounce";
 import { generate } from "xksuid";
 
 import { apiClient } from "../api";
@@ -39,6 +40,8 @@ export function useStorePlans() {
         .then((r) => getSuccessResponseOrThrow(200, r).data),
   });
 
+  const refetchDebounced = useMemo(() => debounce(2000, refetch), [refetch]);
+
   const { mutate } = useMutation({
     mutationFn: (plan: Plan) =>
       apiClient
@@ -55,12 +58,22 @@ export function useStorePlans() {
     onMutate: async (rowIn) => {
       await queryClient.cancelQueries({ queryKey: PLANS_QUERY_KEY });
       queryClient.setQueryData<Plan[]>(PLANS_QUERY_KEY, (plansList) => {
-        return plansList
-          ? plansList.map((p) => ({
-              ...p,
-              ...rowIn,
-            }))
-          : [rowIn];
+        let update = false;
+        const updatedPlanList = plansList
+          ? plansList.map((plan) => {
+              if (plan.id === rowIn.id) {
+                update = true;
+                return {
+                  ...plan,
+                  ...rowIn,
+                };
+              }
+              return plan;
+            })
+          : [];
+        if (!update) {
+          return [...updatedPlanList, rowIn];
+        }
       });
     },
     onSuccess: () => {
@@ -118,7 +131,8 @@ export function useStorePlans() {
         "postgres_changes",
         { event: "*", schema: "public", table: "plans" },
         (_payload) => {
-          refetch();
+          console.log("refetch from sb sub");
+          refetchDebounced();
         },
       )
       .subscribe();
@@ -126,7 +140,7 @@ export function useStorePlans() {
     return () => {
       plansSub.unsubscribe();
     };
-  }, [refetch]);
+  }, [refetchDebounced]);
 
   return {
     data,
@@ -136,6 +150,6 @@ export function useStorePlans() {
     planAdd,
     planDelete: mutateDelete,
     planDeleteIsPending: isPending,
-    refetch,
+    refetch: refetchDebounced,
   };
 }

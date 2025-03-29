@@ -1,6 +1,7 @@
 import { type RouteGetResponse } from "@ridi/api-contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
+import { debounce } from "throttle-debounce";
 
 import { apiClient } from "../api";
 import { supabase } from "../supabase";
@@ -28,6 +29,8 @@ export function useStoreRoute(routeId: string) {
         .routeGet({ params: { routeId }, query: { version: DATA_VERSION } })
         .then((r) => getSuccessResponseOrThrow(200, r)),
   });
+
+  const refetchDebounced = useMemo(() => debounce(2000, refetch), [refetch]);
 
   const { mutate: mutateDelete } = useMutation({
     mutationFn: (id: string) =>
@@ -58,7 +61,7 @@ export function useStoreRoute(routeId: string) {
         "postgres_changes",
         { event: "*", schema: "public", table: "routes" },
         (_payload) => {
-          refetch();
+          refetchDebounced();
         },
       )
       .subscribe();
@@ -66,7 +69,13 @@ export function useStoreRoute(routeId: string) {
     return () => {
       plansSub.unsubscribe();
     };
-  }, [refetch]);
+  }, [refetchDebounced]);
 
-  return { data, error, status, refetch, routeDelete: mutateDelete };
+  return {
+    data,
+    error,
+    status,
+    refetch: refetchDebounced,
+    routeDelete: mutateDelete,
+  };
 }

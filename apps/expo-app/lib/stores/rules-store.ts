@@ -3,7 +3,8 @@ import {
   type RuleSetsListResponse,
 } from "@ridi/api-contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
+import { debounce } from "throttle-debounce";
 import { generate } from "xksuid";
 
 import { apiClient } from "../api";
@@ -28,6 +29,8 @@ export function useStoreRuleSets() {
         .ruleSetsList({ query: { version: DATA_VERSION } })
         .then((r) => getSuccessResponseOrThrow(200, r).data),
   });
+
+  const refetchDebounced = useMemo(() => debounce(2000, refetch), [refetch]);
 
   const { mutate: mutateSet, isPending: setIsPending } = useMutation({
     mutationFn: (ruleSet: RuleSet) =>
@@ -78,7 +81,7 @@ export function useStoreRuleSets() {
         "postgres_changes",
         { event: "*", schema: "public", table: "rule_sets" },
         (_payload) => {
-          refetch();
+          refetchDebounced();
         },
       )
       .subscribe();
@@ -86,7 +89,7 @@ export function useStoreRuleSets() {
     return () => {
       plansSub.unsubscribe();
     };
-  }, [refetch]);
+  }, [refetchDebounced]);
 
   return {
     data,
@@ -96,6 +99,6 @@ export function useStoreRuleSets() {
     ruleSetSetIsPending: setIsPending,
     ruleSetDelete: mutateDelete,
     ruleSetDeleteIsPending: deleteIsPending,
-    refetch,
+    refetch: refetchDebounced,
   };
 }
