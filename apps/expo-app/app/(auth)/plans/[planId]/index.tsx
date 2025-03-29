@@ -56,7 +56,7 @@ function DeleteConfirmDialog({
             Delete Rule Set
           </AlertDialogTitle>
           <AlertDialogDescription>
-            <Text>
+            <Text className="dark:text-gray-200">
               Are you sure you want to delete this plan? This action is
               permanent.
             </Text>

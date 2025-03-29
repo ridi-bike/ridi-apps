@@ -129,7 +129,7 @@ function ActionDialog({
                 }}
                 className="h-14 w-full flex-row items-center gap-3 rounded-xl border-[3px] border-black px-4 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
               >
-                <Eye className="size-4" />
+                <Eye className="size-4 dark:text-gray-200" />
                 <Text className="font-medium dark:text-gray-200">
                   {ruleSet.isSystem ? "View rules" : "Edit rules"}
                 </Text>
@@ -142,7 +142,7 @@ function ActionDialog({
                 }}
                 className="h-14 w-full flex-row items-center gap-3 rounded-xl border-[3px] border-black px-4 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
               >
-                <Copy className="size-4" />
+                <Copy className="size-4 dark:text-gray-200" />
                 <Text className="font-medium dark:text-gray-200">
                   Duplicate
                 </Text>
@@ -161,7 +161,7 @@ function ActionDialog({
                       "dark:border-red-700 dark:hover:bg-red-950 w-full h-14 flex-row items-center px-4 gap-3 rounded-xl border-[3px] border-red-500 text-red-500 hover:bg-red-50 transition-colors",
                     )}
                   >
-                    <Trash2 className="size-4" />
+                    <Trash2 className="size-4 text-red-500" />
                     <Text className="font-medium text-red-500">Delete</Text>
                   </Pressable>
                 </DeleteConfirmDialog>
@@ -253,7 +253,15 @@ export default function RuleSetList() {
     >
       <View className="flex w-full flex-col items-center justify-start">
         <View className="mx-2 flex w-full flex-col items-center justify-start md:max-w-5xl">
-          <AnimatePresence>
+          <AnimatePresence exitBeforeEnter>
+            {!ruleSets && (
+              <View
+                key="loading"
+                className="flex w-full flex-row items-center justify-center"
+              >
+                <Loading className="size-12 text-[#ff4a25]" />
+              </View>
+            )}
             {!!ruleSets && (
               <MotiView
                 key="rule-sets"

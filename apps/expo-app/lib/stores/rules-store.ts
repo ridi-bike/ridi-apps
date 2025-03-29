@@ -42,7 +42,31 @@ export function useStoreRuleSets() {
           },
         })
         .then((r) => getSuccessResponseOrThrow(201, r).data),
-    onMutate: () => {
+    onMutate: async (ruleSetIn) => {
+      await queryClient.cancelQueries({ queryKey: RULE_SETS_QUERY_KEY });
+      queryClient.setQueryData<RuleSet[]>(
+        RULE_SETS_QUERY_KEY,
+        (ruleSetList) => {
+          let update = false;
+          const updatedRuleSet = ruleSetList
+            ? ruleSetList.map((ruleSet) => {
+                if (ruleSet.id === ruleSetIn.id) {
+                  update = true;
+                  return {
+                    ...ruleSet,
+                    ...ruleSetIn,
+                  };
+                }
+                return ruleSet;
+              })
+            : [];
+          if (!update) {
+            return [...updatedRuleSet, ruleSetIn];
+          }
+        },
+      );
+    },
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: RULE_SETS_QUERY_KEY });
     },
   });
@@ -52,7 +76,16 @@ export function useStoreRuleSets() {
       apiClient
         .ruleSetDelete({ body: { id } })
         .then((r) => getSuccessResponseOrThrow(204, r)),
-    onMutate: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: RULE_SETS_QUERY_KEY });
+      queryClient.setQueryData<RuleSet[]>(
+        RULE_SETS_QUERY_KEY,
+        (ruleSetList) => {
+          return ruleSetList?.filter((r) => r.id !== id);
+        },
+      );
+    },
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: RULE_SETS_QUERY_KEY });
     },
   });

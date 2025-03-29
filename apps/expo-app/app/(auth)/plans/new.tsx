@@ -7,6 +7,7 @@ import {
   CirclePauseIcon,
   CirclePlayIcon,
   Compass,
+  Hourglass,
   Locate,
   MapPinned,
   RotateCw,
@@ -525,13 +526,15 @@ export default function PlansNew() {
           <GroupWithTitle title="Routing rules">
             {(
               ruleSets ||
-              Array(3).map((_, id) => ({
-                id,
-                isSystem: true,
-                icon: null,
-                name: "...",
-                isDefault: false,
-              }))
+              Array(3)
+                .fill(0)
+                .map((_, id) => ({
+                  id,
+                  isSystem: true,
+                  icon: null,
+                  name: "...",
+                  isDefault: false,
+                }))
             )
               .filter((rs) => rs.isSystem)
               .map((rs) => (
@@ -561,8 +564,11 @@ export default function PlansNew() {
                   {rs.icon === "dualsport" && (
                     <DualsportIcon className="size-12 dark:fill-gray-200" />
                   )}
-                  {!rs.icon && (
-                    <Waypoints className="size-12 dark:text-gray-200" />
+                  {!rs.icon && typeof rs.id === "number" && (
+                    <Hourglass className="m-3 size-6 dark:text-gray-200" />
+                  )}
+                  {!rs.icon && typeof rs.id === "string" && (
+                    <Waypoints className="m-3 size-6 dark:text-gray-200" />
                   )}
                 </Pressable>
               ))}
