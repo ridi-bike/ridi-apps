@@ -5,6 +5,7 @@ import { env } from "./env";
 export async function handleMapPreviewRequest(): Promise<string> {
   const browser = await puppeteer.launch({
     executablePath: env.CHROME_BIN,
+    args: ["--no-sandbox"], // TODO this is because docker is running under root.
     // headless: false,
   });
   const page = await browser.newPage();
@@ -17,7 +18,7 @@ export async function handleMapPreviewRequest(): Promise<string> {
       event.args(),
     ),
   );
-  await page.goto("http://127.0.0.1:2730");
+  await page.goto(`http://127.0.0.1:${env.PORT}`);
   // const htmlAsset = await env.MAPS.fetch(new URL("https://assets.local/"));
 
   // await page.addScriptTag({

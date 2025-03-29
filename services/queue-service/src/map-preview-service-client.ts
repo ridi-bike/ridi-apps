@@ -20,6 +20,11 @@ export class MapPreviewServiceClient {
   async callMapPreviewService(
     req: Parameters<(typeof client)["createPreview"]>[0]["body"],
   ) {
+    this.logger.info("Calling map preview service", {
+      reqId: req.reqId,
+      baseUrl: `http://${env.MAP_PREVIEW_SERVICE_URL}`,
+    });
+
     const maxRetries = 5;
     const waitTimeMs = 3000;
     let lastError: unknown;

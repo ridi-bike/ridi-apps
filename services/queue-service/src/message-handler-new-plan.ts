@@ -72,25 +72,25 @@ export class MessageHandlerNewPlan {
       }
     }
 
-    this.mapPreviewServiceClient
-      .callMapPreviewService({
-        reqId: planId,
-        type: "plan",
-        start: [0, 0],
-        finish: [0, 0],
-      })
-      .then((resp) => {
-        if (resp.status === 200) {
-          return pgQueries.planUpdateMapPreview(this.pgClient, {
-            id: planId,
-            mapPreviewDark: resp.body.url,
-            mapPreviewLight: resp.body.url,
-          });
-        }
-        this.logger.error("Failed to call map preview generator", {
-          resp,
-        });
-      });
+    // this.mapPreviewServiceClient
+    //   .callMapPreviewService({
+    //     reqId: planId,
+    //     type: "plan",
+    //     start: [0, 0],
+    //     finish: [0, 0],
+    //   })
+    //   .then((resp) => {
+    //     if (resp.status === 200) {
+    //       return pgQueries.planUpdateMapPreview(this.pgClient, {
+    //         id: planId,
+    //         mapPreviewDark: resp.body.url,
+    //         mapPreviewLight: resp.body.url,
+    //       });
+    //     }
+    //     this.logger.error("Failed to call map preview generator", {
+    //       resp,
+    //     });
+    //   });
 
     await pgQueries.planSetState(this.pgClient, {
       id: planId,
