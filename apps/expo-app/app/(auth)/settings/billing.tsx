@@ -86,7 +86,7 @@ export default function BillingPage() {
       <View className="flex size-full flex-col items-center justify-start">
         <AnimatePresence>
           {user?.subType === "code" && (
-            <View className="mb-8 w-full md:max-w-2xl">
+            <View key="code" className="mb-8 w-full md:max-w-2xl">
               <Text
                 role="heading"
                 aria-level={2}

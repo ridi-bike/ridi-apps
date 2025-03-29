@@ -40,15 +40,18 @@ export function RouteCard({ routeId, plan }: RouteCardProps) {
       : null;
   }, [route]);
 
+  console.log("88");
+
   return (
     <ScreenCard
       top={
         <AnimatePresence>
           {!!error && status !== "pending" && (
-            <ErrorBox error={error} retry={refetch} />
+            <ErrorBox key="error" error={error} retry={refetch} />
           )}
           {!!routeOverview && (
             <MotiView
+              key="map"
               className="size-full"
               from={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -60,12 +63,13 @@ export function RouteCard({ routeId, plan }: RouteCardProps) {
       }
       middle={
         <AnimatePresence>
-          {!route && <View className="min-h-[108px]" />}
+          {!route && <View key="placeholder" className="min-h-[108px]" />}
           {!!route && (
             <MotiView
               from={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="flex min-h-7 flex-row items-center justify-between"
+              key="top"
             >
               <Text
                 role="heading"
@@ -87,6 +91,7 @@ export function RouteCard({ routeId, plan }: RouteCardProps) {
               from={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="min-h-20 pt-4"
+              key="bottom"
             >
               <Text
                 role="heading"
@@ -94,70 +99,64 @@ export function RouteCard({ routeId, plan }: RouteCardProps) {
                 className="mb-2 text-sm font-bold dark:text-gray-100"
               >
                 <AnimatePresence>
-                  {route && <>Road Type Breakdown</>}
+                  {!!route && <>Road Type Breakdown</>}
                 </AnimatePresence>
               </Text>
               <View className="flex flex-row gap-2 text-sm">
-                <AnimatePresence>
-                  {!!breakdown && (
-                    <View className="flex-1">
-                      {!!breakdown[0] && (
-                        <>
-                          <View
-                            className="mb-1 h-2 rounded-full bg-[#FF5937]"
-                            style={{
-                              width: `${Math.round(breakdown[0].percentage)}%`,
-                            }}
-                          />
-                          <Text className="dark:text-gray-200">
-                            {breakdown[0].statName}{" "}
-                            {Math.round(breakdown[0].percentage)}%
-                          </Text>
-                        </>
-                      )}
-                    </View>
-                  )}
-                </AnimatePresence>
-                <AnimatePresence>
-                  {!!breakdown && (
-                    <View className="flex-1">
-                      {!!breakdown[1] && (
-                        <>
-                          <View
-                            className="mb-1 h-2 rounded-full bg-[#FFA37F]"
-                            style={{
-                              width: `${Math.round(breakdown[1].percentage)}%`,
-                            }}
-                          />
-                          <Text className="dark:text-gray-200">
-                            {breakdown[1].statName}{" "}
-                            {Math.round(breakdown[1].percentage)}%
-                          </Text>
-                        </>
-                      )}
-                    </View>
-                  )}
-                </AnimatePresence>
-                <AnimatePresence>
-                  {!!breakdown && (
-                    <View className="flex-1">
-                      {!!breakdown[2] && (
-                        <>
-                          <View
-                            className="mb-1 h-2 rounded-full bg-[#FFD7C9]"
-                            style={{
-                              width: `${Math.round(breakdown[2].percentage)}%`,
-                            }}
-                          />
-                          <Text className="dark:text-gray-200">
-                            {breakdown[2].statName}{" "}
-                            {Math.round(breakdown[2].percentage)}%
-                          </Text>
-                        </>
-                      )}
-                    </View>
-                  )}
-                </AnimatePresence>
+                {!!breakdown && (
+                  <View className="flex-1">
+                    {!!breakdown[0] && (
+                      <>
+                        <View
+                          className="mb-1 h-2 rounded-full bg-[#FF5937]"
+                          style={{
+                            width: `${Math.round(breakdown[0].percentage)}%`,
+                          }}
+                        />
+                        <Text className="dark:text-gray-200">
+                          {breakdown[0].statName}{" "}
+                          {Math.round(breakdown[0].percentage)}%
+                        </Text>
+                      </>
+                    )}
+                  </View>
+                )}
+                {!!breakdown && (
+                  <View className="flex-1">
+                    {!!breakdown[1] && (
+                      <>
+                        <View
+                          className="mb-1 h-2 rounded-full bg-[#FFA37F]"
+                          style={{
+                            width: `${Math.round(breakdown[1].percentage)}%`,
+                          }}
+                        />
+                        <Text className="dark:text-gray-200">
+                          {breakdown[1].statName}{" "}
+                          {Math.round(breakdown[1].percentage)}%
+                        </Text>
+                      </>
+                    )}
+                  </View>
+                )}
+                {!!breakdown && (
+                  <View className="flex-1">
+                    {!!breakdown[2] && (
+                      <>
+                        <View
+                          className="mb-1 h-2 rounded-full bg-[#FFD7C9]"
+                          style={{
+                            width: `${Math.round(breakdown[2].percentage)}%`,
+                          }}
+                        />
+                        <Text className="dark:text-gray-200">
+                          {breakdown[2].statName}{" "}
+                          {Math.round(breakdown[2].percentage)}%
+                        </Text>
+                      </>
+                    )}
+                  </View>
+                )}
               </View>
             </MotiView>
           )}

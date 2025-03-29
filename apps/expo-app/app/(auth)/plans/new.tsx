@@ -235,6 +235,7 @@ export default function PlansNew() {
             <AnimatePresence>
               {!!errorMessage && (
                 <MotiView
+                  key="error"
                   from={{ height: 0 }}
                   animate={{ height: 50 }}
                   exit={{ height: 0 }}
@@ -246,6 +247,7 @@ export default function PlansNew() {
             </AnimatePresence>
             {mapMode && (
               <Pressable
+                key="set-map-mode"
                 role="button"
                 onPress={() => setMapMode(false)}
                 aria-disabled={!canCreateRoute()}
@@ -262,6 +264,7 @@ export default function PlansNew() {
             )}
             {!mapMode && (
               <Pressable
+                key="save"
                 role="button"
                 onPress={() => {
                   if (canCreateRoute()) {
@@ -319,6 +322,7 @@ export default function PlansNew() {
         <AnimatePresence>
           {mapMode && (
             <MotiView
+              key="big-map"
               className="fixed top-0 z-50 mt-16 w-[98vw] bg-white p-4 pb-40 dark:bg-gray-900"
               from={{ height: "0%" }}
               animate={{ height: "100%" }}

@@ -55,6 +55,7 @@ export default function PlansPage() {
         <AnimatePresence>
           {!!plans && (
             <MotiPressable
+              key="plans"
               className="fixed bottom-8 right-8 flex size-24 items-center justify-center rounded-full bg-[#FF5937] shadow-lg transition-colors hover:bg-[#ff4a25]"
               aria-label="Create new plan"
               from={{
@@ -82,17 +83,21 @@ export default function PlansPage() {
       <View className="flex w-full flex-col items-center justify-start">
         <AnimatePresence>
           {!!error && status !== "pending" && (
-            <View className="mx-2 max-w-5xl flex-1">
+            <View key="error" className="mx-2 max-w-5xl flex-1">
               <ErrorBox error={error} retry={refetch} />
             </View>
           )}
           {!plans && !error && (
-            <View className="flex w-full flex-row items-center justify-center">
+            <View
+              key="loading"
+              className="flex w-full flex-row items-center justify-center"
+            >
               <Loading className="size-12 text-[#ff4a25]" />
             </View>
           )}
           {!!plans && (
             <MotiView
+              key="plans"
               className="mx-2 w-full md:max-w-5xl"
               from={{
                 opacity: 0,

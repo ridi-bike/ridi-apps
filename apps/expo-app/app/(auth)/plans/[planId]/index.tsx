@@ -249,6 +249,7 @@ function GeneratingRoutes({ createdAt }: { createdAt: Date }) {
       <AnimatePresence>
         {showExplanation && (
           <MotiView
+            key="so-long"
             from={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="mt-8 rounded-2xl border-2 border-[#FF5937] bg-[#FFF5F3] p-6 dark:bg-gray-700"
@@ -292,12 +293,16 @@ export default function PlanDetails() {
       <View className="flex w-full flex-col items-center justify-start">
         <AnimatePresence exitBeforeEnter>
           {!plans && !error && (
-            <View className="flex w-full flex-row items-center justify-center">
+            <View
+              key="loading"
+              className="flex w-full flex-row items-center justify-center"
+            >
               <Loading className="size-12 text-[#ff4a25]" />
             </View>
           )}
           {!!error && status !== "pending" && (
             <MotiView
+              key="error"
               from={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="mx-2 max-w-5xl flex-1"
@@ -307,6 +312,7 @@ export default function PlanDetails() {
           )}
           {plan && (
             <MotiView
+              key="plan"
               from={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="mx-2 w-full max-w-5xl"

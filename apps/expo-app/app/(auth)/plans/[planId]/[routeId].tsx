@@ -226,15 +226,18 @@ export default function RouteDetails() {
         <AnimatePresence>
           {(!plans && !planError) ||
             (!route && !error && (
-              <View className="flex w-full flex-row items-center justify-center">
+              <View
+                key="loading"
+                className="flex w-full flex-row items-center justify-center"
+              >
                 <Loading className="size-12 text-[#ff4a25]" />
               </View>
             ))}
           {!!error && status !== "pending" && (
-            <ErrorBox error={error} retry={refetch} />
+            <ErrorBox key="error" error={error} retry={refetch} />
           )}
           {!!planError && planStatus !== "pending" && (
-            <ErrorBox error={planError} retry={refetch} />
+            <ErrorBox key="other-error" error={planError} retry={refetch} />
           )}
           {!!plan &&
             !!route &&
@@ -242,6 +245,7 @@ export default function RouteDetails() {
             !!breakdownRoadType &&
             !!routeOverview && (
               <MotiView
+                key="plan"
                 from={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="mx-2 w-full max-w-5xl gap-4"

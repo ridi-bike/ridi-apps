@@ -256,6 +256,7 @@ export default function RuleSetList() {
           <AnimatePresence>
             {!!ruleSets && (
               <MotiView
+                key="rule-sets"
                 from={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="w-full"

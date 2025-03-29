@@ -36,17 +36,21 @@ export default function UserSettings() {
     >
       <AnimatePresence>
         {!user && (
-          <View className="flex w-full flex-row items-center justify-center">
+          <View
+            key="loading"
+            className="flex w-full flex-row items-center justify-center"
+          >
             <Loading className="size-12 text-[#ff4a25]" />
           </View>
         )}
         {!!user?.error && (
-          <View className="mx-2 max-w-5xl flex-1">
+          <View key="error" className="mx-2 max-w-5xl flex-1">
             <ErrorBox error={user.error} retry={getUser} />
           </View>
         )}
         {user && user.data && user.data.user && (
           <MotiView
+            key="main"
             role="main"
             className="relative flex min-h-screen w-full flex-col"
           >
