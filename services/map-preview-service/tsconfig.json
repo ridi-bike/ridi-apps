@@ -1,6 +1,6 @@
 {
   "extends": "@total-typescript/tsconfig/bundler/dom/app",
-  "exclude": ["**/node_modules/**/*"],
+  "exclude": ["**/node_modules/**/*", "src/client/**/*"],
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "compilerOptions": {
     "allowImportingTsExtensions": true,

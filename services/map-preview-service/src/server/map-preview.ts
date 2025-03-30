@@ -1,12 +1,11 @@
 import puppeteer from "puppeteer";
 
-import { env } from "./env";
+import { env } from "./env.ts";
 
 export async function handleMapPreviewRequest(): Promise<string> {
   const browser = await puppeteer.launch({
     executablePath: env.CHROME_BIN,
-    args: ["--no-sandbox"], // TODO this is because docker is running under root.
-    // headless: false,
+    headless: !env.PUPPETEER_WINDOWED,
   });
   const page = await browser.newPage();
   page.on("console", (event) =>

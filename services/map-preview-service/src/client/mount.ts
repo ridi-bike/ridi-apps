@@ -6,5 +6,4 @@ if (!rootDiv) {
   throw new Error("root div not found");
 }
 const root = createRoot(rootDiv);
-console.log("root", root);
 root.render(createApp());

@@ -6,13 +6,13 @@ import { mapPreviewContract } from "@ridi/map-preview-service-contracts";
 import { initServer } from "@ts-rest/fastify";
 import Fastify from "fastify";
 
-import { env } from "./env.ts";
-import { handleMapPreviewRequest } from "./map-preview.ts";
+import { env } from "./server/env.ts";
+import { handleMapPreviewRequest } from "./server/map-preview.ts";
 
 const server = Fastify();
 
 await server.register(FastifyVite, {
-  root: path.join(import.meta.url, "../../../"),
+  root: path.resolve(import.meta.dirname, "../"),
   dev: process.argv.includes("--dev"),
   spa: true,
 });
