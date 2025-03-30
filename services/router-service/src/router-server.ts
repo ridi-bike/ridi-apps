@@ -62,6 +62,13 @@ export class RouterServer {
           const text = buf.toString("utf8");
           this.logger.error("Renice script stderr", { text });
         });
+        reniceProcess.on("close", (exitCode) => {
+          if (exitCode !== 0) {
+            this.logger.error("Renice script exit code", { exitCode });
+          } else {
+            this.logger.info("Renice script exit ok", { exitCode });
+          }
+        });
 
         this.logger.info("Router server ready", { text });
       }

@@ -123,7 +123,7 @@ export class RouterClient {
         if (!(data instanceof Buffer)) {
           throw this.logger.error(
             "Data received from router client process on stdout is not a Buffer",
-            { name: `${data}` },
+            { data: `${data}` },
           );
         }
 
@@ -136,7 +136,7 @@ export class RouterClient {
         if (!(data instanceof Buffer)) {
           throw this.logger.error(
             "Data received from router client process on stderr is not a Buffer",
-            { name: `${data}` },
+            { data: `${data}` },
           );
         }
 

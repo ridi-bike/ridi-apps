@@ -50,28 +50,65 @@ try {
     const kmlDom = new DOMParser().parseFromString(kmlFileContents);
     const converted = kml(kmlDom);
     const polygon = converted.features[0]?.geometry;
-    if (polygon?.type !== "Polygon") {
+    if (!polygon) {
+      throw logger.error("Missing polygon", {
+        converted,
+      });
+    }
+    let polygonString = "";
+    if (polygon.type === "Polygon") {
+      const poligonCoordinates = polygon.coordinates[0];
+      if (!poligonCoordinates) {
+        throw logger.error("Missing polygon coordinates", {
+          polygon,
+        });
+      }
+
+      const polygonCoordsList = poligonCoordinates
+        .map((c) => `${c[0]} ${c[1]}`)
+        .join(",");
+      polygonString = `POLYGON((${polygonCoordsList}))`;
+    } else if (polygon.type === "GeometryCollection") {
+      const geometriesPolygonStrings = polygon.geometries
+        .map((singlePolygon) => {
+          if (singlePolygon.type === "Polygon") {
+            const poligonCoordinates = singlePolygon.coordinates[0];
+            if (!poligonCoordinates) {
+              throw logger.error(
+                "Missing polygon coordinates inside GeometryCollection",
+                {
+                  polygon,
+                },
+              );
+            }
+
+            const polygonCoordsList = poligonCoordinates
+              .map((c) => `${c[0]} ${c[1]}`)
+              .join(",");
+            return `(${polygonCoordsList})`;
+          } else {
+            throw logger.error(
+              "Unexpected polygon geometry inside GeometryCollection",
+              {
+                type: singlePolygon.type,
+              },
+            );
+          }
+        })
+        .join(",");
+
+      polygonString = `POLYGON(${geometriesPolygonStrings})`;
+    } else {
       throw logger.error("Unexpected polygon geometry", {
         type: polygon?.type,
       });
     }
 
-    const poligonCoordinates = polygon.coordinates[0];
-    if (!poligonCoordinates) {
-      throw logger.error("Missing polygon coordinates", {
-        polygon,
-      });
-    }
-
-    const polygonCoordsList = poligonCoordinates
-      .map((c) => `${c[0]} ${c[1]}`)
-      .join(",");
-
     const pgClient = postgres(env.SUPABASE_DB_URL);
     await regionInsertOrUpdate(pgClient, {
       region: env.REGION,
       geojson: converted,
-      polygon: `POLYGON((${polygonCoordsList}))`,
+      polygon: polygonString,
     });
 
     fs.renameSync(kmlDownloadFilename, env.KML_LOCATION);
