@@ -12,8 +12,6 @@ export class R2Client {
       accessKeyId: env.R2_ACCESS_KEY,
       secretAccessKey: env.R2_SECRET_ACCESS_KEY,
     },
-    // requestChecksumCalculation: "WHEN_REQUIRED",
-    // responseChecksumValidation: "WHEN_REQUIRED",
   });
   private logger: RidiLogger;
 

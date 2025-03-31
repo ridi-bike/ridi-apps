@@ -1,0 +1,12 @@
+{
+  "name": "@ridi/geo-maps",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "type": "module",
+  "dependencies": {
+    "@turf/turf": "^7.2.0",
+    "@vis.gl/react-maplibre": "1.0.0-alpha.4",
+    "maplibre-gl": "^4.7.1",
+    "react": "18.2.0"
+  }
+}
