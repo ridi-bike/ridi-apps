@@ -1,7 +1,7 @@
+import "maplibre-gl/dist/maplibre-gl.css";
 import * as turf from "@turf/turf";
 import { type MapRef } from "@vis.gl/react-maplibre";
 import { Map as MapLibre } from "@vis.gl/react-maplibre";
-import "maplibre-gl/dist/maplibre-gl.css";
 import maplibre from "maplibre-gl";
 import { useEffect, useMemo, useRef } from "react";
 
@@ -61,7 +61,7 @@ export function GeoMapPlanView(props: GeoMapPlanViewProps) {
       initialViewState={
         bbox
           ? {
-              bounds: bbox,
+              bounds: updateBBox(bbox),
             }
           : {
               longitude: 24.853,

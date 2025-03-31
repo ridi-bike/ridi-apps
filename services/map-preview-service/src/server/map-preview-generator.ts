@@ -5,6 +5,8 @@ import puppeteer from "puppeteer";
 
 import { env } from "./env.ts";
 
+const renderingTimeout = 60 * 1000;
+
 export class MapPreviewGenerator {
   private browser: Browser | null = null;
   private state: "running" | "starting" | "not-running" = "not-running";
@@ -69,11 +71,50 @@ export class MapPreviewGenerator {
       });
     }
     const page = await this.browser.newPage();
-    page.on("console", (event) => this.captureBrowserConsoleMessage(event));
 
-    await page.goto(`http://127.0.0.1:${env.PORT}?req=${JSON.stringify(req)}`);
+    let renderingDoneResolve: (() => void) | null = null;
+    let renderingDoneReject: ((reason: unknown) => void) | null = null;
 
-    await page.waitForSelector("#map-load-done");
+    const renderingDone = new Promise<void>((resolve, reject) => {
+      renderingDoneResolve = resolve;
+      renderingDoneReject = reject;
+    });
+
+    const rejectionTimeout = setTimeout(() => {
+      if (!renderingDoneReject) {
+        throw this.logger.error("Rendering Done Reject is undefined", {
+          renderingDone,
+          renderingDoneResolve,
+          renderingDoneReject,
+        });
+      }
+      renderingDoneReject(
+        this.logger.error("Map rendering timeout", { renderingTimeout }),
+      );
+    }, renderingTimeout);
+
+    page.on("console", (event) => {
+      this.captureBrowserConsoleMessage(event);
+      if (event.text() === "RIDI-MAP-RENDERING-DONE") {
+        if (!renderingDoneResolve) {
+          throw this.logger.error("Rendering Done Resolver is undefined", {
+            renderingDone,
+            renderingDoneResolve,
+            renderingDoneReject,
+          });
+        }
+        clearTimeout(rejectionTimeout);
+        renderingDoneResolve();
+      }
+    });
+
+    const url = new URL("http://127.0.0.1");
+    url.port = env.PORT.toString();
+    url.searchParams.set("req", JSON.stringify(req));
+    url.searchParams.set("theme", "light");
+    await page.goto(url.toString());
+
+    await renderingDone;
 
     const mapContainer = await page.waitForSelector("#map-container");
     const imageData = await mapContainer?.screenshot();

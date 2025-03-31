@@ -37,7 +37,7 @@ export function GeoMapRouteView({
 
   useEffect(() => {
     if (mapRef.current && mapBounds) {
-      mapRef.current.fitBounds(mapBounds);
+      mapRef.current.fitBounds(updateBBox(mapBounds));
     }
   }, [mapBounds]);
 

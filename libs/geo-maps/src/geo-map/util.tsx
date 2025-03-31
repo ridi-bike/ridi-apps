@@ -169,6 +169,7 @@ export function updateBBox(
   ] as [number, number, number, number];
   console.log(updated);
   return updated;
+  // return bbox;
 }
 
 export function metersToDisplay(value: number): string {
