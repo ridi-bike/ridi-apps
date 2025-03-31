@@ -100,16 +100,40 @@ const mapPreviewServiceDeployment = new k8s.apps.v1.Deployment(
                   name: "PORT",
                   value: port.toString(),
                 },
+                {
+                  name: "R2_ENDPOINT",
+                  value: config.require("map_preview_endpoint"),
+                },
+                {
+                  name: "MAP_DATA_BUCKET",
+                  value: config.require("map_preview_bucket"),
+                },
+                {
+                  name: "BUCKET_URL",
+                  value: config.require("map_preview_bucket_url"),
+                },
+                {
+                  name: "PREVIEW_PREFIX",
+                  value: config.require("map_preview_prefix"),
+                },
+                {
+                  name: "R2_ACCESS_KEY",
+                  value: config.requireSecret("map_preview_access_key"),
+                },
+                {
+                  name: "R2_SECRET_ACCESS_KEY",
+                  value: config.requireSecret("map_preview_access_secret"),
+                },
               ],
               startupProbe: {
                 httpGet: {
-                  path: "/",
+                  path: "/api/health",
                   port: 3000,
                 },
               },
               livenessProbe: {
                 httpGet: {
-                  path: "/",
+                  path: "/api/health",
                   port: 3000,
                 },
               },

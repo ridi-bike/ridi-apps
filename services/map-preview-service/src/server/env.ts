@@ -6,6 +6,12 @@ const envSchema = z.object({
   PUPPETEER_WINDOWED: z
     .union([z.literal("true"), z.literal("false")])
     .transform((v) => (v === "true" ? true : false)),
+  R2_ENDPOINT: z.string(),
+  R2_ACCESS_KEY: z.string(),
+  R2_SECRET_ACCESS_KEY: z.string(),
+  MAP_DATA_BUCKET: z.string(),
+  BUCKET_URL: z.string(),
+  PREVIEW_PREFIX: z.string(),
 });
 
 export const env = envSchema.parse(process.env);

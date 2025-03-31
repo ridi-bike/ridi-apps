@@ -3,6 +3,29 @@ import { z } from "zod";
 
 const c = initContract();
 
+export const mapPreviewSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("route"),
+    route: z.array(z.tuple([z.number(), z.number()])),
+    reqId: z.string(),
+  }),
+  z.object({
+    type: z.literal("plan-start-finish"),
+    start: z.tuple([z.number(), z.number()]),
+    finish: z.tuple([z.number(), z.number()]),
+    reqId: z.string(),
+  }),
+  z.object({
+    type: z.literal("plan-round-trip"),
+    start: z.tuple([z.number(), z.number()]),
+    distance: z.number(),
+    bearing: z.number(),
+    reqId: z.string(),
+  }),
+]);
+
+export type MapPreviewReq = z.infer<typeof mapPreviewSchema>;
+
 export const mapPreviewContract = c.router({
   healthcheck: {
     method: "GET",
@@ -16,19 +39,7 @@ export const mapPreviewContract = c.router({
   createPreview: {
     method: "POST",
     path: "/api/preview",
-    body: z.discriminatedUnion("type", [
-      z.object({
-        type: z.literal("route"),
-        route: z.array(z.tuple([z.number(), z.number()])),
-        reqId: z.string(),
-      }),
-      z.object({
-        type: z.literal("plan"),
-        start: z.tuple([z.number(), z.number()]),
-        finish: z.tuple([z.number(), z.number()]),
-        reqId: z.string(),
-      }),
-    ]),
+    body: mapPreviewSchema,
     responses: {
       200: z.object({ url: z.string() }),
       500: z.object({ message: z.string() }),

@@ -7,7 +7,8 @@ import { initServer } from "@ts-rest/fastify";
 import Fastify from "fastify";
 
 import { env } from "./server/env.ts";
-import { handleMapPreviewRequest } from "./server/map-preview.ts";
+import { MapPreviewGenerator } from "./server/map-preview-generator.ts";
+import { R2Client } from "./server/r2-client.ts";
 
 const server = Fastify();
 
@@ -22,43 +23,42 @@ const logger = RidiLogger.init({
 
 const s = initServer();
 
+const previewGenerator = new MapPreviewGenerator(logger);
+previewGenerator
+  .init()
+  .catch((error) => logger.error("Error on browser init", { error }));
+const r2Client = new R2Client(logger);
+
 const router = s.router(mapPreviewContract, {
   createPreview: async ({ body }) => {
-    let stuff = "";
     logger.info("Map preview call", { reqId: body.reqId });
     try {
-      stuff = await handleMapPreviewRequest();
+      const imageData = await previewGenerator.generatePreview(body);
+      const imageUrl = await r2Client.uploadPreview(body.reqId, imageData);
+      return {
+        status: 200,
+        body: {
+          url: imageUrl,
+        },
+      };
     } catch (error) {
-      logger.error("error on puppeteer", { error, reqId: body.reqId });
-    }
-    if (body.type === "route") {
+      logger.error("Error while capturing preview", {
+        error,
+        reqId: body.reqId,
+      });
       return {
-        status: 200,
+        status: 500,
         body: {
-          url: stuff,
+          message: "Error while generating preview",
         },
       };
     }
-    if (body.type === "plan") {
-      return {
-        status: 200,
-        body: {
-          url: stuff,
-        },
-      };
-    }
-    return {
-      status: 500,
-      body: {
-        message: "Unknown preview type",
-      },
-    };
   },
   healthcheck: async () => {
     return {
-      status: 200,
+      status: previewGenerator.getState() === "running" ? 200 : 500,
       body: {
-        running: true,
+        running: previewGenerator.getState() === "running",
       },
     };
   },

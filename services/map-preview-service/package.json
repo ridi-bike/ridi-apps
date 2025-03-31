@@ -4,12 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node --import=tsx --watch-path=./src --env-file=.env.base ./src/server.ts --dev | pino-pretty ",
-    "start": "node --import=tsx --watch-path=./src --env-file=.env.base ./src/server.ts | pino-pretty ",
+    "dev": "node --import=tsx --watch-path=./src --env-file=.env.base --env-file=.env ./src/server.ts --dev | pino-pretty ",
+    "start": "node --import=tsx --watch-path=./src --env-file=.env.base --env-file=.env ./src/server.ts | pino-pretty ",
     "build": "vite build",
     "tsc": "tsc"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.777.0",
     "@fastify/vite": "8.0.0-alpha.2",
     "@protomaps/basemaps": "^5.0.0",
     "@ridi/logger": "workspace:^",
@@ -17,7 +18,6 @@
     "@ridi/messaging": "workspace:^",
     "@ts-rest/fastify": "^3.52.0",
     "@vis.gl/react-maplibre": "1.0.0-alpha.4",
-    "aws-sdk": "^2.1692.0",
     "fastify": "^5.2.1",
     "maplibre-gl": "^4.7.1",
     "pmtiles": "^4.3.0",
@@ -26,6 +26,7 @@
     "react-dom": "18.2.0",
     "tsx": "^4.19.3",
     "typescript": "^5.8.1-rc",
+    "xksuid": "^0.0.4",
     "zod": "^3.24.1"
   },
   "devDependencies": {
