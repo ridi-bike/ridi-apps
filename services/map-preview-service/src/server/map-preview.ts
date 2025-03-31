@@ -76,13 +76,15 @@ export async function handleMapPreviewRequest(): Promise<string> {
   // await new Promise((resolve) => setTimeout(resolve, 15000));
 
   // await page.waitForNetworkIdle({timeout});
-  await new Promise((resolve) => setTimeout(resolve, 5000));
+  // await new Promise((resolve) => setTimeout(resolve, 5000));
   const data = await page.evaluate(
     () => document.querySelector("*")?.outerHTML,
   );
 
+  await page.waitForSelector("#map-load-done");
+
   console.log(data);
-  const mapContainer = await page.waitForSelector("#outer-container");
+  const mapContainer = await page.waitForSelector("#map-container");
   const imageData =
     "data:image/png;base64," +
     (await mapContainer?.screenshot({ encoding: "base64" }));
