@@ -40,12 +40,12 @@ const router = s.router(ridiRouterContract, {
 
     const result = await client.execReq();
 
-    if ((result.result as RidiRouterErr).err) {
-      const err = (result.result as RidiRouterErr).err;
+    if ((result.result as RidiRouterErr).error) {
+      const err = (result.result as RidiRouterErr).error;
       return {
         status: 500,
         body: {
-          message: `Error from router: ${err}`,
+          message: `Error from router: ${err.message}`,
         },
       };
     }

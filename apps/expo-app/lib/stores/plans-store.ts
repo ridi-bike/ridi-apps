@@ -131,7 +131,6 @@ export function useStorePlans() {
         "postgres_changes",
         { event: "*", schema: "public", table: "plans" },
         (_payload) => {
-          console.log("refetch from sb sub");
           refetchDebounced();
         },
       )

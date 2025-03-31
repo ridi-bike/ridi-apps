@@ -38,7 +38,6 @@ export class RouterServiceLookup {
         });
         return result;
       } catch (error) {
-        console.error(error);
         lastError = error;
         this.logger.warn("Router service call failed", {
           attempt,

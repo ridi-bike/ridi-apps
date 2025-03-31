@@ -36,7 +36,6 @@ export class MapPreviewServiceClient {
         });
         return result;
       } catch (error) {
-        console.error(error);
         lastError = error;
         this.logger.warn("Map preview service call failed", {
           reqId: req.reqId,

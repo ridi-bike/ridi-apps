@@ -920,6 +920,8 @@ select
   r.stats_score,
   r.stats_len_m,
   r.stats_junction_count,
+  r.map_preview_light,
+  r.map_preview_dark,
 	pa.lat_lon_array,
 	p.id as plan_id,
 	p.name as plan_name,
@@ -948,6 +950,8 @@ export interface RoutesGetRow {
     statsScore: string;
     statsLenM: string;
     statsJunctionCount: string;
+    mapPreviewLight: string | null;
+    mapPreviewDark: string | null;
     latLonArray: string[];
     planId: string;
     planName: string;
@@ -962,10 +966,12 @@ export async function routesGet(sql: Sql, args: RoutesGetArgs): Promise<RoutesGe
         statsScore: row[3],
         statsLenM: row[4],
         statsJunctionCount: row[5],
-        latLonArray: row[6],
-        planId: row[7],
-        planName: row[8],
-        planState: row[9]
+        mapPreviewLight: row[6],
+        mapPreviewDark: row[7],
+        latLonArray: row[8],
+        planId: row[9],
+        planName: row[10],
+        planState: row[11]
     }));
 }
 
@@ -1017,10 +1023,14 @@ select
 	p.state,
 	p.created_at,
   p.rule_set_id,
+  p.map_preview_light,
+  p.map_preview_dark,
 	r.id as route_id,
 	r.name as route_name,
 	r.created_at as route_created_at,
-  r.stats_len_m
+  r.stats_len_m,
+  r.map_preview_light,
+  r.map_preview_dark
 from plans p
 left join routes r 
 	on r.plan_id = p.id
@@ -1050,10 +1060,14 @@ export interface PlanListRow {
     state: "new" | "planning" | "done" | "error";
     createdAt: Date;
     ruleSetId: string;
+    mapPreviewLight: string | null;
+    mapPreviewDark: string | null;
     routeId: string | null;
     routeName: string | null;
     routeCreatedAt: Date | null;
     statsLenM: string | null;
+    mapPreviewLight_2: string | null;
+    mapPreviewDark_2: string | null;
 }
 
 export async function planList(sql: Sql, args: PlanListArgs): Promise<PlanListRow[]> {
@@ -1072,10 +1086,14 @@ export async function planList(sql: Sql, args: PlanListArgs): Promise<PlanListRo
         state: row[11],
         createdAt: row[12],
         ruleSetId: row[13],
-        routeId: row[14],
-        routeName: row[15],
-        routeCreatedAt: row[16],
-        statsLenM: row[17]
+        mapPreviewLight: row[14],
+        mapPreviewDark: row[15],
+        routeId: row[16],
+        routeName: row[17],
+        routeCreatedAt: row[18],
+        statsLenM: row[19],
+        mapPreviewLight_2: row[20],
+        mapPreviewDark_2: row[21]
     }));
 }
 

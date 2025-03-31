@@ -182,8 +182,6 @@ export class StripeApi {
       });
     }
 
-    console.log("cancel_at_period_end", subscription.cancel_at_period_end);
-
     await privateUsersUpdateStripeData(this.dbClient, {
       stripeSubscriptionId: subscription.id,
       stripeStatus: subscription.status,

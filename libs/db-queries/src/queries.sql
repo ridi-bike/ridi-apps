@@ -235,6 +235,8 @@ select
   r.stats_score,
   r.stats_len_m,
   r.stats_junction_count,
+  r.map_preview_light,
+  r.map_preview_dark,
 	pa.lat_lon_array,
 	p.id as plan_id,
 	p.name as plan_name,
@@ -272,10 +274,14 @@ select
 	p.state,
 	p.created_at,
   p.rule_set_id,
+  p.map_preview_light,
+  p.map_preview_dark,
 	r.id as route_id,
 	r.name as route_name,
 	r.created_at as route_created_at,
-  r.stats_len_m
+  r.stats_len_m,
+  r.map_preview_light,
+  r.map_preview_dark
 from plans p
 left join routes r 
 	on r.plan_id = p.id

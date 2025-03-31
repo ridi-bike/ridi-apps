@@ -8,7 +8,11 @@ import { env } from "./env.ts";
 import { getTagSection } from "./roadTags.ts";
 
 type RoadTagStats = Record<string, { len_m: number; percentage: number }>;
-export type RidiRouterErr = { err: string };
+export type RidiRouterErr = {
+  error: {
+    message: string;
+  };
+};
 export type RidiRouterOk = {
   ok: {
     routes: {

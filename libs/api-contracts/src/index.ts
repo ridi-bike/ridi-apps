@@ -37,6 +37,8 @@ export const routeGetRespopnseSchema = z.discriminatedUnion("version", [
       id: z.string(),
       name: z.string(),
       createdAt: dateOut,
+      mapPreviewLight: z.string().nullable(),
+      mapPreviewDark: z.string().nullable(),
       plan: z.object({
         planId: z.string(),
         planName: z.string(),
@@ -86,11 +88,15 @@ export const plansListResponseSchema = z.discriminatedUnion("version", [
         distance: z.coerce.number(),
         bearing: bearingOut,
         ruleSetId: z.string(),
+        mapPreviewLight: z.string().nullable(),
+        mapPreviewDark: z.string().nullable(),
         routes: z.array(
           z.object({
             routeId: z.string(),
             routeName: z.string(),
             routeCreatedAt: dateOut,
+            mapPreviewLight: z.string().nullable(),
+            mapPreviewDark: z.string().nullable(),
           }),
         ),
       }),

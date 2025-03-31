@@ -13,7 +13,6 @@ export class RidiLogger {
         payload: (data) => {
           return Object.entries(data).reduce(
             (serialized, [key, value]) => {
-              console.log(key, value);
               serialized[key] = value;
               if (value instanceof Error) {
                 serialized[key] = pino.stdSerializers.err(value);
