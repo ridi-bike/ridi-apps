@@ -55,7 +55,7 @@ with latest_plan as (
   limit 1
 )
 select pgmq.send(
-  queue_name => 'new-plan'::text,
+  queue_name => 'plan_new'::text,
   msg        => jsonb_build_object('planId', id)
 ) 
 from latest_plan;

@@ -33,12 +33,29 @@ const router = s.router(mapPreviewContract, {
   createPreview: async ({ body }) => {
     logger.info("Map preview call", { reqId: body.reqId });
     try {
-      const imageData = await previewGenerator.generatePreview(body);
-      const imageUrl = await r2Client.uploadPreview(body.reqId, imageData);
+      const imageDataLight = await previewGenerator.generatePreview(
+        body,
+        "light",
+      );
+      const imageUrlLight = await r2Client.uploadPreview(
+        body.reqId,
+        imageDataLight,
+      );
+
+      const imageDataDark = await previewGenerator.generatePreview(
+        body,
+        "dark",
+      );
+      const imageUrlDark = await r2Client.uploadPreview(
+        body.reqId,
+        imageDataDark,
+      );
+
       return {
         status: 200,
         body: {
-          url: imageUrl,
+          urlLight: imageUrlLight,
+          urlDark: imageUrlDark,
         },
       };
     } catch (error) {

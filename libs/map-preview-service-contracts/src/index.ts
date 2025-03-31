@@ -41,7 +41,10 @@ export const mapPreviewContract = c.router({
     path: "/api/preview",
     body: mapPreviewSchema,
     responses: {
-      200: z.object({ url: z.string() }),
+      200: z.object({
+        urlLight: z.string(),
+        urlDark: z.string(),
+      }),
       500: z.object({ message: z.string() }),
     },
   },

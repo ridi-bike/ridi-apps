@@ -64,7 +64,10 @@ export class MapPreviewGenerator {
     }
   }
 
-  async generatePreview(req: MapPreviewReq): Promise<Uint8Array> {
+  async generatePreview(
+    req: MapPreviewReq,
+    theme: "dark" | "light",
+  ): Promise<Uint8Array> {
     if (!this.browser) {
       throw this.logger.error("Broser not ready in map generator", {
         state: this.state,
@@ -111,7 +114,7 @@ export class MapPreviewGenerator {
     const url = new URL("http://127.0.0.1");
     url.port = env.PORT.toString();
     url.searchParams.set("req", JSON.stringify(req));
-    url.searchParams.set("theme", "light");
+    url.searchParams.set("theme", theme);
     await page.goto(url.toString());
 
     await renderingDone;

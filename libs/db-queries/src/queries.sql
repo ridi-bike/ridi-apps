@@ -1,7 +1,32 @@
+-- name: RouteGet :one
+with points_array as (
+	select 
+		id, 
+		array_agg(array[postgis.st_y(p.geom), postgis.st_x(p.geom)] order by p.path) as lat_lon_array
+	from routes r, postgis.st_dumppoints(r.linestring) p
+	where r.id = $1
+	group by r.id
+) 
+select 
+  r.*,
+	pa.lat_lon_array
+from routes r
+inner join points_array pa
+	on pa.id = r.id
+where r.id = $1
+order by 
+	r.created_at desc;
+
+-- name: RouteUpdateMapPreview :exec
+update plans
+set map_preview_dark = $1,
+  map_preview_light = $2
+where id = $3;
+
 -- name: PlanUpdateMapPreview :exec
 update plans
 set map_preview_dark = $1,
-  map_preview_Light = $2
+  map_preview_light = $2
 where id = $3;
 
 -- name: UserClaimPlans :exec

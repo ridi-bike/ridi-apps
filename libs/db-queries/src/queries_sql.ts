@@ -2,10 +2,91 @@
 
 import type  { Sql } from "postgres";
 
+export const routeGetQuery = `-- name: RouteGet :one
+with points_array as (
+	select 
+		id, 
+		array_agg(array[postgis.st_y(p.geom), postgis.st_x(p.geom)] order by p.path) as lat_lon_array
+	from routes r, postgis.st_dumppoints(r.linestring) p
+	where r.id = $1
+	group by r.id
+) 
+select 
+  r.id, r.user_id, r.created_at, r.plan_id, r.name, r.linestring, r.stats_len_m, r.stats_score, r.stats_junction_count, r.is_deleted, r.map_preview_light, r.map_preview_dark,
+	pa.lat_lon_array
+from routes r
+inner join points_array pa
+	on pa.id = r.id
+where r.id = $1
+order by 
+	r.created_at desc`;
+
+export interface RouteGetArgs {
+    id: string;
+}
+
+export interface RouteGetRow {
+    id: string;
+    userId: string;
+    createdAt: Date;
+    planId: string;
+    name: string;
+    linestring: string | null;
+    statsLenM: string;
+    statsScore: string;
+    statsJunctionCount: string;
+    isDeleted: boolean;
+    mapPreviewLight: string | null;
+    mapPreviewDark: string | null;
+    latLonArray: string[];
+}
+
+export async function routeGet(sql: Sql, args: RouteGetArgs): Promise<RouteGetRow | null> {
+    const rows = await sql.unsafe(routeGetQuery, [args.id]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        userId: row[1],
+        createdAt: row[2],
+        planId: row[3],
+        name: row[4],
+        linestring: row[5],
+        statsLenM: row[6],
+        statsScore: row[7],
+        statsJunctionCount: row[8],
+        isDeleted: row[9],
+        mapPreviewLight: row[10],
+        mapPreviewDark: row[11],
+        latLonArray: row[12]
+    };
+}
+
+export const routeUpdateMapPreviewQuery = `-- name: RouteUpdateMapPreview :exec
+update plans
+set map_preview_dark = $1,
+  map_preview_light = $2
+where id = $3`;
+
+export interface RouteUpdateMapPreviewArgs {
+    mapPreviewDark: string | null;
+    mapPreviewLight: string | null;
+    id: string;
+}
+
+export async function routeUpdateMapPreview(sql: Sql, args: RouteUpdateMapPreviewArgs): Promise<void> {
+    await sql.unsafe(routeUpdateMapPreviewQuery, [args.mapPreviewDark, args.mapPreviewLight, args.id]);
+}
+
 export const planUpdateMapPreviewQuery = `-- name: PlanUpdateMapPreview :exec
 update plans
 set map_preview_dark = $1,
-  map_preview_Light = $2
+  map_preview_light = $2
 where id = $3`;
 
 export interface PlanUpdateMapPreviewArgs {

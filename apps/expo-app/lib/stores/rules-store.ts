@@ -41,7 +41,7 @@ export function useStoreRuleSets() {
             data: ruleSet,
           },
         })
-        .then((r) => getSuccessResponseOrThrow(201, r).data),
+        .then((r) => getSuccessResponseOrThrow(200, r).data),
     onMutate: async (ruleSetIn) => {
       await queryClient.cancelQueries({ queryKey: RULE_SETS_QUERY_KEY });
       queryClient.setQueryData<RuleSet[]>(

@@ -3,25 +3,21 @@ import { type RidiLogger } from "@ridi/logger";
 import { type RouteReq } from "@ridi/router-service-contracts";
 import type postgres from "postgres";
 
-import { type MapPreviewServiceClient } from "./map-preview-service-client";
 import { type RouterServiceLookup } from "./router-service-lookup";
 
 export class MessageHandlerNewPlan {
   private readonly logger: RidiLogger;
   private readonly pgClient: postgres.Sql;
   private readonly routerServiceLookup: RouterServiceLookup;
-  private readonly mapPreviewServiceClient: MapPreviewServiceClient;
 
   constructor(
     logger: RidiLogger,
     pgClient: postgres.Sql,
     routerServiceLookup: RouterServiceLookup,
-    mapPreviewServiceClient: MapPreviewServiceClient,
   ) {
     this.logger = logger.withContext({ module: "message-handler-new-plan" });
     this.pgClient = pgClient;
     this.routerServiceLookup = routerServiceLookup;
-    this.mapPreviewServiceClient = mapPreviewServiceClient;
   }
 
   async onNewPlanError(planId: string) {
@@ -71,26 +67,6 @@ export class MessageHandlerNewPlan {
         );
       }
     }
-
-    // this.mapPreviewServiceClient
-    //   .callMapPreviewService({
-    //     reqId: planId,
-    //     type: "plan",
-    //     start: [0, 0],
-    //     finish: [0, 0],
-    //   })
-    //   .then((resp) => {
-    //     if (resp.status === 200) {
-    //       return pgQueries.planUpdateMapPreview(this.pgClient, {
-    //         id: planId,
-    //         mapPreviewDark: resp.body.url,
-    //         mapPreviewLight: resp.body.url,
-    //       });
-    //     }
-    //     this.logger.error("Failed to call map preview generator", {
-    //       resp,
-    //     });
-    //   });
 
     await pgQueries.planSetState(this.pgClient, {
       id: planId,

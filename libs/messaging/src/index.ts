@@ -10,19 +10,24 @@ import {
   updateVisibilityTimeout,
 } from "./messaging_sql.ts";
 
-type MessageHandler<TName extends keyof Messages> = (args: {
+type Messages = {
+  plan_map_gen: { planId: string };
+  route_map_gen: { routeId: string };
+  plan_new: { planId: string };
+};
+
+type MessageHandler<
+  TName extends keyof Messages,
+  TData extends Messages[TName],
+> = (args: {
   message: ReadMessagesWithLongPollRow;
-  data: Messages[TName];
+  data: TData;
   actions: {
     deleteMessage: () => Promise<void>;
     archiveMessage: () => Promise<void>;
     setVisibilityTimeout: (visibilityTimeoutSecs: number) => Promise<void>;
   };
 }) => Promise<void>;
-
-type Messages = {
-  "new-plan": { planId: string };
-};
 
 export class Messaging {
   private stopped = false;
@@ -44,7 +49,7 @@ export class Messaging {
 
   listen<TName extends keyof Messages>(
     queueName: TName,
-    messageHandler: MessageHandler<TName>,
+    messageHandler: MessageHandler<TName, Messages[TName]>,
   ) {
     this.runListener(queueName, messageHandler).catch((error) => {
       this.stopped = true;
@@ -55,7 +60,7 @@ export class Messaging {
   }
   private async runListener<TName extends keyof Messages>(
     queueName: TName,
-    messageHandler: MessageHandler<TName>,
+    messageHandler: MessageHandler<TName, Messages[TName]>,
   ) {
     while (!this.stopped) {
       const messages = await readMessagesWithLongPoll(this.db, {

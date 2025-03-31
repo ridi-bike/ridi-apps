@@ -6,6 +6,7 @@ import postgres from "postgres";
 
 import { env } from "./env.ts";
 import { MapPreviewServiceClient } from "./map-preview-service-client.ts";
+import { MessageHandlerMapPreview } from "./message-handler-map-preview.ts";
 import { MessageHandlerNewPlan } from "./message-handler-new-plan.ts";
 import { RouterServiceLookup } from "./router-service-lookup.ts";
 
@@ -18,11 +19,63 @@ const messageHandlerNewPlan = new MessageHandlerNewPlan(
   logger,
   pgClient,
   new RouterServiceLookup(logger),
+);
+const messageHandlerMapPreview = new MessageHandlerMapPreview(
+  logger,
+  pgClient,
   new MapPreviewServiceClient(logger),
 );
 
 messaging.listen(
-  "new-plan",
+  "plan_map_gen",
+  async ({
+    message,
+    data,
+    actions: { deleteMessage, setVisibilityTimeout },
+  }) => {
+    const beat = setInterval(() => setVisibilityTimeout(5), 4000);
+    try {
+      await messageHandlerMapPreview.handlePlanMapPreview(data.planId);
+      await deleteMessage();
+    } catch (err) {
+      const retryInSecs = 30;
+      logger.error("Plan Map Preview message error, retry", {
+        message,
+        data,
+        retryInSecs,
+        err,
+      });
+      await setVisibilityTimeout(retryInSecs);
+    }
+    clearInterval(beat);
+  },
+);
+messaging.listen(
+  "route_map_gen",
+  async ({
+    message,
+    data,
+    actions: { deleteMessage, setVisibilityTimeout },
+  }) => {
+    const beat = setInterval(() => setVisibilityTimeout(5), 4000);
+    try {
+      await messageHandlerMapPreview.handleRouteMapPreview(data.routeId);
+      await deleteMessage();
+    } catch (err) {
+      const retryInSecs = 30;
+      logger.error("Route Map Preview message error, retry", {
+        message,
+        data,
+        retryInSecs,
+        err,
+      });
+      await setVisibilityTimeout(retryInSecs);
+    }
+    clearInterval(beat);
+  },
+);
+messaging.listen(
+  "plan_new",
   async ({
     message,
     data,
@@ -34,7 +87,7 @@ messaging.listen(
       await deleteMessage();
     } catch (err) {
       const retryInSecs = 30;
-      logger.error("New Plan message error, retry", {
+      logger.error("Plan New message error, retry", {
         message,
         data,
         retryInSecs,

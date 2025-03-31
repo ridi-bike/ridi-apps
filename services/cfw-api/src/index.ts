@@ -104,7 +104,7 @@ const router = tsr
     }
 
     return {
-      status: 201,
+      status: 200,
       body: undefined,
     };
   },
@@ -160,7 +160,7 @@ const router = tsr
     });
 
     return {
-      status: 201,
+      status: 200,
       body: undefined,
     };
   },
@@ -383,7 +383,7 @@ const router = tsr
     );
 
     return {
-      status: 201,
+      status: 200,
       body: {
         version: "v1",
         data: {
@@ -465,7 +465,7 @@ const router = tsr
       throw new Error("can't happen");
     }
 
-    await ctx.messaging.send("new-plan", { planId: newPlan.id });
+    await ctx.messaging.send("plan_new", { planId: newPlan.id });
 
     const response = {
       version: "v1" as const,
@@ -473,7 +473,7 @@ const router = tsr
     };
 
     return {
-      status: 201,
+      status: 200,
       body: response,
     };
   },

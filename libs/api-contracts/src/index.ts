@@ -280,7 +280,7 @@ export const apiContract = c.router({
       }),
     ]),
     responses: {
-      201: z.void(),
+      200: z.void(),
       500: z.object({ message: z.string() }),
     },
   },
@@ -296,7 +296,7 @@ export const apiContract = c.router({
       }),
     ]),
     responses: {
-      201: z.void(),
+      200: z.void(),
       500: z.object({ message: z.string() }),
     },
   },
@@ -407,7 +407,7 @@ export const apiContract = c.router({
     path: "/user/rules",
     body: ruleSetSetSchema,
     responses: {
-      201: z.object({
+      200: z.object({
         version: z.literal("v1"),
         data: z.object({
           id: z.string(),
@@ -481,7 +481,7 @@ export const apiContract = c.router({
     path: "/user/plans",
     body: planCreateRequestSchema,
     responses: {
-      201: z.object({
+      200: z.object({
         version: z.literal("v1"),
         data: z.object({
           id: z.string(),
