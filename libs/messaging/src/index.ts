@@ -4,7 +4,7 @@ import type postgres from "postgres";
 import {
   archiveMessage,
   deleteMessage,
-  readMessagesWithLongPoll,
+  readMessages,
   type ReadMessagesWithLongPollRow,
   sendMessage,
   updateVisibilityTimeout,
@@ -63,13 +63,14 @@ export class Messaging {
     messageHandler: MessageHandler<TName, Messages[TName]>,
   ) {
     while (!this.stopped) {
-      const messages = await readMessagesWithLongPoll(this.db, {
+      await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+
+      const messages = await readMessages(this.db, {
         queueName,
         visibilityTimeoutSeconds: 5,
-        qty: 100,
-        internalPollMs: 200,
-        maxPollSeconds: 60,
+        qty: 10,
       });
+
       messages.forEach((message) =>
         messageHandler({
           message,

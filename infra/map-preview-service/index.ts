@@ -67,7 +67,7 @@ const mapPreviewServiceDeployment = new k8s.apps.v1.Deployment(
       },
     },
     spec: {
-      replicas: 1,
+      replicas: 3,
       strategy: {
         type: "Recreate",
       },
