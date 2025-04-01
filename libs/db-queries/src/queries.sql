@@ -18,7 +18,7 @@ order by
 	r.created_at desc;
 
 -- name: RouteUpdateMapPreview :exec
-update plans
+update routes
 set map_preview_dark = $1,
   map_preview_light = $2
 where id = $3;
@@ -280,8 +280,8 @@ select
 	r.name as route_name,
 	r.created_at as route_created_at,
   r.stats_len_m,
-  r.map_preview_light,
-  r.map_preview_dark
+  r.map_preview_light as route_map_preview_light,
+  r.map_preview_dark as route_map_preview_dark
 from plans p
 left join routes r 
 	on r.plan_id = p.id

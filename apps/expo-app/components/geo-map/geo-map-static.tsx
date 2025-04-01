@@ -1,3 +1,4 @@
+import { getMapStyle } from "@ridi/geo-maps";
 import * as turf from "@turf/turf";
 import { Map as MapLibre } from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -9,7 +10,6 @@ import { useColorScheme } from "~/lib/useColorScheme";
 import { cn } from "~/lib/utils";
 
 import GeoMapMarker from "./geo-map-marker";
-import { getMapStyle } from "./style";
 import { type Coords } from "./types";
 
 type GeoMapStaticProps = {

@@ -53,7 +53,7 @@ export function GeoMapPlanView(props: GeoMapPlanViewProps) {
     <MapLibre
       ref={(map) => {
         mapRef.current = map;
-        if (map) {
+        if (map && props.mapRef) {
           props.mapRef(map);
         }
       }}

@@ -466,6 +466,7 @@ const router = tsr
     }
 
     await ctx.messaging.send("plan_new", { planId: newPlan.id });
+    await ctx.messaging.send("plan_map_gen", { planId: newPlan.id });
 
     const response = {
       version: "v1" as const,

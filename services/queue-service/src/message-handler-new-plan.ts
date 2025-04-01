@@ -1,5 +1,6 @@
 import * as pgQueries from "@ridi/db-queries";
 import { type RidiLogger } from "@ridi/logger";
+import { type Messaging } from "@ridi/messaging";
 import { type RouteReq } from "@ridi/router-service-contracts";
 import type postgres from "postgres";
 
@@ -9,15 +10,18 @@ export class MessageHandlerNewPlan {
   private readonly logger: RidiLogger;
   private readonly pgClient: postgres.Sql;
   private readonly routerServiceLookup: RouterServiceLookup;
+  private readonly messaging: Messaging;
 
   constructor(
     logger: RidiLogger,
     pgClient: postgres.Sql,
     routerServiceLookup: RouterServiceLookup,
+    messaging: Messaging,
   ) {
     this.logger = logger.withContext({ module: "message-handler-new-plan" });
     this.pgClient = pgClient;
     this.routerServiceLookup = routerServiceLookup;
+    this.messaging = messaging;
   }
 
   async onNewPlanError(planId: string) {
@@ -206,8 +210,15 @@ export class MessageHandlerNewPlan {
         statsScore: route.stats.score.toString(),
       });
       if (!routeRecord) {
-        throw new Error("must exist");
+        throw this.logger.error("Newly inserted route record must exist", {
+          planId,
+          planRecord,
+          routeRecord,
+        });
       }
+
+      await this.messaging.send("route_map_gen", { routeId: routeRecord.id });
+
       for (const statBreakdown of route.stats.breakdown) {
         await pgQueries.routeBreakdownStatsInsert(this.pgClient, {
           userId: planRecord.userId,

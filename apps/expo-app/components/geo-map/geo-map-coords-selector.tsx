@@ -1,5 +1,5 @@
+import { getMapStyle } from "@ridi/geo-maps";
 import * as turf from "@turf/turf";
-import { Protocol } from "pmtiles";
 import {
   type FillLayer,
   Layer,
@@ -26,7 +26,6 @@ import {
 } from "~/components/geo-map/types";
 import { useColorScheme } from "~/lib/useColorScheme";
 
-import { getMapStyle } from "./style";
 import { combineBBox, useRoundTripPolygon } from "./util";
 
 const colors = [

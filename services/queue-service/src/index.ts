@@ -19,6 +19,7 @@ const messageHandlerNewPlan = new MessageHandlerNewPlan(
   logger,
   pgClient,
   new RouterServiceLookup(logger),
+  messaging,
 );
 const messageHandlerMapPreview = new MessageHandlerMapPreview(
   logger,

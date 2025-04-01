@@ -123,20 +123,7 @@ export default function PlansPage() {
                       animate={animate}
                       transition={transition}
                     >
-                      <PlanCard
-                        startDesc={plan.startDesc}
-                        finishDesc={plan.finishDesc}
-                        startCoords={{ lat: plan.startLat, lon: plan.startLon }}
-                        finishCoords={
-                          plan.finishLat && plan.finishLon
-                            ? { lat: plan.finishLat, lon: plan.finishLon }
-                            : null
-                        }
-                        bearing={plan.bearing}
-                        distance={plan.distance}
-                        tripType={plan.tripType}
-                        state={plan.state}
-                      />
+                      <PlanCard plan={plan} />
                     </MotiPressable>
                   ))}
                 </View>

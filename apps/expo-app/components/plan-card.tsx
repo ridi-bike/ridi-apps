@@ -1,44 +1,62 @@
 import { CirclePause, CirclePlay, Navigation } from "lucide-react-native";
 import { View, Text } from "react-native";
+import { Image } from "expo-image";
 
 import { type Plan } from "~/lib/stores/plans-store";
+import { useColorScheme } from "~/lib/useColorScheme";
 import { cn } from "~/lib/utils";
 
 import { GeoMapPlanView } from "./geo-map/geo-map-plan-view";
-import { type Coords } from "./geo-map/types";
 import { getCardinalDirection } from "./geo-map/util";
 import { ScreenCard } from "./screen-card";
 
 type RouteCardProps = {
-  startDesc: string;
-  finishDesc: string | null;
-  distance: number;
-  bearing: number | null;
-  startCoords: Coords;
-  finishCoords: Coords | null;
-  tripType: "round-trip" | "start-finish";
-  state: Plan["state"];
+  plan: Plan;
 };
 
+const blurhash =
+  "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
+
 export const PlanCard = ({
-  startDesc,
-  finishDesc,
-  distance,
-  bearing,
-  startCoords,
-  finishCoords,
-  tripType,
-  state,
+  plan: {
+    startDesc,
+    finishDesc,
+    distance,
+    bearing,
+    startLat,
+    startLon,
+    finishLat,
+    finishLon,
+    tripType,
+    state,
+    mapPreviewDark,
+    mapPreviewLight,
+  },
 }: RouteCardProps) => {
+  const { colorScheme } = useColorScheme();
+  const mapImgUrl = colorScheme === "dark" ? mapPreviewDark : mapPreviewLight;
+
   return (
     <ScreenCard
       top={
-        <GeoMapPlanView
-          start={startCoords}
-          finish={finishCoords}
-          bearing={bearing}
-          distance={distance}
-        />
+        mapImgUrl ? (
+          <Image
+            style={{ width: "100%", height: "100%" }}
+            source={mapImgUrl}
+            placeholder={{ blurhash }}
+            contentFit="cover"
+            transition={1000}
+          />
+        ) : (
+          <GeoMapPlanView
+            start={{ lat: startLat, lon: startLon }}
+            finish={
+              finishLat && finishLon ? { lat: finishLat, lon: finishLon } : null
+            }
+            bearing={bearing}
+            distance={distance}
+          />
+        )
       }
       middle={
         <>

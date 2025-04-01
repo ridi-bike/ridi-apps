@@ -2,9 +2,11 @@ import { Trophy } from "lucide-react-native";
 import { AnimatePresence, MotiView } from "moti";
 import { useMemo } from "react";
 import { View, Text } from "react-native";
+import { Image } from "expo-image";
 
 import { type Plan } from "~/lib/stores/plans-store";
 import { useStoreRoute } from "~/lib/stores/routes-store";
+import { useColorScheme } from "~/lib/useColorScheme";
 
 import { ErrorBox } from "./error";
 import { GeoMapRouteView } from "./geo-map/geo-map-route-view";
@@ -13,11 +15,18 @@ import { ScreenCard } from "./screen-card";
 
 type RouteCardProps = {
   plan: Plan;
-  routeId: string;
+  routeShort: Plan["routes"][number];
 };
+const blurhash =
+  "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
-export function RouteCard({ routeId, plan }: RouteCardProps) {
-  const { data: route, error, status, refetch } = useStoreRoute(routeId);
+export function RouteCard({ routeShort }: RouteCardProps) {
+  const {
+    data: route,
+    error,
+    status,
+    refetch,
+  } = useStoreRoute(routeShort.routeId);
 
   const breakdown = useMemo(() => {
     if (!route) {
@@ -30,17 +39,21 @@ export function RouteCard({ routeId, plan }: RouteCardProps) {
       });
   }, [route]);
 
+  const { colorScheme } = useColorScheme();
+  const mapImgUrl =
+    colorScheme === "dark"
+      ? routeShort.routeMapPreviewDark
+      : routeShort.routeMapPreviewLight;
+
   const routeOverview = useMemo(() => {
-    return route
+    return !mapImgUrl && route
       ? route.data.latLonArray
           .filter(
             (_c, i) => i % Math.ceil(route.data.latLonArray.length / 25) === 0,
           )
           .map((c) => ({ lat: c[0], lon: c[1] }))
       : null;
-  }, [route]);
-
-  console.log("88");
+  }, [mapImgUrl, route]);
 
   return (
     <ScreenCard
@@ -49,15 +62,27 @@ export function RouteCard({ routeId, plan }: RouteCardProps) {
           {!!error && status !== "pending" && (
             <ErrorBox key="error" error={error} retry={refetch} />
           )}
-          {!!routeOverview && (
-            <MotiView
-              key="map"
-              className="size-full"
-              from={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              <GeoMapRouteView route={routeOverview} interactive={false} />
-            </MotiView>
+          {mapImgUrl ? (
+            <Image
+              style={{ width: "100%", height: "100%" }}
+              source={mapImgUrl}
+              placeholder={{ blurhash }}
+              contentFit="cover"
+              transition={1000}
+            />
+          ) : (
+            <>
+              {!!routeOverview && (
+                <MotiView
+                  key="map"
+                  className="size-full"
+                  from={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  <GeoMapRouteView route={routeOverview} interactive={false} />
+                </MotiView>
+              )}
+            </>
           )}
         </AnimatePresence>
       }

@@ -14,26 +14,31 @@ procs:
     shell: "pnpm run tsc"
     cwd: "./apps/expo-app"
   queue-service:
-    shell: "node --import=tsx --watch-path=./src --env-file=.env.base src/index.ts | pino-pretty"
+    shell: "watchexec -r node --import=tsx --env-file=.env.base src/index.ts | pino-pretty"
     cwd: "./services/queue-service/"
+    stop: SIGTERM
   queue-service-tsc:
     shell: "pnpm run tsc --watch"
     cwd: "./services/queue-service/"
   router-service-latvia:
-    shell: "node --import=tsx --watch-path=./src --env-file=.env.latvia src/index.ts | pino-pretty"
+    shell: "watchexec -r node --import=tsx --watch-path=./src --env-file=.env.latvia src/index.ts | pino-pretty"
     cwd: "./services/router-service/"
+    stop: SIGTERM
   router-service-greece:
-    shell: "node --import=tsx --watch-path=./src --env-file=.env.greece src/index.ts | pino-pretty"
+    shell: "watchexec -r node --import=tsx --watch-path=./src --env-file=.env.greece src/index.ts | pino-pretty"
     cwd: "./services/router-service/"
+    stop: SIGTERM
   router-service-estonia:
-    shell: "node --import=tsx --watch-path=./src --env-file=.env.estonia src/index.ts | pino-pretty"
+    shell: "watchexec -r node --import=tsx --watch-path=./src --env-file=.env.estonia src/index.ts | pino-pretty"
     cwd: "./services/router-service/"
+    stop: SIGTERM
   router-service-tsc:
     shell: "pnpm run tsc --watch"
     cwd: "./services/router-service/"
   map-preview-service:
-    shell: "pnpm dev"
+    shell: "watchexec -r node --import=tsx --env-file=.env.base --env-file=.env ./src/server.ts --dev | pino-pretty "
     cwd: "./services/map-preview-service/"
+    stop: SIGTERM
   map-preview-service-tsc:
     shell: "pnpm run tsc --watch"
     cwd: "./services/map-preview-service/"

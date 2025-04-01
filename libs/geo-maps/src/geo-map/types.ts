@@ -1,4 +1,4 @@
-import type { MapRef } from "@vis.gl/react-maplibre";
+import { type MapRef } from "@vis.gl/react-maplibre";
 import { type PropsWithChildren } from "react";
 
 export type GeoMapPlanViewProps = {
@@ -7,13 +7,13 @@ export type GeoMapPlanViewProps = {
   bearing: number | null;
   distance: number;
   colorScheme: "light" | "dark";
-  mapRef: (map: MapRef) => void;
+  mapRef?: (map: MapRef) => void;
 };
 export type GeoMapRouteViewProps = {
   route: Coords[];
   interactive: boolean;
   colorScheme: "light" | "dark";
-  mapRef: (map: MapRef) => void;
+  mapRef?: (map: MapRef) => void;
 };
 
 export type Coords = {

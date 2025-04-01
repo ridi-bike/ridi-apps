@@ -12,9 +12,8 @@ import { type FeatureCollection } from "geojson";
 import maplibre from "maplibre-gl";
 import { useEffect, useMemo, useRef } from "react";
 
-import { type GeoMapRouteViewProps } from "./types";
-
 import { getMapStyle } from "./style";
+import { type GeoMapRouteViewProps } from "./types";
 import { combineBBox, updateBBox } from "./util";
 
 export function GeoMapRouteView({
@@ -82,7 +81,7 @@ export function GeoMapRouteView({
     <MapLibre
       ref={(map) => {
         mapRef.current = map;
-        if (map) {
+        if (map && mapRefExt) {
           mapRefExt(map);
         }
       }}

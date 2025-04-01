@@ -2,11 +2,6 @@ import { type PropsWithChildren } from "react";
 
 import { type Region } from "~/lib/regions";
 
-export type GeoMapRouteViewProps = {
-  className?: string;
-  route: Coords[];
-  interactive: boolean;
-};
 export type GeoMapCoordsSelectorProps = {
   isRoundTrip: boolean;
   start?: Coords | null;

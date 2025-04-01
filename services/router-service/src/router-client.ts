@@ -185,7 +185,7 @@ export class RouterClient {
       return {
         id: this.req.reqId,
         result: {
-          err: "Failed to parse JSON response",
+          error: { message: "Failed to parse JSON response" },
         },
       } as RidiRouterOutput;
     }
