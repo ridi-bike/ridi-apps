@@ -162,10 +162,10 @@ export function updateBBox(
 ): [number, number, number, number] {
   console.log(bbox);
   const updated = [
-    bbox[0] - Math.abs(bbox[2] - bbox[0]),
-    bbox[1] - Math.abs(bbox[3] - bbox[1]),
-    bbox[2] + Math.abs(bbox[2] - bbox[0]),
-    bbox[3] + Math.abs(bbox[3] - bbox[1]),
+    bbox[0] - Math.abs(bbox[2] - bbox[0]) / 2,
+    bbox[1] - Math.abs(bbox[3] - bbox[1]) / 2,
+    bbox[2] + Math.abs(bbox[2] - bbox[0]) / 2,
+    bbox[3] + Math.abs(bbox[3] - bbox[1]) / 2,
   ] as [number, number, number, number];
   console.log(updated);
   return updated;

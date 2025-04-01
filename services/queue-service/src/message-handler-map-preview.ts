@@ -31,6 +31,11 @@ export class MessageHandlerMapPreview {
     if (!routeRecord) {
       throw this.logger.error("Route record not found", { routeId });
     }
+
+    if (routeRecord.isDeleted) {
+      return;
+    }
+
     const response = await this.mapPreviewServiceClient.callMapPreviewService({
       type: "route",
       reqId: routeId,

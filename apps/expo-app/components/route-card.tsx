@@ -1,8 +1,8 @@
+import { Image } from "expo-image";
 import { Trophy } from "lucide-react-native";
 import { AnimatePresence, MotiView } from "moti";
 import { useMemo } from "react";
 import { View, Text } from "react-native";
-import { Image } from "expo-image";
 
 import { type Plan } from "~/lib/stores/plans-store";
 import { useStoreRoute } from "~/lib/stores/routes-store";

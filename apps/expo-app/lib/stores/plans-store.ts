@@ -4,7 +4,7 @@ import {
 } from "@ridi/api-contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo } from "react";
-import { debounce } from "throttle-debounce";
+import { throttle } from "throttle-debounce";
 import { generate } from "xksuid";
 
 import { apiClient } from "../api";
@@ -40,7 +40,7 @@ export function useStorePlans() {
         .then((r) => getSuccessResponseOrThrow(200, r).data),
   });
 
-  const refetchDebounced = useMemo(() => debounce(2000, refetch), [refetch]);
+  const refetchThrottled = useMemo(() => throttle(5000, refetch), [refetch]);
 
   const { mutate } = useMutation({
     mutationFn: (plan: Plan) =>
@@ -116,6 +116,8 @@ export function useStorePlans() {
         createdAt: new Date().toString(),
         ruleSetId: planNew.ruleSetId,
         state: "new",
+        mapPreviewDark: null,
+        mapPreviewLight: null,
         routes: [],
       };
       mutate(plan);
@@ -131,15 +133,27 @@ export function useStorePlans() {
         "postgres_changes",
         { event: "*", schema: "public", table: "plans" },
         (_payload) => {
-          refetchDebounced();
+          refetchThrottled();
+        },
+      )
+      .subscribe();
+
+    const routesSub = supabase
+      .channel(`plans_routes_${Math.random()}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "routes" },
+        (_payload) => {
+          refetchThrottled();
         },
       )
       .subscribe();
 
     return () => {
       plansSub.unsubscribe();
+      routesSub.unsubscribe();
     };
-  }, [refetchDebounced]);
+  }, [refetchThrottled]);
 
   return {
     data,
@@ -149,6 +163,6 @@ export function useStorePlans() {
     planAdd,
     planDelete: mutateDelete,
     planDeleteIsPending: isPending,
-    refetch: refetchDebounced,
+    refetch: refetchThrottled,
   };
 }

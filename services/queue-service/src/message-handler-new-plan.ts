@@ -40,6 +40,10 @@ export class MessageHandlerNewPlan {
       return;
     }
 
+    if (planRecord.isDeleted) {
+      return;
+    }
+
     if (planRecord.tripType === "round-trip") {
       if (
         Number(planRecord.bearing).toString() !== planRecord.bearing ||
