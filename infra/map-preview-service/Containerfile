@@ -3,8 +3,6 @@ FROM node:23-bookworm AS build
 WORKDIR /app
 
 ARG PORT
-ARG USER_ID=1000
-ARG GROUP_ID=1000
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV CHROME_BIN=/usr/bin/google-chrome
@@ -16,8 +14,7 @@ RUN apt-get update && apt-get install gnupg wget -y && \
   apt-get install google-chrome-stable -y --no-install-recommends && \
   rm -rf /var/lib/apt/lists/*
 
-RUN groupadd -g $GROUP_ID nodeuser && \
-    useradd -u $USER_ID -g nodeuser -s /bin/bash -m nodeuser
+RUN useradd -ms /bin/bash nodeuser
 
 RUN npm install -g pnpm
 
@@ -28,7 +25,7 @@ COPY ./pnpm-workspace.yaml ./pnpm-workspace.yaml
 
 RUN pnpm install
 
-RUN pnpm run --filter=@ridi/map-preview-service build
+# RUN pnpm run --filter=@ridi/map-preview-service build
 
 RUN chown -R nodeuser:nodeuser /app
 
@@ -36,4 +33,4 @@ USER nodeuser
 
 EXPOSE ${PORT}
 
-CMD ["node", "--import=tsx", "./services/map-preview-service/src/server.ts"]
+CMD ["node", "--import=tsx", "./services/map-preview-service/src/server.ts", "--dev"]

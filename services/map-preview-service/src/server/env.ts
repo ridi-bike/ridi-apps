@@ -5,7 +5,8 @@ const envSchema = z.object({
   CHROME_BIN: z.string(),
   PUPPETEER_WINDOWED: z
     .union([z.literal("true"), z.literal("false")])
-    .transform((v) => (v === "true" ? true : false)),
+    .transform((v) => (v === "true" ? true : false))
+    .optional(),
   R2_ENDPOINT: z.string(),
   R2_ACCESS_KEY: z.string(),
   R2_SECRET_ACCESS_KEY: z.string(),
