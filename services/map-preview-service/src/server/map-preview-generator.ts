@@ -17,10 +17,12 @@ export class MapPreviewGenerator {
   }
 
   public async init() {
+    this.state = "starting";
     this.browser = await puppeteer.launch({
       executablePath: env.CHROME_BIN,
       headless: !env.PUPPETEER_WINDOWED,
     });
+    this.state = "running";
   }
 
   public getState() {
