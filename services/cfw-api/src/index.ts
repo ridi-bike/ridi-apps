@@ -683,7 +683,10 @@ export default Sentry.withSentry(
             env.STRIPE_PRICE_ID_MONTLY,
             env.STRIPE_PRICE_ID_YEARLY,
           );
-          response = await stripeApi.processWebhook(request, ctx.waitUntil);
+          response = await stripeApi.processWebhook(
+            request,
+            ctx.waitUntil.bind(ctx),
+          );
           return;
         }
 
