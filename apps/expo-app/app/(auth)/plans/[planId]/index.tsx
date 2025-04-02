@@ -371,7 +371,7 @@ export default function PlanDetails() {
                               <Text className="text-sm font-bold text-[#FF5937]">
                                 {plan.tripType === "round-trip"
                                   ? "Target distance"
-                                  : "Straigt line distance"}
+                                  : "Straight line distance"}
                               </Text>
                               <Text className="text-base font-medium dark:text-gray-200">
                                 {metersToDisplay(plan.distance)}
