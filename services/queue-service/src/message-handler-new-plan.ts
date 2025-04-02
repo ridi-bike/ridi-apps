@@ -168,7 +168,10 @@ export class MessageHandlerNewPlan {
       });
     }
     const okRoutes = result.body.routes;
-    this.logger.info("Client finished", { planId, region: region.region });
+    this.logger.info("Router Client finished", {
+      planId,
+      region: region.region,
+    });
 
     const distanceModifier = planRecord.tripType === "round-trip" ? 1 : 2;
     const distance = Number(planRecord.distance);

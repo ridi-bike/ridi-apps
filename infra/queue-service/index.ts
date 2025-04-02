@@ -66,7 +66,7 @@ new k8s.apps.v1.Deployment(queueServiceName, {
     },
   },
   spec: {
-    replicas: 3,
+    replicas: 2,
     strategy: {
       type: "Recreate",
     },
