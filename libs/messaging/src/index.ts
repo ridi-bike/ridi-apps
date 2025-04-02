@@ -16,6 +16,28 @@ type Messages = {
   plan_new: { planId: string };
 };
 
+async function retryUntil(
+  work: () => Promise<unknown>,
+  errorOnRetryHandler: (err: unknown) => void,
+  errorOnFailHandler: (err: unknown) => Error,
+  maxFailureCount: number,
+) {
+  let failCount = 0;
+  while (true) {
+    try {
+      await work();
+      failCount = 0;
+    } catch (error) {
+      failCount++;
+      if (failCount >= maxFailureCount) {
+        throw errorOnFailHandler(error);
+      } else {
+        errorOnRetryHandler(error);
+      }
+    }
+  }
+}
+
 type MessageHandler<
   TName extends keyof Messages,
   TData extends Messages[TName],
@@ -51,11 +73,14 @@ export class Messaging {
     queueName: TName,
     messageHandler: MessageHandler<TName, Messages[TName]>,
   ) {
-    this.runListener(queueName, messageHandler).catch((error) => {
+    retryUntil(
+      () => this.runListener(queueName, messageHandler),
+      (error) =>
+        this.logger.warn("Retry from queue listener with error", { error }),
+      (error) => this.logger.error("Error from queue listener", { error }),
+      10,
+    ).catch(() => {
       this.stopped = true;
-      this.logger.error("Error in message listener", {
-        error,
-      });
     });
   }
   private async runListener<TName extends keyof Messages>(
