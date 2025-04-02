@@ -1,4 +1,5 @@
 import {
+  privateUserInsert,
   privateUsersGetRow,
   privateUsersGetRowByStripeCustomerId,
   privateUsersUpdateCompleted,
@@ -62,9 +63,15 @@ export class StripeApi {
     priceType: "montly" | "yearly",
   ) {
     this.logger.info("Creating Stripe checkout", { userId: user.id });
-    const privateUser = await privateUsersGetRow(this.dbClient, {
+    let privateUser = await privateUsersGetRow(this.dbClient, {
       userId: user.id,
     });
+
+    if (!privateUser) {
+      privateUser = await privateUserInsert(this.dbClient, {
+        userId: user.id,
+      });
+    }
 
     if (privateUser?.subType !== "none") {
       throw this.logger.error("Subscription already in place", { privateUser });

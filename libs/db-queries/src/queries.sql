@@ -64,6 +64,11 @@ set claimed_at = now(),
     claimed_by_user_id = $1
 where code = $2;
 
+-- name: PrivateUserInsert :one
+insert into private.users (user_id)
+values ($1)
+returning *;
+
 -- name: PrivateUsersUpdateWithSubscriptionCode :exec
 update private.users 
 set sub_type = $1
