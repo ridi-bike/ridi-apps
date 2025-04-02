@@ -18,8 +18,8 @@ type Messages = {
 
 async function retryUntil(
   work: () => Promise<unknown>,
-  errorOnRetryHandler: (err: unknown) => void,
-  errorOnFailHandler: (err: unknown) => Error,
+  errorOnRetryHandler: (err: unknown, failCount: number) => void,
+  errorOnFailHandler: (err: unknown, failCount: number) => Error,
   maxFailureCount: number,
 ) {
   let failCount = 0;
@@ -30,9 +30,9 @@ async function retryUntil(
     } catch (error) {
       failCount++;
       if (failCount >= maxFailureCount) {
-        throw errorOnFailHandler(error);
+        throw errorOnFailHandler(error, failCount);
       } else {
-        errorOnRetryHandler(error);
+        errorOnRetryHandler(error, failCount);
       }
     }
   }
@@ -75,9 +75,18 @@ export class Messaging {
   ) {
     retryUntil(
       () => this.runListener(queueName, messageHandler),
-      (error) =>
-        this.logger.warn("Retry from queue listener with error", { error }),
-      (error) => this.logger.error("Error from queue listener", { error }),
+      (error, failCount) =>
+        this.logger.warn("Retry from queue listener with error", {
+          error,
+          queueName,
+          failCount,
+        }),
+      (error, failCount) =>
+        this.logger.error("Error from queue listener", {
+          error,
+          queueName,
+          failCount,
+        }),
       10,
     ).catch(() => {
       this.stopped = true;
