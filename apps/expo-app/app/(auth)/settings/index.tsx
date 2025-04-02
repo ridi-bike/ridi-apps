@@ -34,14 +34,16 @@ export default function UserSettings() {
       }
       title="Settings"
     >
-      <AnimatePresence>
+      <AnimatePresence exitBeforeEnter>
         {!user && (
-          <View
+          <MotiView
+            from={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             key="loading"
             className="flex w-full flex-row items-center justify-center"
           >
             <Loading className="size-12 text-[#ff4a25]" />
-          </View>
+          </MotiView>
         )}
         {!!user?.error && (
           <View key="error" className="mx-2 max-w-5xl flex-1">
@@ -50,6 +52,8 @@ export default function UserSettings() {
         )}
         {user && user.data && user.data.user && (
           <MotiView
+            from={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             key="main"
             role="main"
             className="relative flex min-h-screen w-full flex-col"
@@ -76,7 +80,7 @@ export default function UserSettings() {
               </View>
             </View>
 
-            {userWithSub && !userWithSub.isAnonymous && (
+            {!user.data.user.is_anonymous && (
               <View className="border-b-2 border-black p-4 dark:border-gray-700">
                 <Text
                   role="heading"
@@ -85,26 +89,45 @@ export default function UserSettings() {
                 >
                   Billing
                 </Text>
-                <Link
-                  href="/settings/billing"
-                  role="button"
-                  className="flex w-full flex-row items-center justify-between rounded-xl border-2 border-black p-3 dark:border-gray-700"
-                >
-                  <View className="flex flex-row items-center gap-3">
-                    <View className="flex size-8 flex-row items-center justify-center rounded-lg bg-[#FF5937]/10">
-                      <CreditCard className="size-4 text-[#FF5937]" />
-                    </View>
-                    <View className="text-left">
-                      <Text className="text-sm font-medium dark:text-gray-100">
-                        {userWithSub.subType === "stripe" &&
-                          "Stripe Subscription"}
-                        {userWithSub.subType === "none" && "Free"}
-                        {userWithSub.subType === "code" && "Code"}
-                      </Text>
-                    </View>
-                  </View>
-                  <ChevronRight className="size-5 text-gray-400" />
-                </Link>
+                <AnimatePresence exitBeforeEnter>
+                  {userWithSub && (
+                    <MotiView
+                      from={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="w-full"
+                    >
+                      <Link
+                        href="/settings/billing"
+                        role="button"
+                        className="flex w-full flex-row items-center justify-between rounded-xl border-2 border-black p-3 dark:border-gray-700"
+                      >
+                        <View className="flex flex-row items-center gap-3">
+                          <View className="flex size-8 flex-row items-center justify-center rounded-lg bg-[#FF5937]/10">
+                            <CreditCard className="size-4 text-[#FF5937]" />
+                          </View>
+                          <View className="text-left">
+                            <Text className="text-sm font-medium dark:text-gray-100">
+                              {userWithSub.subType === "stripe" &&
+                                "Stripe Subscription"}
+                              {userWithSub.subType === "none" && "Free"}
+                              {userWithSub.subType === "code" && "Code"}
+                            </Text>
+                          </View>
+                        </View>
+                        <ChevronRight className="size-5 text-gray-400" />
+                      </Link>
+                    </MotiView>
+                  )}
+                  {!userWithSub && (
+                    <MotiView
+                      from={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="flex h-14 w-full flex-row items-center justify-center"
+                    >
+                      <Loading className="size-12 text-[#ff4a25]" />
+                    </MotiView>
+                  )}
+                </AnimatePresence>
               </View>
             )}
 
