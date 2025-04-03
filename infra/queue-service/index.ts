@@ -105,21 +105,19 @@ new k8s.apps.v1.Deployment(queueServiceName, {
               },
             ],
             startupProbe: {
-              httpGet: {
-                path: "/",
-                port: 3000,
+              exec: {
+                command: ["sh", "-c", "curl --fail localhost:3000"],
               },
-              failureThreshold: 10,
-              initialDelaySeconds: 15,
+              failureThreshold: 2,
+              initialDelaySeconds: 5,
               successThreshold: 1,
               timeoutSeconds: 10,
             },
             livenessProbe: {
-              httpGet: {
-                path: "/",
-                port: 3000,
+              exec: {
+                command: ["sh", "-c", "curl --fail localhost:3000"],
               },
-              failureThreshold: 10,
+              failureThreshold: 2,
               initialDelaySeconds: 15,
               successThreshold: 1,
               timeoutSeconds: 10,

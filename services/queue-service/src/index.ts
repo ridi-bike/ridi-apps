@@ -95,22 +95,12 @@ messaging.listen(
         err,
       });
       await setVisibilityTimeout(retryInSecs);
-      messageHandlerNewPlan.onNewPlanError(data.planId);
+      await messageHandlerNewPlan.onNewPlanError(data.planId);
     }
     clearInterval(beat);
   },
 );
 
-const handleExit = () => {
-  messaging.stop();
-};
-// do something when app is closing
-process.on("exit", handleExit);
-// catches ctrl+c event
-process.on("SIGINT", handleExit);
-// catches "kill pid" (for example: nodemon restart)
-process.on("SIGUSR1", handleExit);
-process.on("SIGUSR2", handleExit);
 // catches uncaught exceptions
 process.on("uncaughtException", (error, origin) => {
   logger.error("uncaughtException", { error, origin });

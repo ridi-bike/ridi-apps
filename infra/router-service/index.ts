@@ -149,28 +149,24 @@ for (const region of regions) {
                 ],
                 volumeMounts: [ridiDataVolumeSetup.volumeMount],
                 startupProbe: {
-                  httpGet: {
-                    path: "/",
-                    port: "api",
-                    scheme: "HTTP",
+                  exec: {
+                    command: ["sh", "-c", `curl --fail localhost:${port}`],
                   },
                   initialDelaySeconds: 15,
                   periodSeconds: 30,
-                  timeoutSeconds: 1,
+                  timeoutSeconds: 10,
                   successThreshold: 1,
                   failureThreshold: 50,
                 },
                 livenessProbe: {
-                  httpGet: {
-                    path: "/",
-                    port: "api",
-                    scheme: "HTTP",
+                  exec: {
+                    command: ["sh", "-c", `curl --fail localhost:${port}`],
                   },
                   initialDelaySeconds: 15,
                   periodSeconds: 30,
-                  timeoutSeconds: 1,
+                  timeoutSeconds: 10,
                   successThreshold: 1,
-                  failureThreshold: 10,
+                  failureThreshold: 2,
                 },
               },
             ],

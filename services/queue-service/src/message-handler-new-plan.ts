@@ -196,7 +196,10 @@ export class MessageHandlerNewPlan {
       bestRoutes.push(...okRoutes);
     } else {
       let step = 0;
-      while (bestRoutes.length < num_of_best_routes) {
+      while (
+        bestRoutes.length < num_of_best_routes &&
+        step <= filterBuckes.length * num_of_best_routes
+      ) {
         const bucket = step % filterBuckes.length;
         const iter = Math.floor(step / filterBuckes.length);
         const route = okRoutes.filter(filterBuckes[bucket]!).sort(sort)[iter];

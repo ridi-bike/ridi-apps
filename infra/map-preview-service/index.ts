@@ -126,16 +126,30 @@ const mapPreviewServiceDeployment = new k8s.apps.v1.Deployment(
                 },
               ],
               startupProbe: {
-                httpGet: {
-                  path: "/api/health",
-                  port: 3000,
+                exec: {
+                  command: [
+                    "sh",
+                    "-c",
+                    "curl --fail localhost:3000/api/health",
+                  ],
                 },
+                failureThreshold: 2,
+                initialDelaySeconds: 15,
+                successThreshold: 1,
+                timeoutSeconds: 10,
               },
               livenessProbe: {
-                httpGet: {
-                  path: "/api/health",
-                  port: 3000,
+                exec: {
+                  command: [
+                    "sh",
+                    "-c",
+                    "curl --fail localhost:3000/api/health",
+                  ],
                 },
+                failureThreshold: 2,
+                initialDelaySeconds: 15,
+                successThreshold: 1,
+                timeoutSeconds: 10,
               },
               ports: [
                 {
