@@ -4,11 +4,6 @@ SELECT * from pgmq.send(
   msg        => sqlc.arg(message)::jsonb
 );
 
-SELECT * from pgmq.send(
-  queue_name => 'route_map_gen',
-  msg        => '{"routeId":"2v7dL7siziErqL2y0Fz9ABuzkTQ"}'
-);
-
 -- name: ReadMessages :many
 SELECT
     msg_id::bigint,

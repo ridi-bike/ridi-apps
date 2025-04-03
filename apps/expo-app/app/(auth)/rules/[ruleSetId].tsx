@@ -119,6 +119,9 @@ export default function RulePackDetails() {
 
   const toggleGroup = useCallback(
     (group: (typeof ruleGroups)[number]) => {
+      if (ruleSet?.isSystem) {
+        return;
+      }
       const souldDisable = isGroupEnabled(group);
       if (souldDisable) {
         setRoadTags((rt) => ({
@@ -138,11 +141,14 @@ export default function RulePackDetails() {
         }));
       }
     },
-    [getGroupTags, isGroupEnabled],
+    [getGroupTags, isGroupEnabled, ruleSet?.isSystem],
   );
 
   const setGroupValue = useCallback(
     (group: (typeof ruleGroups)[number], value: number) => {
+      if (ruleSet?.isSystem) {
+        return;
+      }
       setRoadTags((rt) => ({
         ...rt!,
         ...getGroupTags(group).reduce(
@@ -151,7 +157,7 @@ export default function RulePackDetails() {
         ),
       }));
     },
-    [getGroupTags],
+    [getGroupTags, ruleSet?.isSystem],
   );
 
   const setTagValue = useCallback(
@@ -159,22 +165,28 @@ export default function RulePackDetails() {
       tag: [keyof NonNullable<typeof roadTags>, number | null],
       value: number,
     ) => {
+      if (ruleSet?.isSystem) {
+        return;
+      }
       setRoadTags((rt) => ({
         ...rt!,
         [tag[0]]: value,
       }));
     },
-    [],
+    [ruleSet?.isSystem],
   );
 
   const toggleTag = useCallback(
     (tag: [keyof NonNullable<typeof roadTags>, number | null]) => {
+      if (ruleSet?.isSystem) {
+        return;
+      }
       setRoadTags((rt) => ({
         ...rt!,
         [tag[0]]: rt![tag[0]] === null ? 0 : null,
       }));
     },
-    [],
+    [ruleSet?.isSystem],
   );
 
   const unsavedChangesExist = useMemo(() => {
@@ -271,7 +283,7 @@ export default function RulePackDetails() {
               )}
             </View>
             <ScrollView className="h-[calc(100vh-130px)]">
-              <View className="mr-2 flex flex-col gap-6 pb-12">
+              <View className="mr-2 flex flex-col gap-6 pb-24">
                 {ruleGroups.map((group, groupIdx) => (
                   <View
                     key={groupIdx}

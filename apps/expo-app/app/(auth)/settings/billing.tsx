@@ -132,7 +132,7 @@ export default function BillingPage() {
               )}
               {!loading && !isLoading && !isLoadingUser && !isPending && (
                 <ScrollView className="h-[calc(100vh-130px)] w-full">
-                  <MotiView className="flex min-h-screen w-full flex-col items-center justify-start bg-white px-6 pb-12 md:px-8 dark:bg-gray-900">
+                  <MotiView className="flex min-h-screen w-full flex-col items-center justify-start bg-white px-6 pb-24 md:px-8 dark:bg-gray-900">
                     {data?.subscription?.price && (
                       <View className="mb-8 w-full md:max-w-2xl">
                         <Text
