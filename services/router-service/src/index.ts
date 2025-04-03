@@ -49,7 +49,25 @@ const router = s.router(ridiRouterContract, {
         },
       };
     }
-    const okResult = result.result as RidiRouterOk;
+    let okResult = result.result as RidiRouterOk;
+
+    let retryAttempt = 0;
+    while (!okResult.ok.routes.length) {
+      retryAttempt++;
+
+      const client = new RouterClient(logger, body);
+      if (!client.adjustReq(retryAttempt)) {
+        break;
+      }
+
+      const result = await client.execReq();
+
+      // we will ignore error on retries as we are making up rules
+      if ((result.result as RidiRouterErr).error) {
+        continue;
+      }
+      okResult = result.result as RidiRouterOk;
+    }
 
     const respBody: z.infer<typeof respSchema> = {
       reqId: body.reqId,

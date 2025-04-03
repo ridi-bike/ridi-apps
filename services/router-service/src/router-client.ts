@@ -46,9 +46,78 @@ type RidiRouterOutput = {
   id: string;
   result: RidiRouterErr | RidiRouterOk;
 };
+
+const inputRulesWithBasicDefaults = {
+  basic: {
+    step_limit: 30000,
+    prefer_same_road: {
+      enabled: true,
+      priority: 30,
+    },
+    progression_direction: {
+      enabled: true,
+      check_junctions_back: 50,
+    },
+    progression_speed: {
+      enabled: false,
+      check_steps_back: 1000,
+      last_step_distance_below_avg_with_ratio: 1.3,
+    },
+    no_short_detours: {
+      enabled: true,
+      min_detour_len_m: 5000.0,
+    },
+    no_sharp_turns: {
+      enabled: true,
+      under_deg: 150.0,
+      priority: 60,
+    },
+  },
+} as const;
+
+type InputRules = {
+  basic?: {
+    step_limit?: number;
+    prefer_same_road?: {
+      enabled: boolean;
+      priority: number;
+    };
+    progression_direction?: {
+      enabled: boolean;
+      check_junctions_back: number;
+    };
+    progression_speed?: {
+      enabled: boolean;
+      check_steps_back: number;
+      last_step_distance_below_avg_with_ratio: number;
+    };
+    no_short_detours?: {
+      enabled: boolean;
+      min_detour_len_m: boolean;
+    };
+    no_sharp_turns?: {
+      enabled: boolean;
+      under_deg: number;
+      priority: number;
+    };
+  };
+  highway: Record<
+    string,
+    { action: "avoid" } | { action: "priority"; value: number }
+  >;
+  surface: Record<
+    string,
+    { action: "avoid" } | { action: "priority"; value: number }
+  >;
+  smoothness: Record<
+    string,
+    { action: "avoid" } | { action: "priority"; value: number }
+  >;
+};
 export class RouterClient {
   private logger: RidiLogger;
   private req: RouteReq;
+  private ruleInput: InputRules;
 
   constructor(logger: RidiLogger, req: RouteReq) {
     this.logger = logger.withContext({
@@ -56,12 +125,8 @@ export class RouterClient {
       reqId: req.reqId,
     });
     this.req = req;
-  }
 
-  async execReq() {
-    this.logger.info("Router client starting");
-
-    const ruleInput = Object.entries(this.req.rules).reduce(
+    this.ruleInput = Object.entries(this.req.rules).reduce(
       (rules, [key, value]) => {
         const group = getTagSection(key);
         if (!rules[group]) {
@@ -78,14 +143,60 @@ export class RouterClient {
               };
         return rules;
       },
-      {} as Record<
-        string,
-        Record<
-          string,
-          { action: "avoid" } | { action: "priority"; value: number }
-        >
-      >,
+      {} as InputRules,
     );
+  }
+  adjustReq(retryAttempt: number): boolean {
+    const roundTripBearingStep = 10;
+    const maxRetriesRoundTrip = 6;
+    const macRetriesStartFinish = 3;
+    if (this.req.req.tripType === "round-trip") {
+      if (retryAttempt > maxRetriesRoundTrip) {
+        return false;
+      }
+
+      const bearingAdjustment =
+        retryAttempt < maxRetriesRoundTrip / 2
+          ? retryAttempt
+          : (maxRetriesRoundTrip / 2 - retryAttempt) * roundTripBearingStep;
+
+      this.req = {
+        ...this.req,
+        req: {
+          ...this.req.req,
+          brearing: this.req.req.brearing + bearingAdjustment,
+        },
+      };
+      return true;
+    }
+
+    if (retryAttempt > macRetriesStartFinish) {
+      return false;
+    }
+
+    this.ruleInput = {
+      ...this.ruleInput,
+      basic: {
+        step_limit:
+          inputRulesWithBasicDefaults.basic.step_limit +
+          inputRulesWithBasicDefaults.basic.step_limit * 0.25 * retryAttempt,
+        progression_direction: {
+          enabled: true,
+          check_junctions_back:
+            inputRulesWithBasicDefaults.basic.progression_direction
+              .check_junctions_back +
+            inputRulesWithBasicDefaults.basic.progression_direction
+              .check_junctions_back *
+              0.5 *
+              retryAttempt,
+        },
+      },
+    };
+    return true;
+  }
+
+  async execReq() {
+    this.logger.info("Router client starting");
 
     const process = spawn(
       env.ROUTER_BIN,
@@ -97,10 +208,8 @@ export class RouterClient {
             "--route-req-id",
             `${this.req.reqId}`,
             "start-finish",
-            "--start",
-            `${this.req.req.start.lat},${this.req.req.start.lon}`,
-            "--finish",
-            `${this.req.req.finish.lat},${this.req.req.finish.lon}`,
+            `--start=${this.req.req.start.lat},${this.req.req.start.lon}`,
+            `--finish=${this.req.req.finish.lat},${this.req.req.finish.lon}`,
           ]
         : [
             "start-client",
@@ -109,15 +218,14 @@ export class RouterClient {
             "--route-req-id",
             `${this.req.reqId}`,
             "round-trip",
-            "--start-finish",
-            `${this.req.req.startFinish.lat},${this.req.req.startFinish.lon}`,
+            `--start-finish=${this.req.req.startFinish.lat},${this.req.req.startFinish.lon}`,
             "--bearing",
             this.req.req.brearing.toString(),
             "--distance",
             this.req.req.distance.toString(),
           ],
     );
-    process.stdin.write(JSON.stringify(ruleInput));
+    process.stdin.write(JSON.stringify(this.ruleInput));
     process.stdin.end();
 
     const response = await new Promise<string>((resolve, reject) => {

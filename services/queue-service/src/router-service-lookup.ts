@@ -28,7 +28,7 @@ export class RouterServiceLookup {
     });
 
     const maxRetries = 5;
-    const waitTimeMs = 3000;
+    const waitTimeMs = 5000;
     let lastError: unknown;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -48,7 +48,7 @@ export class RouterServiceLookup {
         });
 
         if (attempt < maxRetries) {
-          await setTimeout(waitTimeMs);
+          await setTimeout(waitTimeMs * attempt);
         }
       }
     }
