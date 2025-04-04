@@ -152,18 +152,16 @@ for (const region of regions) {
                   exec: {
                     command: ["sh", "-c", `curl --fail localhost:${port}`],
                   },
-                  initialDelaySeconds: 15,
-                  periodSeconds: 30,
+                  periodSeconds: 5,
                   timeoutSeconds: 10,
                   successThreshold: 1,
-                  failureThreshold: 50,
+                  failureThreshold: 300,
                 },
                 livenessProbe: {
                   exec: {
                     command: ["sh", "-c", `curl --fail localhost:${port}`],
                   },
-                  initialDelaySeconds: 15,
-                  periodSeconds: 30,
+                  periodSeconds: 5,
                   timeoutSeconds: 10,
                   successThreshold: 1,
                   failureThreshold: 2,
