@@ -124,7 +124,7 @@ export class MessageHandlerNewPlan {
       {} as RouteReq["rules"],
     );
 
-    this.logger.info("Starting router service req plan", {
+    this.logger.info("Starting router service request ", {
       planId,
       region: region.region,
       ruleInput,
@@ -161,6 +161,16 @@ export class MessageHandlerNewPlan {
     );
 
     if (result.status !== 200) {
+      if (
+        result.status === 500 &&
+        result.body.message.includes("PointNotFound")
+      ) {
+        await pgQueries.planSetState(this.pgClient, {
+          id: planId,
+          state: "done",
+        });
+        return null;
+      }
       throw this.logger.error("Router service response error", {
         result,
         planId,

@@ -91,37 +91,13 @@ function DeleteConfirmDialog({
 const loadingMessages = [
   "Teaching squirrels to navigate traffic...",
   "Consulting local pigeons for shortcuts...",
-  "Calculating optimal coffee shop stops...",
-  "Measuring sidewalk cracks for smoothness...",
   "Bribing traffic lights to stay green...",
   "Interviewing street signs for directions...",
-  "Counting passing clouds for weather data...",
   "Teaching GPS to speak dolphin...",
-  "Negotiating with potholes...",
-  "Measuring distance in bananas...",
-  "Recruiting snails as pace cars...",
-  "Polling local cats about sunbathing spots...",
-  "Converting distance to pizza slices...",
-  "Teaching raccoons proper crosswalk usage...",
-  "Synchronizing watches with subway rats...",
-  "Calculating detours based on ice cream trucks...",
-  "Mapping scenic routes for sleepwalkers...",
-  "Consulting wise old park benches...",
-  "Training pigeons in traffic control...",
-  "Measuring road width in rubber ducks...",
-  "Organizing flash mobs for street crossings...",
-  "Teaching trees to give better directions...",
-  "Calibrating route based on squirrel migrations...",
-  "Interviewing fire hydrants about foot traffic...",
-  "Negotiating right of way with bike messengers...",
-  "Converting travel time to coffee cups...",
-  "Analyzing sidewalk chalk art for secret paths...",
-  "Teaching parking meters to moonwalk...",
-  "Calculating shortcuts through parallel universes...",
   "Recruiting local dogs as pace setters...",
 ];
 
-function NoRoutes() {
+function NoRoutes({ tripType }: { tripType: "start-finish" | "round-trip" }) {
   return (
     <MotiView
       from={{ opacity: 0 }}
@@ -140,38 +116,38 @@ function NoRoutes() {
             aria-level={2}
             className="mb-3 text-xl font-bold dark:text-gray-100"
           >
-            Our Squirrels Could Not Find a Route
+            Could Not Find a Route
           </Text>
-
           <Text className="mb-3 text-lg leading-6 dark:text-gray-200">
-            Our highly trained squirrels searched every tree, alley, and
-            shortcut, but couldn&apos;t find a path that matches your
-            requirements. This usually happens when some route rules are playing
-            too hard to get!
+            Try changing:
           </Text>
 
-          <Text className="mb-3 text-lg leading-6 dark:text-gray-200">
-            Try relaxing some of your preferences - for example, if you&apos;re
-            avoiding paved roads while also steering clear of unpaved ones, even
-            our most acrobatic squirrels can&apos;t help. Consider:
-          </Text>
-
-          <View className="mb-3 ml-2">
-            <Text className="mb-2 text-lg leading-6 dark:text-gray-200">
-              • Allowing some road types you previously excluded
-            </Text>
-            <Text className="mb-2 text-lg leading-6 dark:text-gray-200">
-              • Expanding your permitted surface types
-            </Text>
-            <Text className="mb-2 text-lg leading-6 dark:text-gray-200">
-              • Adjusting your start and finish points
-            </Text>
-          </View>
-
-          <Text className="text-lg leading-6 dark:text-gray-200">
-            Remember: Our squirrels are talented, but they can&apos;t defy
-            geography... yet.
-          </Text>
+          {tripType === "start-finish" && (
+            <View className="mb-3 ml-2">
+              <Text className="mb-2 text-lg leading-6 dark:text-gray-200">
+                • Start or finish coordinates
+              </Text>
+              <Text className="mb-2 text-lg leading-6 dark:text-gray-200">
+                • Selected rules
+              </Text>
+            </View>
+          )}
+          {tripType === "round-trip" && (
+            <View className="mb-3 ml-2">
+              <Text className="mb-2 text-lg leading-6 dark:text-gray-200">
+                • Start coordinates
+              </Text>
+              <Text className="mb-2 text-lg leading-6 dark:text-gray-200">
+                • Travel direction
+              </Text>
+              <Text className="mb-2 text-lg leading-6 dark:text-gray-200">
+                • Travel distance
+              </Text>
+              <Text className="mb-2 text-lg leading-6 dark:text-gray-200">
+                • Selected rules
+              </Text>
+            </View>
+          )}
         </View>
       </View>
     </MotiView>
@@ -194,12 +170,14 @@ function RouteGenError({ planId }: { planId: string }) {
           aria-level={2}
           className="mb-4 text-2xl font-bold dark:text-gray-100"
         >
-          Our Squirrels Took a Wrong Turn
+          An error occured
         </Text>
         <Text className="animate-pulse text-lg text-gray-600 dark:text-gray-200">
-          Looks like our navigation squirrels got distracted by some
-          particularly shiny acorns. Don&apos;t worry - we&apos;ve already sent
-          our most experienced squirrel squad to investigate!
+          There has been an error in the route generation. An error repor thas
+          been sent and is being looked at!
+        </Text>
+        <Text className="animate-pulse text-lg text-gray-600 dark:text-gray-200">
+          In the mean time please try a different plan
         </Text>
       </View>
 
@@ -423,7 +401,7 @@ export default function PlanDetails() {
                   )}
                   {plan.state === "error" && <RouteGenError planId={plan.id} />}
                   {plan.state === "done" && plan.routes.length === 0 && (
-                    <NoRoutes />
+                    <NoRoutes tripType={plan.tripType} />
                   )}
                   {plan.state === "done" && plan.routes.length > 0 && (
                     <>
