@@ -20,54 +20,47 @@ const localPathStorageClass = new k8s.storage.v1.StorageClass(
   },
 );
 
-const ridiDataPVName = "ridi-data-pv";
+const ridiDataPVName = "ridi-data-pv-4nodes";
 const ridiDataStorageSize = "450Gi";
-const ridiDataPV = new k8s.core.v1.PersistentVolume(
-  ridiDataPVName,
-  {
-    metadata: {
-      name: ridiDataPVName,
-      namespace: ridiNamespace.metadata.name,
+const ridiDataPV = new k8s.core.v1.PersistentVolume(ridiDataPVName, {
+  metadata: {
+    name: ridiDataPVName,
+    namespace: ridiNamespace.metadata.name,
+  },
+  spec: {
+    capacity: {
+      storage: ridiDataStorageSize,
     },
-    spec: {
-      capacity: {
-        storage: ridiDataStorageSize,
-      },
-      volumeMode: "Filesystem",
-      accessModes: ["ReadWriteOnce"],
-      persistentVolumeReclaimPolicy: "Retain",
-      storageClassName: localPathStorageClass.metadata.name,
-      local: {
-        path: "/ridi-data",
-      },
-      nodeAffinity: {
-        required: {
-          nodeSelectorTerms: [
-            {
-              matchExpressions: [
-                {
-                  key: "kubernetes.io/hostname",
-                  operator: "In",
-                  values: [
-                    ...Object.entries(nodes)
-                      .filter(([_host, node]) => node.storageNode)
-                      .map(([host, _node]) => host),
-                  ],
-                },
-              ],
-            },
-          ],
-        },
+    volumeMode: "Filesystem",
+    accessModes: ["ReadWriteOnce"],
+    persistentVolumeReclaimPolicy: "Retain",
+    storageClassName: localPathStorageClass.metadata.name,
+    local: {
+      path: "/ridi-data",
+    },
+    nodeAffinity: {
+      required: {
+        nodeSelectorTerms: [
+          {
+            matchExpressions: [
+              {
+                key: "kubernetes.io/hostname",
+                operator: "In",
+                values: [
+                  ...Object.entries(nodes)
+                    .filter(([_host, node]) => node.storageNode)
+                    .map(([host, _node]) => host),
+                ],
+              },
+            ],
+          },
+        ],
       },
     },
   },
-  {
-    deleteBeforeReplace: true,
-    replaceOnChanges: ["*"],
-  },
-);
+});
 
-const rididDataPVCName = "ridi-data-pvc";
+const rididDataPVCName = "ridi-data-pvc-4nodes";
 const ridiDataPVC = new k8s.core.v1.PersistentVolumeClaim(rididDataPVCName, {
   metadata: {
     name: rididDataPVCName,

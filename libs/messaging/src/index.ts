@@ -102,47 +102,49 @@ export class Messaging {
       const messages = await readMessages(this.db, {
         queueName,
         visibilityTimeoutSeconds: 5,
-        qty: 10,
+        qty: 1,
       });
 
-      messages.forEach((message) =>
-        messageHandler({
-          message,
-          data: message.message,
-          actions: {
-            deleteMessage: async () => {
-              this.logger.info("Message delete called", { message });
-              await deleteMessage(this.db, {
-                queueName,
-                messageId: message.msgId,
-              });
+      await Promise.all(
+        messages.map((message) =>
+          messageHandler({
+            message,
+            data: message.message,
+            actions: {
+              deleteMessage: async () => {
+                this.logger.info("Message delete called", { message });
+                await deleteMessage(this.db, {
+                  queueName,
+                  messageId: message.msgId,
+                });
+              },
+              archiveMessage: async () => {
+                this.logger.info("Message archive called", { message });
+                await archiveMessage(this.db, {
+                  queueName,
+                  messageId: message.msgId,
+                });
+              },
+              setVisibilityTimeout: async (vt) => {
+                this.logger.info("Message visisvility timeout update called", {
+                  message,
+                });
+                await updateVisibilityTimeout(this.db, {
+                  queueName,
+                  messageId: message.msgId,
+                  visibilityTimeoutSeconds: vt,
+                });
+              },
             },
-            archiveMessage: async () => {
-              this.logger.info("Message archive called", { message });
-              await archiveMessage(this.db, {
-                queueName,
-                messageId: message.msgId,
-              });
-            },
-            setVisibilityTimeout: async (vt) => {
-              this.logger.info("Message visisvility timeout update called", {
+          })
+            .then(() => this.logger.info("Message processed", { message }))
+            .catch((error) =>
+              this.logger.error("Failed to process message unexpectedly", {
                 message,
-              });
-              await updateVisibilityTimeout(this.db, {
-                queueName,
-                messageId: message.msgId,
-                visibilityTimeoutSeconds: vt,
-              });
-            },
-          },
-        })
-          .then(() => this.logger.info("Message processed", { message }))
-          .catch((error) =>
-            this.logger.error("Failed to process message unexpectedly", {
-              message,
-              error,
-            }),
-          ),
+                error,
+              }),
+            ),
+        ),
       );
     }
   }

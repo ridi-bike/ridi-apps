@@ -102,6 +102,9 @@ for (const region of regions) {
             },
           },
           spec: {
+            nodeSelector: {
+              "node.ridi.bike/map-data": "ready",
+            },
             containers: [
               {
                 name: regionServiceName,
