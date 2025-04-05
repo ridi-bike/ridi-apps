@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import { View } from "react-native";
+import { View, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ScreenHeader } from "~/components/screen-header";
@@ -40,6 +40,20 @@ export function ScreenFrame({
           }}
         />
         <View role="main" className="flex flex-col px-2 pb-24 pt-8 md:px-8">
+          <View className="mb-2 mr-8 flex w-full flex-col rounded-xl border border-red-400 p-2">
+            <Text className="text-lg text-red-400">
+              The volume of routing requests is unexpectedly high.
+            </Text>
+            <Text className="text-lg text-red-400">
+              I am currently working on adding server capacity.
+            </Text>
+            <Text className="text-lg text-red-400">
+              Please check back after a day, your routes should be ready.
+            </Text>
+            <Text className="text-lg text-red-400">
+              Apologies for the slowness.
+            </Text>
+          </View>
           {children}
         </View>
       </View>
