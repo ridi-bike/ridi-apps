@@ -4,6 +4,7 @@ import * as pulumi from "@pulumi/pulumi";
 
 import {
   getCacheLocation,
+  getRouterActivityLevel,
   getPbfLocation,
   mapDataVersionDate,
   regions,
@@ -76,6 +77,9 @@ for (const region of regions) {
         name: regionServiceName,
         labels: {
           name: regionServiceName,
+          "region.ridi.bike/activity-level": getRouterActivityLevel(
+            region.region,
+          ),
         },
         namespace: ridiNamespace.metadata.name,
         annotations: {
@@ -102,6 +106,44 @@ for (const region of regions) {
             },
           },
           spec: {
+            affinity: {
+              nodeAffinity: {
+                requiredDuringSchedulingIgnoredDuringExecution: {
+                  nodeSelectorTerms: [
+                    {
+                      matchExpressions:
+                        getRouterActivityLevel(region.region) !== "xs"
+                          ? [
+                              {
+                                key: "node.ridi.bike/power-level",
+                                operator: "NotIn",
+                                values: ["xs"],
+                              },
+                            ]
+                          : [],
+                    },
+                  ],
+                },
+              },
+              podAntiAffinity: {
+                preferredDuringSchedulingIgnoredDuringExecution:
+                  getRouterActivityLevel(region.region) === "l"
+                    ? [
+                        {
+                          weight: 1,
+                          podAffinityTerm: {
+                            topologyKey: "node.ridi.bike/power-level",
+                            labelSelector: {
+                              matchLabels: {
+                                "region.ridi.bike/activity-level": "l",
+                              },
+                            },
+                          },
+                        },
+                      ]
+                    : [],
+              },
+            },
             nodeSelector: {
               "node.ridi.bike/map-data": "ready",
             },
