@@ -19,6 +19,11 @@ export class RouterServiceLookup {
   async callRouterService(region: string, req: RouteReq) {
     const routerServiceUrl = env.ROUTER_SERVICE_LIST[region];
 
+    this.logger.info("Router service call", {
+      routerServiceUrl,
+      req,
+    });
+
     if (!routerServiceUrl) {
       throw this.logger.error("Router service url not found", { region });
     }

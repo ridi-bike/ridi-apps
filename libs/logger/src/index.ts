@@ -41,19 +41,19 @@ export class RidiLogger {
   }
 
   public debug(message: string, properties?: Record<string, unknown>) {
-    this.logger.debug({ payload: properties }, message);
+    this.logger.debug(properties, message);
   }
 
   public info(message: string, properties?: Record<string, unknown>) {
-    this.logger.info({ payload: properties }, message);
+    this.logger.info(properties, message);
   }
 
   public warn(message: string, properties?: Record<string, unknown>) {
-    this.logger.warn({ payload: properties }, message);
+    this.logger.warn(properties, message);
   }
 
   public error(message: string, properties?: Record<string, unknown>) {
-    this.logger.error({ payload: properties }, message);
+    this.logger.error(properties, message);
     return Error(message);
   }
 }

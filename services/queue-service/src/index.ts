@@ -43,6 +43,7 @@ function constructMessageHandler<
     data,
     actions: { deleteMessage, setVisibilityTimeout, archiveMessage },
   }) => {
+    logger.info("Message received", { queueName, message, data });
     const beat = setInterval(() => setVisibilityTimeout(10), 8000);
     try {
       await messageDataHandler(data);

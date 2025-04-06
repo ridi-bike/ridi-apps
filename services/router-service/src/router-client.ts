@@ -196,10 +196,8 @@ export class RouterClient {
   }
 
   async execReq() {
-    this.logger.info("Router client starting");
-
-    const process = spawn(
-      env.ROUTER_BIN,
+    const bin = env.ROUTER_BIN;
+    const args =
       this.req.req.tripType === "start-finish"
         ? [
             "start-client",
@@ -223,9 +221,14 @@ export class RouterClient {
             this.req.req.brearing.toString(),
             "--distance",
             this.req.req.distance.toString(),
-          ],
-    );
-    process.stdin.write(JSON.stringify(this.ruleInput));
+          ];
+
+    const stdin = JSON.stringify(this.ruleInput);
+
+    this.logger.info("Router client starting", { bin, args, stdin });
+
+    const process = spawn(bin, args);
+    process.stdin.write(stdin);
     process.stdin.end();
 
     const response = await new Promise<string>((resolve, reject) => {
@@ -256,11 +259,11 @@ export class RouterClient {
         const text = buf.toString("utf8");
         try {
           const output = NdJson.parse(text);
-          this.logger.info("ridi-router-output", {
+          this.logger.info("Router client process output", {
             output: output,
           });
         } catch (error) {
-          this.logger.error("Router client process output", {
+          this.logger.error("Router client process output unparsable", {
             text,
             error,
           });
