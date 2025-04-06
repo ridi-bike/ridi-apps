@@ -31,7 +31,7 @@ export class MessageHandlerNewPlan {
     });
   }
 
-  async handleNewPlan(planId: string) {
+  async handleNewPlan(planId: string): Promise<void> {
     const planRecord = await pgQueries.planGetById(this.pgClient, {
       id: planId,
     });
@@ -169,7 +169,7 @@ export class MessageHandlerNewPlan {
           id: planId,
           state: "done",
         });
-        return null;
+        return;
       }
       throw this.logger.error("Router service response error", {
         result,
@@ -255,7 +255,5 @@ export class MessageHandlerNewPlan {
       id: planId,
       state: "done",
     });
-
-    return null;
   }
 }

@@ -10,7 +10,7 @@ import {
   updateVisibilityTimeout,
 } from "./messaging_sql.ts";
 
-type Messages = {
+export type Messages = {
   plan_map_gen: { planId: string };
   route_map_gen: { routeId: string };
   plan_new: { planId: string };
@@ -38,7 +38,7 @@ async function retryUntil(
   }
 }
 
-type MessageHandler<
+export type MessageHandler<
   TName extends keyof Messages,
   TData extends Messages[TName],
 > = (args: {

@@ -1,7 +1,7 @@
 import { createServer } from "http";
 
 import { RidiLogger } from "@ridi/logger";
-import { Messaging } from "@ridi/messaging";
+import { type MessageHandler, Messaging, type Messages } from "@ridi/messaging";
 import postgres from "postgres";
 
 import { env } from "./env.ts";
@@ -27,78 +27,76 @@ const messageHandlerMapPreview = new MessageHandlerMapPreview(
   new MapPreviewServiceClient(logger),
 );
 
-messaging.listen(
-  "plan_map_gen",
-  async ({
+const MAX_RETRY_COUNT = 10;
+
+function constructMessageHandler<
+  TName extends keyof Messages,
+  TData extends Messages[TName],
+>(
+  queueName: TName,
+  messageDataHandler: (data: TData) => Promise<void>,
+  onFailure?: (data: TData) => Promise<void>,
+  onSuccess?: (data: TData) => Promise<void>,
+): MessageHandler<TName, TData> {
+  return async ({
     message,
     data,
-    actions: { deleteMessage, setVisibilityTimeout },
+    actions: { deleteMessage, setVisibilityTimeout, archiveMessage },
   }) => {
-    const beat = setInterval(() => setVisibilityTimeout(5), 4000);
+    const beat = setInterval(() => setVisibilityTimeout(10), 8000);
     try {
-      await messageHandlerMapPreview.handlePlanMapPreview(data.planId);
+      await messageDataHandler(data);
       await deleteMessage();
+      if (onSuccess) {
+        await onSuccess(data);
+      }
     } catch (err) {
-      const retryInSecs = 30;
-      logger.error("Plan Map Preview message error, retry", {
-        message,
-        data,
-        retryInSecs,
-        err,
-      });
-      await setVisibilityTimeout(retryInSecs);
+      if (message.readCt <= MAX_RETRY_COUNT) {
+        const retryInSecs = 15 * message.readCt;
+        logger.error("Message failure, retry", {
+          queueName,
+          message,
+          data,
+          retryInSecs,
+          err,
+        });
+        await setVisibilityTimeout(retryInSecs);
+      } else {
+        logger.error("Message failure, archiving", {
+          queueName,
+          message,
+          data,
+          err,
+        });
+        await archiveMessage();
+      }
+      if (onFailure) {
+        await onFailure(data);
+      }
     }
     clearInterval(beat);
-  },
+  };
+}
+
+messaging.listen(
+  "plan_map_gen",
+  constructMessageHandler("plan_map_gen", (data) =>
+    messageHandlerMapPreview.handlePlanMapPreview(data.planId),
+  ),
 );
 messaging.listen(
   "route_map_gen",
-  async ({
-    message,
-    data,
-    actions: { deleteMessage, setVisibilityTimeout },
-  }) => {
-    const beat = setInterval(() => setVisibilityTimeout(5), 4000);
-    try {
-      await messageHandlerMapPreview.handleRouteMapPreview(data.routeId);
-      await deleteMessage();
-    } catch (err) {
-      const retryInSecs = 30;
-      logger.error("Route Map Preview message error, retry", {
-        message,
-        data,
-        retryInSecs,
-        err,
-      });
-      await setVisibilityTimeout(retryInSecs);
-    }
-    clearInterval(beat);
-  },
+  constructMessageHandler("route_map_gen", (data) =>
+    messageHandlerMapPreview.handleRouteMapPreview(data.routeId),
+  ),
 );
 messaging.listen(
   "plan_new",
-  async ({
-    message,
-    data,
-    actions: { deleteMessage, setVisibilityTimeout },
-  }) => {
-    const beat = setInterval(() => setVisibilityTimeout(5), 4000);
-    try {
-      await messageHandlerNewPlan.handleNewPlan(data.planId);
-      await deleteMessage();
-    } catch (err) {
-      const retryInSecs = 30;
-      logger.error("Plan New message error, retry", {
-        message,
-        data,
-        retryInSecs,
-        err,
-      });
-      await setVisibilityTimeout(retryInSecs);
-      await messageHandlerNewPlan.onNewPlanError(data.planId);
-    }
-    clearInterval(beat);
-  },
+  constructMessageHandler(
+    "plan_new",
+    (data) => messageHandlerNewPlan.handleNewPlan(data.planId),
+    (data) => messageHandlerNewPlan.onNewPlanError(data.planId),
+  ),
 );
 
 // catches uncaught exceptions
