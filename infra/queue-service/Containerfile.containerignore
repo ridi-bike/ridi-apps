@@ -1,0 +1,4 @@
+*
+!./libs
+!./services/queue-service
+!./package.json

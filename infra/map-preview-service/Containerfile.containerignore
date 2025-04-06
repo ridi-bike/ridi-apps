@@ -1,0 +1,4 @@
+*
+!./libs
+!./services/map-preview-service
+!./package.json

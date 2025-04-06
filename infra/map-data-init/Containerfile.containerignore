@@ -1,0 +1,4 @@
+*
+!./libs
+!./services/map-data-init
+!./package.json
