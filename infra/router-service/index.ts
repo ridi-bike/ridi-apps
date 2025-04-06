@@ -107,28 +107,29 @@ for (const region of regions) {
           },
           spec: {
             affinity: {
-              nodeAffinity: {
-                requiredDuringSchedulingIgnoredDuringExecution: {
-                  nodeSelectorTerms: [
-                    {
-                      matchExpressions:
-                        getRouterActivityLevel(region.region) !== "xs"
-                          ? [
+              ...(getRouterActivityLevel(region.region) !== "xs"
+                ? {
+                    nodeAffinity: {
+                      requiredDuringSchedulingIgnoredDuringExecution: {
+                        nodeSelectorTerms: [
+                          {
+                            matchExpressions: [
                               {
                                 key: "node.ridi.bike/power-level",
                                 operator: "NotIn",
                                 values: ["xs"],
                               },
-                            ]
-                          : [],
+                            ],
+                          },
+                        ],
+                      },
                     },
-                  ],
-                },
-              },
-              podAntiAffinity: {
-                preferredDuringSchedulingIgnoredDuringExecution:
-                  getRouterActivityLevel(region.region) === "l"
-                    ? [
+                  }
+                : {}),
+              ...(getRouterActivityLevel(region.region) === "l"
+                ? {
+                    podAntiAffinity: {
+                      preferredDuringSchedulingIgnoredDuringExecution: [
                         {
                           weight: 1,
                           podAffinityTerm: {
@@ -140,9 +141,10 @@ for (const region of regions) {
                             },
                           },
                         },
-                      ]
-                    : [],
-              },
+                      ],
+                    },
+                  }
+                : {}),
             },
             nodeSelector: {
               "node.ridi.bike/map-data": "ready",
