@@ -120,13 +120,17 @@ const router = s.router(ridiRouterContract, {
 });
 
 app.register(s.plugin(router));
+app.setErrorHandler((error, req, reply) => {
+  logger.error("Router error in req", { error, req });
+  reply.code(500).send("Internal error");
+});
 
 const start = async () => {
   try {
     logger.info("Healthcheck listening", { port: env.PORT });
     await app.listen({ port: env.PORT, host: "0.0.0.0" });
   } catch (err) {
-    app.log.error(err);
+    logger.error("Unhandler error in router service req", { err });
     process.exit(1);
   }
 };

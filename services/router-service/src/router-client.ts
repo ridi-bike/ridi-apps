@@ -155,10 +155,14 @@ export class RouterClient {
         return false;
       }
 
-      const bearingAdjustment =
+      let bearingAdjustment =
         retryAttempt < maxRetriesRoundTrip / 2
-          ? retryAttempt
+          ? retryAttempt * roundTripBearingStep
           : (maxRetriesRoundTrip / 2 - retryAttempt) * roundTripBearingStep;
+
+      if (bearingAdjustment < 0) {
+        bearingAdjustment = 360 + bearingAdjustment;
+      }
 
       this.req = {
         ...this.req,
@@ -201,26 +205,20 @@ export class RouterClient {
       this.req.req.tripType === "start-finish"
         ? [
             "start-client",
-            "--socket-name",
-            env.REGION,
-            "--route-req-id",
-            `${this.req.reqId}`,
+            `--socket-name=${env.REGION}`,
+            `--route-req-id=${this.req.reqId}`,
             "start-finish",
             `--start=${this.req.req.start.lat},${this.req.req.start.lon}`,
             `--finish=${this.req.req.finish.lat},${this.req.req.finish.lon}`,
           ]
         : [
             "start-client",
-            "--socket-name",
-            env.REGION,
-            "--route-req-id",
-            `${this.req.reqId}`,
+            `--socket-name=${env.REGION}`,
+            `--route-req-id=${this.req.reqId}`,
             "round-trip",
             `--start-finish=${this.req.req.startFinish.lat},${this.req.req.startFinish.lon}`,
-            "--bearing",
-            this.req.req.brearing.toString(),
-            "--distance",
-            this.req.req.distance.toString(),
+            `--bearing=${this.req.req.brearing.toString()}`,
+            `--distance=${this.req.req.distance.toString()}`,
           ];
 
     const stdin = JSON.stringify(this.ruleInput);

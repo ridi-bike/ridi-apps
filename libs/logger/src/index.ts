@@ -8,7 +8,6 @@ export class RidiLogger {
 
   static init(context: Record<string, unknown>) {
     const innerLogger = pino({
-      nestedKey: "payload",
       serializers: {
         payload: (data) => {
           return Object.entries(data).reduce(
@@ -40,20 +39,20 @@ export class RidiLogger {
     return new RidiLogger(this.logger.child(context));
   }
 
-  public debug(message: string, properties?: Record<string, unknown>) {
-    this.logger.debug(properties, message);
+  public debug(message: string, payload?: Record<string, unknown>) {
+    this.logger.debug({ payload }, message);
   }
 
-  public info(message: string, properties?: Record<string, unknown>) {
-    this.logger.info(properties, message);
+  public info(message: string, payload?: Record<string, unknown>) {
+    this.logger.info({ payload }, message);
   }
 
-  public warn(message: string, properties?: Record<string, unknown>) {
-    this.logger.warn(properties, message);
+  public warn(message: string, payload?: Record<string, unknown>) {
+    this.logger.warn({ payload }, message);
   }
 
-  public error(message: string, properties?: Record<string, unknown>) {
-    this.logger.error(properties, message);
+  public error(message: string, payload?: Record<string, unknown>) {
+    this.logger.error({ payload }, message);
     return Error(message);
   }
 }
