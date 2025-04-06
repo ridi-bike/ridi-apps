@@ -55,8 +55,8 @@ regions.reduce((prevDelay, region) => {
           timeZone: "Etc/UTC",
           schedule: cron,
           concurrencyPolicy: "Forbid",
-          successfulJobsHistoryLimit: 1,
-          failedJobsHistoryLimit: 1,
+          successfulJobsHistoryLimit: 0,
+          failedJobsHistoryLimit: 0,
           jobTemplate: {
             spec: {
               backoffLimit: 10,
