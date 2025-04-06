@@ -17,6 +17,15 @@ Sentry.init({
   sendDefaultPii: true,
   tracesSampleRate: 1.0,
   profilesSampleRate: 1.0,
+  replaysSessionSampleRate: 1.0,
+  replaysOnErrorSampleRate: 1.0,
+  integrations: [
+    Sentry.mobileReplayIntegration({
+      maskAllText: false,
+      maskAllImages: false,
+      maskAllVectors: false,
+    }),
+  ],
 });
 
 const queryClient = new QueryClient({
