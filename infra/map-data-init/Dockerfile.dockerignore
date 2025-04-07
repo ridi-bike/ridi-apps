@@ -2,3 +2,4 @@
 !./libs
 !./services/map-data-init
 !./package.json
+!./pnpm-workspace.yaml

@@ -2,3 +2,4 @@
 !./libs
 !./services/queue-service
 !./package.json
+!./pnpm-workspace.yaml
