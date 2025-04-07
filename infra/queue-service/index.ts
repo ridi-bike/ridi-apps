@@ -23,7 +23,7 @@ const queueServiceImage = new docker_build.Image(queueServiceName, {
     location: "../",
   },
   dockerfile: {
-    location: "./queue-service/Containerfile",
+    location: "./queue-service/Dockerfile",
   },
   cacheFrom: [
     {

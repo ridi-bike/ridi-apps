@@ -23,7 +23,7 @@ const queueServiceImage = new docker_build.Image(mapPreviewServiceName, {
     location: "../",
   },
   dockerfile: {
-    location: "./map-preview-service/Containerfile",
+    location: "./map-preview-service/Dockerfile",
   },
   buildArgs: {
     PORT: port.toString(),

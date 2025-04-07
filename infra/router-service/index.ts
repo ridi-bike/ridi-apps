@@ -33,7 +33,7 @@ const routerServiceImage = new docker_build.Image(routerServiceName, {
     location: "../",
   },
   dockerfile: {
-    location: "./router-service/Containerfile",
+    location: "./router-service/Dockerfile",
   },
   buildArgs: {
     ROUTER_VERSION: routerVersion,

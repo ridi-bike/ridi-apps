@@ -26,7 +26,7 @@ const mapDataInitImage = new docker_build.Image(mapDataInitName, {
     location: "../",
   },
   dockerfile: {
-    location: "./map-data-init/Containerfile",
+    location: "./map-data-init/Dockerfile",
   },
   cacheFrom: [
     {
