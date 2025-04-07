@@ -19,7 +19,10 @@ const logger = RidiLogger.init({
   routerVersion: env.ROUTER_VERSION,
 });
 
-const app = Fastify();
+const TIMEOUT = 5 * 60 * 1000;
+const app = Fastify({ requestTimeout: TIMEOUT });
+app.server.headersTimeout = TIMEOUT;
+app.server.keepAliveTimeout = TIMEOUT;
 
 const s = initServer();
 
@@ -64,9 +67,17 @@ const router = s.router(ridiRouterContract, {
 
       // we will ignore error on retries as we are making up rules
       if ((result.result as RidiRouterErr).error) {
+        logger.warn("Router client retry with adjusted rules - error", {
+          retryAttempt,
+          resultError: (result.result as RidiRouterErr).error.message,
+        });
         continue;
       }
       okResult = result.result as RidiRouterOk;
+      logger.info("Router client retry with adjusted rules", {
+        retryAttempt,
+        resultLen: okResult.ok.routes.length,
+      });
     }
 
     const respBody: z.infer<typeof respSchema> = {

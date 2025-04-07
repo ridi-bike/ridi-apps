@@ -25,7 +25,10 @@ export class RouterServiceLookup {
     });
 
     if (!routerServiceUrl) {
-      throw this.logger.error("Router service url not found", { region });
+      throw this.logger.error("Router service url not found", {
+        region,
+        reqId: req.reqId,
+      });
     }
 
     const client = initClient(ridiRouterContract, {
@@ -41,10 +44,14 @@ export class RouterServiceLookup {
         const result = await client.generateRoute({
           body: req,
         });
+        this.logger.info("Router service call done", {
+          reqId: req.reqId,
+        });
         return result;
       } catch (error) {
         lastError = error;
         this.logger.warn("Router service call failed", {
+          reqId: req.reqId,
           attempt,
           error,
           region,
@@ -59,6 +66,7 @@ export class RouterServiceLookup {
     }
 
     throw this.logger.error("Router service call failed after all retries", {
+      reqId: req.reqId,
       region,
       attempts: maxRetries,
       error: lastError,

@@ -51,6 +51,11 @@ function constructMessageHandler<
       if (onSuccess) {
         await onSuccess(data);
       }
+      logger.info("Message successfully processed", {
+        queueName,
+        message,
+        data,
+      });
     } catch (err) {
       if (message.readCt <= MAX_RETRY_COUNT) {
         const retryInSecs = 15 * message.readCt;

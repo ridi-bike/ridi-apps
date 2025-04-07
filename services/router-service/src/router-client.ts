@@ -270,6 +270,11 @@ export class RouterClient {
 
       process.on("close", (exitCode) => {
         if (exitCode === 0) {
+          this.logger.info("Router client finished", {
+            bin,
+            args,
+            stdin,
+          });
           resolve(stdout);
         } else {
           reject(
