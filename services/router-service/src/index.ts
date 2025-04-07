@@ -19,7 +19,7 @@ const logger = RidiLogger.init({
   routerVersion: env.ROUTER_VERSION,
 });
 
-const TIMEOUT = 5 * 60 * 1000;
+const TIMEOUT = 10 * 60 * 1000;
 const app = Fastify({ requestTimeout: TIMEOUT });
 app.server.headersTimeout = TIMEOUT;
 app.server.keepAliveTimeout = TIMEOUT;
