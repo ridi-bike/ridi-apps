@@ -19,7 +19,7 @@ const logger = RidiLogger.init({
   routerVersion: env.ROUTER_VERSION,
 });
 
-const TIMEOUT = 10 * 60 * 1000;
+const TIMEOUT = 20 * 60 * 1000;
 const app = Fastify({ requestTimeout: TIMEOUT });
 app.server.headersTimeout = TIMEOUT;
 app.server.keepAliveTimeout = TIMEOUT;
@@ -29,7 +29,7 @@ const s = initServer();
 const routerServer = new RouterServer(logger);
 
 const router = s.router(ridiRouterContract, {
-  generateRoute: async ({ body }) => {
+  generateRoute: async ({ body, request }) => {
     if (routerServer.getState() !== "running") {
       return {
         status: 400,
@@ -39,7 +39,14 @@ const router = s.router(ridiRouterContract, {
       };
     }
 
-    const client = new RouterClient(logger, body);
+    const requestState = {
+      shouldContinue: true,
+    };
+    request.raw.socket.on("timeout", () => {
+      requestState.shouldContinue = false;
+    });
+
+    const client = new RouterClient(logger, body, requestState);
 
     const result = await client.execReq();
 
@@ -55,14 +62,17 @@ const router = s.router(ridiRouterContract, {
     let okResult = result.result as RidiRouterOk;
 
     let retryAttempt = 0;
-    while (!okResult.ok.routes.length) {
+    while (!okResult.ok.routes.length && requestState.shouldContinue) {
       retryAttempt++;
 
-      const client = new RouterClient(logger, body);
+      const client = new RouterClient(logger, body, requestState);
       if (!client.adjustReq(retryAttempt)) {
         break;
       }
 
+      logger.info("Router client retry with adjusted rules", {
+        retryAttempt,
+      });
       const result = await client.execReq();
 
       // we will ignore error on retries as we are making up rules
@@ -74,7 +84,7 @@ const router = s.router(ridiRouterContract, {
         continue;
       }
       okResult = result.result as RidiRouterOk;
-      logger.info("Router client retry with adjusted rules", {
+      logger.info("Router client retry with adjusted rules result", {
         retryAttempt,
         resultLen: okResult.ok.routes.length,
       });

@@ -35,11 +35,13 @@ export class RouterServiceLookup {
       baseUrl: `http://${routerServiceUrl}`,
     });
 
+    const retryIfUnderSecs = 5;
     const maxRetries = 5;
     const waitTimeMs = 5000;
     let lastError: unknown;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      const startMoment = Date.now();
       try {
         const result = await client.generateRoute({
           body: req,
@@ -58,6 +60,11 @@ export class RouterServiceLookup {
           routerServiceUrl,
           willRetry: attempt < maxRetries,
         });
+
+        // if more than X secs passed, don't retry as it's not a netowrk thing
+        if (Date.now() - retryIfUnderSecs * 1000 > startMoment) {
+          break;
+        }
 
         if (attempt < maxRetries) {
           await setTimeout(waitTimeMs * attempt);

@@ -115,16 +115,27 @@ type InputRules = {
   >;
 };
 export class RouterClient {
-  private logger: RidiLogger;
+  private readonly logger: RidiLogger;
   private req: RouteReq;
   private ruleInput: InputRules;
+  private readonly requestState: {
+    shouldContinue: boolean;
+  };
+  private requestStateCheck: NodeJS.Timeout | null = null;
 
-  constructor(logger: RidiLogger, req: RouteReq) {
+  constructor(
+    logger: RidiLogger,
+    req: RouteReq,
+    requestState: {
+      shouldContinue: boolean;
+    },
+  ) {
     this.logger = logger.withContext({
       module: "router-client",
       reqId: req.reqId,
     });
     this.req = req;
+    this.requestState = requestState;
 
     this.ruleInput = Object.entries(this.req.rules).reduce(
       (rules, [key, value]) => {
@@ -223,11 +234,27 @@ export class RouterClient {
 
     const stdin = JSON.stringify(this.ruleInput);
 
-    this.logger.info("Router client starting", { bin, args, stdin });
+    this.logger.info("Router client starting", {
+      bin,
+      args,
+      reqId: this.req.reqId,
+      stdin,
+    });
 
     const process = spawn(bin, args);
     process.stdin.write(stdin);
     process.stdin.end();
+
+    this.requestStateCheck = setInterval(() => {
+      if (!this.requestState.shouldContinue) {
+        process.kill();
+        this.logger.warn("Router client aborted", {
+          bin,
+          args,
+          reqId: this.req.reqId,
+        });
+      }
+    });
 
     const response = await new Promise<string>((resolve, reject) => {
       let stdout = "";
@@ -269,10 +296,14 @@ export class RouterClient {
       });
 
       process.on("close", (exitCode) => {
+        if (this.requestStateCheck) {
+          clearInterval(this.requestStateCheck);
+        }
         if (exitCode === 0) {
           this.logger.info("Router client finished", {
             bin,
             args,
+            reqId: this.req.reqId,
             stdin,
           });
           resolve(stdout);
