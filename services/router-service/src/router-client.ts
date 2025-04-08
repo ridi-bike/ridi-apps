@@ -1,7 +1,10 @@
 import { spawn } from "node:child_process";
 
 import { type RidiLogger } from "@ridi/logger";
-import { type RouteReq } from "@ridi/router-service-contracts";
+import {
+  planWiderRetryMax,
+  type RouteReq,
+} from "@ridi/router-service-contracts";
 import { NdJson } from "json-nd";
 
 import { env } from "./env.ts";
@@ -159,17 +162,15 @@ export class RouterClient {
   }
   adjustReq(retryAttempt: number): boolean {
     const roundTripBearingStep = 10;
-    const maxRetriesRoundTrip = 6;
-    const macRetriesStartFinish = 3;
     if (this.req.req.tripType === "round-trip") {
-      if (retryAttempt > maxRetriesRoundTrip) {
+      if (retryAttempt > planWiderRetryMax) {
         return false;
       }
 
       let bearingAdjustment =
-        retryAttempt < maxRetriesRoundTrip / 2
+        retryAttempt < planWiderRetryMax / 2
           ? retryAttempt * roundTripBearingStep
-          : (maxRetriesRoundTrip / 2 - retryAttempt) * roundTripBearingStep;
+          : (planWiderRetryMax / 2 - retryAttempt) * roundTripBearingStep;
 
       if (bearingAdjustment < 0) {
         bearingAdjustment = 360 + bearingAdjustment;
@@ -185,7 +186,7 @@ export class RouterClient {
       return true;
     }
 
-    if (retryAttempt > macRetriesStartFinish) {
+    if (retryAttempt > planWiderRetryMax) {
       return false;
     }
 

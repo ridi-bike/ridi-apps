@@ -100,7 +100,11 @@ messaging.listen(
   "plan_new",
   constructMessageHandler(
     "plan_new",
-    (data) => messageHandlerNewPlan.handleNewPlan(data.planId),
+    (data) =>
+      messageHandlerNewPlan.handleNewPlan(
+        data.planId,
+        data.widerRetryNum || null,
+      ),
     (data) => messageHandlerNewPlan.onNewPlanError(data.planId),
   ),
 );

@@ -526,7 +526,7 @@ export interface PlanDeleteRow {
     startLon: string;
     finishLat: string | null;
     finishLon: string | null;
-    state: "new" | "planning" | "done" | "error";
+    state: "new" | "planning" | "planning-wider" | "done" | "error";
     name: string;
     error: string | null;
     tripType: "round-trip" | "start-finish";
@@ -1004,7 +1004,7 @@ export interface RoutesGetRow {
     latLonArray: string[];
     planId: string;
     planName: string;
-    planState: "new" | "planning" | "done" | "error";
+    planState: "new" | "planning" | "planning-wider" | "done" | "error";
 }
 
 export async function routesGet(sql: Sql, args: RoutesGetArgs): Promise<RoutesGetRow[]> {
@@ -1106,7 +1106,7 @@ export interface PlanListRow {
     distance: string;
     bearing: string | null;
     tripType: "round-trip" | "start-finish";
-    state: "new" | "planning" | "done" | "error";
+    state: "new" | "planning" | "planning-wider" | "done" | "error";
     createdAt: Date;
     ruleSetId: string;
     mapPreviewLight: string | null;
@@ -1292,7 +1292,7 @@ export interface PlanGetByIdRow {
     startLon: string;
     finishLat: string | null;
     finishLon: string | null;
-    state: "new" | "planning" | "done" | "error";
+    state: "new" | "planning" | "planning-wider" | "done" | "error";
     name: string;
     error: string | null;
     tripType: "round-trip" | "start-finish";
@@ -1354,7 +1354,7 @@ export interface PlansGetNewRow {
     startLon: string;
     finishLat: string | null;
     finishLon: string | null;
-    state: "new" | "planning" | "done" | "error";
+    state: "new" | "planning" | "planning-wider" | "done" | "error";
     name: string;
     error: string | null;
     tripType: "round-trip" | "start-finish";
@@ -1403,7 +1403,7 @@ set
 where plans.id = $2`;
 
 export interface PlanSetStateArgs {
-    state: "new" | "planning" | "done" | "error";
+    state: "new" | "planning" | "planning-wider" | "done" | "error";
     id: string;
 }
 

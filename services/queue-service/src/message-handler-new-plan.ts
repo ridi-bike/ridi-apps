@@ -1,7 +1,10 @@
 import * as pgQueries from "@ridi/db-queries";
 import { type RidiLogger } from "@ridi/logger";
 import { type Messaging } from "@ridi/messaging";
-import { type RouteReq } from "@ridi/router-service-contracts";
+import {
+  planWiderRetryMax,
+  type RouteReq,
+} from "@ridi/router-service-contracts";
 import type postgres from "postgres";
 
 import { type RouterServiceLookup } from "./router-service-lookup";
@@ -31,7 +34,10 @@ export class MessageHandlerNewPlan {
     });
   }
 
-  async handleNewPlan(planId: string): Promise<void> {
+  async handleNewPlan(
+    planId: string,
+    widerReqNum: number | null,
+  ): Promise<void> {
     const planRecord = await pgQueries.planGetById(this.pgClient, {
       id: planId,
     });
@@ -78,7 +84,7 @@ export class MessageHandlerNewPlan {
 
     await pgQueries.planSetState(this.pgClient, {
       id: planId,
-      state: "planning",
+      state: widerReqNum ? "planning-wider" : "planning",
     });
 
     const regionsFrom = await pgQueries.regionFindFromCoords(this.pgClient, {
@@ -134,6 +140,7 @@ export class MessageHandlerNewPlan {
       region.region,
       {
         reqId: planRecord.id,
+        widerReqNum,
         req:
           planRecord.tripType === "start-finish"
             ? {
@@ -192,33 +199,47 @@ export class MessageHandlerNewPlan {
       (r: (typeof okRoutes)[number]) =>
         (!fromMod || r.stats.lenM > distance * distanceModifier * fromMod) &&
         (!toMod || r.stats.lenM <= distance * distanceModifier * toMod);
-    const filterBuckes = [
-      filter(0, 1),
-      filter(1, 1.5),
-      filter(1.5, 2),
-      // filter(2, 2.5),
-      // filter(2.5, 3),
-      // filter(3, 0),
+    const filterBuckeLevels = [
+      [filter(0, 1), filter(1, 1.5), filter(1.5, 2)],
+      [filter(2, 2.5), filter(2.5, 3), filter(3, 0)],
     ];
     const num_of_best_routes = 8;
     const bestRoutes: typeof okRoutes = [];
     if (okRoutes.length <= num_of_best_routes) {
       bestRoutes.push(...okRoutes);
     } else {
-      let step = 0;
-      while (
-        bestRoutes.length < num_of_best_routes &&
-        step <= filterBuckes.length * num_of_best_routes
-      ) {
-        const bucket = step % filterBuckes.length;
-        const iter = Math.floor(step / filterBuckes.length);
-        const route = okRoutes.filter(filterBuckes[bucket]!).sort(sort)[iter];
-        if (route) {
-          bestRoutes.push(route);
+      for (const filterBuckes of filterBuckeLevels) {
+        let step = 0;
+        while (
+          bestRoutes.length < num_of_best_routes &&
+          step <= filterBuckes.length * num_of_best_routes
+        ) {
+          const bucket = step % filterBuckes.length;
+          const iter = Math.floor(step / filterBuckes.length);
+          const route = okRoutes.filter(filterBuckes[bucket]!).sort(sort)[iter];
+          if (route) {
+            bestRoutes.push(route);
+          }
+          step++;
         }
-        step++;
       }
     }
+
+    if (
+      !bestRoutes.length &&
+      (!widerReqNum || widerReqNum < planWiderRetryMax)
+    ) {
+      await this.messaging.send("plan_new", {
+        planId,
+        widerRetryNum: (widerReqNum || 0) + 1,
+      });
+      await pgQueries.planSetState(this.pgClient, {
+        id: planId,
+        state: "planning-wider",
+      });
+      return;
+    }
+
     for (const route of bestRoutes) {
       const routeRecord = await pgQueries.routeInsert(this.pgClient, {
         planId,

@@ -27,7 +27,13 @@ const bearingOut = z.coerce.number().min(0).max(360).nullable();
 
 const c = initContract();
 
-const planStateSchema = z.enum(["new", "planning", "done", "error"]);
+const planStateSchema = z.enum([
+  "new",
+  "planning",
+  "planning-wider",
+  "done",
+  "error",
+]);
 const planTypeSchema = z.enum(["round-trip", "start-finish"]);
 
 export const routeGetRespopnseSchema = z.discriminatedUnion("version", [

@@ -4,6 +4,8 @@ import { z } from "zod";
 
 const c = initContract();
 
+export const planWiderRetryMax = 6;
+
 const latLonSchema = z.object({
   lat: z.number(),
   lon: z.number(),
@@ -11,6 +13,7 @@ const latLonSchema = z.object({
 
 const reqSchema = z.object({
   reqId: z.string(),
+  widerReqNum: z.number().nullable(),
   req: z.discriminatedUnion("tripType", [
     z.object({
       tripType: z.literal("round-trip"),

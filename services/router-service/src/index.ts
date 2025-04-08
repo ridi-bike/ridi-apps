@@ -48,6 +48,10 @@ const router = s.router(ridiRouterContract, {
 
     const client = new RouterClient(logger, body, requestState);
 
+    if (body.widerReqNum) {
+      client.adjustReq(body.widerReqNum);
+    }
+
     const result = await client.execReq();
 
     if ((result.result as RidiRouterErr).error) {
@@ -59,36 +63,7 @@ const router = s.router(ridiRouterContract, {
         },
       };
     }
-    let okResult = result.result as RidiRouterOk;
-
-    let retryAttempt = 0;
-    while (!okResult.ok.routes.length && requestState.shouldContinue) {
-      retryAttempt++;
-
-      const client = new RouterClient(logger, body, requestState);
-      if (!client.adjustReq(retryAttempt)) {
-        break;
-      }
-
-      logger.info("Router client retry with adjusted rules", {
-        retryAttempt,
-      });
-      const result = await client.execReq();
-
-      // we will ignore error on retries as we are making up rules
-      if ((result.result as RidiRouterErr).error) {
-        logger.warn("Router client retry with adjusted rules - error", {
-          retryAttempt,
-          resultError: (result.result as RidiRouterErr).error.message,
-        });
-        continue;
-      }
-      okResult = result.result as RidiRouterOk;
-      logger.info("Router client retry with adjusted rules result", {
-        retryAttempt,
-        resultLen: okResult.ok.routes.length,
-      });
-    }
+    const okResult = result.result as RidiRouterOk;
 
     const respBody: z.infer<typeof respSchema> = {
       reqId: body.reqId,

@@ -185,7 +185,13 @@ function RouteGenError({ planId }: { planId: string }) {
     </MotiView>
   );
 }
-function GeneratingRoutes({ createdAt }: { createdAt: Date }) {
+function GeneratingRoutes({
+  createdAt,
+  planningWider,
+}: {
+  createdAt: Date;
+  planningWider: boolean;
+}) {
   const [messageIndex, setMessageIndex] = useState(0);
   const [showExplanation, setShowExplanation] = useState(false);
 
@@ -225,6 +231,23 @@ function GeneratingRoutes({ createdAt }: { createdAt: Date }) {
       </View>
 
       <AnimatePresence>
+        {!!planningWider && (
+          <MotiView
+            key="wider-search"
+            from={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-2 rounded-2xl border border-[#FF5937] bg-[#FFF5F3] p-6 dark:bg-gray-700"
+          >
+            <Text
+              role="heading"
+              aria-level={3}
+              className="mb-4 text-lg font-bold text-[#FF5937]"
+            >
+              No routes were found so a wider search is executed
+            </Text>
+          </MotiView>
+        )}
+
         {showExplanation && (
           <MotiView
             key="so-long"
@@ -396,8 +419,12 @@ export default function PlanDetails() {
                       </View>
                     }
                   />
-                  {plan.state !== "done" && plan.state !== "error" && (
-                    <GeneratingRoutes createdAt={new Date(plan.createdAt)} />
+                  {(plan.state === "planning" ||
+                    plan.state === "planning-wider") && (
+                    <GeneratingRoutes
+                      planningWider={plan.state === "planning-wider"}
+                      createdAt={new Date(plan.createdAt)}
+                    />
                   )}
                   {plan.state === "error" && <RouteGenError planId={plan.id} />}
                   {plan.state === "done" && plan.routes.length === 0 && (
