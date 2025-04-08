@@ -48,11 +48,13 @@ export class RouterServiceLookup {
         });
         this.logger.info("Router service call done", {
           reqId: req.reqId,
+          duration: Date.now() - startMoment,
         });
         return result;
       } catch (error) {
         lastError = error;
         this.logger.warn("Router service call failed", {
+          duration: Date.now() - startMoment,
           reqId: req.reqId,
           attempt,
           error,
