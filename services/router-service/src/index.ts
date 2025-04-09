@@ -20,8 +20,9 @@ const logger = RidiLogger.init({
 });
 
 const TIMEOUT = 20 * 60 * 1000;
-const app = Fastify({ requestTimeout: TIMEOUT });
+const app = Fastify();
 app.server.headersTimeout = TIMEOUT;
+app.server.requestTimeout = TIMEOUT;
 app.server.keepAliveTimeout = TIMEOUT;
 
 const s = initServer();
