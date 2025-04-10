@@ -1,3 +1,4 @@
+import { Agent } from "node:https";
 import { setTimeout } from "node:timers/promises";
 
 import { type RidiLogger } from "@ridi/logger";
@@ -33,6 +34,7 @@ export class RouterServiceLookup {
 
     const client = initClient(ridiRouterContract, {
       baseUrl: `http://${routerServiceUrl}`,
+      validateResponse: true,
     });
 
     const retryIfUnderSecs = 5;
@@ -52,6 +54,18 @@ export class RouterServiceLookup {
         });
         return result;
       } catch (error) {
+        // if more than X secs passed, don't retry as it's not a netowrk thing
+        if (Date.now() - retryIfUnderSecs * 1000 > startMoment) {
+          throw this.logger.error("Router service call failed", {
+            duration: Date.now() - startMoment,
+            reqId: req.reqId,
+            attempt,
+            error,
+            region,
+            routerServiceUrl,
+            willRetry: attempt < maxRetries,
+          });
+        }
         lastError = error;
         this.logger.warn("Router service call failed", {
           duration: Date.now() - startMoment,
@@ -62,11 +76,6 @@ export class RouterServiceLookup {
           routerServiceUrl,
           willRetry: attempt < maxRetries,
         });
-
-        // if more than X secs passed, don't retry as it's not a netowrk thing
-        if (Date.now() - retryIfUnderSecs * 1000 > startMoment) {
-          break;
-        }
 
         if (attempt < maxRetries) {
           await setTimeout(waitTimeMs * attempt);
