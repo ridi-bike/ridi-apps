@@ -2,7 +2,7 @@ import { RidiLogger } from "@ridi/logger";
 import { type respSchema } from "@ridi/router-service-contracts";
 import { ridiRouterContract } from "@ridi/router-service-contracts";
 import { initServer } from "@ts-rest/fastify";
-import Fastify from "fastify";
+import { fastify } from "fastify";
 import { type z } from "zod";
 
 import { env } from "./env.ts";
@@ -19,11 +19,7 @@ const logger = RidiLogger.init({
   routerVersion: env.ROUTER_VERSION,
 });
 
-const TIMEOUT = 20 * 60 * 1000;
-const app = Fastify();
-app.server.headersTimeout = TIMEOUT;
-app.server.requestTimeout = TIMEOUT;
-app.server.keepAliveTimeout = TIMEOUT;
+const app = fastify();
 
 const s = initServer();
 

@@ -3,11 +3,43 @@ import { setTimeout } from "node:timers/promises";
 import { type RidiLogger } from "@ridi/logger";
 import { mapPreviewContract } from "@ridi/map-preview-service-contracts";
 import { initClient } from "@ts-rest/core";
+import axios, {
+  type Method,
+  type AxiosError,
+  type AxiosResponse,
+  isAxiosError,
+} from "axios";
 
 import { env } from "./env";
 
 const client = initClient(mapPreviewContract, {
   baseUrl: `http://${env.MAP_PREVIEW_SERVICE_URL}`,
+  api: async ({ path, method, headers, body }) => {
+    try {
+      const result = await axios.request({
+        method: method as Method,
+        url: path,
+        headers,
+        data: body,
+      });
+      return {
+        status: result.status,
+        body: result.data,
+        headers: new Headers(JSON.parse(JSON.stringify(result.headers))),
+      };
+    } catch (e: Error | AxiosError | unknown) {
+      if (isAxiosError(e)) {
+        const error = e as AxiosError;
+        const response = error.response as AxiosResponse;
+        return {
+          status: response.status,
+          body: response.data,
+          headers: new Headers(JSON.parse(JSON.stringify(response.headers))),
+        };
+      }
+      throw e;
+    }
+  },
 });
 
 export class MapPreviewServiceClient {

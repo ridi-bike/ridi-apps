@@ -7,6 +7,12 @@ import {
   type RouteReq,
 } from "@ridi/router-service-contracts";
 import { initClient } from "@ts-rest/core";
+import axios, {
+  type Method,
+  type AxiosError,
+  type AxiosResponse,
+  isAxiosError,
+} from "axios";
 
 import { env } from "./env";
 
