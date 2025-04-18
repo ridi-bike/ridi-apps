@@ -1,5 +1,6 @@
 import { useLocalSearchParams, router } from "expo-router";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
+import { debounce } from "throttle-debounce";
 import type * as z from "zod";
 
 export function useUrlParams<T>(
@@ -29,14 +30,13 @@ export function useUrlParams<T>(
     }
   }, [key, paramsValue, schema]);
 
-  const setValue = useCallback(
-    (newValue?: T) => {
+  const setValue = useMemo(() => {
+    return debounce(300, (newValue?: T) =>
       router.setParams({
         [key]: newValue !== undefined ? JSON.stringify(newValue) : undefined,
-      });
-    },
-    [key],
-  );
+      }),
+    );
+  }, [key]);
 
   return [value, setValue];
 }
