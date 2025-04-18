@@ -2,9 +2,11 @@
   "name": "@ridi/cfw-api",
   "scripts": {
     "dev": "wrangler dev",
-    "build": "wrangler deploy --dry-run --minify --outdir dist && pnpm run sentry:sourcemaps",
-    "deploy": "wrangler deploy --no-bundle ./dist/index.js",
+    "build": "pnpm run release:new && wrangler deploy --dry-run --minify --outdir dist && pnpm run sentry:sourcemaps",
+    "deploy": "wrangler deploy --no-bundle ./dist/index.js && pnpm run release:fin",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "release:new": "sentry-cli releases new \"ridi-apps-api@$(sentry-cli releases propose-version)\" && sentry-cli releases set-commits \"expo-app@$(sentry-cli releases propose-version)\" --auto",
+    "release:fin": "sentry-cli releases finalize \"ridi-apps-api@$(sentry-cli releases propose-version)\"",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org hood-software --project ridi-apps-api ./dist && sentry-cli sourcemaps upload --org hood-software --project ridi-apps-api ./dist"
   },
   "dependencies": {
