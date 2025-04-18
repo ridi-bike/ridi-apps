@@ -12,7 +12,7 @@
     "lint": "expo lint",
     "build:android": "eas build --profile development --platform android",
     "build:web": "pnpm run release:web:new && expo export -p web --dump-sourcemap && sentry-expo-upload-sourcemaps dist && pnpm run release:web:fin",
-    "release:web:new": "sentry-cli releases new \"ridi-apps-expo@$(sentry-cli releases propose-version)\" && sentry-cli releases set-commits \"expo-app@$(sentry-cli releases propose-version)\" --auto",
+    "release:web:new": "sentry-cli releases new \"ridi-apps-expo@$(sentry-cli releases propose-version)\" && sentry-cli releases set-commits \"ridi-apps-expo@$(sentry-cli releases propose-version)\" --auto",
     "release:web:fin": "sentry-cli releases finalize \"ridi-apps-expo@$(sentry-cli releases propose-version)\"",
     "tsc": "tsc --watch",
     "type-check": "node ./scripts/type-check.mjs"
