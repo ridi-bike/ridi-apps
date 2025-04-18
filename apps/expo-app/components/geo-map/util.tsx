@@ -1,3 +1,4 @@
+import { makeBoxSafe } from "@ridi/geo-maps";
 import * as turf from "@turf/turf";
 import { type FillLayer } from "@vis.gl/react-maplibre";
 import { Layer, Source } from "@vis.gl/react-maplibre";
@@ -149,12 +150,12 @@ export function combineBBox(
         Math.max(bbox1[3], bbox2[3]), // maxY
       ]
     : bbox1;
-  return [
+  return makeBoxSafe([
     combinedBbox[0] - Math.abs(combinedBbox[0] - combinedBbox[2]) / 10,
     combinedBbox[1] - Math.abs(combinedBbox[1] - combinedBbox[3]) / 10,
     combinedBbox[2] + Math.abs(combinedBbox[0] - combinedBbox[2]) / 10,
     combinedBbox[3] + Math.abs(combinedBbox[1] - combinedBbox[3]) / 10,
-  ] as [number, number, number, number];
+  ]);
 }
 
 export function metersToDisplay(value: number): string {

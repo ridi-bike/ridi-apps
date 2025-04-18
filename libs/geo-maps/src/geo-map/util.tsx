@@ -137,6 +137,19 @@ export function useRoundTripPolygon(
   return { rountdTripLayer, roundTripPolygon };
 }
 
+export function makeBoxSafe(
+  box: [number, number, number, number],
+): [number, number, number, number] {
+  const safeBox = [
+    Math.max(-180, box[0]),
+    Math.max(-90, box[1]),
+    Math.min(180, box[2]),
+    Math.min(90, box[3]),
+  ] as [number, number, number, number];
+
+  return safeBox;
+}
+
 export function combineBBox(
   bbox1: BBox,
   bbox2: BBox | null,
@@ -149,12 +162,12 @@ export function combineBBox(
         Math.max(bbox1[3], bbox2[3]), // maxY
       ]
     : bbox1;
-  return [
+  return makeBoxSafe([
     combinedBbox[0]! - Math.abs(combinedBbox[0]! - combinedBbox[2]!) / 10,
     combinedBbox[1]! - Math.abs(combinedBbox[1]! - combinedBbox[3]!) / 10,
     combinedBbox[2]! + Math.abs(combinedBbox[0]! - combinedBbox[2]!) / 10,
     combinedBbox[3]! + Math.abs(combinedBbox[1]! - combinedBbox[3]!) / 10,
-  ] as [number, number, number, number];
+  ]);
 }
 
 export function updateBBox(
@@ -167,8 +180,7 @@ export function updateBBox(
     bbox[2] + Math.abs(bbox[2] - bbox[0]) / 2,
     bbox[3] + Math.abs(bbox[3] - bbox[1]) / 2,
   ] as [number, number, number, number];
-  console.log(updated);
-  return updated;
+  return makeBoxSafe(updated);
   // return bbox;
 }
 
