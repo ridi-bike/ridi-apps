@@ -53,7 +53,7 @@
       [
         "@sentry/react-native/expo",
         {
-          "url": "https://sentry.io/",
+          "url": "https://sentry.io",
           "project": "ridi-apps-expo",
           "organization": "hood-software"
         }
