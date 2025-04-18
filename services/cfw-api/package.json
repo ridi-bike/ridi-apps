@@ -2,8 +2,9 @@
   "name": "@ridi/cfw-api",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy --minify",
-    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
+    "deploy": "wrangler deploy --minify --outdir dist && pnpm run sentry:sourcemaps",
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org hood-software --project ridi-apps-api ./dist && sentry-cli sourcemaps upload --org hood-software --project ridi-apps-api ./dist"
   },
   "dependencies": {
     "@ridi/api-contracts": "workspace:^",
@@ -27,3 +28,4 @@
     "wrangler": "^3.107.2"
   }
 }
+
