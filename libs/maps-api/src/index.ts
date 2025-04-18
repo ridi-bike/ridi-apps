@@ -17,7 +17,7 @@ export async function coordsAddressGet(coords: Coords): Promise<string> {
   return fromLookup[0];
 }
 
-type ReverseGeocodingResponse = {
+type ReverseGeocodingResponseOk = {
   place_id: number;
   licence: string;
   osm_type: string;
@@ -33,6 +33,14 @@ type ReverseGeocodingResponse = {
   address: Address;
   extratags: Extratags;
 };
+
+type ReverseGeocodingResponseError = {
+  error: string;
+};
+
+type ReverseGeocodingResponse =
+  | ReverseGeocodingResponseOk
+  | ReverseGeocodingResponseError;
 
 type Address = {
   city?: string;
@@ -60,14 +68,33 @@ type Extratags = {
   population: string;
 };
 
+function isRespOk(
+  resp: ReverseGeocodingResponse,
+): resp is ReverseGeocodingResponseOk {
+  if ((resp as ReverseGeocodingResponseError).error) {
+    return false;
+  }
+  return true;
+}
+
 function getCityLoc(coords: ReverseGeocodingResponse): string {
+  if (!isRespOk(coords)) {
+    return "Unknown";
+  }
+
   return `${coords.address.city || coords.address.town || coords.address.state || coords.address.state_district || coords.address.village || coords.address.municipality}`;
 }
 
 function formatCityDiff(coords: ReverseGeocodingResponse): string {
+  if (!isRespOk(coords)) {
+    return "Unknown";
+  }
   return `${getCityLoc(coords)}, ${coords.address.country}`;
 }
 function formatCitySame(coords: ReverseGeocodingResponse): string {
+  if (!isRespOk(coords)) {
+    return "Unknown";
+  }
   const partOne =
     coords.address.isolated_dwelling ||
     coords.address.road ||
