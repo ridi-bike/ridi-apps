@@ -3,7 +3,7 @@
   "scripts": {
     "dev": "wrangler dev",
     "build": "wrangler deploy --dry-run --minify --outdir dist && pnpm run sentry:sourcemaps",
-    "deploy": "wrangler deploy --no-bundle --outdir dist",
+    "deploy": "wrangler deploy --no-bundle ./dist/index.js",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org hood-software --project ridi-apps-api ./dist && sentry-cli sourcemaps upload --org hood-software --project ridi-apps-api ./dist"
   },
