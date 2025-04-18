@@ -20,7 +20,10 @@ export function ErrorBox({
 
   useEffect(() => {
     Sentry.captureException(error, {
-      event_id: errorId,
+      captureContext(scope) {
+        scope.setTag("ridi_error_id", errorId);
+        return scope;
+      },
     });
   }, [error, errorId]);
 
