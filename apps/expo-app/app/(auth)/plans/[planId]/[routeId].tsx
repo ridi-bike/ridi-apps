@@ -53,7 +53,7 @@ function DownloadGpxDialog({
             {user.user && (
               <>
                 {user.user.subType === "none" && (
-                  <Text>GPX download is a premium feature</Text>
+                  <Text>Become a Ridi supporter to download GPX</Text>
                 )}
                 {user.user.subType !== "none" && (
                   <Text>
