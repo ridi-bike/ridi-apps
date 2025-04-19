@@ -1,0 +1,13 @@
+{
+  "lockfile_version": "1",
+  "packages": {
+    "github:NixOS/nixpkgs/nixpkgs-unstable": {
+      "last_modified": "2025-04-13T09:22:33Z",
+      "resolved": "github:NixOS/nixpkgs/18dd725c29603f582cf1900e0d25f9f1063dbf11?lastModified=1744536153&narHash=sha256-awS2zRgF4uTwrOKwwiJcByDzDOdo3Q1rPZbiHQg%2FN38%3D"
+    },
+    "github:fdietze/sqlc-gen-from-template/fb2969359a4df3d6e77cd0d5d02e2717ff645ff4": {
+      "last_modified": "1970-01-01T00:00:00Z",
+      "resolved": "github:fdietze/sqlc-gen-from-template/fb2969359a4df3d6e77cd0d5d02e2717ff645ff4"
+    }
+  }
+}

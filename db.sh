@@ -31,9 +31,10 @@ case "$1" in
   ./db.sh sqlc
   ;;
 "sqlc")
-  sqlc generate
+  devbox run sqlc
   sed -i 's/import/import type /g' ./libs/db-queries/src/queries_sql.ts
   sed -i 's/import/import type /g' ./libs/messaging/src/messaging_sql.ts
+  rustfmt ./services/geo-boundary-init/src/db/queries.rs
   ;;
 *)
   display_help

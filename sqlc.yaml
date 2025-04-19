@@ -6,6 +6,9 @@ plugins:
       # sha256: 287df8f6cc06377d67ad5ba02c9e0f00c585509881434d15ea8bd9fc751a9368
       url: "https://api.ridi.bike/storage/v1/object/public/dev-ci-cd-assets/sqlc-gen-typescript-with-enums-plugin-0.1.3.wasm"
       sha256: 94b6d0ee9c11a1c7dd2e87218443c770f1904632396a9675a0afbcc9dbb536a0
+  - name: sqlc-gen-from-template
+    process:
+      cmd: "sqlc-gen-from-template"
 sql:
   - schema: "supabase/migrations"
     queries:
@@ -31,3 +34,21 @@ sql:
         options:
           runtime: node
           driver: postgres
+  - schema: "supabase/migrations"
+    queries:
+      - "./services/geo-boundary-init/src/db/queries.sql"
+    engine: postgresql
+    database:
+      uri: "postgres://postgres:postgres@localhost:54322/postgres"
+    codegen:
+      - out: "./services/geo-boundary-init/src/db/"
+        plugin: "sqlc-gen-from-template"
+        options:
+          template: "rust_postgres.go.tmpl"
+          filename: "queries.rs"
+          cache_statements: false
+          # optional formatter command to format generated code
+          # the command needs to read from stdin and write to stdout
+          # so rustfmt is not suitable
+          #formatter_cmd: ""
+          use_serde: true
