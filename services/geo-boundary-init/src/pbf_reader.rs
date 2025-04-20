@@ -1,103 +1,64 @@
-use std::path::PathBuf;
+use std::{io, path::PathBuf, time::Instant};
 
-pub fn read_pbf(file: &PathBuf) -> Result<(), OsmDataReaderError> {
+use tracing::trace;
+
+pub enum PbfReaderError {
+    PbfFileOpenError { error: io::Error },
+    PbfFileReadError { error: osmpbfreader::Error },
+    NotARelation,
+    NameNotFound,
+    LevelNotFound,
+}
+
+pub struct Boundary {
+    id: i64,
+    name: String,
+    polygon: Vec<(f64, f64)>,
+    level: String,
+}
+
+pub fn pbf_get_boundaries(file: &PathBuf) -> Result<Vec<Boundary>, PbfReaderError> {
     let read_start = Instant::now();
 
     let path = std::path::Path::new(&file);
-    let r = std::fs::File::open(path)
-        .map_err(|error| OsmDataReaderError::PbfFileOpenError { error })?;
+    let r =
+        std::fs::File::open(path).map_err(|error| PbfReaderError::PbfFileOpenError { error })?;
     let mut pbf = osmpbfreader::OsmPbfReader::new(r);
 
-    let elements = pbf
+    let boundaries = pbf
         .get_objs_and_deps(|obj| {
-            obj.is_way()
-                && obj.tags().iter().any(|t| {
-                    t.0 == "highway"
-                        && (ALLOWED_HIGHWAY_VALUES.contains(&t.1.as_str())
-                            || (t.1 == "path"
-                                && obj
-                                    .tags()
-                                    .iter()
-                                    .any(|t2| t2.0 == "motorcycle" && t2.1 == "yes")))
-                })
+            obj.is_relation()
+                && obj
+                    .tags()
+                    .iter()
+                    .any(|t| t.0 == "boundary" && t.1 == "administrative")
         })
-        .map_err(|error| OsmDataReaderError::PbfFileReadError { error })?;
-
-    for (_id, element) in elements {
-        if element.is_node() {
-            let node = element.node().ok_or(OsmDataReaderError::PbfFileError {
-                error: String::from("expected node, did not get it"),
-            })?;
-            self.map_data.insert_node(OsmNode {
-                id: node.id.0 as u64,
-                lat: node.lat(),
-                lon: node.lon(),
-            });
-        } else if element.is_way() {
-            let way = element.way().ok_or(OsmDataReaderError::PbfFileError {
-                error: String::from("expected way, did not get it"),
-            })?;
-            self.map_data
-                .insert_way(OsmWay {
-                    id: way.id.0 as u64,
-                    point_ids: way.nodes.iter().map(|v| v.0 as u64).collect(),
-                    tags: Some(
-                        way.tags
-                            .iter()
-                            .map(|v| (v.0.to_string(), v.1.to_string()))
-                            .collect(),
-                    ),
-                })
-                .map_err(|error| OsmDataReaderError::MapDataError { error })?;
-        } else if element.is_relation() {
-            let relation = element.relation().ok_or(OsmDataReaderError::PbfFileError {
-                error: String::from("expected relation, did not get it"),
-            })?;
-            self.map_data
-                .insert_relation(OsmRelation {
-                    id: relation.id.0 as u64,
-                    members: relation
-                        .refs
-                        .iter()
-                        .map(|v| -> Result<OsmRelationMember, OsmDataReaderError> {
-                            Ok(OsmRelationMember {
-                                member_ref: match v.member {
-                                    osmpbfreader::OsmId::Way(id) => id.0 as u64,
-                                    osmpbfreader::OsmId::Node(id) => id.0 as u64,
-                                    osmpbfreader::OsmId::Relation(id) => id.0 as u64,
-                                },
-                                role: match v.role.as_str() {
-                                    "from" => OsmRelationMemberRole::From,
-                                    "to" => OsmRelationMemberRole::To,
-                                    "via" => OsmRelationMemberRole::Via,
-                                    _ => Err(OsmDataReaderError::PbfFileError {
-                                        error: String::from("unknown role"),
-                                    })?,
-                                },
-                                member_type: match v.member {
-                                    osmpbfreader::OsmId::Way(_) => OsmRelationMemberType::Way,
-                                    osmpbfreader::OsmId::Node(_) => OsmRelationMemberType::Node,
-                                    _ => Err(OsmDataReaderError::PbfFileError {
-                                        error: String::from("unexpected member type"),
-                                    })?,
-                                },
-                            })
-                        })
-                        .collect::<Result<Vec<OsmRelationMember>, OsmDataReaderError>>()?,
-                    tags: relation
-                        .tags
-                        .iter()
-                        .map(|v| (v.0.to_string(), v.1.to_string()))
-                        .collect(),
-                })
-                .map_err(|error| OsmDataReaderError::MapDataError { error })?;
-        }
-    }
-
-    self.map_data.generate_point_hashes();
+        .map_err(|error| PbfReaderError::PbfFileReadError { error })?
+        .iter()
+        .map(|(id, rel)| {
+            if !rel.is_relation() {
+                return Err(PbfReaderError::NotARelation);
+            }
+            let tags_iter = rel.tags().iter();
+            let name = match tags_iter.find(|tag| tag.0 == "name").map(|t| t.1) {
+                None => return Err(PbfReaderError::NameNotFound),
+                Some(n) => n,
+            };
+            let level = match tags_iter.find(|tag| tag.0 == "name").map(|t| t.1) {
+                None => return Err(PbfReaderError::LevelNotFound),
+                Some(n) => n,
+            };
+            Ok(Boundary {
+                id: id.inner_id(),
+                name: name.to_string(),
+                level: level.to_string(),
+                polygon,
+            })
+        })
+        .collect::<Result<Vec<_>, PbfReaderError>>()?;
 
     let read_duration = read_start.elapsed();
     trace!("file read took {} seconds", read_duration.as_secs());
 
-    Ok(())
+    Ok(boundaries)
 }

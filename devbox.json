@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.14.2/.schema/devbox.schema.json",
   "packages": [
-    "github:fdietze/sqlc-gen-from-template/fb2969359a4df3d6e77cd0d5d02e2717ff645ff4"
+    "github:tomsjansons/sqlc-gen-from-template/1261abe3934b088389855dfc790a3a0abbaac286"
   ],
   "shell": {
     "init_hook": ["echo 'Welcome to devbox!' > /dev/null"],

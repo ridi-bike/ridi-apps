@@ -11,7 +11,11 @@ https://pkg.go.dev/text/template
 {{- define "RustType" -}}
 {{- $rustType := .Type.Name -}}
 {{- $TypeName :=   .Type.Name | ToLower  -}}
-{{- if eq $TypeName "integer"}}{{ $rustType = "i64" }}
+{{- if eq $TypeName "integer"}}{{ $rustType = "i32" }}
+{{- else if eq $TypeName "int2"}}{{ $rustType = "i16" }}
+{{- else if eq $TypeName "int8"}}{{ $rustType = "i64" }}
+{{- else if eq $TypeName "smallint"}}{{ $rustType = "i16" }}
+{{- else if eq $TypeName "bigint"}}{{ $rustType = "i64" }}
 {{- else if eq $TypeName "text"}}{{ $rustType = "String" }}
 {{- else if eq $TypeName "blob"}}{{ $rustType = "Vec<u8>" }}
 {{- else if eq $TypeName "real"}}{{ $rustType = "f64" }}
@@ -20,6 +24,7 @@ https://pkg.go.dev/text/template
 {{- else if eq $TypeName "boolean"}}{{ $rustType = "bool" }}
 {{- else if eq $TypeName "bool"}}{{ $rustType = "bool" }}
 {{- else if eq $TypeName "numeric"}}{{ $rustType = "f64" }}
+{{- else if eq $TypeName "timestamp"}}{{ $rustType = "i64" }}
 {{- end -}}
 {{- $rustType }}
 {{- end -}}
@@ -61,8 +66,7 @@ use serde::{Serialize, Deserialize};
 
 {{- if eq .Cmd ":many" }}
 {{- $returnType := printf "Vec<%s>" $rowType -}}
-#[allow(non_snake_case)]
-pub fn {{.Name}}(client: &mut Client{{range .Params}},
+pub fn {{.Name | ToSnakeCase}}(client: &mut Client{{range .Params}},
   {{.Column.Name}}:{{template "RustType" .Column}}
 {{- end}}
 
@@ -87,8 +91,7 @@ pub fn {{.Name}}(client: &mut Client{{range .Params}},
 
 {{- if eq .Cmd ":one" }}
 {{- $returnType := printf "Option<%s>" $rowType -}}
-#[allow(non_snake_case)]
-pub fn {{.Name}}(client: &mut Client{{range .Params}},
+pub fn {{.Name | ToSnakeCase }}(client: &mut Client{{range .Params}},
   {{.Column.Name}}:{{template "RustType" .Column}}
 {{- end}}
 
@@ -112,8 +115,7 @@ pub fn {{.Name}}(client: &mut Client{{range .Params}},
 
 
 {{- if eq .Cmd ":exec" }}
-#[allow(non_snake_case)]
-pub fn {{.Name}}(client: &mut Client{{range .Params}},
+pub fn {{.Name | ToSnakeCase }}(client: &mut Client{{range .Params}},
   {{.Column.Name}}:{{template "RustType" .Column}}
 {{- end}}
 
