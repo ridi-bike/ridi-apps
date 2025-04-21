@@ -1,28 +1,45 @@
 use std::{collections::HashMap, fmt::Display, io, path::PathBuf, time::Instant};
 
 use osmpbfreader::{OsmObj, Relation};
-use tracing::{trace, warn};
+use tracing::trace;
 
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
 pub enum PbfReaderError {
+    #[error("File open error: {error}")]
     PbfFileOpenError { error: io::Error },
+
+    #[error("File read error: {error}")]
     PbfFileReadError { error: osmpbfreader::Error },
+
+    #[error("Not a relation")]
     NotARelation,
+
+    #[error("Not a node")]
     NotANode,
+
+    #[error("Not a way")]
     NotAWay,
+
+    #[error("Name not found for relation {id}")]
     NameNotFound { id: i64 },
+
+    #[error("Level not found for relation {id}")]
     LevelNotFound { id: i64 },
+
+    #[error("Way not found")]
     WayNotFound,
+
+    #[error("Node not found")]
     NodeNotFound,
 }
 
 #[derive(Debug)]
 pub struct Boundary {
-    id: i64,
-    name: String,
-    polygons_outer: Vec<Vec<(f64, f64)>>,
-    polygons_inner: Vec<Vec<(f64, f64)>>,
-    level: String,
+    pub id: i64,
+    pub name: String,
+    pub polygons_outer: Vec<Vec<(f64, f64)>>,
+    pub polygons_inner: Vec<Vec<(f64, f64)>>,
+    pub level: String,
 }
 
 pub struct PbfReader {

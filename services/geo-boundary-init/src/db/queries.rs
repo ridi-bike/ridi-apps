@@ -40,7 +40,7 @@ pub fn geo_boundaries_upsert(
 ) -> Result<u64, postgres::Error> {
     client.execute(
         r#"insert into geo_boundaries (id, name, level, updated_at, polygon)
-values ($1, $2, $3, now(), $4::text)
+values ($1, $2, $3, now(), postgis.ST_GeomFromText($4::text))
 on conflict (id) do update
 set polygon = excluded.polygon,
   name = excluded.name,

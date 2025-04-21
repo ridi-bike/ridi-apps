@@ -13,8 +13,8 @@ supabase start
 (cd ./services/router-cache-init/ && node --import=tsx --env-file=./.env.greece ./src/index.ts | pino-pretty)
 (cd ./services/router-cache-init/ && node --import=tsx --env-file=./.env.estonia ./src/index.ts | pino-pretty)
 
-(cd ./services/geo-boundary-init/ && set -a && source ./.env.base && source ./.env.latvia && set +a && cargo run)
-(cd ./services/geo-boundary-init/ && set -a && source ./.env.base && source ./.env.greece && set +a && cargo run)
-(cd ./services/geo-boundary-init/ && set -a && source ./.env.base && source ./.env.estonia && set +a && cargo run)
+(cd ./services/geo-boundary-init/ && ./dev.sh latvia)
+(cd ./services/geo-boundary-init/ && ./dev.sh greece)
+(cd ./services/geo-boundary-init/ && ./dev.sh estonia)
 
 mprocs

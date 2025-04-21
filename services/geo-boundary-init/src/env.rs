@@ -14,9 +14,6 @@ pub struct Env {
 
 impl Env {
     pub fn init() -> Self {
-        for val in env::vars() {
-            println!("val: {val:?}");
-        }
         Env {
             pbf_location: env::var("PBF_LOCATION").expect("PBF_LOCATION env variable"),
             supabase_db_url: env::var("SUPABASE_DB_URL").expect("SUPABASE_DB_URL env variable"),
