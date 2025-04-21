@@ -23,8 +23,8 @@ fn main() {
         Ok(_) => {}
     };
 
-    let boundaries = match pbf_reader::pbf_get_boundaries(&PathBuf::from(
-        "../.ridi-data/map-data/latvia/map.osm.pbf",
+    let boundaries = match pbf_reader::PbfReader::pbf_get_boundaries(&PathBuf::from(
+        "../.ridi-data/map-data/estonia/map.osm.pbf",
     )) {
         Err(e) => {
             error!(error = ?e, "Failed to read boundaries");
@@ -33,5 +33,5 @@ fn main() {
         Ok(b) => b,
     };
 
-    trace!(boundaries = ?boundaries, "boundaries found");
+    trace!(boundaries = ?boundaries.len(), "boundaries found");
 }
