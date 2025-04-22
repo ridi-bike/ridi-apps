@@ -139,18 +139,22 @@ impl PbfReader {
                     None => return Err(PbfReaderError::NotARelation),
                     Some(rel) => rel,
                 };
-                let name = match element
+                let name = element
                     .tags()
                     .iter()
-                    .find(|tag| tag.0 == "name")
-                    .map(|t| t.1)
-                {
-                    None => {
-                        return Err(PbfReaderError::NameNotFound {
-                            id: element.id().inner_id(),
-                        })
-                    }
+                    .find(|tag| tag.0 == "name:en")
+                    .map(|t| t.1);
+
+                let name = match name {
                     Some(n) => n,
+                    None => element
+                        .tags()
+                        .iter()
+                        .find(|tag| tag.0 == "name")
+                        .map(|t| t.1)
+                        .ok_or(PbfReaderError::NameNotFound {
+                            id: element.id().inner_id(),
+                        })?,
                 };
                 let level = match element
                     .tags()
