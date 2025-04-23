@@ -66,7 +66,7 @@ function calculateCronSchedule(jobIndex: number) {
   const hour = (baseHour + additionalHours) % 24;
 
   // Set to run on the 22nd of every month
-  return { cron: `${minutes} ${hour} 22 * *` };
+  return { cron: `${minutes} ${hour} 24 * *` };
 }
 
 regions.forEach((region, regionIdx) => {

@@ -1,8 +1,8 @@
 FROM rust:latest
 
 WORKDIR /usr/src/geo
-COPY . .
+COPY ../services/geo-boundary-init .
 
 RUN cargo install --path .
 
-CMD ["geo"]
+CMD ["geo-boundary-init"]
