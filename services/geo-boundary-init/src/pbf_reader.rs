@@ -1,7 +1,7 @@
 use std::{collections::HashMap, fmt::Display, io, path::PathBuf, time::Instant};
 
-use osmpbfreader::{OsmObj, Relation};
-use tracing::trace;
+use osmpbfreader::{Node, OsmObj, Relation, Way};
+use tracing::{error, trace};
 
 #[derive(Debug, thiserror::Error)]
 pub enum PbfReaderError {
@@ -11,26 +11,11 @@ pub enum PbfReaderError {
     #[error("File read error: {error}")]
     PbfFileReadError { error: osmpbfreader::Error },
 
-    #[error("Not a relation")]
-    NotARelation,
-
-    #[error("Not a node")]
-    NotANode,
-
-    #[error("Not a way")]
-    NotAWay,
-
     #[error("Name not found for relation {id}")]
     NameNotFound { id: i64 },
 
     #[error("Level not found for relation {id}")]
     LevelNotFound { id: i64 },
-
-    #[error("Way not found")]
-    WayNotFound,
-
-    #[error("Node not found")]
-    NodeNotFound,
 }
 
 #[derive(Debug)]
@@ -43,50 +28,136 @@ pub struct Boundary {
 }
 
 pub struct PbfReader {
-    nodes: HashMap<i64, OsmObj>,
-    ways: HashMap<i64, OsmObj>,
-    relations: Vec<OsmObj>,
+    nodes: HashMap<i64, Node>,
+    ways: HashMap<i64, Way>,
+    relations: Vec<Relation>,
+}
+
+#[derive(Clone, Debug)]
+struct WayWithPoints {
+    points: Vec<(f64, f64)>,
 }
 
 impl PbfReader {
     fn get_boundary_from_relation(&self, relation: &Relation, role: &str) -> Vec<Vec<(f64, f64)>> {
-        relation
+        let mut boundaries: Vec<Vec<(f64, f64)>> = Vec::new();
+        let mut current_boundary: Vec<(f64, f64)> = Vec::new();
+
+        let mut ways_with_points: Vec<WayWithPoints> = Vec::new();
+
+        for relation_ref in relation
             .refs
             .iter()
             .filter(|relation_ref| relation_ref.role == role)
-            .map(|relation_ref| -> Result<Vec<_>, PbfReaderError> {
-                let way_id = relation_ref
-                    .member
-                    .way()
-                    .map_or(Err(PbfReaderError::NotAWay), |way| Ok(way))?;
-                let way = self
-                    .ways
-                    .get(&way_id.0)
-                    .map_or(Err(PbfReaderError::WayNotFound), |w| Ok(w))?
-                    .way()
-                    .map_or(Err(PbfReaderError::NotAWay), |w| Ok(w))?;
-                let points = way
+        {
+            let way_id = match relation_ref.member.way() {
+                None => {
+                    error!(relation_id = ?relation_ref, "Not a way");
+                    continue;
+                }
+                Some(w_id) => w_id,
+            };
+
+            let way = match self.ways.get(&way_id.0) {
+                None => {
+                    continue;
+                }
+                Some(w) => w,
+            };
+
+            ways_with_points.push(WayWithPoints {
+                points: way
                     .nodes
                     .iter()
-                    .map(|p| {
-                        self.nodes
-                            .get(&p.0)
-                            .map_or(Err(PbfReaderError::NodeNotFound), |node| Ok(node))
-                            .map(|node| {
-                                node.node().map_or(Err(PbfReaderError::NotANode), |n| {
-                                    Ok((n.lat(), n.lon()))
-                                })
-                            })?
-                    })
-                    .collect::<Result<Vec<_>, PbfReaderError>>()?;
+                    .filter_map(|node_id| self.nodes.get(&node_id.0))
+                    .map(|node| (node.lat(), node.lon()))
+                    .collect(),
+            });
+        }
+        trace!(
+            ways_with_points = ?ways_with_points,
+            "Prep done"
+        );
 
-                Ok(points)
-            })
-            .filter_map(|res| match res {
-                Err(_error) => None,
-                Ok(v) => Some(v),
-            })
-            .collect::<Vec<Vec<_>>>()
+        while !ways_with_points.is_empty() {
+            trace!(
+                ways_with_points_len = ways_with_points.len(),
+                current_boundary_len = current_boundary.len(),
+                "Loop start"
+            );
+            if current_boundary.len() == 0 {
+                if let Some(way) = ways_with_points.pop() {
+                    way.points
+                        .iter()
+                        .for_each(|p| current_boundary.push((p.0, p.1)));
+                }
+            } else if let Some(last_point) = current_boundary.last() {
+                trace!(last_point = ?last_point, "Checking last point");
+                let next_way = ways_with_points
+                    .iter()
+                    .enumerate()
+                    .find(|(_i, w)| {
+                        if let Some(p) = w.points.last() {
+                            if p.0 == last_point.0 && p.1 == last_point.1 {
+                                return true;
+                            }
+                        }
+                        if let Some(p) = w.points.first() {
+                            if p.0 == last_point.0 && p.1 == last_point.1 {
+                                return true;
+                            }
+                        }
+                        false
+                    })
+                    .map(|w| (w.0, w.1.clone()));
+                trace!(next_way = ?next_way, "Next way");
+                if let Some((idx, next_way)) = next_way {
+                    ways_with_points.remove(idx);
+                    if let Some(next_way_first_point) = next_way.points.first() {
+                        trace!(next_way_first_point = ?next_way_first_point, "First point match");
+                        if next_way_first_point == last_point {
+                            next_way
+                                .points
+                                .iter()
+                                .for_each(|p| current_boundary.push((p.0, p.1)));
+                        } else {
+                            trace!("Last point match");
+                            next_way
+                                .points
+                                .iter()
+                                .rev()
+                                .for_each(|p| current_boundary.push((p.0, p.1)));
+                        }
+                    }
+                } else {
+                    trace!("Should be a full circle");
+                    if current_boundary.len() > 1 {
+                        if let Some(first_point) = current_boundary.first() {
+                            if let Some(last_point) = current_boundary.last() {
+                                if first_point == last_point {
+                                    trace!("Adding boundary");
+                                    boundaries.push(current_boundary);
+                                }
+                                current_boundary = Vec::new();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if current_boundary.len() > 1 {
+            if let Some(first_point) = current_boundary.first() {
+                if let Some(last_point) = current_boundary.last() {
+                    if first_point == last_point {
+                        trace!("Adding boundary");
+                        boundaries.push(current_boundary);
+                    }
+                }
+            }
+        }
+
+        boundaries
     }
 
     pub fn pbf_get_boundaries(file: &PathBuf) -> Result<Vec<Boundary>, PbfReaderError> {
@@ -113,68 +184,56 @@ impl PbfReader {
         .map_err(|error| PbfReaderError::PbfFileReadError { error })?
         .into_iter()
         .for_each(|(_id, element)| {
-            // trace!(element = ?element, "Element");
             if element.is_relation()
                 && element.tags().contains("type", "boundary")
                 && element.tags().contains("boundary", "administrative")
                 && element.tags().contains_key("admin_level")
                 && element.tags().contains_key("name")
             {
-                reader.relations.push(element);
+                let relation = element.relation().expect("Must be a way");
+                reader.relations.push(relation.clone());
             } else if element.is_way() {
-                reader.ways.insert(element.id().inner_id(), element);
+                let way = element.way().expect("Must be a way");
+                reader.ways.insert(element.id().inner_id(), way.clone());
             } else if element.is_node() {
-                reader.nodes.insert(element.id().inner_id(), element);
+                let node = element.node().expect("Must be a node");
+                reader.nodes.insert(element.id().inner_id(), node.clone());
             }
         });
 
         let boundaries: Vec<Boundary> = reader
             .relations
             .iter()
-            .map(|element| {
-                if !element.is_relation() {
-                    return Err(PbfReaderError::NotARelation);
-                }
-                let relation = match element.relation() {
-                    None => return Err(PbfReaderError::NotARelation),
-                    Some(rel) => rel,
-                };
-                let name = element
-                    .tags()
+            .map(|relation| {
+                let name = relation
+                    .tags
                     .iter()
                     .find(|tag| tag.0 == "name:en")
                     .map(|t| t.1);
 
                 let name = match name {
                     Some(n) => n,
-                    None => element
-                        .tags()
+                    None => relation
+                        .tags
                         .iter()
                         .find(|tag| tag.0 == "name")
                         .map(|t| t.1)
-                        .ok_or(PbfReaderError::NameNotFound {
-                            id: element.id().inner_id(),
-                        })?,
+                        .ok_or(PbfReaderError::NameNotFound { id: relation.id.0 })?,
                 };
-                let level = match element
-                    .tags()
+                let level = match relation
+                    .tags
                     .iter()
                     .find(|tag| tag.0 == "admin_level")
                     .map(|t| t.1)
                 {
-                    None => {
-                        return Err(PbfReaderError::LevelNotFound {
-                            id: element.id().inner_id(),
-                        })
-                    }
+                    None => return Err(PbfReaderError::LevelNotFound { id: relation.id.0 }),
                     Some(n) => n,
                 };
-
                 let border_outer_points = reader.get_boundary_from_relation(relation, "outer");
                 let border_inner_points = reader.get_boundary_from_relation(relation, "inner");
 
                 Ok(Boundary {
-                    id: element.id().inner_id(),
+                    id: relation.id.0,
                     name: name.to_string(),
                     level: level.to_string(),
                     polygons_outer: border_outer_points,

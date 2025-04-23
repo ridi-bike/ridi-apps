@@ -1,8 +1,41 @@
 use std::num::ParseIntError;
 
 use postgres::Client;
+use wkt::ToWkt;
 
 use crate::{db::queries::geo_boundaries_upsert, pbf_reader::Boundary};
+use geo::{Contains, Coord, LineString, Polygon};
+use geo_types::MultiPolygon;
+
+fn match_holes_to_outer_polygons(
+    outer_polygons: &[LineString<f64>],
+    inner_polygons: &[LineString<f64>],
+) -> MultiPolygon<f64> {
+    let mut matched_polygons = Vec::new();
+
+    // For each outer polygon
+    for outer in outer_polygons {
+        let outer_polygon = Polygon::new(outer.clone(), vec![]);
+        let mut matching_holes = Vec::new();
+
+        // Find all inner polygons (holes) that are contained within this outer polygon
+        for inner in inner_polygons {
+            // Create a point from the first coordinate of the inner ring
+            if let Some(point) = inner.points().next() {
+                // Check if the outer polygon contains this point from the inner ring
+                if outer_polygon.contains(&point) {
+                    matching_holes.push(inner.clone());
+                }
+            }
+        }
+
+        // Create a polygon with the outer ring and all matching holes
+        let polygon = Polygon::new(outer.clone(), matching_holes);
+        matched_polygons.push(polygon);
+    }
+
+    MultiPolygon::new(matched_polygons)
+}
 
 #[derive(Debug, thiserror::Error)]
 pub enum GeoBoundariesError {
@@ -23,39 +56,31 @@ pub fn boundary_insert(
     db_client: &mut Client,
     boundary: &Boundary,
 ) -> Result<(), GeoBoundariesError> {
-    let mut polygon = String::new();
-    polygon.push_str("MULTIPOLYGON(");
-
-    polygon.push_str("(");
-    for outer in boundary.polygons_outer.clone() {
-        if outer.len() > 2 {
-            polygon.push_str("(");
-            for coords in outer.clone() {
-                polygon.push_str(format!("{:.5} {:.5}, ", coords.1, coords.0).as_str());
-            }
-            polygon.push_str(format!("{:.5} {:.5}", outer[0].1, outer[0].0).as_str());
-            polygon.push_str("), ");
-        }
-    }
-    polygon.pop();
-    polygon.pop();
-    polygon.push_str("),");
-
-    for inner in boundary.polygons_inner.clone() {
-        if inner.len() > 2 {
-            polygon.push_str("(");
-            for coords in inner.clone() {
-                polygon.push_str(format!("{:.5} {:.5}, ", coords.1, coords.0).as_str());
-            }
-            polygon.push_str(format!("{:.5} {:.5}", inner[0].1, inner[0].0).as_str());
-            polygon.push_str("), ");
-        }
-    }
-    polygon.pop();
-    polygon.pop();
-    polygon.push_str(")");
-
-    polygon.push_str(")");
+    let multi_polygon = match_holes_to_outer_polygons(
+        &boundary
+            .polygons_outer
+            .iter()
+            .map(|line| {
+                LineString::new(
+                    line.iter()
+                        .map(|(lat, lon)| Coord { x: *lon, y: *lat })
+                        .collect(),
+                )
+            })
+            .collect::<Vec<_>>()[..],
+        &boundary
+            .polygons_inner
+            .iter()
+            .map(|line| {
+                LineString::new(
+                    line.iter()
+                        .map(|(lat, lon)| Coord { x: *lon, y: *lat })
+                        .collect(),
+                )
+            })
+            .collect::<Vec<_>>()[..],
+    );
+    let wkt_string = multi_polygon.to_wkt().to_string();
 
     let level =
         boundary
@@ -72,7 +97,7 @@ pub fn boundary_insert(
         boundary.id,
         boundary.name.clone(),
         level,
-        polygon,
+        wkt_string,
     )
     .map_err(|error| GeoBoundariesError::DbError {
         error,

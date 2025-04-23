@@ -33,6 +33,7 @@ import {
   userClaimRouteBreakdownStats,
   userClaimRuleSets,
   userClaimRuleSetRoadTags,
+  geoBoundariesFindCoords,
 } from "@ridi/db-queries";
 import { RidiLogger } from "@ridi/logger";
 import { lookupCooordsInfo } from "@ridi/maps-api";
@@ -661,19 +662,49 @@ export default Sentry.withSentry(
         return new Response();
       }
 
+      const dbCon = postgres(env.SUPABASE_DB_URL);
+
+      const url = new URL(request.url);
+      if (url.pathname.startsWith("/geo-boundaries")) {
+        const lat = url.searchParams.get("lat");
+        const lon = url.searchParams.get("lon");
+
+        if (!lat || !lon) {
+          return new Response("missing lat or lon", { status: 400 });
+        }
+
+        const boundaries = (
+          await geoBoundariesFindCoords(dbCon, {
+            lat,
+            lon,
+          })
+        )
+          .toSorted((a, b) => b.level - a.level)
+          .filter((b) => !!b.name);
+
+        return new Response(
+          JSON.stringify(
+            boundaries.map((b) => ({ name: b.name, level: b.level })),
+          ),
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          },
+        );
+      }
+
       const supabaseClient = createClient(
         env.SUPABASE_URL,
         env.SUPABASE_SERVICE_ROLE_KEY,
       );
-
-      const dbCon = postgres(env.SUPABASE_DB_URL);
 
       let response: Response | undefined;
 
       await dbCon.begin(async (tx) => {
         const messaging = new Messaging(tx, ridiLogger);
 
-        if (new URL(request.url).pathname.startsWith("/stripe-webhook")) {
+        if (url.pathname.startsWith("/stripe-webhook")) {
           const stripeApi = new StripeApi(
             tx,
             ridiLogger,

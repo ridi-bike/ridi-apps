@@ -1,3 +1,7 @@
+-- name: GeoBoundariesFindCoords :many
+select * from geo_boundaries
+where postgis.st_within(postgis.st_point(sqlc.arg(lon), sqlc.arg(lat)), geo_boundaries.polygon);
+
 -- name: RouteGet :one
 with points_array as (
 	select 

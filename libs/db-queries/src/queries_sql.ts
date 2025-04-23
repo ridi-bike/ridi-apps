@@ -2,6 +2,33 @@
 
 import type  { Sql } from "postgres";
 
+export const geoBoundariesFindCoordsQuery = `-- name: GeoBoundariesFindCoords :many
+select id, name, polygon, level, updated_at from geo_boundaries
+where postgis.st_within(postgis.st_point($1, $2), geo_boundaries.polygon)`;
+
+export interface GeoBoundariesFindCoordsArgs {
+    lon: string;
+    lat: string;
+}
+
+export interface GeoBoundariesFindCoordsRow {
+    id: string;
+    name: string;
+    polygon: string;
+    level: number;
+    updatedAt: Date;
+}
+
+export async function geoBoundariesFindCoords(sql: Sql, args: GeoBoundariesFindCoordsArgs): Promise<GeoBoundariesFindCoordsRow[]> {
+    return (await sql.unsafe(geoBoundariesFindCoordsQuery, [args.lon, args.lat]).values()).map(row => ({
+        id: row[0],
+        name: row[1],
+        polygon: row[2],
+        level: row[3],
+        updatedAt: row[4]
+    }));
+}
+
 export const routeGetQuery = `-- name: RouteGet :one
 with points_array as (
 	select 

@@ -3,7 +3,7 @@ use std::{io, path::PathBuf, process};
 use env::{Env, RidiEnv};
 use geo_boundaries::boundary_insert;
 use postgres::NoTls;
-use tracing::{error, trace, Level};
+use tracing::{error, info, trace, Level};
 
 mod db;
 mod env;
@@ -20,7 +20,7 @@ fn main() {
             .with_file(true)
             .with_line_number(true)
             .with_thread_names(true)
-            .with_max_level(Level::TRACE)
+            .with_max_level(Level::INFO)
             .finish();
 
         tracing::subscriber::set_global_default(subscriber)
@@ -34,6 +34,13 @@ fn main() {
             .finish();
         tracing::subscriber::set_global_default(subscriber)
     };
+
+    info!(
+        service = "geo-boundaries-init",
+        region = env.region,
+        pbf_location = env.pbf_location,
+        "Geo boundaries init starting"
+    );
 
     if let Err(e) = subscriber {
         error!(error = ?e, "Failed to set up tracing");
@@ -57,7 +64,12 @@ fn main() {
             Ok(b) => b,
         };
 
-    trace!(boundaries = ?boundaries.len(), "boundaries found");
+    info!(
+        service = "geo-boundaries-init",
+        region = env.region,
+        boundaries_len = boundaries.len(),
+        "Boundaries found"
+    );
 
     for boundary in boundaries {
         match boundary_insert(&mut db_client, &boundary) {
@@ -67,4 +79,10 @@ fn main() {
             Ok(o) => o,
         };
     }
+
+    info!(
+        service = "geo-boundaries-init",
+        region = env.region,
+        "Geo boundaries init donw"
+    );
 }
