@@ -53,7 +53,7 @@ const geoBoundaryInitImage = new docker_build.Image(geoBoundaryInitName, {
 
 function calculateCronSchedule(jobIndex: number) {
   // Start at 1am (01:00)
-  const baseHour = 1;
+  const baseHour = 9;
   const baseMinute = 0;
 
   // Each job is delayed by 5 minutes
@@ -101,6 +101,10 @@ regions.forEach((region, regionIdx) => {
                   name: geoBoundaryJobName,
                   image: geoBoundaryInitImage.ref,
                   env: [
+                    {
+                      name: "REGION",
+                      value: region.region,
+                    },
                     {
                       name: "PBF_LOCATION",
                       value: getPbfLocation(
