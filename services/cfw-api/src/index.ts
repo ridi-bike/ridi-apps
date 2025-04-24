@@ -668,8 +668,10 @@ export default Sentry.withSentry(
       if (url.pathname.startsWith("/geo-boundaries")) {
         const lat = url.searchParams.get("lat");
         const lon = url.searchParams.get("lon");
+        ridiLogger.info("Geo Boundaries call", { lat, lon });
 
         if (!lat || !lon) {
+          ridiLogger.warn("Geo Boundaries call missing values", { lat, lon });
           return new Response("missing lat or lon", { status: 400 });
         }
 
@@ -682,16 +684,18 @@ export default Sentry.withSentry(
           .toSorted((a, b) => b.level - a.level)
           .filter((b) => !!b.name);
 
-        return new Response(
-          JSON.stringify(
-            boundaries.map((b) => ({ name: b.name, level: b.level })),
-          ),
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
+        const results = boundaries.map((b) => ({
+          name: b.name,
+          level: b.level,
+        }));
+
+        ridiLogger.warn("Geo Boundaries found", { lat, lon, results });
+
+        return new Response(JSON.stringify(results), {
+          headers: {
+            "Content-Type": "application/json",
           },
-        );
+        });
       }
 
       const supabaseClient = createClient(
