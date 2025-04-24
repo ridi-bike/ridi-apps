@@ -1,7 +1,7 @@
 use std::{collections::HashMap, fmt::Display, io, path::PathBuf, time::Instant};
 
 use osmpbfreader::{Node, OsmObj, Relation, Way};
-use tracing::{error, trace};
+use tracing::{error, info, trace};
 
 #[derive(Debug, thiserror::Error)]
 pub enum PbfReaderError {
@@ -161,6 +161,8 @@ impl PbfReader {
     }
 
     pub fn pbf_get_boundaries(file: &PathBuf) -> Result<Vec<Boundary>, PbfReaderError> {
+        info!("Reading PBF");
+
         let mut reader = PbfReader {
             nodes: HashMap::new(),
             ways: HashMap::new(),

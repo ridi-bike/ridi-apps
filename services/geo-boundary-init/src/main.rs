@@ -1,9 +1,9 @@
-use std::{io, path::PathBuf, process};
+use std::{io, path::PathBuf, process, thread::sleep, time::Duration};
 
 use env::{Env, RidiEnv};
 use geo_boundaries::boundary_insert;
 use postgres::NoTls;
-use tracing::{error, info, trace, Level};
+use tracing::{error, info, info_span, warn, Level};
 
 mod db;
 mod env;
@@ -17,9 +17,6 @@ fn main() {
         let subscriber = tracing_subscriber::fmt()
             .json()
             .with_writer(io::stderr)
-            .with_file(true)
-            .with_line_number(true)
-            .with_thread_names(true)
             .with_max_level(Level::INFO)
             .finish();
 
@@ -27,32 +24,43 @@ fn main() {
     } else {
         let subscriber = tracing_subscriber::fmt()
             .with_writer(io::stderr)
-            .with_file(true)
-            .with_line_number(true)
-            .with_thread_names(true)
             .with_max_level(Level::INFO)
             .finish();
         tracing::subscriber::set_global_default(subscriber)
     };
 
-    info!(
+    let _span = info_span!(
+        "Geo boundaries main",
         service = "geo-boundaries-init",
         region = env.region,
         pbf_location = env.pbf_location,
-        "Geo boundaries init starting"
-    );
+    )
+    .entered();
+
+    info!("Starting");
 
     if let Err(e) = subscriber {
-        error!(error = ?e, "Failed to set up tracing");
+        eprintln!("Failed to set up tracing: {e:?}");
         process::exit(1);
     }
 
-    let mut db_client = match postgres::Client::connect(&env.supabase_db_url, NoTls) {
-        Err(e) => {
-            error!(error = ?e, "Failed to connect to db");
-            process::exit(1);
-        }
-        Ok(con) => con,
+    let mut connection_attempt = 0;
+    let mut db_client = loop {
+        connection_attempt += 1;
+
+        info!(connection_attempt = connection_attempt, "Connecting to db");
+        match postgres::Client::connect(&env.supabase_db_url, NoTls) {
+            Err(e) => {
+                if connection_attempt < 11 {
+                    warn!(error = ?e, connection_attempt = connection_attempt, "Failed to connect to db");
+                    sleep(Duration::from_millis(connection_attempt * 1000));
+                } else {
+                    error!(error = ?e, "Failed to connect to db");
+                    process::exit(1);
+                }
+            }
+            Ok(con) => break con,
+        };
     };
 
     let boundaries =
@@ -64,12 +72,7 @@ fn main() {
             Ok(b) => b,
         };
 
-    info!(
-        service = "geo-boundaries-init",
-        region = env.region,
-        boundaries_len = boundaries.len(),
-        "Boundaries found"
-    );
+    info!(boundaries_len = boundaries.len(), "Boundaries found");
 
     for boundary in boundaries {
         match boundary_insert(&mut db_client, &boundary) {
@@ -80,9 +83,5 @@ fn main() {
         };
     }
 
-    info!(
-        service = "geo-boundaries-init",
-        region = env.region,
-        "Geo boundaries init donw"
-    );
+    info!("Done");
 }
