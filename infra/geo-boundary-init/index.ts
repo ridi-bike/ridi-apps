@@ -55,7 +55,7 @@ function calculateCronSchedule(jobIndex: number) {
   const baseHour = 16;
   const baseMinute = 0;
 
-  const delayMinutes = jobIndex * 3.5;
+  const delayMinutes = jobIndex * 3;
 
   const totalMinutes = baseMinute + delayMinutes;
   const additionalHours = Math.floor(totalMinutes / 60);
