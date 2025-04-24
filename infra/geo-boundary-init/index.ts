@@ -52,20 +52,16 @@ const geoBoundaryInitImage = new docker_build.Image(geoBoundaryInitName, {
 });
 
 function calculateCronSchedule(jobIndex: number) {
-  // Start at 1am (01:00)
-  const baseHour = 9;
+  const baseHour = 16;
   const baseMinute = 0;
 
-  // Each job is delayed by 5 minutes
-  const delayMinutes = jobIndex * 5;
+  const delayMinutes = jobIndex * 3.5;
 
-  // Calculate the actual time
   const totalMinutes = baseMinute + delayMinutes;
   const additionalHours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
   const hour = (baseHour + additionalHours) % 24;
 
-  // Set to run on the 22nd of every month
   return { cron: `${minutes} ${hour} 24 * *` };
 }
 
