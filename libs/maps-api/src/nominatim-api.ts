@@ -1,21 +1,4 @@
-type Coords = [string, string];
-const coordsAddrCache = new Map<string, string>();
-function getKey(coords: Coords): string {
-  return `${Math.round(Number(coords[0]) * 1000)}${Math.round(Number(coords[1]) * 1000)}`;
-}
-export function coordsAddressCacheInsert(coords: Coords, address: string) {
-  coordsAddrCache.set(getKey(coords), address);
-}
-
-export async function coordsAddressGet(coords: Coords): Promise<string> {
-  const fromCache = coordsAddrCache.get(getKey(coords));
-  if (fromCache) {
-    return fromCache;
-  }
-  const fromLookup = await lookupCooordsInfo([coords, null]);
-  coordsAddressCacheInsert(coords, fromLookup[0]);
-  return fromLookup[0];
-}
+import { type Coords } from "./index.ts";
 
 type ReverseGeocodingResponseOk = {
   place_id: number;
@@ -85,45 +68,17 @@ function getCityLoc(coords: ReverseGeocodingResponse): string {
   return `${coords.address.city || coords.address.town || coords.address.state || coords.address.state_district || coords.address.village || coords.address.municipality}`;
 }
 
-function formatCityDiff(coords: ReverseGeocodingResponse): string {
-  if (!isRespOk(coords)) {
-    return "Unknown";
-  }
-  return `${getCityLoc(coords)}, ${coords.address.country}`;
-}
-function formatCitySame(coords: ReverseGeocodingResponse): string {
-  if (!isRespOk(coords)) {
-    return "Unknown";
-  }
-  const partOne =
-    coords.address.isolated_dwelling ||
-    coords.address.road ||
-    coords.address.postcode;
-  return `${partOne ? partOne + ", " : ""}${getCityLoc(coords)}`;
-}
-export async function lookupCooordsInfo(
-  coords: [[string, string], null | [string, string]],
-): Promise<[string, null | string]> {
-  const coordsDetails = (await Promise.all(
-    coords.map((c) => {
-      if (!c) {
-        return null;
-      }
-      const url = `https://nominatim.openstreetmap.org/reverse?lat=${c[0]}&lon=${c[1]}&format=json`;
-      return fetch(url, {
-        headers: {
-          Referer: "https://app.ridi.bike",
-        },
-      }).then((r) => r.json());
-    }),
-  )) as [ReverseGeocodingResponse, null | ReverseGeocodingResponse];
-  const coordsOne = coordsDetails[0];
-  const coordsTwo = coordsDetails[1];
-  if (!coordsTwo) {
-    return [formatCitySame(coordsOne), null];
-  }
-  if (getCityLoc(coordsOne) !== getCityLoc(coordsTwo)) {
-    return [formatCityDiff(coordsOne), formatCityDiff(coordsTwo)];
-  }
-  return [formatCitySame(coordsOne), formatCitySame(coordsTwo)];
+export async function lookupCooordsInfoNominatim(
+  coords: Coords,
+): Promise<string> {
+  const coordsDetails = (await fetch(
+    `https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lon}&format=json`,
+    {
+      headers: {
+        Referer: "https://app.ridi.bike",
+      },
+    },
+  ).then((r) => r.json())) as ReverseGeocodingResponse;
+
+  return getCityLoc(coordsDetails);
 }

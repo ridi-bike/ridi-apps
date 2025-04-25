@@ -1,5 +1,6 @@
-import { coordsAddressGet } from "@ridi/maps-api";
 import { useCallback, useEffect, useState } from "react";
+
+import { coordsAddressGet } from "~/lib/coords-details";
 
 import { PointSelectDialog } from "../point-select-dialog";
 
@@ -18,7 +19,10 @@ export function MapMarker(
   const [description, setDescription] = useState("");
 
   const lookupAddr = useCallback(async () => {
-    return await coordsAddressGet([props.lat.toString(), props.lon.toString()]);
+    return await coordsAddressGet({
+      lat: props.lat,
+      lon: props.lon,
+    });
   }, [props.lat, props.lon]);
 
   useEffect(() => {

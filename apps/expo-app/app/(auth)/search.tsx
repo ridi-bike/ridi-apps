@@ -1,4 +1,3 @@
-import { coordsAddressCacheInsert } from "@ridi/maps-api";
 import { useRootNavigationState, useRouter } from "expo-router";
 import {
   Search,
@@ -15,6 +14,7 @@ import { GeoMapStatic } from "~/components/geo-map/geo-map-static";
 import { PointSelectDialog } from "~/components/point-select-dialog";
 import { ScreenCard } from "~/components/screen-card";
 import { ScreenFrame } from "~/components/screen-frame";
+import { coordsAddressCacheInsert } from "~/lib/coords-details";
 import { cn } from "~/lib/utils";
 
 type Location = {
@@ -99,11 +99,22 @@ export default function LocationSearch() {
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`,
+        {
+          headers: {
+            Referer: "https://app.ridi.bike",
+          },
+        },
       );
       const data = await response.json();
 
       (data as Location[]).forEach((loc) =>
-        coordsAddressCacheInsert([loc.lat, loc.lon], loc.display_name),
+        coordsAddressCacheInsert(
+          {
+            lat: Number(loc.lat),
+            lon: Number(loc.lon),
+          },
+          loc.display_name,
+        ),
       );
       setLocations(data);
       setSearching(false);

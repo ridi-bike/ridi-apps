@@ -1,5 +1,4 @@
 import { Slider } from "@miblanchard/react-native-slider";
-import { coordsAddressGet } from "@ridi/maps-api";
 import * as turf from "@turf/turf";
 import * as Location from "expo-location";
 import { Link, useRouter } from "expo-router";
@@ -27,6 +26,7 @@ import { GeoMapPlanView } from "~/components/geo-map/geo-map-plan-view";
 import { DIRECTIONS, getCardinalDirection } from "~/components/geo-map/util";
 import { LocationPermsNotGiven } from "~/components/LocationPermsNotGiven";
 import { ScreenFrame } from "~/components/screen-frame";
+import { coordsAddressGet } from "~/lib/coords-details";
 import { AdvIcon } from "~/lib/icons/adv";
 import { DualsportIcon } from "~/lib/icons/dualsport";
 import { TouringIcon } from "~/lib/icons/touring";
@@ -170,19 +170,19 @@ export default function PlansNew() {
 
   useEffect(() => {
     if (startCoords) {
-      coordsAddressGet([
-        startCoords[0].toString(),
-        startCoords[1].toString(),
-      ]).then((v) => setStartDesc(v));
+      coordsAddressGet({
+        lat: startCoords[0],
+        lon: startCoords[1],
+      }).then((v) => setStartDesc(v));
     }
   }, [startCoords]);
 
   useEffect(() => {
     if (finishCoords) {
-      coordsAddressGet([
-        finishCoords[0].toString(),
-        finishCoords[1].toString(),
-      ]).then((v) => setFinishDesc(v));
+      coordsAddressGet({
+        lat: finishCoords[0],
+        lon: finishCoords[1],
+      }).then((v) => setFinishDesc(v));
     }
   }, [finishCoords]);
 

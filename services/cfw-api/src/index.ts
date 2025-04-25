@@ -36,7 +36,7 @@ import {
   geoBoundariesFindCoords,
 } from "@ridi/db-queries";
 import { RidiLogger } from "@ridi/logger";
-import { lookupCooordsInfo } from "@ridi/maps-api";
+import { coordsDetailsGetAndFormat } from "@ridi/maps-api";
 import { Messaging } from "@ridi/messaging";
 import { StripeApi } from "@ridi/stripe-api";
 import * as Sentry from "@sentry/cloudflare";
@@ -422,10 +422,30 @@ const router = tsr
     }
     let startFinishDesc: [string, null | string];
     try {
-      startFinishDesc = await lookupCooordsInfo([
-        [data.startLat, data.startLon],
+      startFinishDesc = await Promise.all([
+        coordsDetailsGetAndFormat(
+          {
+            lat: Number(data.startLat),
+            lon: Number(data.startLon),
+          },
+          (coords) =>
+            geoBoundariesFindCoords(ctx.db, {
+              lat: coords.lat.toString(),
+              lon: coords.lon.toString(),
+            }),
+        ),
         data.finishLat && data.finishLon
-          ? [data.finishLat, data.finishLon]
+          ? coordsDetailsGetAndFormat(
+              {
+                lat: Number(data.finishLat),
+                lon: Number(data.finishLon),
+              },
+              (coords) =>
+                geoBoundariesFindCoords(ctx.db, {
+                  lat: coords.lat.toString(),
+                  lon: coords.lon.toString(),
+                }),
+            )
           : null,
       ]);
     } catch (error) {
@@ -691,11 +711,14 @@ export default Sentry.withSentry(
 
         ridiLogger.warn("Geo Boundaries found", { lat, lon, results });
 
-        return new Response(JSON.stringify(results), {
+        const response = new Response(JSON.stringify(results), {
           headers: {
             "Content-Type": "application/json",
           },
         });
+        response.headers.set("Access-Control-Allow-Origin", env.RIDI_APP_URL);
+        response.headers.set("Access-Control-Allow-Credentials", "true");
+        return response;
       }
 
       const supabaseClient = createClient(
