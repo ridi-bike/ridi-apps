@@ -82,7 +82,10 @@ export default function BillingPage() {
   }
 
   return (
-    <ScreenFrame onGoBack={() => router.replace("/settings")} title="Billing">
+    <ScreenFrame
+      onGoBack={() => router.replace("/settings")}
+      title="Ridi supporter"
+    >
       <View className="flex size-full flex-col items-center justify-start">
         <AnimatePresence>
           {user?.subType === "code" && (
@@ -92,7 +95,7 @@ export default function BillingPage() {
                 aria-level={2}
                 className="mb-4 text-lg font-bold dark:text-gray-100"
               >
-                Current Subscription
+                Current Supporter level
               </Text>
               <View className="rounded-2xl border-2 border-black bg-white p-6 shadow-lg dark:border-gray-700 dark:bg-gray-900">
                 <View className="flex flex-row items-center justify-between">
@@ -149,7 +152,7 @@ export default function BillingPage() {
                                 {data.subscription.price.priceType === "yearly"
                                   ? "Yearly"
                                   : "Monthly"}{" "}
-                                Plan
+                                Supporter
                               </Text>
                               <Text className="text-gray-600 dark:text-gray-200">
                                 {data.subscription.price.price} EUR/
@@ -190,7 +193,7 @@ export default function BillingPage() {
                               className="flex-1 rounded-xl border-2 border-black bg-[#FF5937] px-4 py-2 font-medium text-white transition-colors hover:bg-[#ff4a25] dark:border-gray-700"
                             >
                               <Text className="text-center font-medium text-white">
-                                Manage plan
+                                Manage supporter status
                               </Text>
                             </Pressable>
                           </View>
@@ -228,7 +231,7 @@ export default function BillingPage() {
                                   {price.priceType === "yearly"
                                     ? "Yearly"
                                     : "Monthly"}{" "}
-                                  Plan
+                                  Supporter
                                 </Text>
                                 <Text className="mt-2 text-2xl font-bold dark:text-gray-100">
                                   {price.price.toFixed(2)} EUR
@@ -254,7 +257,17 @@ export default function BillingPage() {
                               >
                                 <CheckIcon className="size-5 text-[#FF5937]" />
                                 <Text className="dark:text-gray-200">
-                                  Unlimited route planning
+                                  Your support helps further Ridi development
+                                </Text>
+                              </View>
+                              <View
+                                role="listitem"
+                                className="flex flex-row items-center gap-2"
+                              >
+                                <CheckIcon className="size-5 text-[#FF5937]" />
+                                <Text className="dark:text-gray-200">
+                                  Download as many GPX files as you want and
+                                  ride as much as you can!
                                 </Text>
                               </View>
                             </View>

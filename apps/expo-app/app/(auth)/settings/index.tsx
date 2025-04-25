@@ -88,7 +88,7 @@ export default function UserSettings() {
                   aria-level={3}
                   className="mb-3 text-sm text-gray-500 dark:text-gray-300"
                 >
-                  Billing
+                  Supporter status
                 </Text>
                 <AnimatePresence exitBeforeEnter>
                   {userWithSub && (
@@ -108,10 +108,9 @@ export default function UserSettings() {
                           </View>
                           <View className="text-left">
                             <Text className="text-sm font-medium dark:text-gray-100">
-                              {userWithSub.subType === "stripe" &&
-                                "Stripe Subscription"}
-                              {userWithSub.subType === "none" && "Free"}
-                              {userWithSub.subType === "code" && "Code"}
+                              {userWithSub.subType === "stripe" && "Supporting"}
+                              {userWithSub.subType === "none" && "None"}
+                              {userWithSub.subType === "code" && "Ridi friend"}
                             </Text>
                           </View>
                         </View>

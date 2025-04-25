@@ -459,12 +459,12 @@ const router = tsr
     let distance = data.distance || "0";
     if (data.finishLat && data.finishLon) {
       const startPoint = turf.point([
-        Number(data.startLat),
         Number(data.startLon),
+        Number(data.startLat),
       ]);
       const finishPoint = turf.point([
-        Number(data.finishLat),
         Number(data.finishLon),
+        Number(data.finishLat),
       ]);
 
       distance = turf

@@ -53,10 +53,12 @@ function DownloadGpxDialog({
             {user.user && (
               <>
                 {user.user.subType === "none" && (
-                  <Text>Become a Ridi supporter to download GPX</Text>
+                  <Text className="dark:text-gray-100">
+                    Become a Ridi supporter to download GPX
+                  </Text>
                 )}
                 {user.user.subType !== "none" && (
-                  <Text>
+                  <Text className="dark:text-gray-100">
                     Start the GPX download and open the file in your favourite
                     navigatior
                   </Text>
@@ -88,7 +90,7 @@ function DownloadGpxDialog({
                     router.replace("/settings/billing");
                   }}
                 >
-                  <Text className="dark:text-gray-200">Login</Text>
+                  <Text className="dark:text-gray-200">Become a supporter</Text>
                 </Button>
               )}
             {user.user &&
