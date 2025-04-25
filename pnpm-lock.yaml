@@ -225,6 +225,9 @@ importers:
       expo:
         specifier: ~51.0.38
         version: 51.0.39(@babel/core@7.26.10)(encoding@0.1.13)
+      expo-application:
+        specifier: ~5.9.1
+        version: 5.9.1(expo@51.0.39(@babel/core@7.26.10)(encoding@0.1.13))
       expo-auth-session:
         specifier: ^5.5.2
         version: 5.5.2(expo@51.0.39(@babel/core@7.26.10)(encoding@0.1.13))
@@ -243,6 +246,12 @@ importers:
       expo-dev-client:
         specifier: ~4.0.28
         version: 4.0.29(expo@51.0.39(@babel/core@7.26.10)(encoding@0.1.13))
+      expo-device:
+        specifier: ~6.0.2
+        version: 6.0.2(expo@51.0.39(@babel/core@7.26.10)(encoding@0.1.13))
+      expo-file-system:
+        specifier: ~17.0.1
+        version: 17.0.1(expo@51.0.39(@babel/core@7.26.10)(encoding@0.1.13))
       expo-font:
         specifier: ~12.0.9
         version: 12.0.10(expo@51.0.39(@babel/core@7.26.10)(encoding@0.1.13))
@@ -255,6 +264,9 @@ importers:
       expo-linking:
         specifier: ~6.3.1
         version: 6.3.1(expo@51.0.39(@babel/core@7.26.10)(encoding@0.1.13))
+      expo-localization:
+        specifier: ~15.0.3
+        version: 15.0.3(expo@51.0.39(@babel/core@7.26.10)(encoding@0.1.13))
       expo-location:
         specifier: ~17.0.1
         version: 17.0.1(expo@51.0.39(@babel/core@7.26.10)(encoding@0.1.13))
@@ -306,6 +318,12 @@ importers:
       pmtiles:
         specifier: ^4.3.0
         version: 4.3.0
+      posthog-react-native:
+        specifier: ^3.15.0
+        version: 3.15.0(76799e2399f2c87983631c45c63ede8f)
+      posthog-react-native-session-replay:
+        specifier: ^1.0.6
+        version: 1.0.6(react-native@0.74.5(@babel/core@7.26.10)(@types/react@18.2.79)(encoding@0.1.13)(react@18.2.0))(react@18.2.0)
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -6584,6 +6602,11 @@ packages:
     peerDependencies:
       expo: '*'
 
+  expo-device@6.0.2:
+    resolution: {integrity: sha512-sCt91CuTmAuMXX4SlFOn4lIos2UIr8vb0jDstDDZXys6kErcj0uynC7bQAMreU5uRUTKMAl4MAMpKt9ufCXPBw==}
+    peerDependencies:
+      expo: '*'
+
   expo-file-system@17.0.1:
     resolution: {integrity: sha512-dYpnZJqTGj6HCYJyXAgpFkQWsiCH3HY1ek2cFZVHFoEc5tLz9gmdEgTF6nFHurvmvfmXqxi7a5CXyVm0aFYJBw==}
     peerDependencies:
@@ -6614,6 +6637,11 @@ packages:
 
   expo-linking@6.3.1:
     resolution: {integrity: sha512-xuZCntSBGWCD/95iZ+mTUGTwHdy8Sx+immCqbUBxdvZ2TN61P02kKg7SaLS8A4a/hLrSCwrg5tMMwu5wfKr35g==}
+
+  expo-localization@15.0.3:
+    resolution: {integrity: sha512-IfcmlKuKRlowR9qIzL0e+nGHBeNoF7l2GQaOJstc7HZiPjNJ4J1R4D53ZNf483dt7JSkTRJBihdTadOtOEjRdg==}
+    peerDependencies:
+      expo: '*'
 
   expo-location@17.0.1:
     resolution: {integrity: sha512-m+OzotzlAXO3ZZ1uqW5GC25nXW868zN+ROyBA1V4VF6jGay1ZEs4URPglCVUDzZby2F5wt24cMzqDKw2IX6nRw==}
@@ -9654,6 +9682,51 @@ packages:
     resolution: {integrity: sha512-cDWgoah1Gez9rN3H4165peY9qfpEo+SA61oQv65O3cRUE1pOEoJWwddwcqKE8XZYjbblOJlYDlLV4h67HrEVDg==}
     engines: {node: '>=12'}
 
+  posthog-react-native-session-replay@1.0.6:
+    resolution: {integrity: sha512-IOVFaMpdpyMsemnpKNKrIdU2XI7Qfb6Ctp1hOc4gsHKDctGWgwbgZu4a6Sn1viChlSBlTBUCj8BqgUSlkgK2Zg==}
+    peerDependencies:
+      react: 18.2.0
+      react-native: '*'
+
+  posthog-react-native@3.15.0:
+    resolution: {integrity: sha512-H/FjTvAxaV6kx07TXk8KwHBgJ+2mU1yPhAGsT6oIIa16cq7XpSlXDgyZ+DqAwWjtp/GFHD7VlqdAz7jdK2TYxw==}
+    peerDependencies:
+      '@react-native-async-storage/async-storage': '>=1.0.0'
+      '@react-navigation/native': '>= 5.0.0'
+      expo-application: '>= 4.0.0'
+      expo-device: '>= 4.0.0'
+      expo-file-system: '>= 13.0.0'
+      expo-localization: '>= 11.0.0'
+      posthog-react-native-session-replay: '>= 1.0.6'
+      react-native-device-info: '>= 10.0.0'
+      react-native-localize: '>= 3.0.0'
+      react-native-navigation: '>= 6.0.0'
+      react-native-safe-area-context: '>= 4.0.0'
+      react-native-svg: '>= 15.0.0'
+    peerDependenciesMeta:
+      '@react-native-async-storage/async-storage':
+        optional: true
+      '@react-navigation/native':
+        optional: true
+      expo-application:
+        optional: true
+      expo-device:
+        optional: true
+      expo-file-system:
+        optional: true
+      expo-localization:
+        optional: true
+      posthog-react-native-session-replay:
+        optional: true
+      react-native-device-info:
+        optional: true
+      react-native-localize:
+        optional: true
+      react-native-navigation:
+        optional: true
+      react-native-safe-area-context:
+        optional: true
+
   potpack@2.0.0:
     resolution: {integrity: sha512-Q+/tYsFU9r7xoOJ+y/ZTtdVQwTWfzjbiXBDMM/JKUux3+QPP02iUuIoeBQ+Ot6oEDlC+/PGjB/5A3K7KKb7hcw==}
 
@@ -10294,6 +10367,9 @@ packages:
     resolution: {integrity: sha512-kg6oI4g+vc41vePJyO6dHt/yl0Rz3Thv0kJeVQ3D1kS3E5XSuKbPc29G4IpT/Kv1KQwgHVcN+HtyS+HYLNSvQg==}
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
+
+  rtl-detect@1.1.2:
+    resolution: {integrity: sha512-PGMBq03+TTG/p/cRB7HCLKJ1MgDIi07+QU1faSjiYRfmY5UsAttV9Hs08jDAHVwcOwmVLcSJkpwyfXszVjWfIQ==}
 
   run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
@@ -11197,6 +11273,10 @@ packages:
 
   typewise@1.0.3:
     resolution: {integrity: sha512-aXofE06xGhaQSPzt8hlTY+/YWQhm9P0jYUp1f2XtmW/3Bk0qzXcyFWAtPoo2uTGQj1ZwbDuSyuxicq+aDo8lCQ==}
+
+  ua-parser-js@0.7.40:
+    resolution: {integrity: sha512-us1E3K+3jJppDBa3Tl0L3MOJiGhe1C6P0+nIvQAFYbxlMAx0h81eOwLmU57xgqToduDDPx3y5QsdjPfDu+FgOQ==}
+    hasBin: true
 
   ua-parser-js@1.0.40:
     resolution: {integrity: sha512-z6PJ8Lml+v3ichVojCiB8toQJBuwR42ySM4ezjXIqXK3M0HczmKQ3LF4rhU55PfD99KEEXQG6yb7iOMyvYuHew==}
@@ -20195,6 +20275,11 @@ snapshots:
       expo-dev-menu-interface: 1.8.4(expo@51.0.39(@babel/core@7.26.10)(encoding@0.1.13))
       semver: 7.7.1
 
+  expo-device@6.0.2(expo@51.0.39(@babel/core@7.26.10)(encoding@0.1.13)):
+    dependencies:
+      expo: 51.0.39(@babel/core@7.26.10)(encoding@0.1.13)
+      ua-parser-js: 0.7.40
+
   expo-file-system@17.0.1(expo@51.0.39(@babel/core@7.26.10)(encoding@0.1.13)):
     dependencies:
       expo: 51.0.39(@babel/core@7.26.10)(encoding@0.1.13)
@@ -20225,6 +20310,11 @@ snapshots:
     transitivePeerDependencies:
       - expo
       - supports-color
+
+  expo-localization@15.0.3(expo@51.0.39(@babel/core@7.26.10)(encoding@0.1.13)):
+    dependencies:
+      expo: 51.0.39(@babel/core@7.26.10)(encoding@0.1.13)
+      rtl-detect: 1.1.2
 
   expo-location@17.0.1(expo@51.0.39(@babel/core@7.26.10)(encoding@0.1.13)):
     dependencies:
@@ -24045,6 +24135,24 @@ snapshots:
 
   postgres@3.4.5: {}
 
+  posthog-react-native-session-replay@1.0.6(react-native@0.74.5(@babel/core@7.26.10)(@types/react@18.2.79)(encoding@0.1.13)(react@18.2.0))(react@18.2.0):
+    dependencies:
+      react: 18.2.0
+      react-native: 0.74.5(@babel/core@7.26.10)(@types/react@18.2.79)(encoding@0.1.13)(react@18.2.0)
+
+  posthog-react-native@3.15.0(76799e2399f2c87983631c45c63ede8f):
+    dependencies:
+      react-native-svg: 15.2.0(react-native@0.74.5(@babel/core@7.26.10)(@types/react@18.2.79)(encoding@0.1.13)(react@18.2.0))(react@18.2.0)
+    optionalDependencies:
+      '@react-native-async-storage/async-storage': 1.23.1(react-native@0.74.5(@babel/core@7.26.10)(@types/react@18.2.79)(encoding@0.1.13)(react@18.2.0))
+      '@react-navigation/native': 6.1.18(react-native@0.74.5(@babel/core@7.26.10)(@types/react@18.2.79)(encoding@0.1.13)(react@18.2.0))(react@18.2.0)
+      expo-application: 5.9.1(expo@51.0.39(@babel/core@7.26.10)(encoding@0.1.13))
+      expo-device: 6.0.2(expo@51.0.39(@babel/core@7.26.10)(encoding@0.1.13))
+      expo-file-system: 17.0.1(expo@51.0.39(@babel/core@7.26.10)(encoding@0.1.13))
+      expo-localization: 15.0.3(expo@51.0.39(@babel/core@7.26.10)(encoding@0.1.13))
+      posthog-react-native-session-replay: 1.0.6(react-native@0.74.5(@babel/core@7.26.10)(@types/react@18.2.79)(encoding@0.1.13)(react@18.2.0))(react@18.2.0)
+      react-native-safe-area-context: 4.10.5(react-native@0.74.5(@babel/core@7.26.10)(@types/react@18.2.79)(encoding@0.1.13)(react@18.2.0))(react@18.2.0)
+
   potpack@2.0.0: {}
 
   preferred-pm@4.1.1:
@@ -24853,6 +24961,8 @@ snapshots:
       '@rollup/rollup-win32-ia32-msvc': 4.35.0
       '@rollup/rollup-win32-x64-msvc': 4.35.0
       fsevents: 2.3.3
+
+  rtl-detect@1.1.2: {}
 
   run-parallel@1.2.0:
     dependencies:
@@ -25902,6 +26012,8 @@ snapshots:
   typewise@1.0.3:
     dependencies:
       typewise-core: 1.2.0
+
+  ua-parser-js@0.7.40: {}
 
   ua-parser-js@1.0.40: {}
 

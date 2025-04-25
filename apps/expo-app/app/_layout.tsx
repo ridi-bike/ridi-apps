@@ -4,8 +4,10 @@ import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { router, Stack } from "expo-router";
 import maplibregl from "maplibre-gl";
 import { Protocol } from "pmtiles";
+import { PostHogProvider } from "posthog-react-native";
 import { useEffect } from "react";
 
+import { posthog } from "~/lib/posthog";
 import { supabase } from "~/lib/supabase";
 
 Sentry.init({
@@ -50,20 +52,26 @@ export default Sentry.wrap(function App() {
     return supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
         router.replace("/");
+      } else if (!session.user.is_anonymous) {
+        posthog.identify(session.user.id, {
+          email: session.user.email,
+        });
       }
     }).data.subscription.unsubscribe;
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <Stack
-        screenOptions={{
-          contentStyle: {
-            overflow: "hidden",
-          },
-        }}
-      />
-      <PortalHost />
-    </QueryClientProvider>
+    <PostHogProvider client={posthog}>
+      <QueryClientProvider client={queryClient}>
+        <Stack
+          screenOptions={{
+            contentStyle: {
+              overflow: "hidden",
+            },
+          }}
+        />
+        <PortalHost />
+      </QueryClientProvider>
+    </PostHogProvider>
   );
 });

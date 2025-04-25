@@ -57,7 +57,8 @@
           "project": "ridi-apps-expo",
           "organization": "hood-software"
         }
-      ]
+      ],
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true
