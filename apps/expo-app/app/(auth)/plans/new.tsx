@@ -30,6 +30,7 @@ import { coordsAddressGet } from "~/lib/coords-details";
 import { AdvIcon } from "~/lib/icons/adv";
 import { DualsportIcon } from "~/lib/icons/dualsport";
 import { TouringIcon } from "~/lib/icons/touring";
+import { posthogClient } from "~/lib/posthog/client";
 import { findRegions, type Region } from "~/lib/regions";
 import { useStorePlans } from "~/lib/stores/plans-store";
 import { useStoreRuleSets } from "~/lib/stores/rules-store";
@@ -112,12 +113,20 @@ export default function PlansNew() {
   useEffect(() => {
     if (startCoords && finishCoords && startRegions && finishRegions) {
       if (!startRegions.length || !finishRegions.length) {
+        posthogClient.captureEvent("plan-new-unsupported-region", {
+          startCoords,
+          finishCoords,
+        });
         setErrorMessage("Journey start or finish set in unsupported region");
       } else {
         const overlapping = startRegions.filter((sr) =>
           finishRegions.find((fr) => fr.region === sr.region),
         );
         if (!overlapping.length) {
+          posthogClient.captureEvent("plan-new-different-regions", {
+            startRegions,
+            finishRegions,
+          });
           setErrorMessage("Journey start and finish are in different regions");
         } else {
           setErrorMessage(null);
@@ -127,7 +136,7 @@ export default function PlansNew() {
   }, [finishCoords, finishRegions, startCoords, startRegions]);
 
   useEffect(() => {
-    // set immediate is needed to let the stack mount first and then update params
+    // set timeout is needed to let the stack mount first and then update params
     // this happens when reloading browser with isRoundTrip query param
     setTimeout(() => {
       if (isRoundTrip) {
@@ -188,11 +197,13 @@ export default function PlansNew() {
 
   const getCurrentLocation = useCallback(async () => {
     if (currentCoords) {
+      posthogClient.captureEvent("plan-new-current-location-clear");
       setCurrentCoords(null);
       return;
     }
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
+      posthogClient.captureEvent("plan-new-current-location-not-granted");
       setShowLocationAlert(true);
       return;
     }
@@ -200,7 +211,10 @@ export default function PlansNew() {
     const location = await Location.getCurrentPositionAsync({});
 
     if (location) {
+      posthogClient.captureEvent("plan-new-current-location-gotten");
       setCurrentCoords([location.coords.latitude, location.coords.longitude]);
+    } else {
+      posthogClient.captureEvent("plan-new-current-location-not-available");
     }
   }, [currentCoords]);
 
@@ -229,7 +243,18 @@ export default function PlansNew() {
   return (
     <ScreenFrame
       title="New plan"
-      onGoBack={() => (mapMode ? setMapMode(false) : router.replace("/plans"))}
+      onGoBack={() => {
+        if (mapMode) {
+          setMapMode(false);
+
+          posthogClient.captureEvent("plan-new-map-mode", {
+            mapMode,
+            trigger: "back-button",
+          });
+        } else {
+          router.replace("/plans");
+        }
+      }}
       floating={
         <View className="flex w-full flex-col items-center justify-start">
           <View className="fixed bottom-0 flex w-full flex-col items-center justify-center bg-white p-4 dark:bg-gray-800">
@@ -250,7 +275,13 @@ export default function PlansNew() {
               <Pressable
                 key="set-map-mode"
                 role="button"
-                onPress={() => setMapMode(false)}
+                onPress={() => {
+                  setMapMode(false);
+                  posthogClient.captureEvent("plan-new-map-mode", {
+                    mapMode,
+                    trigger: "ok-button",
+                  });
+                }}
                 aria-disabled={!canCreateRoute()}
                 className={cn(
                   "w-full rounded-xl px-4 py-3 font-medium text-white transition-colors",
@@ -272,6 +303,9 @@ export default function PlansNew() {
                     if (!startCoords || !ruleSetId) {
                       return;
                     }
+
+                    posthogClient.captureEvent("plan-new-plan-create-ok");
+
                     let distance = (selectedDistance || 0) * 1000;
                     if (!isRoundTrip && finishCoords) {
                       const turfP1 = turf.point([
@@ -356,10 +390,18 @@ export default function PlansNew() {
                   coords: { lat: c[0], lon: c[1] },
                 }))}
                 selectionMode={centerSelectionMode ? "center" : "tap"}
-                setStart={(c) => setStartCoords(c ? [c.lat, c.lon] : undefined)}
-                setFinish={(c) =>
-                  setFinishCoords(c ? [c.lat, c.lon] : undefined)
-                }
+                setStart={(c) => {
+                  posthogClient.captureEvent("plan-new-coords-start-select", {
+                    coords: c,
+                  });
+                  setStartCoords(c ? [c.lat, c.lon] : undefined);
+                }}
+                setFinish={(c) => {
+                  posthogClient.captureEvent("plan-new-coords-finish-select", {
+                    coords: c,
+                  });
+                  setFinishCoords(c ? [c.lat, c.lon] : undefined);
+                }}
               >
                 <View className="pointer-events-none flex w-full flex-row items-start justify-center">
                   <View className="flex flex-1 flex-row items-start justify-center p-4">
@@ -386,9 +428,15 @@ export default function PlansNew() {
                     </Pressable>
                     <Pressable
                       role="button"
-                      onPress={() =>
-                        setCenterSelectionMode(!centerSelectionMode)
-                      }
+                      onPress={() => {
+                        posthogClient.captureEvent(
+                          "plan-new-selection-mode-set",
+                          {
+                            centerSelectionMode,
+                          },
+                        );
+                        setCenterSelectionMode(!centerSelectionMode);
+                      }}
                       className={cn(
                         "flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 p-4",
                         {
@@ -403,7 +451,7 @@ export default function PlansNew() {
                     </Pressable>
                     {!searchPoints && (
                       <Link
-                        href="/search"
+                        href={`/search?isRoundTrip=${JSON.stringify(isRoundTrip)}`}
                         className="flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 border-black bg-white p-4 dark:border-gray-700 dark:bg-gray-900"
                       >
                         <Search className="size-4 dark:text-gray-200" />
@@ -413,6 +461,7 @@ export default function PlansNew() {
                       <Pressable
                         role="button"
                         onPress={() => {
+                          posthogClient.captureEvent("plan-new-search-clear");
                           setSearchPoints();
                         }}
                         className="flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 border-[#FF5937] bg-[#FF5937] p-4 text-white"
@@ -434,7 +483,16 @@ export default function PlansNew() {
           />
         )}
         <ScrollView className="max-h-[calc(100vh-170px)] w-full max-w-5xl px-4 pb-36 pt-4">
-          <Pressable role="button" onPress={() => setMapMode(true)}>
+          <Pressable
+            role="button"
+            onPress={() => {
+              posthogClient.captureEvent("plan-new-map-mode", {
+                mapMode,
+                trigger: "start-finish-panel",
+              });
+              setMapMode(true);
+            }}
+          >
             <GroupWithTitle title="Trip details">
               <AnimatePresence>
                 <MotiView
@@ -489,6 +547,9 @@ export default function PlansNew() {
             <Pressable
               role="button"
               onPress={() => {
+                posthogClient.captureEvent("plan-new-round-trip-set", {
+                  isRoundTrip,
+                });
                 setIsRoundTrip(false);
               }}
               className={cn(
@@ -508,6 +569,9 @@ export default function PlansNew() {
             <Pressable
               role="button"
               onPress={() => {
+                posthogClient.captureEvent("plan-new-round-trip-set", {
+                  isRoundTrip,
+                });
                 setIsRoundTrip(true);
               }}
               className={cn(
@@ -542,6 +606,10 @@ export default function PlansNew() {
                   role="button"
                   key={rs.id}
                   onPress={() => {
+                    posthogClient.captureEvent("plan-new-rule-set-selected", {
+                      ruleSetId: rs.id,
+                      isSystem: rs.isSystem,
+                    });
                     if (typeof rs.id === "string") {
                       setRuleSetId(rs.id);
                     }
@@ -597,7 +665,16 @@ export default function PlansNew() {
               <Settings className="size-6 dark:text-gray-200" />
             </Pressable>
           </GroupWithTitle>
-          <Pressable role="button" onPress={() => setMapMode(true)}>
+          <Pressable
+            role="button"
+            onPress={() => {
+              posthogClient.captureEvent("plan-new-map-mode", {
+                mapMode,
+                trigger: "map-panel",
+              });
+              setMapMode(true);
+            }}
+          >
             <GroupWithTitle title="Overview" className="h-48">
               <GeoMapPlanView
                 bearing={isRoundTrip ? (bearing ?? null) : null}
@@ -665,6 +742,9 @@ export default function PlansNew() {
                         minimumTrackStyle={{ backgroundColor: "transparent" }}
                         maximumTrackStyle={{ backgroundColor: "transparent" }}
                         onValueChange={(value) => {
+                          posthogClient.captureEvent("plan-new-bearing-set", {
+                            bearing,
+                          });
                           setBearing(value[0]);
                         }}
                       />
@@ -703,6 +783,9 @@ export default function PlansNew() {
                         minimumTrackStyle={{ backgroundColor: "transparent" }}
                         maximumTrackStyle={{ backgroundColor: "transparent" }}
                         onValueChange={(value) => {
+                          posthogClient.captureEvent("plan-new-distance-set", {
+                            distance,
+                          });
                           setSelectedDistance(DISTANCES[value[0]]);
                         }}
                       />

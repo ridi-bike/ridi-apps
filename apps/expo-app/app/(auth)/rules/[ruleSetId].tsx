@@ -24,6 +24,7 @@ import { View, Text, Pressable, TextInput, ScrollView } from "react-native";
 import { ErrorBox } from "~/components/error";
 import { ScreenCard } from "~/components/screen-card";
 import { ScreenFrame } from "~/components/screen-frame";
+import { posthogClient } from "~/lib/posthog/client";
 import { useStoreRuleSets } from "~/lib/stores/rules-store";
 import { cn } from "~/lib/utils";
 
@@ -76,6 +77,9 @@ export default function RulePackDetails() {
   }, [roadTags, ruleSet]);
 
   const toggleGroupExpanded = useCallback((groupIdx: number) => {
+    posthogClient.captureEvent("rule-group-expand-toggle", {
+      group: ruleGroups[groupIdx][2],
+    });
     setGroupsExpanded((ge) =>
       ge.includes(groupIdx)
         ? ge.filter((g) => g !== groupIdx)
@@ -122,6 +126,9 @@ export default function RulePackDetails() {
       if (ruleSet?.isSystem) {
         return;
       }
+      posthogClient.captureEvent("rule-group-enabled-toggle", {
+        group: group[2],
+      });
       const souldDisable = isGroupEnabled(group);
       if (souldDisable) {
         setRoadTags((rt) => ({
@@ -149,6 +156,10 @@ export default function RulePackDetails() {
       if (ruleSet?.isSystem) {
         return;
       }
+      posthogClient.captureEvent("rule-group-value-set", {
+        group: group[2],
+        value,
+      });
       setRoadTags((rt) => ({
         ...rt!,
         ...getGroupTags(group).reduce(
@@ -168,6 +179,10 @@ export default function RulePackDetails() {
       if (ruleSet?.isSystem) {
         return;
       }
+      posthogClient.captureEvent("rule-tag-value-set", {
+        tag: tag[0],
+        value,
+      });
       setRoadTags((rt) => ({
         ...rt!,
         [tag[0]]: value,
@@ -181,6 +196,9 @@ export default function RulePackDetails() {
       if (ruleSet?.isSystem) {
         return;
       }
+      posthogClient.captureEvent("rule-tag-enabled-toggle", {
+        tag: tag[0],
+      });
       setRoadTags((rt) => ({
         ...rt!,
         [tag[0]]: rt![tag[0]] === null ? 0 : null,
@@ -236,6 +254,9 @@ export default function RulePackDetails() {
               role="button"
               onPress={() => {
                 if (unsavedChangesExist) {
+                  posthogClient.captureEvent("rule-set-save", {
+                    ruleSetId: ruleSet.id,
+                  });
                   ruleSetSet({
                     ...ruleSet,
                     name: ruleSetName || "",

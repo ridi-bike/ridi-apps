@@ -8,6 +8,7 @@ import { useCreateSessionFromUrl } from "~/components/auth";
 import { Button } from "~/components/button";
 import { MotorcycleIcon } from "~/components/icons/motorcycle";
 import { Link } from "~/components/link";
+import { posthogClient } from "~/lib/posthog/client";
 import { usePhScreenCapture } from "~/lib/posthog/hooks";
 import { supabase } from "~/lib/supabase";
 
@@ -126,6 +127,7 @@ export default function Index() {
             variant="secondary"
             fullWidth
             onPress={async () => {
+              posthogClient.captureEvent("try-out-tapped");
               if (!session) {
                 await supabase.auth.signInAnonymously();
               }

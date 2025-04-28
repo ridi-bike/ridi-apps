@@ -10,6 +10,8 @@ import { GithubIcon } from "~/components/icons/github";
 import { GoogleIcon } from "~/components/icons/google";
 import { Input } from "~/components/input";
 import { apiClient } from "~/lib/api";
+import { posthogClient } from "~/lib/posthog/client";
+import { usePhScreenCapture } from "~/lib/posthog/hooks";
 import { supabase } from "~/lib/supabase";
 import { cn } from "~/lib/utils";
 
@@ -20,6 +22,9 @@ export default function LoginScreen() {
 
   const performOAuth = useCallback(
     async (provider: Provider) => {
+      posthogClient.captureEvent("login-oauth", {
+        provider,
+      });
       let fromUserAccessToken: string | undefined = undefined;
 
       const {
@@ -54,6 +59,7 @@ export default function LoginScreen() {
   );
 
   const performOTPAuth = useCallback(async (email: string) => {
+    posthogClient.captureEvent("login-otp-code-send");
     const { error } = await supabase.auth.signInWithOtp({
       email,
     });
@@ -64,6 +70,7 @@ export default function LoginScreen() {
 
   const validateOTPAuth = useCallback(
     async (email: string, token: string) => {
+      posthogClient.captureEvent("login-otp-code-validate");
       let fromUserAccessToken: string | undefined = undefined;
 
       const {
@@ -172,7 +179,10 @@ export default function LoginScreen() {
               variant="primary"
               fullWidth
               className="flex flex-row items-center justify-center gap-2"
-              onPress={() => setShowEmailInput(true)}
+              onPress={() => {
+                posthogClient.captureEvent("login-otp-selected");
+                setShowEmailInput(true);
+              }}
             >
               <MailIcon size={24} />
 

@@ -22,6 +22,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
+import { posthogClient } from "~/lib/posthog/client";
 import { useStorePlans } from "~/lib/stores/plans-store";
 import { useStoreRoute } from "~/lib/stores/routes-store";
 import { useUser } from "~/lib/useUser";
@@ -294,6 +295,9 @@ export default function RouteDetails() {
                             <View className="flex flex-col items-end justify-center">
                               <DeleteConfirmDialog
                                 onDelete={() => {
+                                  posthogClient.captureEvent("route-deleted", {
+                                    routeId: route.data.id,
+                                  });
                                   routeDelete(route.data.id);
                                   router.replace(`/plans/${planId}`);
                                 }}
@@ -311,6 +315,12 @@ export default function RouteDetails() {
                             <View className="flex flex-col items-end justify-center">
                               <DownloadGpxDialog
                                 onDownload={() => {
+                                  posthogClient.captureEvent(
+                                    "route-gpx-downloaded",
+                                    {
+                                      routeId: route.data.id,
+                                    },
+                                  );
                                   const { Point } = BaseBuilder.MODELS;
                                   const points = route.data.latLonArray.map(
                                     (latLon) => new Point(latLon[0], latLon[1]),

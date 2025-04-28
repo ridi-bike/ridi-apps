@@ -32,6 +32,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
+import { posthogClient } from "~/lib/posthog/client";
 import { useStoreRuleSets } from "~/lib/stores/rules-store";
 import { useUrlParams } from "~/lib/url-params";
 import { cn } from "~/lib/utils";
@@ -74,6 +75,9 @@ function DeleteConfirmDialog({
               variant="primary"
               className="flex w-full flex-row items-center justify-center"
               onPress={() => {
+                posthogClient.captureEvent("rule-set-deleted", {
+                  ruleSetId: ruleSet.id,
+                });
                 setOpen(false);
                 onDelete();
               }}
@@ -124,6 +128,9 @@ function ActionDialog({
               <Pressable
                 role="button"
                 onPress={() => {
+                  posthogClient.captureEvent("rule-set-opened", {
+                    ruleSetId: ruleSet.id,
+                  });
                   setOpen(false);
                   router.navigate(`/rules/${ruleSet.id}`);
                 }}
@@ -137,6 +144,9 @@ function ActionDialog({
               <Pressable
                 role="button"
                 onPress={() => {
+                  posthogClient.captureEvent("rule-set-duplicated", {
+                    ruleSetId: ruleSet.id,
+                  });
                   setOpen(false);
                   onDuplicate();
                 }}

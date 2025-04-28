@@ -1,7 +1,7 @@
 import { useGlobalSearchParams, useSegments } from "expo-router";
 import { useEffect, useMemo } from "react";
 
-import { posthog } from "./index";
+import { posthogClient } from "./client";
 
 export function usePhScreenCapture() {
   const segments = useSegments();
@@ -9,9 +9,9 @@ export function usePhScreenCapture() {
 
   const segmentPath = useMemo(() => `/${segments.join("/")}`, [segments]);
 
-  // useEffect(() => {
-  //   posthog.screen(segmentPath, {
-  //     ...params,
-  //   });
-  // }, [segmentPath, params]);
+  useEffect(() => {
+    posthogClient.captureScreen(segmentPath, {
+      ...params,
+    });
+  }, [segmentPath, params]);
 }

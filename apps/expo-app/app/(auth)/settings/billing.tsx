@@ -11,6 +11,7 @@ import { Input } from "~/components/input";
 import { Loading } from "~/components/loading";
 import { ScreenFrame } from "~/components/screen-frame";
 import { apiClient } from "~/lib/api";
+import { posthogClient } from "~/lib/posthog/client";
 import { getSuccessResponseOrThrow } from "~/lib/stores/util";
 import { useUrlParams } from "~/lib/url-params";
 import { useUser } from "~/lib/useUser";
@@ -44,6 +45,7 @@ export default function BillingPage() {
 
   useEffect(() => {
     if (stripeSuccess) {
+      posthogClient.captureEvent("billing-subscription-success");
       setLoading(true);
       apiClient
         .stripeSuccess()
@@ -73,6 +75,7 @@ export default function BillingPage() {
         },
       }),
     onSuccess: () => {
+      posthogClient.captureEvent("billing-code-claim-succeeded");
       queryClient.invalidateQueries({ queryKey: ["billing", DATA_VERSION] });
     },
   });
@@ -274,6 +277,10 @@ export default function BillingPage() {
                             <Pressable
                               role="button"
                               onPress={() => {
+                                posthogClient.captureEvent(
+                                  "billing-subscription-selected",
+                                  { ...price },
+                                );
                                 setLoading(true);
                                 apiClient
                                   .stripeCheckout({
@@ -337,6 +344,9 @@ export default function BillingPage() {
                             role="button"
                             onPress={() => {
                               if (code) {
+                                posthogClient.captureEvent(
+                                  "billing-code-claim-attempted",
+                                );
                                 codeClaim(code);
                               }
                             }}

@@ -1,4 +1,8 @@
-import { useRootNavigationState, useRouter } from "expo-router";
+import {
+  useLocalSearchParams,
+  useRootNavigationState,
+  useRouter,
+} from "expo-router";
 import {
   Search,
   MapPin,
@@ -15,6 +19,7 @@ import { PointSelectDialog } from "~/components/point-select-dialog";
 import { ScreenCard } from "~/components/screen-card";
 import { ScreenFrame } from "~/components/screen-frame";
 import { coordsAddressCacheInsert } from "~/lib/coords-details";
+import { posthogClient } from "~/lib/posthog/client.web";
 import { cn } from "~/lib/utils";
 
 type Location = {
@@ -24,11 +29,16 @@ type Location = {
 };
 
 type LocationCardProps = {
+  isRoundTrip: boolean;
   location: Location;
   gotoNewScreen: () => void;
 };
 
-function LocationCard({ location, gotoNewScreen }: LocationCardProps) {
+function LocationCard({
+  location,
+  gotoNewScreen,
+  isRoundTrip,
+}: LocationCardProps) {
   const router = useRouter();
   return (
     <PointSelectDialog
@@ -37,6 +47,7 @@ function LocationCard({ location, gotoNewScreen }: LocationCardProps) {
       lat={parseFloat(location.lat)}
       lon={parseFloat(location.lon)}
       setStart={() => {
+        posthogClient.captureEvent("point-search-start-select");
         gotoNewScreen();
         router.setParams({
           start: JSON.stringify([
@@ -45,15 +56,20 @@ function LocationCard({ location, gotoNewScreen }: LocationCardProps) {
           ]),
         });
       }}
-      setFinish={() => {
-        gotoNewScreen();
-        router.setParams({
-          finish: JSON.stringify([
-            parseFloat(location.lat),
-            parseFloat(location.lon),
-          ]),
-        });
-      }}
+      setFinish={
+        isRoundTrip
+          ? undefined
+          : () => {
+              posthogClient.captureEvent("point-search-finish-select");
+              gotoNewScreen();
+              router.setParams({
+                finish: JSON.stringify([
+                  parseFloat(location.lat),
+                  parseFloat(location.lon),
+                ]),
+              });
+            }
+      }
     >
       <ScreenCard
         topClassName="h-40"
@@ -92,10 +108,18 @@ export default function LocationSearch() {
   const [searchQuery, setSearchQuery] = useState("");
   const [locations, setLocations] = useState<Location[]>([]);
   const [searching, setSearching] = useState(false);
+  const { isRoundTrip } = useLocalSearchParams();
 
   const handleSearch = async () => {
     setSearching(true);
-    if (!searchQuery.trim()) return;
+    if (!searchQuery.trim()) {
+      return;
+    }
+
+    posthogClient.captureEvent("point-search-query-started", {
+      setSearchQuery,
+    });
+
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`,
@@ -136,7 +160,9 @@ export default function LocationSearch() {
   return (
     <ScreenFrame
       title="Search"
-      onGoBack={() => router.back()}
+      onGoBack={() =>
+        router.canGoBack() ? router.back() : router.replace("/plans/new")
+      }
       floating={
         <MotiView
           className="fixed top-16 flex w-full flex-col items-center justify-start border-b-2 border-black bg-white dark:border-gray-700 dark:bg-gray-900"
@@ -146,6 +172,9 @@ export default function LocationSearch() {
             <Pressable
               role="button"
               onPress={() => {
+                posthogClient.captureEvent("point-search-show-all-on-map", {
+                  locationCount: locations.length,
+                });
                 gotoNewScreen();
                 router.setParams({
                   "map-mode": "true",
@@ -199,6 +228,13 @@ export default function LocationSearch() {
                 <>
                   {locations.map((location, index) => (
                     <LocationCard
+                      isRoundTrip={
+                        JSON.parse(
+                          Array.isArray(isRoundTrip)
+                            ? isRoundTrip[0]
+                            : isRoundTrip,
+                        ) === true
+                      }
                       key={index}
                       location={location}
                       gotoNewScreen={gotoNewScreen}

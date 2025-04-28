@@ -10,7 +10,7 @@ import { ErrorBox } from "~/components/error";
 import { Link as AppLink } from "~/components/link";
 import { Loading } from "~/components/loading";
 import { ScreenFrame } from "~/components/screen-frame";
-import { posthog } from "~/lib/posthog";
+import { posthogClient } from "~/lib/posthog/client";
 import { supabase } from "~/lib/supabase";
 import { useUser } from "~/lib/useUser";
 
@@ -139,7 +139,7 @@ export default function UserSettings() {
                   onPress={() => {
                     queryClient.clear();
                     supabase.auth.signOut();
-                    posthog.reset();
+                    posthogClient.reset();
                   }}
                 >
                   <LogOut className="size-5" />

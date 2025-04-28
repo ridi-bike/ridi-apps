@@ -6,7 +6,7 @@ import maplibregl from "maplibre-gl";
 import { Protocol } from "pmtiles";
 import { useEffect } from "react";
 
-import { PhProvider, posthog } from "~/lib/posthog";
+import { PhProvider, posthogClient } from "~/lib/posthog/client";
 import { supabase } from "~/lib/supabase";
 
 Sentry.init({
@@ -52,7 +52,7 @@ export default Sentry.wrap(function App() {
       if (!session) {
         router.replace("/");
       } else if (!session.user.is_anonymous) {
-        posthog.identify(session.user.id, {
+        posthogClient.identify(session.user.id, {
           email: session.user.email,
         });
       }

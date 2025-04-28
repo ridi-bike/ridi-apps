@@ -32,6 +32,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
+import { posthogClient } from "~/lib/posthog/client";
 import { useStorePlans } from "~/lib/stores/plans-store";
 import { cn } from "~/lib/utils";
 
@@ -403,6 +404,9 @@ export default function PlanDetails() {
                         <View className="flex flex-col items-end justify-center">
                           <DeleteConfirmDialog
                             onDelete={() => {
+                              posthogClient.captureEvent("plan-deleted", {
+                                planId: plan.id,
+                              });
                               planDelete(plan.id);
                               router.replace("/plans");
                             }}
