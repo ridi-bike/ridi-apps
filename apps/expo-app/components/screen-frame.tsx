@@ -1,8 +1,9 @@
 import { Stack } from "expo-router";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ScreenHeader } from "~/components/screen-header";
+import { usePhScreenCapture } from "~/lib/posthog/hooks";
 
 type ScreenFramePropsn = {
   title: string;
@@ -17,6 +18,9 @@ export function ScreenFrame({
   onGoBack,
 }: ScreenFramePropsn) {
   const insets = useSafeAreaInsets();
+
+  usePhScreenCapture();
+
   return (
     <>
       <View

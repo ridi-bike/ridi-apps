@@ -14,6 +14,8 @@ import { supabase } from "~/lib/supabase";
 import { cn } from "~/lib/utils";
 
 export default function LoginScreen() {
+  usePhScreenCapture();
+
   const queryClient = useQueryClient();
 
   const performOAuth = useCallback(

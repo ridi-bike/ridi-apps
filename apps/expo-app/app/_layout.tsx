@@ -4,10 +4,9 @@ import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { router, Stack } from "expo-router";
 import maplibregl from "maplibre-gl";
 import { Protocol } from "pmtiles";
-import { PostHogProvider } from "posthog-react-native";
 import { useEffect } from "react";
 
-import { posthog } from "~/lib/posthog";
+import { PhProvider, posthog } from "~/lib/posthog";
 import { supabase } from "~/lib/supabase";
 
 Sentry.init({
@@ -61,19 +60,7 @@ export default Sentry.wrap(function App() {
   }, []);
 
   return (
-    <PostHogProvider
-      client={posthog}
-      autocapture={{
-        captureTouches: true,
-        captureLifecycleEvents: true,
-        captureScreens: true,
-        navigation: {
-          routeToName: (name, params) => {
-            return `${name}/${JSON.stringify(params)}`;
-          },
-        },
-      }}
-    >
+    <PhProvider>
       <QueryClientProvider client={queryClient}>
         <Stack
           screenOptions={{
@@ -84,6 +71,6 @@ export default Sentry.wrap(function App() {
         />
         <PortalHost />
       </QueryClientProvider>
-    </PostHogProvider>
+    </PhProvider>
   );
 });

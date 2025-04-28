@@ -8,9 +8,12 @@ import { useCreateSessionFromUrl } from "~/components/auth";
 import { Button } from "~/components/button";
 import { MotorcycleIcon } from "~/components/icons/motorcycle";
 import { Link } from "~/components/link";
+import { usePhScreenCapture } from "~/lib/posthog/hooks";
 import { supabase } from "~/lib/supabase";
 
 export default function Index() {
+  usePhScreenCapture();
+
   const isAuthCallback = useCreateSessionFromUrl();
 
   const router = useRouter();
