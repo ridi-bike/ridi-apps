@@ -9,9 +9,9 @@ export function usePhScreenCapture() {
 
   const segmentPath = useMemo(() => `/${segments.join("/")}`, [segments]);
 
-  useEffect(() => {
-    posthog.screen(segmentPath, {
-      ...params,
-    });
-  }, [segmentPath, params]);
+  // useEffect(() => {
+  //   posthog.screen(segmentPath, {
+  //     ...params,
+  //   });
+  // }, [segmentPath, params]);
 }
