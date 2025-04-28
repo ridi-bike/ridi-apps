@@ -6,5 +6,6 @@ export const posthog = new PostHog(
   {
     host: "https://ph.ridi.bike",
     disabled: __DEV__,
+    enableSessionReplay: true,
   },
 );

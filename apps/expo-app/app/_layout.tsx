@@ -61,7 +61,19 @@ export default Sentry.wrap(function App() {
   }, []);
 
   return (
-    <PostHogProvider client={posthog}>
+    <PostHogProvider
+      client={posthog}
+      autocapture={{
+        captureTouches: true,
+        captureLifecycleEvents: true,
+        captureScreens: true,
+        navigation: {
+          routeToName: (name, params) => {
+            return `${name}/${JSON.stringify(params)}`;
+          },
+        },
+      }}
+    >
       <QueryClientProvider client={queryClient}>
         <Stack
           screenOptions={{
