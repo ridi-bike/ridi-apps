@@ -784,7 +784,7 @@ export default function PlansNew() {
                         maximumTrackStyle={{ backgroundColor: "transparent" }}
                         onValueChange={(value) => {
                           posthogClient.captureEvent("plan-new-distance-set", {
-                            distance,
+                            selectedDistance,
                           });
                           setSelectedDistance(DISTANCES[value[0]]);
                         }}
