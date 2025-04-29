@@ -103,7 +103,7 @@ export default function UserSettings() {
                         className="flex w-full flex-row items-center justify-between rounded-xl border-2 border-black p-3 dark:border-gray-700"
                       >
                         <View className="flex flex-row items-center gap-3">
-                          <View className="flex size-8 flex-row pl-1 items-center justify-center rounded-lg bg-[#FF5937]/10">
+                          <View className="flex size-8 flex-row items-center justify-center rounded-lg bg-[#FF5937]/10 pl-1">
                             <CreditCard className="size-4 text-[#FF5937]" />
                           </View>
                           <View className="text-left">
