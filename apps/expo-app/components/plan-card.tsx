@@ -1,6 +1,6 @@
+import { Image } from "expo-image";
 import { CirclePause, CirclePlay, Navigation } from "lucide-react-native";
 import { View, Text } from "react-native";
-import { Image } from "expo-image";
 
 import { type Plan } from "~/lib/stores/plans-store";
 import { useColorScheme } from "~/lib/useColorScheme";

@@ -9,6 +9,7 @@ import { Button } from "~/components/button";
 import { GithubIcon } from "~/components/icons/github";
 import { GoogleIcon } from "~/components/icons/google";
 import { Input } from "~/components/input";
+import { VersionCheck } from "~/components/version-check";
 import { apiClient } from "~/lib/api";
 import { posthogClient } from "~/lib/posthog/client";
 import { usePhScreenCapture } from "~/lib/posthog/hooks";
@@ -133,6 +134,7 @@ export default function LoginScreen() {
       className="flex min-h-screen w-full flex-col items-center justify-center bg-white p-6 dark:bg-gray-900"
     >
       <Stack.Screen options={{ headerShown: false }} />
+      <VersionCheck />
       <View className="flex w-full max-w-[375px] flex-col items-center">
         <View className="mb-12">
           <Text

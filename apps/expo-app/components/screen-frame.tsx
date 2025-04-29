@@ -5,6 +5,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenHeader } from "~/components/screen-header";
 import { usePhScreenCapture } from "~/lib/posthog/hooks";
 
+import { VersionCheck } from "./version-check";
+
 type ScreenFramePropsn = {
   title: string;
   children: React.ReactNode;
@@ -43,6 +45,7 @@ export function ScreenFrame({
             ),
           }}
         />
+        <VersionCheck />
         <View role="main" className="flex flex-col px-2 pb-24 pt-8 md:px-8">
           {children}
         </View>

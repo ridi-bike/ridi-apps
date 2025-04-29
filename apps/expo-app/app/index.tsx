@@ -8,6 +8,7 @@ import { useCreateSessionFromUrl } from "~/components/auth";
 import { Button } from "~/components/button";
 import { MotorcycleIcon } from "~/components/icons/motorcycle";
 import { Link } from "~/components/link";
+import { VersionCheck } from "~/components/version-check";
 import { posthogClient } from "~/lib/posthog/client";
 import { usePhScreenCapture } from "~/lib/posthog/hooks";
 import { supabase } from "~/lib/supabase";
@@ -40,6 +41,7 @@ export default function Index() {
       className="flex min-h-screen w-full flex-col items-center justify-center bg-white p-6 dark:bg-gray-900"
     >
       <Stack.Screen options={{ headerShown: false }} />
+      <VersionCheck />
       <View className="flex w-[375px] flex-col items-center">
         <View className="mb-16">
           <Text className="text-6xl font-bold tracking-tight text-[#FF5937]">

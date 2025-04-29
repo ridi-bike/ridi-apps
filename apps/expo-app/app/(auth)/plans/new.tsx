@@ -451,7 +451,7 @@ export default function PlansNew() {
                     </Pressable>
                     {!searchPoints && (
                       <Link
-                        href={`/search?isRoundTrip=${JSON.stringify(isRoundTrip)}`}
+                        href={`/search?isRoundTrip=${JSON.stringify(isRoundTrip || false)}`}
                         className="flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 border-black bg-white p-4 dark:border-gray-700 dark:bg-gray-900"
                       >
                         <Search className="size-4 dark:text-gray-200" />
