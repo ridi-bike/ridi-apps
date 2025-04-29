@@ -4,29 +4,33 @@ import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
 import { ViewTransitions } from "astro:transitions";
 import PostHog from "../components/Posthog.astro";
+
+const title = "Ridi motorcycle route generator";
+const description =
+  "Generate the perfect motorcycling route based based on your preferences with Ridi";
+const image = "https://ridi.bike/og-image.png";
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content="Motorcycle navigation app" />
+    <meta name="description" content={title} />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/Moto.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>Ridi to ride</title>
-    <meta
-      name="description"
-      content="Generate the perfect motorcycling route based based on your preferences with Ridi"
-    />
-    <meta property="og:title" content="Ridi Motorcycle Routes" />
-    <meta
-      property="og:description"
-      content="Generate the perfect motorcycling route based based on your preferences with Ridi"
-    />
-    <meta property="og:image" content="https://ridi.bike/hero-image.png" />
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={image} />
     <meta property="og:url" content="https://ridi.bike" />
     <meta property="og:type" content="website" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
 
     <link
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap"
