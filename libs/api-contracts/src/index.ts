@@ -292,7 +292,7 @@ export const apiContract = c.router({
       }),
     ]),
     responses: {
-      200: z.void(),
+      200: z.object({ ok: z.boolean() }),
       500: z.object({ message: z.string() }),
     },
   },
@@ -308,7 +308,7 @@ export const apiContract = c.router({
       }),
     ]),
     responses: {
-      200: z.void(),
+      200: z.object({ ok: z.boolean() }),
       500: z.object({ message: z.string() }),
     },
   },

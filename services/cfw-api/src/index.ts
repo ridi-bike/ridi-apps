@@ -76,37 +76,39 @@ const router = tsr
     );
     const userFrom = data.user;
     if (userFrom && userFrom.is_anonymous) {
-      await userClaimPlans(ctx.db, {
-        fromUserId: userFrom.id,
-        toUserId: ctx.request.user.id,
-      });
+      await Promise.all([
+        userClaimPlans(ctx.db, {
+          fromUserId: userFrom.id,
+          toUserId: ctx.request.user.id,
+        }),
 
-      await userClaimRoutes(ctx.db, {
-        fromUserId: userFrom.id,
-        toUserId: ctx.request.user.id,
-      });
+        userClaimRoutes(ctx.db, {
+          fromUserId: userFrom.id,
+          toUserId: ctx.request.user.id,
+        }),
 
-      await userClaimRouteBreakdownStats(ctx.db, {
-        fromUserId: userFrom.id,
-        toUserId: ctx.request.user.id,
-      });
+        userClaimRouteBreakdownStats(ctx.db, {
+          fromUserId: userFrom.id,
+          toUserId: ctx.request.user.id,
+        }),
 
-      await userClaimRuleSets(ctx.db, {
-        fromUserId: userFrom.id,
-        toUserId: ctx.request.user.id,
-      });
+        userClaimRuleSets(ctx.db, {
+          fromUserId: userFrom.id,
+          toUserId: ctx.request.user.id,
+        }),
 
-      await userClaimRuleSetRoadTags(ctx.db, {
-        fromUserId: userFrom.id,
-        toUserId: ctx.request.user.id,
-      });
+        userClaimRuleSetRoadTags(ctx.db, {
+          fromUserId: userFrom.id,
+          toUserId: ctx.request.user.id,
+        }),
+      ]);
 
       await ctx.supabaseClient.auth.admin.deleteUser(userFrom.id);
     }
 
     return {
       status: 200,
-      body: undefined,
+      body: { ok: true },
     };
   },
   codeClaim: async ({ body }, ctx) => {
@@ -162,7 +164,7 @@ const router = tsr
 
     return {
       status: 200,
-      body: undefined,
+      body: { ok: true },
     };
   },
   userGet: async ({ query: { version } }, ctx) => {
