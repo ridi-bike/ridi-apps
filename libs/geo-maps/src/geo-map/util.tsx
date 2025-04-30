@@ -173,7 +173,6 @@ export function combineBBox(
 export function updateBBox(
   bbox: [number, number, number, number],
 ): [number, number, number, number] {
-  console.log(bbox);
   const updated = [
     bbox[0] - Math.abs(bbox[2] - bbox[0]) / 2,
     bbox[1] - Math.abs(bbox[3] - bbox[1]) / 2,

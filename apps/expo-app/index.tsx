@@ -2,7 +2,6 @@ import "@expo/metro-runtime";
 import "./global.css";
 import "react-native-reanimated";
 import "react-native-gesture-handler";
-import "./lib/nativewind";
 
 import { registerRootComponent } from "expo";
 import { ExpoRoot } from "expo-router";

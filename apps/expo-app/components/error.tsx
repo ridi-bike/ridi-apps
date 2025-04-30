@@ -1,11 +1,10 @@
 import * as Sentry from "@sentry/react-native";
 import * as Clipboard from "expo-clipboard";
 import { AlertCircle, Copy, RefreshCcw } from "lucide-react-native";
+import { MotiPressable } from "moti/interactions";
 import { useCallback, useEffect, useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import { generate } from "xksuid";
-
-import { MotiPressable } from "~/lib/nativewind";
 
 export function ErrorBox({
   retry,
@@ -78,11 +77,10 @@ export function ErrorBox({
                 }}
                 onPress={copyToClipboard}
                 accessibilityLabel="Copy error ID"
-                className={
-                  "ml-auto w-full rounded-md p-1 transition-colors hover:bg-[#FFF5F3] dark:hover:bg-gray-800"
-                }
               >
-                <Copy className="size-4 text-[#FF5937]" />
+                <View className="ml-auto w-full rounded-md p-1 transition-colors hover:bg-[#FFF5F3] dark:hover:bg-gray-800">
+                  <Copy className="size-4 text-[#FF5937]" />
+                </View>
               </MotiPressable>
             </View>
           </View>

@@ -4,6 +4,7 @@ import { AnimatePresence, MotiView } from "moti";
 import {
   type MotiPressableTransitionProp,
   type MotiPressableProp,
+  MotiPressable,
 } from "moti/interactions";
 import { useEffect, useMemo } from "react";
 import { ScrollView, View } from "react-native";
@@ -12,7 +13,6 @@ import { ErrorBox } from "~/components/error";
 import { Loading } from "~/components/loading";
 import { PlanCard } from "~/components/plan-card";
 import { ScreenFrame } from "~/components/screen-frame";
-import { MotiPressable } from "~/lib/nativewind";
 import { useStorePlans } from "~/lib/stores/plans-store";
 
 export default function PlansPage() {
@@ -56,7 +56,6 @@ export default function PlansPage() {
           {!!plans && (
             <MotiPressable
               key="plans"
-              className="fixed bottom-8 right-8 flex size-24 items-center justify-center rounded-full bg-[#FF5937] shadow-lg transition-colors hover:bg-[#ff4a25]"
               aria-label="Create new plan"
               from={{
                 opacity: 0,
@@ -74,7 +73,9 @@ export default function PlansPage() {
               }}
               onPress={() => router.navigate("/plans/new")}
             >
-              <Plus className="size-12 text-white dark:text-gray-900" />
+              <View className="fixed bottom-8 right-8 flex size-24 items-center justify-center rounded-full bg-[#FF5937] shadow-lg transition-colors hover:bg-[#ff4a25]">
+                <Plus className="size-12 text-white dark:text-gray-900" />
+              </View>
             </MotiPressable>
           )}
         </AnimatePresence>
