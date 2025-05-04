@@ -1,0 +1,28 @@
+---
+import Container from "./Container.astro";
+import { Waitlist } from "../components/Waitlist.tsx";
+---
+
+<Container>
+  <div class="flex-row items-center my-6 p-14 bg-zinc-100 rounded-[45px]">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="flex-col justify-start items-center gap-[275px] flex">
+        <div
+          class="flex-col justify-start items-start gap-[26px] inline-flex text-black"
+        >
+          <div class="text-3xl font-medium">Get notified</div>
+          <div class="md:hidden flex flex-col items-center justify-center">
+            <img src="/email.png" width="80%" alt="cat" />
+          </div>
+          <div class="text-lg font-normal">
+            I will email you when big stuff happens
+          </div>
+          <Waitlist client:visible />
+        </div>
+      </div>
+      <div class="hidden md:grid justify-items-center -m-20">
+        <img src="/email.png" width="70%" alt="me" />
+      </div>
+    </div>
+  </div>
+</Container>

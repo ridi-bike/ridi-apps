@@ -2,12 +2,11 @@
 import Container from "./Container.astro";
 import Topic from "./Topic.astro";
 import servicesData from "./Data/services.json";
-import { Waitlist } from "../components/Waitlist.tsx";
 import { cn } from "../utils.ts";
 ---
 
 <Container>
-  <div class="relative flex flex-col items-center" id="features">
+  <div class="relative flex flex-col items-center" id="how-it-works">
     <div class="flex-row items-center py-5 mb-8">
       <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-4">
         <!-- card start-->
@@ -25,7 +24,7 @@ import { cn } from "../utils.ts";
               )}
             >
               <div class="flex flex-col justify-center p-6 items-center md:items-start gap-[93px]">
-                <div class="flex flex-col justify-start items-start flex max-w-[50%]">
+                <div class="flex flex-col justify-start items-start max-w-[50%]">
                   <div class="px-[7px] rounded-[7px] flex-col justify-start items-start gap-2.5 flex">
                     <div class=" text-3xl font-medium">{name1}</div>
                   </div>
@@ -48,29 +47,8 @@ import { cn } from "../utils.ts";
     </div>
 
     <Topic
-      title="HOW IT WORKS?"
+      title="HOW IT WORKS"
       description="I want to ride, not navigate. So, I built Ridi, an app that takes all the guesswork out of it. You tell it what kind of roads you love – highways, primaries, unclassified’s, tracks, paths, residential? Gravel, sand? Smooth roads or tracks? Choose your style and it’ll whip up a perfect route tailored to your exact preferences. Or just choose one of the default rule sets. Whether it’s a quick spin through scenic roads or a heart-pounding journey through twisty paths, Ridi’s got you covered."
     />
-    <div class="flex-row items-center my-6 p-14 bg-zinc-100 rounded-[45px]">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="flex-col justify-start items-center gap-[275px] flex">
-          <div
-            class="flex-col justify-start items-start gap-[26px] inline-flex text-black"
-          >
-            <div class="text-3xl font-medium">Get notified</div>
-            <div class="md:hidden flex flex-col items-center justify-center">
-              <img src="/email.png" width="80%" alt="cat" />
-            </div>
-            <div class="text-lg font-normal">
-              I will email you when big stuff happens
-            </div>
-            <Waitlist client:visible />
-          </div>
-        </div>
-        <div class="hidden md:grid justify-items-center -m-20">
-          <img src="/email.png" width="70%" alt="me" />
-        </div>
-      </div>
-    </div>
   </div>
 </Container>

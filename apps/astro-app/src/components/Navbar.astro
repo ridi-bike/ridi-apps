@@ -4,8 +4,10 @@ import { Astronav, MenuItems, MenuIcon } from "astro-navbar";
 
 const menuitems = [
   { href: "/", label: "Home" },
-  { href: "https://ridi.bike/privacy/", label: "Privacy policy" },
-  { href: "https://ridi.bike/tos/", label: "Terms of Service" },
+  { href: "/#how-it-works", label: "How it works" },
+  { href: "/#pricing", label: "Price" },
+  { href: "/privacy", label: "Privacy policy" },
+  { href: "/tos", label: "Terms of Service" },
 ];
 ---
 
@@ -43,6 +45,13 @@ const menuitems = [
             </ul>
           </MenuItems>
         </Astronav>
+        <a
+          href="https://app.ridi.bike/login"
+          target="_blank"
+          class="px-4 py-2 bg-[#f75835] hover:bg-white rounded-lg text-center text-white hover:text-black border border-black text-xl font-normal leading-7"
+        >
+          Log in
+        </a>
       </header>
     </Container>
   </nav>
