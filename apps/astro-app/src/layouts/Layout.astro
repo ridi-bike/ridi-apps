@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
 import { ViewTransitions } from "astro:transitions";
 import PostHog from "../components/Posthog.astro";
+import GTag from "../components/GTag.astro";
 
 const title = "Ridi motorcycle route generator";
 const description =
@@ -37,6 +38,7 @@ const image = "https://ridi.bike/og-image.png";
       rel="stylesheet"
     />
     <PostHog />
+    <GTag />
     <ViewTransitions />
   </head>
   <body class="bg-white font-SpaceGrotesk">

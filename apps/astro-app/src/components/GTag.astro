@@ -1,0 +1,14 @@
+---
+// src/components/posthog.astro
+---
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17048245597"
+></script>
+<script is:inline>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() {
+    dataLayer.push(arguments);
+  }
+  gtag("js", new Date());
+  gtag("config", "AW-17048245597");
+</script>
