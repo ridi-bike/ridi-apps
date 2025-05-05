@@ -90,6 +90,19 @@ export default function PlansNew() {
     z.array(coordsSchema),
   );
 
+  useEffect(() => {
+    //@ts-expect-error func from google tag script
+    if (typeof gtag === "function") {
+      //@ts-expect-error func from google tag script
+      gtag("event", "conversion", {
+        send_to: "AW-17048245597/OxNtCOy978AaEN2qnsE_",
+        value: 1.0,
+        currency: "EUR",
+        transaction_id: "",
+      });
+    }
+  }, []);
+
   const [showLocationAlert, setShowLocationAlert] = useState(false);
   const [currentCoords, setCurrentCoords] = useState<Coords | null>(null);
 
