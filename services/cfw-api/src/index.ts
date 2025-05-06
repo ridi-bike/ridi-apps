@@ -1,7 +1,7 @@
 import {
   type Request as WorkerRequest,
   type ExecutionContext,
-} from "@cloudflare/workers-types/experimental";
+} from "@cloudflare/workers-types";
 import { type RoadTags } from "@ridi/api-contracts";
 import {
   apiContract,
@@ -50,6 +50,7 @@ import {
 import * as turf from "@turf/turf";
 import postgres from "postgres";
 import * as R from "remeda";
+import { Resend } from "resend";
 
 export type FieldsNotNull<T extends object> = {
   [n in keyof T]: NonNullable<T[n]>;
@@ -687,6 +688,59 @@ export default Sentry.withSentry(
       const dbCon = postgres(env.SUPABASE_DB_URL);
 
       const url = new URL(request.url);
+
+      if (url.pathname.startsWith("/get-notified")) {
+        const email = url.searchParams.get("email");
+        ridiLogger.info("Get notified call", { email });
+
+        const resend = new Resend(env.RESEND_KEY);
+        const resp = { ok: false };
+        if (email) {
+          resend.emails.send({
+            from: "news@email.ridi.bike",
+            subject: "Subscription to Ridi News",
+            to: email,
+            html: `
+              <div style="width: 375px; margin: 0 auto; background-color: #f4f4f5;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+                  <tr>
+                    <td style="padding: 48px 24px; background-color: #f4f4f5;">
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: white; border-radius: 12px;">
+                        <tr>
+                          <td style="padding: 32px 24px; text-align: center;">
+                            <img src="https://ridi.bike/Name-tagline.svg" alt="Logo" style="width: 120px; height: 40px;">
+                            <h1 style="font-size: 24px; font-weight: 600; color: #FF5937; margin: 24px 0 12px;">
+                              Ridi News
+                            </h1>
+                            <p style="font-size: 16px; color: #71717A; margin-bottom: 32px; line-height: 24px;">
+                              Thank you for subscribing to Ridi news and updates. 
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            `,
+          });
+          resend.contacts.create({
+            email,
+            unsubscribed: false,
+            audienceId: env.RESEND_AUD_GENERAL_ID,
+          });
+          resp.ok = true;
+        }
+        const response = new Response(JSON.stringify(resp), {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        response.headers.set("Access-Control-Allow-Origin", env.RIDI_APP_URL);
+        response.headers.set("Access-Control-Allow-Credentials", "true");
+        return response;
+      }
+
       if (url.pathname.startsWith("/geo-boundaries")) {
         const lat = url.searchParams.get("lat");
         const lon = url.searchParams.get("lon");
@@ -816,6 +870,5 @@ export default Sentry.withSentry(
 
       return response;
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as ExportedHandler<any, unknown, unknown>,
+  },
 );
