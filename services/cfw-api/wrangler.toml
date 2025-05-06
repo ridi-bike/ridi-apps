@@ -12,10 +12,12 @@ enabled = true
 [vars]
 SUPABASE_URL = "https://sb.ridi.bike"
 RIDI_APP_URL = "https://app.ridi.bike"
+RIDI_LANDING_URL = "https://ridi.bike"
 SENTRY_DSN = "https://57ef996c2cdb0754386a7cfa02783c4f@o337283.ingest.us.sentry.io/4509016159420416"
 RIDI_ENV = "prod"
 STRIPE_PRICE_ID_MONTLY = "price_1R3NmnDgjvIEDQY4z7U8tBji"
 STRIPE_PRICE_ID_YEARLY = "price_1R3NnVDgjvIEDQY49Yf3KGGP"
+RESEND_AUD_GENERAL_ID = "226e0e44-d07c-416d-9abb-0d88110ef628"
 
 # Note: Use secrets to store sensitive data.
 # https://developers.cloudflare.com/workers/configuration/secrets/

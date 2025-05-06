@@ -91,6 +91,7 @@ export default function PlansNew() {
   );
 
   useEffect(() => {
+    //@ts-expect-error func from google tag script
     console.log("gtag", gtag, typeof gtag);
     //@ts-expect-error func from google tag script
     if (typeof gtag === "function") {

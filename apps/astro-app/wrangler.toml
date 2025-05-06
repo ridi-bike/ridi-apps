@@ -3,5 +3,5 @@ name = "ridi-apps-astro"
 pages_build_output_dir = "dist"
 compatibility_date = "2024-09-26"
 
-[env]
-production = { }
+[vars]
+PUBLIC_RIDI_API_URL = "https://api.ridi.bike"

@@ -15,7 +15,7 @@ export function Waitlist() {
         e.preventDefault();
         try {
           fetch(
-            `https://api.ridi.bike/get-notified?email=${emailRef.current?.value || ""}`,
+            `${import.meta.env.PUBLIC_RIDI_API_URL}/get-notified?email=${emailRef.current?.value || ""}`,
           );
           setSubmitted(true);
         } catch (err) {

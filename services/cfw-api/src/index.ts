@@ -670,10 +670,16 @@ export default Sentry.withSentry(
       env: CloudflareBindings,
       ctx: ExecutionContext,
     ): Promise<Response> {
+      const url = new URL(request.url);
+
       if (request.method === "OPTIONS") {
         return new Response("ok", {
           headers: {
-            "Access-Control-Allow-Origin": env.RIDI_APP_URL,
+            "Access-Control-Allow-Origin": url.pathname.startsWith(
+              "/get-notified",
+            )
+              ? env.RIDI_LANDING_URL
+              : env.RIDI_APP_URL,
             "Access-Control-Allow-Credentials": "true",
             "Access-Control-Allow-Headers":
               "authorization, origin, content-type, accept",
@@ -687,8 +693,6 @@ export default Sentry.withSentry(
 
       const dbCon = postgres(env.SUPABASE_DB_URL);
 
-      const url = new URL(request.url);
-
       if (url.pathname.startsWith("/get-notified")) {
         const email = url.searchParams.get("email");
         ridiLogger.info("Get notified call", { email });
@@ -696,7 +700,7 @@ export default Sentry.withSentry(
         const resend = new Resend(env.RESEND_KEY);
         const resp = { ok: false };
         if (email) {
-          resend.emails.send({
+          await resend.emails.send({
             from: "news@email.ridi.bike",
             subject: "Subscription to Ridi News",
             to: email,
@@ -724,7 +728,7 @@ export default Sentry.withSentry(
               </div>
             `,
           });
-          resend.contacts.create({
+          await resend.contacts.create({
             email,
             unsubscribed: false,
             audienceId: env.RESEND_AUD_GENERAL_ID,
@@ -736,7 +740,10 @@ export default Sentry.withSentry(
             "Content-Type": "application/json",
           },
         });
-        response.headers.set("Access-Control-Allow-Origin", env.RIDI_APP_URL);
+        response.headers.set(
+          "Access-Control-Allow-Origin",
+          env.RIDI_LANDING_URL,
+        );
         response.headers.set("Access-Control-Allow-Credentials", "true");
         return response;
       }

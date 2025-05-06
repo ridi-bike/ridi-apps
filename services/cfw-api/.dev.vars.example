@@ -1,6 +1,7 @@
 SUPABASE_URL="http://127.0.0.1:54321"
 SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
 RIDI_APP_URL="http://127.0.0.1:8081"
+RIDI_LANDING_URL = "http://localhost:4321"
 SUPABASE_SERVICE_ROLE_KEY="xxxxxxxxxxxxx"
 STRIPE_SECRET_KEY="xxxxxxxxxxxxxxx"
 STRIPE_PRICE_ID_MONTLY="xxxxxxxxx"
