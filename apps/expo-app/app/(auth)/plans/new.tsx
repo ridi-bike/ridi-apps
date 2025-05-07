@@ -3,12 +3,14 @@ import * as turf from "@turf/turf";
 import * as Location from "expo-location";
 import { Link, useRouter } from "expo-router";
 import {
+  ArrowRightCircle,
   CirclePauseIcon,
   CirclePlayIcon,
   Compass,
   Hourglass,
   Locate,
   MapPinned,
+  MoveRight,
   RotateCw,
   Route,
   Search,
@@ -68,11 +70,14 @@ function GroupWithTitle({
   );
 }
 
+const CANCEL_TRIGGER_TIMES = 5;
+
 export default function PlansNew() {
   const router = useRouter();
   const { planAdd } = useStorePlans();
   const [startCoords, setStartCoords] = useUrlParams("start", coordsSchema);
   const [finishCoords, setFinishCoords] = useUrlParams("finish", coordsSchema);
+  const [cancelPressedTimes, setCancelPressedTimes] = useState(0);
   const [startDesc, setStartDesc] = useState<string | null>(null);
   const [finishDesc, setFinishDesc] = useState<string | null>(null);
   const [isRoundTrip, setIsRoundTrip] = useUrlParams("round-trip", z.boolean());
@@ -91,8 +96,6 @@ export default function PlansNew() {
   );
 
   useEffect(() => {
-    //@ts-expect-error func from google tag script
-    console.log("gtag", gtag, typeof gtag);
     //@ts-expect-error func from google tag script
     if (typeof gtag === "function") {
       //@ts-expect-error func from google tag script
@@ -380,6 +383,12 @@ export default function PlansNew() {
               transition={{ type: "timing" }}
             >
               <GeoMapCoordsSelector
+                onCoordsSelectCancel={() => {
+                  setCancelPressedTimes((t) => t + 1);
+                  if (cancelPressedTimes >= CANCEL_TRIGGER_TIMES) {
+                    setTimeout(() => setCancelPressedTimes(0), 20 * 1000);
+                  }
+                }}
                 regions={
                   errorMessage
                     ? (startRegions || []).concat(finishRegions || [])
@@ -418,52 +427,67 @@ export default function PlansNew() {
                   setFinishCoords(c ? [c.lat, c.lon] : undefined);
                 }}
               >
-                <View className="pointer-events-none flex w-full flex-row items-start justify-center">
-                  <View className="flex flex-1 flex-row items-start justify-center p-4">
-                    <Text className="ml-10 rounded-lg bg-gray-400 px-2 py-1 text-sm text-gray-200">
-                      Tap on map to start
-                    </Text>
-                  </View>
-                  <View className="pointer-events-auto float-right flex flex-col items-end justify-start gap-2 p-4">
-                    <Pressable
-                      role="button"
-                      onPress={getCurrentLocation}
-                      className={cn(
-                        "flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 p-4",
+                <View className="pointer-events-none flex w-full flex-row items-start justify-end">
+                  <View className="float-right flex w-full flex-col items-end justify-start gap-2 p-4">
+                    <View className="flex w-full flex-row items-center justify-between">
+                      <View className="flex flex-1 flex-row items-center justify-center p-4">
+                        <Text className="ml-10 rounded-lg bg-gray-400 px-2 py-1 text-sm text-gray-200">
+                          {centerSelectionMode
+                            ? "Tap on center to start"
+                            : "Tap on map to start"}
+                        </Text>
+                      </View>
+                      <Pressable
+                        role="button"
+                        onPress={getCurrentLocation}
+                        className={cn(
+                          "flex flex-row items-center justify-start gap-2 rounded-xl border-2 p-4 pointer-events-auto",
 
-                        {
-                          "border-[#FF5937] bg-[#FF5937] text-white":
-                            currentCoords,
-                          "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
-                            !currentCoords,
-                        },
-                      )}
-                    >
-                      <Locate className="size-4 dark:text-gray-200" />
-                    </Pressable>
-                    <Pressable
-                      role="button"
-                      onPress={() => {
-                        posthogClient.captureEvent(
-                          "plan-new-selection-mode-set",
                           {
-                            centerSelectionMode,
+                            "border-[#FF5937] bg-[#FF5937] text-white":
+                              currentCoords,
+                            "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
+                              !currentCoords,
                           },
-                        );
-                        setCenterSelectionMode(!centerSelectionMode);
-                      }}
-                      className={cn(
-                        "flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 p-4",
-                        {
-                          "border-[#FF5937] bg-[#FF5937] text-white":
-                            centerSelectionMode,
-                          "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
-                            !centerSelectionMode,
-                        },
+                        )}
+                      >
+                        <Locate className="size-4 dark:text-gray-200" />
+                      </Pressable>
+                    </View>
+                    <View className="pointer-events-auto flex flex-row items-center justify-center gap-2">
+                      {cancelPressedTimes > CANCEL_TRIGGER_TIMES && (
+                        <>
+                          <Text className="ml-10 rounded-lg bg-gray-400 px-2 py-1 text-sm text-gray-200">
+                            Try using map center selector
+                          </Text>
+                          <MoveRight className="size-6 dark:text-gray-200" />
+                        </>
                       )}
-                    >
-                      <MapPinned className="size-4 dark:text-gray-200" />
-                    </Pressable>
+                      <Pressable
+                        role="button"
+                        onPress={() => {
+                          posthogClient.captureEvent(
+                            "plan-new-selection-mode-set",
+                            {
+                              centerSelectionMode,
+                            },
+                          );
+                          setCancelPressedTimes(0);
+                          setCenterSelectionMode(!centerSelectionMode);
+                        }}
+                        className={cn(
+                          "flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 p-4",
+                          {
+                            "border-[#FF5937] bg-[#FF5937] text-white":
+                              centerSelectionMode,
+                            "border-black bg-white dark:border-gray-700 dark:bg-gray-900":
+                              !centerSelectionMode,
+                          },
+                        )}
+                      >
+                        <MapPinned className="size-4 dark:text-gray-200" />
+                      </Pressable>
+                    </View>
                     {!searchPoints && (
                       <Link
                         href={`/search?isRoundTrip=${JSON.stringify(isRoundTrip || false)}`}
@@ -479,7 +503,7 @@ export default function PlansNew() {
                           posthogClient.captureEvent("plan-new-search-clear");
                           setSearchPoints();
                         }}
-                        className="flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 border-[#FF5937] bg-[#FF5937] p-4 text-white"
+                        className="pointer-events-auto flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 border-[#FF5937] bg-[#FF5937] p-4 text-white"
                       >
                         <Search className="size-4 dark:text-gray-200" />
                       </Pressable>

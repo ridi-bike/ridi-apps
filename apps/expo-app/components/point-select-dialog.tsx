@@ -24,16 +24,19 @@ export function PointSelectDialog({
   setStart,
   setFinish,
   unset,
+  onCancel,
   isDialogOpen,
 }: GeoMapMarkerProps & {
   title: string;
   description: string;
   setStart?: () => void;
   setFinish?: () => void;
+  onCancel?: () => void;
   unset?: () => void;
   isDialogOpen?: boolean;
 }) {
   const [open, setOpen] = useState(!!isDialogOpen);
+
   return (
     <AlertDialog open={open} onOpenChange={(open) => setOpen(open)}>
       <AlertDialogTrigger asChild>
@@ -111,7 +114,12 @@ export function PointSelectDialog({
           <Button
             variant="secondary"
             className="flex w-full flex-row items-center justify-center"
-            onPress={() => setOpen(false)}
+            onPress={() => {
+              setOpen(false);
+              if (onCancel) {
+                onCancel();
+              }
+            }}
           >
             <Text className="dark:text-gray-200">Cancel</Text>
           </Button>

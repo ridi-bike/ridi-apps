@@ -13,6 +13,7 @@ export function MapMarker(
     setStart?: () => void;
     setFinish?: () => void;
     unset?: () => void;
+    onCancel?: () => void;
     isDialogOpen?: boolean;
   },
 ) {

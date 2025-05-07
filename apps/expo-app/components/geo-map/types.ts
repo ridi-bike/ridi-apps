@@ -10,6 +10,7 @@ export type GeoMapCoordsSelectorProps = {
   points?: MapPoint[];
   setStart: (coords: Coords | null) => void;
   setFinish: (cords: Coords | null) => void;
+  onCoordsSelectCancel?: () => void;
   bearing?: number;
   distance?: number;
   selectionMode: "tap" | "center";

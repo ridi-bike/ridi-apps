@@ -62,6 +62,7 @@ export function GeoMapCoordsSelector({
   distance,
   regions,
   children,
+  onCoordsSelectCancel,
 }: GeoMapCoordsSelectorProps) {
   const { colorScheme } = useColorScheme();
   const mapRef = useRef<MapRef>(null);
@@ -194,6 +195,7 @@ export function GeoMapCoordsSelector({
           title="Point"
           setStart={() => setStart(point.coords)}
           setFinish={isRoundTrip ? undefined : () => setFinish(point.coords)}
+          onCancel={onCoordsSelectCancel}
         >
           <CircleFadingPlusIcon className="size-8 text-blue-500" />
         </MapMarker>
@@ -204,6 +206,7 @@ export function GeoMapCoordsSelector({
           lon={start.lon}
           title="Start"
           unset={() => setStart(null)}
+          onCancel={onCoordsSelectCancel}
         >
           <CirclePlayIcon className="size-8 text-green-500" />
         </MapMarker>
@@ -214,6 +217,7 @@ export function GeoMapCoordsSelector({
           lon={finish.lon}
           title="Finish"
           unset={() => setFinish(null)}
+          onCancel={onCoordsSelectCancel}
         >
           <CirclePauseIcon className="size-8 text-red-500" />
         </MapMarker>
@@ -225,6 +229,7 @@ export function GeoMapCoordsSelector({
           title="Finish"
           setStart={() => setStart(current)}
           setFinish={isRoundTrip ? undefined : () => setFinish(current)}
+          onCancel={onCoordsSelectCancel}
         >
           <CircleUserIcon className="size-8 text-teal-500" />
         </MapMarker>
@@ -248,6 +253,7 @@ export function GeoMapCoordsSelector({
                 }
           }
           isDialogOpen={findCoordsCurr.tapped}
+          onCancel={onCoordsSelectCancel}
         >
           <CircleDotIcon className="size-8 text-yellow-500" />
         </MapMarker>
