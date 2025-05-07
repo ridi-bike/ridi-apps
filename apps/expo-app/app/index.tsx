@@ -38,11 +38,11 @@ export default function Index() {
   return (
     <ScrollView
       role="main"
-      className="flex min-h-screen w-full flex-col items-center justify-center bg-white p-6 dark:bg-gray-900"
+      className="flex min-h-screen w-full flex-col items-center justify-center bg-white p-16 dark:bg-gray-900"
     >
       <Stack.Screen options={{ headerShown: false }} />
       <VersionCheck />
-      <View className="flex w-[375px] flex-col items-center">
+      <View className="mb-64 flex w-screen max-w-[375px] flex-col items-center p-4">
         <View className="mb-16">
           <Text className="text-6xl font-bold tracking-tight text-[#FF5937]">
             Ridi
@@ -54,7 +54,7 @@ export default function Index() {
             <View className="mb-8 flex flex-row items-center gap-4">
               <View
                 className={
-                  "flex size-12 flex-row items-center justify-center rounded-full border-2 border-black bg-[#FF5937] dark:border-gray-700"
+                  "flex size-12 flex-row items-center justify-center rounded-full border-2 border-black bg-[#FF5937]/50 dark:border-gray-700"
                 }
               >
                 <Map className="size-6 text-white" />
@@ -79,7 +79,7 @@ export default function Index() {
             <View className="mb-8 flex flex-row items-center gap-4">
               <View
                 className={
-                  "flex size-12 flex-row items-center justify-center rounded-full border-2 border-black bg-[#FF5937] dark:border-gray-700"
+                  "flex size-12 flex-row items-center justify-center rounded-full border-2 border-black bg-[#FF5937]/50 dark:border-gray-700"
                 }
               >
                 <Download className="size-6 text-white" />
@@ -104,7 +104,7 @@ export default function Index() {
             <View className="flex flex-row items-center gap-4">
               <View
                 className={
-                  "flex size-12 flex-row items-center justify-center rounded-full border-2 border-black bg-[#FF5937] dark:border-gray-700"
+                  "flex size-12 flex-row items-center justify-center rounded-full border-2 border-black bg-[#FF5937]/50 dark:border-gray-700"
                 }
               >
                 <MotorcycleIcon className="size-6 fill-white" />
