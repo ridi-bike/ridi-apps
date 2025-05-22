@@ -1,0 +1,14 @@
+{
+  "name": "@ridi/tests-expo-app",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "scripts": {
+    "cy:open": "cypress open"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "cypress": "^14.3.3"
+  }
+}

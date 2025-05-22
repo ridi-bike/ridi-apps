@@ -1,5 +1,7 @@
 packages:
-  - "./apps/*"
-  - "./infra/"
-  - "./libs/*"
-  - "./services/*"
+  - ./apps/*
+  - ./infra/
+  - ./libs/*
+  - ./services/*
+  - ./tests/*
+sideEffectsCache: false
