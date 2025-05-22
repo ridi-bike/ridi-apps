@@ -39,7 +39,7 @@ with points_array as (
 	group by r.id
 ) 
 select 
-  r.id, r.user_id, r.created_at, r.plan_id, r.name, r.linestring, r.stats_len_m, r.stats_score, r.stats_junction_count, r.is_deleted, r.map_preview_light, r.map_preview_dark,
+  r.id, r.user_id, r.created_at, r.plan_id, r.name, r.linestring, r.stats_len_m, r.stats_score, r.stats_junction_count, r.is_deleted, r.map_preview_light, r.map_preview_dark, r.downloaded_at,
 	pa.lat_lon_array
 from routes r
 inner join points_array pa
@@ -65,6 +65,7 @@ export interface RouteGetRow {
     isDeleted: boolean;
     mapPreviewLight: string | null;
     mapPreviewDark: string | null;
+    downloadedAt: Date | null;
     latLonArray: string[];
 }
 
@@ -90,7 +91,61 @@ export async function routeGet(sql: Sql, args: RouteGetArgs): Promise<RouteGetRo
         isDeleted: row[9],
         mapPreviewLight: row[10],
         mapPreviewDark: row[11],
-        latLonArray: row[12]
+        downloadedAt: row[12],
+        latLonArray: row[13]
+    };
+}
+
+export const routeSetDownloadedAtQuery = `-- name: RouteSetDownloadedAt :one
+update routes
+set downloaded_at = $1
+where id = $2 and downloaded_at is null
+returning id, user_id, created_at, plan_id, name, linestring, stats_len_m, stats_score, stats_junction_count, is_deleted, map_preview_light, map_preview_dark, downloaded_at`;
+
+export interface RouteSetDownloadedAtArgs {
+    downloadedAt: Date | null;
+    id: string;
+}
+
+export interface RouteSetDownloadedAtRow {
+    id: string;
+    userId: string;
+    createdAt: Date;
+    planId: string;
+    name: string;
+    linestring: string | null;
+    statsLenM: string;
+    statsScore: string;
+    statsJunctionCount: string;
+    isDeleted: boolean;
+    mapPreviewLight: string | null;
+    mapPreviewDark: string | null;
+    downloadedAt: Date | null;
+}
+
+export async function routeSetDownloadedAt(sql: Sql, args: RouteSetDownloadedAtArgs): Promise<RouteSetDownloadedAtRow | null> {
+    const rows = await sql.unsafe(routeSetDownloadedAtQuery, [args.downloadedAt, args.id]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        userId: row[1],
+        createdAt: row[2],
+        planId: row[3],
+        name: row[4],
+        linestring: row[5],
+        statsLenM: row[6],
+        statsScore: row[7],
+        statsJunctionCount: row[8],
+        isDeleted: row[9],
+        mapPreviewLight: row[10],
+        mapPreviewDark: row[11],
+        downloadedAt: row[12]
     };
 }
 
@@ -248,7 +303,7 @@ export async function privateCodeClaim(sql: Sql, args: PrivateCodeClaimArgs): Pr
 export const privateUserInsertQuery = `-- name: PrivateUserInsert :one
 insert into private.users (user_id)
 values ($1)
-returning user_id, stripe_flow_status, stripe_customer_id, stripe_status, stripe_checkout_id, stripe_subscription_id, stripe_price_id, stripe_current_period_end, stripe_current_period_start, stripe_cancel_at_period_end, stripe_payment_method, sub_type`;
+returning user_id, stripe_flow_status, stripe_customer_id, stripe_status, stripe_checkout_id, stripe_subscription_id, stripe_price_id, stripe_current_period_end, stripe_current_period_start, stripe_cancel_at_period_end, stripe_payment_method, sub_type, download_count_remain`;
 
 export interface PrivateUserInsertArgs {
     userId: string;
@@ -267,6 +322,7 @@ export interface PrivateUserInsertRow {
     stripeCancelAtPeriodEnd: boolean | null;
     stripePaymentMethod: string | null;
     subType: "none" | "stripe" | "code";
+    downloadCountRemain: number;
 }
 
 export async function privateUserInsert(sql: Sql, args: PrivateUserInsertArgs): Promise<PrivateUserInsertRow | null> {
@@ -290,7 +346,60 @@ export async function privateUserInsert(sql: Sql, args: PrivateUserInsertArgs): 
         stripeCurrentPeriodStart: row[8],
         stripeCancelAtPeriodEnd: row[9],
         stripePaymentMethod: row[10],
-        subType: row[11]
+        subType: row[11],
+        downloadCountRemain: row[12]
+    };
+}
+
+export const privateUserDecreaseDownloadsQuery = `-- name: PrivateUserDecreaseDownloads :one
+update private.users
+set download_count_remain = download_count_remain - 1
+where user_id = $1
+returning user_id, stripe_flow_status, stripe_customer_id, stripe_status, stripe_checkout_id, stripe_subscription_id, stripe_price_id, stripe_current_period_end, stripe_current_period_start, stripe_cancel_at_period_end, stripe_payment_method, sub_type, download_count_remain`;
+
+export interface PrivateUserDecreaseDownloadsArgs {
+    userId: string;
+}
+
+export interface PrivateUserDecreaseDownloadsRow {
+    userId: string;
+    stripeFlowStatus: "none" | "initiated" | "completed" | "confirmed";
+    stripeCustomerId: string | null;
+    stripeStatus: string | null;
+    stripeCheckoutId: string | null;
+    stripeSubscriptionId: string | null;
+    stripePriceId: string | null;
+    stripeCurrentPeriodEnd: Date | null;
+    stripeCurrentPeriodStart: Date | null;
+    stripeCancelAtPeriodEnd: boolean | null;
+    stripePaymentMethod: string | null;
+    subType: "none" | "stripe" | "code";
+    downloadCountRemain: number;
+}
+
+export async function privateUserDecreaseDownloads(sql: Sql, args: PrivateUserDecreaseDownloadsArgs): Promise<PrivateUserDecreaseDownloadsRow | null> {
+    const rows = await sql.unsafe(privateUserDecreaseDownloadsQuery, [args.userId]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        userId: row[0],
+        stripeFlowStatus: row[1],
+        stripeCustomerId: row[2],
+        stripeStatus: row[3],
+        stripeCheckoutId: row[4],
+        stripeSubscriptionId: row[5],
+        stripePriceId: row[6],
+        stripeCurrentPeriodEnd: row[7],
+        stripeCurrentPeriodStart: row[8],
+        stripeCancelAtPeriodEnd: row[9],
+        stripePaymentMethod: row[10],
+        subType: row[11],
+        downloadCountRemain: row[12]
     };
 }
 
@@ -298,7 +407,7 @@ export const privateUsersUpdateWithSubscriptionCodeQuery = `-- name: PrivateUser
 update private.users 
 set sub_type = $1
 where user_id = $2
-returning user_id, stripe_flow_status, stripe_customer_id, stripe_status, stripe_checkout_id, stripe_subscription_id, stripe_price_id, stripe_current_period_end, stripe_current_period_start, stripe_cancel_at_period_end, stripe_payment_method, sub_type`;
+returning user_id, stripe_flow_status, stripe_customer_id, stripe_status, stripe_checkout_id, stripe_subscription_id, stripe_price_id, stripe_current_period_end, stripe_current_period_start, stripe_cancel_at_period_end, stripe_payment_method, sub_type, download_count_remain`;
 
 export interface PrivateUsersUpdateWithSubscriptionCodeArgs {
     subType: string;
@@ -318,6 +427,7 @@ export interface PrivateUsersUpdateWithSubscriptionCodeRow {
     stripeCancelAtPeriodEnd: boolean | null;
     stripePaymentMethod: string | null;
     subType: "none" | "stripe" | "code";
+    downloadCountRemain: number;
 }
 
 export async function privateUsersUpdateWithSubscriptionCode(sql: Sql, args: PrivateUsersUpdateWithSubscriptionCodeArgs): Promise<void> {
@@ -423,7 +533,7 @@ export async function privateUsersUpdateStripeStatusNone(sql: Sql, args: Private
 }
 
 export const privateUsersGetRowQuery = `-- name: PrivateUsersGetRow :one
-select user_id, stripe_flow_status, stripe_customer_id, stripe_status, stripe_checkout_id, stripe_subscription_id, stripe_price_id, stripe_current_period_end, stripe_current_period_start, stripe_cancel_at_period_end, stripe_payment_method, sub_type from private.users
+select user_id, stripe_flow_status, stripe_customer_id, stripe_status, stripe_checkout_id, stripe_subscription_id, stripe_price_id, stripe_current_period_end, stripe_current_period_start, stripe_cancel_at_period_end, stripe_payment_method, sub_type, download_count_remain from private.users
 where user_id = $1`;
 
 export interface PrivateUsersGetRowArgs {
@@ -443,6 +553,7 @@ export interface PrivateUsersGetRowRow {
     stripeCancelAtPeriodEnd: boolean | null;
     stripePaymentMethod: string | null;
     subType: "none" | "stripe" | "code";
+    downloadCountRemain: number;
 }
 
 export async function privateUsersGetRow(sql: Sql, args: PrivateUsersGetRowArgs): Promise<PrivateUsersGetRowRow | null> {
@@ -466,12 +577,13 @@ export async function privateUsersGetRow(sql: Sql, args: PrivateUsersGetRowArgs)
         stripeCurrentPeriodStart: row[8],
         stripeCancelAtPeriodEnd: row[9],
         stripePaymentMethod: row[10],
-        subType: row[11]
+        subType: row[11],
+        downloadCountRemain: row[12]
     };
 }
 
 export const privateUsersGetRowByStripeCustomerIdQuery = `-- name: PrivateUsersGetRowByStripeCustomerId :one
-select user_id, stripe_flow_status, stripe_customer_id, stripe_status, stripe_checkout_id, stripe_subscription_id, stripe_price_id, stripe_current_period_end, stripe_current_period_start, stripe_cancel_at_period_end, stripe_payment_method, sub_type from private.users
+select user_id, stripe_flow_status, stripe_customer_id, stripe_status, stripe_checkout_id, stripe_subscription_id, stripe_price_id, stripe_current_period_end, stripe_current_period_start, stripe_cancel_at_period_end, stripe_payment_method, sub_type, download_count_remain from private.users
 where stripe_customer_id = $1`;
 
 export interface PrivateUsersGetRowByStripeCustomerIdArgs {
@@ -491,6 +603,7 @@ export interface PrivateUsersGetRowByStripeCustomerIdRow {
     stripeCancelAtPeriodEnd: boolean | null;
     stripePaymentMethod: string | null;
     subType: "none" | "stripe" | "code";
+    downloadCountRemain: number;
 }
 
 export async function privateUsersGetRowByStripeCustomerId(sql: Sql, args: PrivateUsersGetRowByStripeCustomerIdArgs): Promise<PrivateUsersGetRowByStripeCustomerIdRow | null> {
@@ -514,7 +627,8 @@ export async function privateUsersGetRowByStripeCustomerId(sql: Sql, args: Priva
         stripeCurrentPeriodStart: row[8],
         stripeCancelAtPeriodEnd: row[9],
         stripePaymentMethod: row[10],
-        subType: row[11]
+        subType: row[11],
+        downloadCountRemain: row[12]
     };
 }
 
@@ -607,7 +721,7 @@ update routes
 set is_deleted = true
 where id = $1
   and user_id = $2
-returning id, user_id, created_at, plan_id, name, linestring, stats_len_m, stats_score, stats_junction_count, is_deleted, map_preview_light, map_preview_dark`;
+returning id, user_id, created_at, plan_id, name, linestring, stats_len_m, stats_score, stats_junction_count, is_deleted, map_preview_light, map_preview_dark, downloaded_at`;
 
 export interface RouteDeleteArgs {
     id: string;
@@ -627,6 +741,7 @@ export interface RouteDeleteRow {
     isDeleted: boolean;
     mapPreviewLight: string | null;
     mapPreviewDark: string | null;
+    downloadedAt: Date | null;
 }
 
 export async function routeDelete(sql: Sql, args: RouteDeleteArgs): Promise<RouteDeleteRow | null> {
@@ -650,7 +765,8 @@ export async function routeDelete(sql: Sql, args: RouteDeleteArgs): Promise<Rout
         statsJunctionCount: row[8],
         isDeleted: row[9],
         mapPreviewLight: row[10],
-        mapPreviewDark: row[11]
+        mapPreviewDark: row[11],
+        downloadedAt: row[12]
     };
 }
 
@@ -659,7 +775,7 @@ update routes
 set is_deleted = true
 where plan_id = $1
   and user_id = $2
-returning id, user_id, created_at, plan_id, name, linestring, stats_len_m, stats_score, stats_junction_count, is_deleted, map_preview_light, map_preview_dark`;
+returning id, user_id, created_at, plan_id, name, linestring, stats_len_m, stats_score, stats_junction_count, is_deleted, map_preview_light, map_preview_dark, downloaded_at`;
 
 export interface RouteDeleteByPlanIdArgs {
     planId: string;
@@ -679,6 +795,7 @@ export interface RouteDeleteByPlanIdRow {
     isDeleted: boolean;
     mapPreviewLight: string | null;
     mapPreviewDark: string | null;
+    downloadedAt: Date | null;
 }
 
 export async function routeDeleteByPlanId(sql: Sql, args: RouteDeleteByPlanIdArgs): Promise<RouteDeleteByPlanIdRow | null> {
@@ -702,7 +819,8 @@ export async function routeDeleteByPlanId(sql: Sql, args: RouteDeleteByPlanIdArg
         statsJunctionCount: row[8],
         isDeleted: row[9],
         mapPreviewLight: row[10],
-        mapPreviewDark: row[11]
+        mapPreviewDark: row[11],
+        downloadedAt: row[12]
     };
 }
 
@@ -993,6 +1111,7 @@ select
 	r.id,
 	r.name,
 	r.created_at,
+	r.downloaded_at,
   r.stats_score,
   r.stats_len_m,
   r.stats_junction_count,
@@ -1023,6 +1142,7 @@ export interface RoutesGetRow {
     id: string;
     name: string;
     createdAt: Date;
+    downloadedAt: Date | null;
     statsScore: string;
     statsLenM: string;
     statsJunctionCount: string;
@@ -1039,15 +1159,16 @@ export async function routesGet(sql: Sql, args: RoutesGetArgs): Promise<RoutesGe
         id: row[0],
         name: row[1],
         createdAt: row[2],
-        statsScore: row[3],
-        statsLenM: row[4],
-        statsJunctionCount: row[5],
-        mapPreviewLight: row[6],
-        mapPreviewDark: row[7],
-        latLonArray: row[8],
-        planId: row[9],
-        planName: row[10],
-        planState: row[11]
+        downloadedAt: row[3],
+        statsScore: row[4],
+        statsLenM: row[5],
+        statsJunctionCount: row[6],
+        mapPreviewLight: row[7],
+        mapPreviewDark: row[8],
+        latLonArray: row[9],
+        planId: row[10],
+        planName: row[11],
+        planState: row[12]
     }));
 }
 
@@ -1106,7 +1227,8 @@ select
 	r.created_at as route_created_at,
   r.stats_len_m,
   r.map_preview_light as route_map_preview_light,
-  r.map_preview_dark as route_map_preview_dark
+  r.map_preview_dark as route_map_preview_dark,
+  r.downloaded_at as route_downloaded_at
 from plans p
 left join routes r 
 	on r.plan_id = p.id
@@ -1144,6 +1266,7 @@ export interface PlanListRow {
     statsLenM: string | null;
     routeMapPreviewLight: string | null;
     routeMapPreviewDark: string | null;
+    routeDownloadedAt: Date | null;
 }
 
 export async function planList(sql: Sql, args: PlanListArgs): Promise<PlanListRow[]> {
@@ -1169,7 +1292,8 @@ export async function planList(sql: Sql, args: PlanListArgs): Promise<PlanListRo
         routeCreatedAt: row[18],
         statsLenM: row[19],
         routeMapPreviewLight: row[20],
-        routeMapPreviewDark: row[21]
+        routeMapPreviewDark: row[21],
+        routeDownloadedAt: row[22]
     }));
 }
 
@@ -1465,7 +1589,7 @@ values (
 		)
 	)
 )
-returning id, user_id, created_at, plan_id, name, linestring, stats_len_m, stats_score, stats_junction_count, is_deleted, map_preview_light, map_preview_dark`;
+returning id, user_id, created_at, plan_id, name, linestring, stats_len_m, stats_score, stats_junction_count, is_deleted, map_preview_light, map_preview_dark, downloaded_at`;
 
 export interface RouteInsertArgs {
     name: string;
@@ -1490,6 +1614,7 @@ export interface RouteInsertRow {
     isDeleted: boolean;
     mapPreviewLight: string | null;
     mapPreviewDark: string | null;
+    downloadedAt: Date | null;
 }
 
 export async function routeInsert(sql: Sql, args: RouteInsertArgs): Promise<RouteInsertRow | null> {
@@ -1513,7 +1638,8 @@ export async function routeInsert(sql: Sql, args: RouteInsertArgs): Promise<Rout
         statsJunctionCount: row[8],
         isDeleted: row[9],
         mapPreviewLight: row[10],
-        mapPreviewDark: row[11]
+        mapPreviewDark: row[11],
+        downloadedAt: row[12]
     };
 }
 

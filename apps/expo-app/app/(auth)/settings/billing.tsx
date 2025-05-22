@@ -217,13 +217,6 @@ export default function BillingPage() {
                               },
                             )}
                           >
-                            {price.priceType === "yearly" && (
-                              <View className="absolute right-4 top-4 rounded-full bg-[#FF5937] px-3 py-1 text-white">
-                                <Text className="text-sm font-medium text-white">
-                                  Best Value
-                                </Text>
-                              </View>
-                            )}
                             <View className="mb-4 flex flex-row items-start justify-between">
                               <View>
                                 <Text

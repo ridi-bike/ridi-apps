@@ -109,7 +109,8 @@ export default function UserSettings() {
                           <View className="text-left">
                             <Text className="text-sm font-medium dark:text-gray-100">
                               {userWithSub.subType === "stripe" && "Supporting"}
-                              {userWithSub.subType === "none" && "None"}
+                              {userWithSub.subType === "none" &&
+                                `Available downloads: ${userWithSub.downloadCountRemain}`}
                               {userWithSub.subType === "code" && "Ridi friend"}
                             </Text>
                           </View>

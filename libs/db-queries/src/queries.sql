@@ -21,6 +21,12 @@ where r.id = $1
 order by 
 	r.created_at desc;
 
+-- name: RouteSetDownloadedAt :one
+update routes
+set downloaded_at = $1
+where id = $2 and downloaded_at is null
+returning *;
+
 -- name: RouteUpdateMapPreview :exec
 update routes
 set map_preview_dark = $1,
@@ -71,6 +77,12 @@ where code = $2;
 -- name: PrivateUserInsert :one
 insert into private.users (user_id)
 values ($1)
+returning *;
+
+-- name: PrivateUserDecreaseDownloads :one
+update private.users
+set download_count_remain = download_count_remain - 1
+where user_id = $1
 returning *;
 
 -- name: PrivateUsersUpdateWithSubscriptionCode :exec
@@ -241,6 +253,7 @@ select
 	r.id,
 	r.name,
 	r.created_at,
+	r.downloaded_at,
   r.stats_score,
   r.stats_len_m,
   r.stats_junction_count,
@@ -290,7 +303,8 @@ select
 	r.created_at as route_created_at,
   r.stats_len_m,
   r.map_preview_light as route_map_preview_light,
-  r.map_preview_dark as route_map_preview_dark
+  r.map_preview_dark as route_map_preview_dark,
+  r.downloaded_at as route_downloaded_at
 from plans p
 left join routes r 
 	on r.plan_id = p.id

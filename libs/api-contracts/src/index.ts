@@ -43,6 +43,7 @@ export const routeGetRespopnseSchema = z.discriminatedUnion("version", [
       id: z.string(),
       name: z.string(),
       createdAt: dateOut,
+      downloadedAt: z.string().nullable(),
       mapPreviewLight: z.string().nullable(),
       mapPreviewDark: z.string().nullable(),
       plan: z.object({
@@ -103,6 +104,7 @@ export const plansListResponseSchema = z.discriminatedUnion("version", [
             routeCreatedAt: dateOut,
             routeMapPreviewLight: z.string().nullable(),
             routeMapPreviewDark: z.string().nullable(),
+            routeDownloadedAt: z.string().nullable(),
           }),
         ),
       }),
@@ -346,6 +348,7 @@ export const apiContract = c.router({
           userId: z.string(),
           isAnonymous: z.boolean(),
           subType: userSubType,
+          downloadCountRemain: z.number(),
           email: z.string().nullable(),
         }),
       }),
@@ -463,6 +466,22 @@ export const apiContract = c.router({
       500: z.object({ message: z.string() }),
     },
     summary: "Delete route by ID",
+  },
+  routeSetDownloadedAt: {
+    method: "POST",
+    path: "/user/routes/:routeId/set-downloaded",
+    body: z.discriminatedUnion("version", [
+      z.object({
+        version: z.literal("v1"),
+        data: z.object({
+          downloadedAt: z.number(),
+        }),
+      }),
+    ]),
+    responses: {
+      200: z.object({ id: z.string() }),
+      500: z.object({ message: z.string() }),
+    },
   },
   planDelete: {
     method: "DELETE",

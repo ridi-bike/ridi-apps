@@ -307,12 +307,12 @@ export class StripeApi {
       return [];
     }
     return [
-      {
-        id: this.priceMontly,
-        priceType: "montly",
-        price: montlyPrice.unit_amount / 100,
-        priceMontly: montlyPrice.unit_amount / 100,
-      } as const,
+      // {
+      //   id: this.priceMontly,
+      //   priceType: "montly",
+      //   price: montlyPrice.unit_amount / 100,
+      //   priceMontly: montlyPrice.unit_amount / 100,
+      // } as const,
       {
         id: this.priceYearly,
         priceType: "yearly",

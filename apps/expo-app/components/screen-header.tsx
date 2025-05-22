@@ -1,6 +1,6 @@
 import { type NativeStackHeaderProps } from "@react-navigation/native-stack/src/types";
 import { Link } from "expo-router";
-import { ArrowLeft, UserCircle } from "lucide-react-native";
+import { ArrowLeft, StarIcon, UserCircle } from "lucide-react-native";
 import { View, Text, Pressable } from "react-native";
 
 type ScreenHeaderProps = {
@@ -35,14 +35,24 @@ export function ScreenHeader(props: ScreenHeaderProps) {
       >
         {props.title}
       </Text>
-      <Link
-        role="button"
-        className="flex size-10 items-center justify-center text-gray-600 transition-colors hover:text-[#FF5937] dark:text-gray-400"
-        aria-label="Profile"
-        href="/settings"
-      >
-        <UserCircle className="size-8" />
-      </Link>
+      <View className="flex flex-row gap-4">
+        <Link
+          role="button"
+          className="flex size-10 items-center justify-center text-gray-600 transition-colors hover:text-[#FF5937] dark:text-gray-400"
+          aria-label="My routes"
+          href="/my-routes"
+        >
+          <StarIcon className="size-8" />
+        </Link>
+        <Link
+          role="button"
+          className="flex size-10 items-center justify-center text-gray-600 transition-colors hover:text-[#FF5937] dark:text-gray-400"
+          aria-label="Profile"
+          href="/settings"
+        >
+          <UserCircle className="size-8" />
+        </Link>
+      </View>
     </View>
   );
 }

@@ -5,6 +5,8 @@ import { throttle } from "throttle-debounce";
 
 import { apiClient } from "../api";
 import { supabase } from "../supabase";
+import { type UserResponse } from "../useUser";
+import { USER_QUERY_KEY } from "../useUser";
 
 import { type Plan } from "./plans-store";
 import { PLANS_QUERY_KEY } from "./plans-store";
@@ -54,6 +56,60 @@ export function useStoreRoute(routeId: string) {
     },
   });
 
+  const { mutate: mutateSetDownloaded } = useMutation({
+    mutationFn: (params: { id: string; downloadedAt: Date }) =>
+      apiClient
+        .routeSetDownloadedAt({
+          params: {
+            routeId: params.id,
+          },
+          body: {
+            version: "v1",
+            data: {
+              downloadedAt: params.downloadedAt.getTime(),
+            },
+          },
+        })
+        .then((r) => getSuccessResponseOrThrow(200, r)),
+    onMutate: async (params) => {
+      await queryClient.cancelQueries({ queryKey: USER_QUERY_KEY });
+      await queryClient.cancelQueries({ queryKey: PLANS_QUERY_KEY });
+      await queryClient.cancelQueries({ queryKey: routeQueryKey });
+      queryClient.setQueryData<UserResponse>(USER_QUERY_KEY, (user) => {
+        if (!user) {
+          return user;
+        }
+        return {
+          ...user,
+          data: {
+            ...user.data,
+            downloadCountRemain: user.data.downloadCountRemain - 1,
+          },
+        };
+      });
+      queryClient.setQueryData(routeQueryKey, () => undefined);
+      queryClient.setQueryData<Plan[]>(PLANS_QUERY_KEY, (plansList) => {
+        return plansList?.map((plan) => ({
+          ...plan,
+          routes: plan.routes.map((route) => {
+            if (route.routeId !== params.id) {
+              return {
+                ...route,
+                downloadedAt: params.downloadedAt.toString(),
+              };
+            }
+            return route;
+          }),
+        }));
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: PLANS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: routeQueryKey });
+    },
+  });
+
   useEffect(() => {
     const plansSub = supabase
       .channel(`routes_${Math.random()}`)
@@ -77,5 +133,6 @@ export function useStoreRoute(routeId: string) {
     status,
     refetch: refetchThrottled,
     routeDelete: mutateDelete,
+    routeSetDownloaded: mutateSetDownloaded,
   };
 }

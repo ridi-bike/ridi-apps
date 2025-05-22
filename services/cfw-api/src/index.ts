@@ -34,6 +34,8 @@ import {
   userClaimRuleSets,
   userClaimRuleSetRoadTags,
   geoBoundariesFindCoords,
+  routeSetDownloadedAt,
+  privateUserDecreaseDownloads,
 } from "@ridi/db-queries";
 import { RidiLogger } from "@ridi/logger";
 import { coordsDetailsGetAndFormat } from "@ridi/maps-api";
@@ -183,6 +185,7 @@ const router = tsr
           userId: ctx.request.user.id,
           isAnonymous: !!ctx.request.user.is_anonymous,
           subType: privateUser?.subType || "none",
+          downloadCountRemain: privateUser?.downloadCountRemain || 0,
           email: ctx.request.user.email || null,
         },
       },
@@ -506,6 +509,7 @@ const router = tsr
     if (version !== "v1") {
       throw ctx.logger.error("Wrong version", { version });
     }
+
     const plansFlat = await planList(ctx.db, {
       userId: ctx.request.user.id,
     });
@@ -523,6 +527,8 @@ const router = tsr
               R.entries(),
               R.map(([_routeId, oneRouteFlat]) => ({
                 ...R.first(oneRouteFlat),
+                routeDownloadedAt:
+                  R.first(oneRouteFlat).routeDownloadedAt?.toString() ?? null,
               })),
             )
           : [],
@@ -533,6 +539,7 @@ const router = tsr
       version: "v1",
       data: plans,
     });
+    console.log(validated);
 
     if (!validated.success) {
       throw ctx.logger.error("Validation error in plansList", {
@@ -599,6 +606,7 @@ const router = tsr
         data: {
           ...routesFlat[0],
           latLonArray: routesFlat[0].latLonArray,
+          downloadedAt: routesFlat[0].downloadedAt?.toString() ?? null,
           plan: {
             ...routesFlat[0],
           },
@@ -612,6 +620,7 @@ const router = tsr
       };
 
       const validated = routeGetRespopnseSchema.safeParse(response);
+
       if (!validated.success) {
         throw ctx.logger.error("Validation error in routeGet", {
           error: validated.error.toString(),
@@ -648,6 +657,45 @@ const router = tsr
       status: 200,
       body: {
         id: deletedRoute.id,
+      },
+    };
+  },
+  routeSetDownloadedAt: async (
+    {
+      params: { routeId },
+      body: {
+        version,
+        data: { downloadedAt },
+      },
+    },
+    ctx,
+  ) => {
+    if (version !== "v1") {
+      throw ctx.logger.error("Wrong version", { version });
+    }
+
+    const updatedRoute = await routeSetDownloadedAt(ctx.db, {
+      id: routeId,
+      downloadedAt: new Date(downloadedAt),
+    });
+
+    // updating only if first time download
+    if (updatedRoute) {
+      const privateUser = await privateUserDecreaseDownloads(ctx.db, {
+        userId: ctx.request.user.id,
+      });
+
+      if (!privateUser) {
+        throw ctx.logger.error("Missing private user record", {
+          userId: ctx.request.user.id,
+        });
+      }
+    }
+
+    return {
+      status: 200,
+      body: {
+        id: routeId,
       },
     };
   },
