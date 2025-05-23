@@ -11,7 +11,7 @@ export const routerVersion = "v0.7.3";
 export const routerVersionNext = "v0.7.3";
 
 export const mapDataVersionDate = "2025-02-19";
-export const mapDataVersionDateNext = "2025-02-19";
+export const mapDataVersionDateNext = "2025-05-22";
 
 export const ridiDataRootPath = "/ridi-data";
 

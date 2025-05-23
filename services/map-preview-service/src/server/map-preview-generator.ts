@@ -25,6 +25,11 @@ export class MapPreviewGenerator {
     this.state = "running";
   }
 
+  public async stop() {
+    this.state = "not-running";
+    await this.browser?.close();
+  }
+
   public getState() {
     return this.state;
   }
@@ -93,6 +98,7 @@ export class MapPreviewGenerator {
           renderingDoneReject,
         });
       }
+      this.stop();
       renderingDoneReject(
         this.logger.error("Map rendering timeout", { renderingTimeout }),
       );
