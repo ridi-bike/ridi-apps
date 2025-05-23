@@ -234,14 +234,13 @@ export default function RouteDetails() {
     refetch,
   } = useStorePlans();
   const plan = plans?.find((p) => p.id === planId);
-  const planRoute = plan?.routes.find((r) => r.routeId === routeId);
   const {
     data: route,
     error,
     status,
     routeDelete,
     routeSetDownloaded,
-  } = useStoreRoute(planRoute?.routeId || "");
+  } = useStoreRoute(Array.isArray(routeId) ? "" : routeId || "");
 
   const breakdownSurface = useMemo(() => {
     if (!route) {
@@ -280,23 +279,21 @@ export default function RouteDetails() {
     >
       <View className="flex w-full flex-col items-center justify-start">
         <AnimatePresence>
-          {(!plans && !planError) ||
-            (!route && !error && (
-              <View
-                key="loading"
-                className="flex w-full flex-row items-center justify-center"
-              >
-                <Loading className="size-12 text-[#ff4a25]" />
-              </View>
-            ))}
+          {!route && !error && (
+            <View
+              key="loading"
+              className="flex w-full flex-row items-center justify-center"
+            >
+              <Loading className="size-12 text-[#ff4a25]" />
+            </View>
+          )}
           {!!error && status !== "pending" && (
             <ErrorBox key="error" error={error} retry={refetch} />
           )}
           {!!planError && planStatus !== "pending" && (
             <ErrorBox key="other-error" error={planError} retry={refetch} />
           )}
-          {!!plan &&
-            !!route &&
+          {!!route &&
             !!breakdownSurface &&
             !!breakdownRoadType &&
             !!routeOverview && (
@@ -319,14 +316,17 @@ export default function RouteDetails() {
                       middle={
                         <>
                           <View className="flex flex-row items-center justify-between">
-                            {" "}
-                            <Text className="text-lg font-bold dark:text-gray-200">
-                              {plan.startDesc}
-                            </Text>
-                            {!!plan.finishDesc && (
-                              <Text className="text-lg font-bold dark:text-gray-200">
-                                {plan.finishDesc}
-                              </Text>
+                            {!!plan && (
+                              <>
+                                <Text className="text-lg font-bold dark:text-gray-200">
+                                  {plan.startDesc}
+                                </Text>
+                                {!!plan.finishDesc && (
+                                  <Text className="text-lg font-bold dark:text-gray-200">
+                                    {plan.finishDesc}
+                                  </Text>
+                                )}
+                              </>
                             )}
                             <View className="flex flex-row items-center gap-2">
                               <Trophy className="size-5 text-[#FF5937]" />
@@ -353,7 +353,11 @@ export default function RouteDetails() {
                                     routeId: route.data.id,
                                   });
                                   routeDelete(route.data.id);
-                                  router.replace(`/plans/${planId}`);
+                                  if (router.canGoBack()) {
+                                    router.back();
+                                  } else {
+                                    router.replace(`/plans/${planId}`);
+                                  }
                                 }}
                               >
                                 <Pressable
@@ -404,7 +408,9 @@ export default function RouteDetails() {
                                     "dark:border-green-700 dark:hover:bg-green-950 w-full h-14 flex-row items-center px-4 gap-3 rounded-xl border-[3px] border-green-500 text-green-500 hover:bg-green-50 transition-colors",
                                   )}
                                 >
-                                  <Text>Download Route GPX</Text>
+                                  <Text className="dark:text-gray-200">
+                                    Download Route GPX
+                                  </Text>
                                 </Pressable>
                               </DownloadGpxDialog>
                             </View>

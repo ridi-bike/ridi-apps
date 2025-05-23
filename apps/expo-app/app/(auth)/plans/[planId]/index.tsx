@@ -449,7 +449,7 @@ export default function PlanDetails() {
                             key={route.routeId}
                             href={`/plans/${plan.id}/${route.routeId}`}
                           >
-                            <RouteCard routeShort={route} plan={plan} />
+                            <RouteCard routeShort={route} />
                           </Link>
                         ))}
                       </View>

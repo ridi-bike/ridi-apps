@@ -96,6 +96,52 @@ export async function routeGet(sql: Sql, args: RouteGetArgs): Promise<RouteGetRo
     };
 }
 
+export const routesListDownloadedQuery = `-- name: RoutesListDownloaded :many
+select id, user_id, created_at, plan_id, name, linestring, stats_len_m, stats_score, stats_junction_count, is_deleted, map_preview_light, map_preview_dark, downloaded_at from routes r
+where r.downloaded_at is not null
+  and r.user_id = $1
+  and is_deleted = false
+order by 
+	r.created_at desc`;
+
+export interface RoutesListDownloadedArgs {
+    userId: string;
+}
+
+export interface RoutesListDownloadedRow {
+    id: string;
+    userId: string;
+    createdAt: Date;
+    planId: string;
+    name: string;
+    linestring: string | null;
+    statsLenM: string;
+    statsScore: string;
+    statsJunctionCount: string;
+    isDeleted: boolean;
+    mapPreviewLight: string | null;
+    mapPreviewDark: string | null;
+    downloadedAt: Date | null;
+}
+
+export async function routesListDownloaded(sql: Sql, args: RoutesListDownloadedArgs): Promise<RoutesListDownloadedRow[]> {
+    return (await sql.unsafe(routesListDownloadedQuery, [args.userId]).values()).map(row => ({
+        id: row[0],
+        userId: row[1],
+        createdAt: row[2],
+        planId: row[3],
+        name: row[4],
+        linestring: row[5],
+        statsLenM: row[6],
+        statsScore: row[7],
+        statsJunctionCount: row[8],
+        isDeleted: row[9],
+        mapPreviewLight: row[10],
+        mapPreviewDark: row[11],
+        downloadedAt: row[12]
+    }));
+}
+
 export const routeSetDownloadedAtQuery = `-- name: RouteSetDownloadedAt :one
 update routes
 set downloaded_at = $1
@@ -775,6 +821,7 @@ update routes
 set is_deleted = true
 where plan_id = $1
   and user_id = $2
+  and downloaded_at is null
 returning id, user_id, created_at, plan_id, name, linestring, stats_len_m, stats_score, stats_junction_count, is_deleted, map_preview_light, map_preview_dark, downloaded_at`;
 
 export interface RouteDeleteByPlanIdArgs {
@@ -1124,7 +1171,6 @@ select
 from routes r
 inner join plans p
 	on p.id = r.plan_id 
-    and p.is_deleted = false
 inner join points_array pa
 	on pa.id = r.id
 where r.user_id = $1

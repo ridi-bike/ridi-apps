@@ -36,45 +36,70 @@ const planStateSchema = z.enum([
 ]);
 const planTypeSchema = z.enum(["round-trip", "start-finish"]);
 
+const routeSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  createdAt: dateOut,
+  downloadedAt: z.string().nullable(),
+  mapPreviewLight: z.string().nullable(),
+  mapPreviewDark: z.string().nullable(),
+  plan: z.object({
+    planId: z.string(),
+    planName: z.string(),
+    planState: planStateSchema,
+  }),
+  latLonArray: z.array(z.tuple([z.number(), z.number()])),
+  stats: z.object({
+    lenM: numericOut,
+    score: numericOut,
+    junctionCount: numericOut,
+    breakdown: z.array(
+      z.object({
+        id: z.string(),
+        statType: z.union([
+          z.literal("type"),
+          z.literal("surface"),
+          z.literal("smoothness"),
+        ]),
+        statName: z.string(),
+        lenM: numericOut,
+        percentage: numericOut,
+      }),
+    ),
+  }),
+});
+
 export const routeGetRespopnseSchema = z.discriminatedUnion("version", [
   z.object({
     version: z.literal("v1"),
-    data: z.object({
-      id: z.string(),
-      name: z.string(),
-      createdAt: dateOut,
-      downloadedAt: z.string().nullable(),
-      mapPreviewLight: z.string().nullable(),
-      mapPreviewDark: z.string().nullable(),
-      plan: z.object({
-        planId: z.string(),
-        planName: z.string(),
-        planState: planStateSchema,
-      }),
-      latLonArray: z.array(z.tuple([z.number(), z.number()])),
-      stats: z.object({
-        lenM: numericOut,
-        score: numericOut,
-        junctionCount: numericOut,
-        breakdown: z.array(
-          z.object({
-            id: z.string(),
-            statType: z.union([
-              z.literal("type"),
-              z.literal("surface"),
-              z.literal("smoothness"),
-            ]),
-            statName: z.string(),
-            lenM: numericOut,
-            percentage: numericOut,
-          }),
-        ),
-      }),
-    }),
+    data: routeSchema,
   }),
 ]);
 
+export const routeListDownloadedResponseSchema = z.discriminatedUnion(
+  "version",
+  [
+    z.object({
+      version: z.literal("v1"),
+      data: z.array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+          createdAt: dateOut,
+          mapPreviewLight: z.string().nullable(),
+          mapPreviewDark: z.string().nullable(),
+          downloadedAt: z.string().nullable(),
+          planId: z.string(),
+        }),
+      ),
+    }),
+  ],
+);
+
 export type RouteGetResponse = z.infer<typeof routeGetRespopnseSchema>;
+export type RouteListDownloadedResponse = z.infer<
+  typeof routeGetRespopnseSchema
+>;
 
 export const plansListResponseSchema = z.discriminatedUnion("version", [
   z.object({
@@ -444,9 +469,23 @@ export const apiContract = c.router({
     },
     summary: "Delete a route by ID",
   },
+  routesListDownloaded: {
+    method: "GET",
+    path: "/user/routes/downloaded",
+    query: z.discriminatedUnion("version", [
+      z.object({
+        version: z.literal("v1"),
+      }),
+    ]),
+    responses: {
+      200: routeListDownloadedResponseSchema,
+      500: z.object({ message: z.string() }),
+    },
+    summary: "Get a route by ID",
+  },
   routeGet: {
     method: "GET",
-    path: "/user/routes/:routeId",
+    path: "/user/route/:routeId",
     query: z.discriminatedUnion("version", [
       z.object({
         version: z.literal("v1"),
@@ -460,7 +499,7 @@ export const apiContract = c.router({
   },
   routeDelete: {
     method: "DELETE",
-    path: "/user/routes/:routeId",
+    path: "/user/route/:routeId",
     responses: {
       200: z.object({ id: z.string() }),
       500: z.object({ message: z.string() }),
@@ -469,7 +508,7 @@ export const apiContract = c.router({
   },
   routeSetDownloadedAt: {
     method: "POST",
-    path: "/user/routes/:routeId/set-downloaded",
+    path: "/user/route/:routeId/set-downloaded",
     body: z.discriminatedUnion("version", [
       z.object({
         version: z.literal("v1"),
@@ -485,7 +524,7 @@ export const apiContract = c.router({
   },
   planDelete: {
     method: "DELETE",
-    path: "/user/plans/:planId",
+    path: "/user/plan/:planId",
     responses: {
       200: z.object({ id: z.string() }),
       500: z.object({ message: z.string() }),
@@ -509,7 +548,7 @@ export const apiContract = c.router({
 
   planCreate: {
     method: "POST",
-    path: "/user/plans",
+    path: "/user/plan",
     body: planCreateRequestSchema,
     responses: {
       200: z.object({

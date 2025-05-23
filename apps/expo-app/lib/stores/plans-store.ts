@@ -10,6 +10,7 @@ import { generate } from "xksuid";
 import { apiClient } from "../api";
 import { supabase } from "../supabase";
 
+import { ROUTES_DOWNLOADED_QUERY_KEY } from "./routes-downloaded-store";
 import { getSuccessResponseOrThrow } from "./util";
 
 const DATA_VERSION = "v1";
@@ -57,6 +58,9 @@ export function useStorePlans() {
         .then((r) => getSuccessResponseOrThrow(200, r).data),
     onMutate: async (rowIn) => {
       await queryClient.cancelQueries({ queryKey: PLANS_QUERY_KEY });
+      await queryClient.cancelQueries({
+        queryKey: ROUTES_DOWNLOADED_QUERY_KEY,
+      });
       queryClient.setQueryData<Plan[]>(PLANS_QUERY_KEY, (plansList) => {
         let update = false;
         const updatedPlanList = plansList
@@ -78,6 +82,7 @@ export function useStorePlans() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: PLANS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ROUTES_DOWNLOADED_QUERY_KEY });
     },
   });
 
@@ -88,12 +93,16 @@ export function useStorePlans() {
         .then((r) => getSuccessResponseOrThrow(204, r)),
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: PLANS_QUERY_KEY });
+      await queryClient.cancelQueries({
+        queryKey: ROUTES_DOWNLOADED_QUERY_KEY,
+      });
       queryClient.setQueryData<Plan[]>(PLANS_QUERY_KEY, (plansList) => {
         return plansList?.filter((p) => p.id !== id);
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: PLANS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ROUTES_DOWNLOADED_QUERY_KEY });
     },
   });
 

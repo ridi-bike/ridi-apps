@@ -2,7 +2,10 @@ import {
   type Request as WorkerRequest,
   type ExecutionContext,
 } from "@cloudflare/workers-types";
-import { type RoadTags } from "@ridi/api-contracts";
+import {
+  routeListDownloadedResponseSchema,
+  type RoadTags,
+} from "@ridi/api-contracts";
 import {
   apiContract,
   plansListResponseSchema,
@@ -36,6 +39,7 @@ import {
   geoBoundariesFindCoords,
   routeSetDownloadedAt,
   privateUserDecreaseDownloads,
+  routesListDownloaded,
 } from "@ridi/db-queries";
 import { RidiLogger } from "@ridi/logger";
 import { coordsDetailsGetAndFormat } from "@ridi/maps-api";
@@ -539,7 +543,6 @@ const router = tsr
       version: "v1",
       data: plans,
     });
-    console.log(validated);
 
     if (!validated.success) {
       throw ctx.logger.error("Validation error in plansList", {
@@ -636,6 +639,43 @@ const router = tsr
       throw ctx.logger.error("Route get error", {
         error,
         routeId,
+        userId: ctx.request.user.id,
+      });
+    }
+  },
+  routesListDownloaded: async ({ query: { version } }, ctx) => {
+    if (version !== "v1") {
+      throw ctx.logger.error("Wrong version", { version });
+    }
+
+    try {
+      const routesFlat = await routesListDownloaded(ctx.db, {
+        userId: ctx.request.user.id,
+      });
+
+      const response = {
+        version: "v1",
+        data: routesFlat.map((routeFlat) => ({
+          ...routeFlat,
+          downloadedAt: routeFlat.downloadedAt?.toString() ?? null,
+        })),
+      };
+
+      const validated = routeListDownloadedResponseSchema.safeParse(response);
+
+      if (!validated.success) {
+        throw ctx.logger.error("Validation error in routeGet", {
+          error: validated.error.toString(),
+          userId: ctx.request.user.id,
+        });
+      }
+      return {
+        status: 200,
+        body: validated.data,
+      };
+    } catch (error) {
+      throw ctx.logger.error("Route get error", {
+        error,
         userId: ctx.request.user.id,
       });
     }

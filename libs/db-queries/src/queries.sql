@@ -21,6 +21,14 @@ where r.id = $1
 order by 
 	r.created_at desc;
 
+-- name: RoutesListDownloaded :many
+select * from routes r
+where r.downloaded_at is not null
+  and r.user_id = $1
+  and is_deleted = false
+order by 
+	r.created_at desc;
+
 -- name: RouteSetDownloadedAt :one
 update routes
 set downloaded_at = $1
@@ -162,6 +170,7 @@ update routes
 set is_deleted = true
 where plan_id = $1
   and user_id = $2
+  and downloaded_at is null
 returning *;
 
 -- name: RegionInsertOrUpdate :one
@@ -266,7 +275,6 @@ select
 from routes r
 inner join plans p
 	on p.id = r.plan_id 
-    and p.is_deleted = false
 inner join points_array pa
 	on pa.id = r.id
 where r.user_id = $1

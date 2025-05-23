@@ -10,6 +10,7 @@ import { USER_QUERY_KEY } from "../useUser";
 
 import { type Plan } from "./plans-store";
 import { PLANS_QUERY_KEY } from "./plans-store";
+import { ROUTES_DOWNLOADED_QUERY_KEY } from "./routes-downloaded-store";
 import { getSuccessResponseOrThrow } from "./util";
 
 export type Route = RouteGetResponse["data"];
@@ -42,6 +43,9 @@ export function useStoreRoute(routeId: string) {
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: PLANS_QUERY_KEY });
       await queryClient.cancelQueries({ queryKey: routeQueryKey });
+      await queryClient.cancelQueries({
+        queryKey: ROUTES_DOWNLOADED_QUERY_KEY,
+      });
       queryClient.setQueryData(routeQueryKey, () => undefined);
       queryClient.setQueryData<Plan[]>(PLANS_QUERY_KEY, (plansList) => {
         return plansList?.map((plan) => ({
@@ -52,6 +56,7 @@ export function useStoreRoute(routeId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: PLANS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ROUTES_DOWNLOADED_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: routeQueryKey });
     },
   });
@@ -74,6 +79,9 @@ export function useStoreRoute(routeId: string) {
     onMutate: async (params) => {
       await queryClient.cancelQueries({ queryKey: USER_QUERY_KEY });
       await queryClient.cancelQueries({ queryKey: PLANS_QUERY_KEY });
+      await queryClient.cancelQueries({
+        queryKey: ROUTES_DOWNLOADED_QUERY_KEY,
+      });
       await queryClient.cancelQueries({ queryKey: routeQueryKey });
       queryClient.setQueryData<UserResponse>(USER_QUERY_KEY, (user) => {
         if (!user) {
@@ -106,6 +114,7 @@ export function useStoreRoute(routeId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: PLANS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ROUTES_DOWNLOADED_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: routeQueryKey });
     },
   });

@@ -6,11 +6,11 @@ import { ErrorBox } from "~/components/error";
 import { Loading } from "~/components/loading";
 import { RouteCard } from "~/components/route-card";
 import { ScreenFrame } from "~/components/screen-frame";
-import { useStorePlans } from "~/lib/stores/plans-store";
+import { useStoreRoutesDownloaded } from "~/lib/stores/routes-downloaded-store";
 
 export default function PlanDetails() {
   const router = useRouter();
-  const { data: plans, error, status, refetch } = useStorePlans();
+  const { data: routes, error, status, refetch } = useStoreRoutesDownloaded();
 
   return (
     <ScreenFrame
@@ -21,7 +21,7 @@ export default function PlanDetails() {
     >
       <View className="flex w-full flex-col items-center justify-start">
         <AnimatePresence exitBeforeEnter>
-          {!plans && !error && (
+          {!routes && !error && (
             <View
               key="loading"
               className="flex w-full flex-row items-center justify-center"
@@ -39,7 +39,7 @@ export default function PlanDetails() {
               <ErrorBox error={error} retry={refetch} />
             </MotiView>
           )}
-          {plans && (
+          {routes && (
             <MotiView
               key="plan"
               from={{ opacity: 0 }}
@@ -56,20 +56,23 @@ export default function PlanDetails() {
                     My Routes
                   </Text>
                   <View className="grid grid-cols-1 gap-6 pb-24 md:grid-cols-2 lg:grid-cols-3">
-                    {plans
-                      ?.map((plan) => {
-                        return plan.routes
-                          .filter((route) => !!route.routeDownloadedAt)
-                          .map((route) => (
-                            <Link
-                              key={route.routeId}
-                              href={`/plans/${plan.id}/${route.routeId}`}
-                            >
-                              <RouteCard routeShort={route} plan={plan} />
-                            </Link>
-                          ));
-                      })
-                      .flat()}
+                    {routes.data.map((route) => (
+                      <Link
+                        key={route.id}
+                        href={`/plans/${route.planId}/${route.id}`}
+                      >
+                        <RouteCard
+                          routeShort={{
+                            routeId: route.id,
+                            routeName: route.name,
+                            routeCreatedAt: route.createdAt,
+                            routeDownloadedAt: route.downloadedAt,
+                            routeMapPreviewDark: route.mapPreviewDark,
+                            routeMapPreviewLight: route.mapPreviewLight,
+                          }}
+                        />
+                      </Link>
+                    ))}
                   </View>
                 </View>
               </ScrollView>

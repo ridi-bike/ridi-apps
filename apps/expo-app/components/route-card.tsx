@@ -14,7 +14,6 @@ import { metersToDisplay } from "./geo-map/util";
 import { ScreenCard } from "./screen-card";
 
 type RouteCardProps = {
-  plan: Plan;
   routeShort: Plan["routes"][number];
 };
 const blurhash =
