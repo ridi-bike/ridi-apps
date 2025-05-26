@@ -30,6 +30,9 @@ echo "Stack: $STACK (kubectl context: $KUBE_CONTEXT)"
 echo "Logs URI: $URI_LOGS"
 echo "Metrics URI: $URI_METRICS"
 
+helm repo add betterstack-logs https://betterstackhq.github.io/logs-helm-chart
+helm repo update
+
 # Install using Helm with specific kubectl context
 helm install betterstack-logs betterstack-logs/betterstack-logs \
   --kube-context="$KUBE_CONTEXT" \
