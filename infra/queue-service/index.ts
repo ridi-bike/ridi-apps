@@ -103,6 +103,14 @@ new k8s.apps.v1.Deployment(queueServiceName, {
                 name: "MAP_PREVIEW_SERVICE_URL",
                 value: mapPreviewServiceUrl,
               },
+              {
+                name: "RESEND_SECRET",
+                value: config.require("resend_secret"),
+              },
+              {
+                name: "RESEND_AUDIENCE_ID",
+                value: config.require("resend_audience_id"),
+              },
             ],
             startupProbe: {
               exec: {

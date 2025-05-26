@@ -2,6 +2,34 @@
 
 import type  { Sql } from "postgres";
 
+export const userGetQuery = `-- name: UserGet :one
+select id, email from auth.users
+where id = $1::uuid`;
+
+export interface UserGetArgs {
+    userId: string | null;
+}
+
+export interface UserGetRow {
+    id: string;
+    email: string | null;
+}
+
+export async function userGet(sql: Sql, args: UserGetArgs): Promise<UserGetRow | null> {
+    const rows = await sql.unsafe(userGetQuery, [args.userId]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        email: row[1]
+    };
+}
+
 export const geoBoundariesFindCoordsQuery = `-- name: GeoBoundariesFindCoords :many
 select id, name, polygon, level, updated_at from geo_boundaries
 where postgis.st_within(postgis.st_point($1, $2), geo_boundaries.polygon)`;

@@ -6,6 +6,8 @@ const envSchema = z.object({
     .string()
     .transform((v) => JSON.parse(v) as Record<string, string>),
   MAP_PREVIEW_SERVICE_URL: z.string(),
+  RESEND_SECRET: z.string(),
+  RESEND_AUDIENCE_ID: z.string(),
 });
 
 export const env = envSchema.parse(process.env);

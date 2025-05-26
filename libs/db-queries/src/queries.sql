@@ -1,3 +1,7 @@
+-- name: UserGet :one
+select id, email from auth.users
+where id = sqlc.arg(user_id)::uuid;
+
 -- name: GeoBoundariesFindCoords :many
 select * from geo_boundaries
 where postgis.st_within(postgis.st_point(sqlc.arg(lon), sqlc.arg(lat)), geo_boundaries.polygon);
