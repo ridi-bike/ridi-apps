@@ -174,10 +174,6 @@ for (const region of regions) {
                     name: "PORT",
                     value: port.toString(),
                   },
-                  {
-                    name: "RAYON_NUM_THREADS",
-                    value: "5",
-                  },
                 ],
                 resources: {
                   requests: {
@@ -185,7 +181,7 @@ for (const region of regions) {
                     cpu: "0.01",
                   },
                   limits: {
-                    cpu: "6",
+                    cpu: "24",
                   },
                 },
                 ports: [
