@@ -265,10 +265,9 @@ function GeneratingRoutes({
             </Text>
             <View className="space-y-4">
               <Text className="text-lg text-gray-700 dark:text-gray-200">
-                We&apos;re currently in beta, which means our route-finding
-                squirrels are still in training! While they&apos;re working hard
-                to find the perfect routes for you, it might take a little
-                longer.
+                Route generation will take longer for longer distances and more
+                complex rules. If this feels too long, try creating shorter
+                plans.
               </Text>
               <View className="flex flex-row items-center gap-2">
                 <Text className="flex-1 text-lg font-medium text-[#FF5937]">
