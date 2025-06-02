@@ -422,7 +422,8 @@ export default function PlanDetails() {
                       </View>
                     }
                   />
-                  {(plan.state === "planning" ||
+                  {(plan.state === "new" ||
+                    plan.state === "planning" ||
                     plan.state === "planning-wider") && (
                     <GeneratingRoutes
                       planningWider={plan.state === "planning-wider"}
