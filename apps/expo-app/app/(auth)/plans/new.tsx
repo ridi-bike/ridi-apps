@@ -143,7 +143,7 @@ export default function PlansNew() {
           startRegions?.filter((sr) =>
             finishRegions?.find((fr) => fr.region === sr.region),
           ) || [];
-        if (!overlapping.length) {
+        if (startRegions && finishRegions && !overlapping.length) {
           posthogClient.captureEvent("plan-new-different-regions", {
             startRegions,
             finishRegions,
