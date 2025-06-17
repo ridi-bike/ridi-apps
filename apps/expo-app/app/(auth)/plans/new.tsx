@@ -3,7 +3,6 @@ import * as turf from "@turf/turf";
 import * as Location from "expo-location";
 import { Link, useRouter } from "expo-router";
 import {
-  ArrowRightCircle,
   CirclePauseIcon,
   CirclePlayIcon,
   Compass,
@@ -19,7 +18,7 @@ import {
   Waypoints,
 } from "lucide-react-native";
 import { AnimatePresence, MotiView, ScrollView } from "moti";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import * as z from "zod";
 
@@ -124,32 +123,38 @@ export default function PlansNew() {
     if (finishCoords) {
       findRegions(finishCoords).then((regions) => setFinishRegions(regions));
     } else {
-      setStartRegions(null);
+      setFinishRegions(null);
     }
   }, [finishCoords]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   useEffect(() => {
-    if (startCoords && finishCoords && startRegions && finishRegions) {
-      if (!startRegions.length || !finishRegions.length) {
+    if ((startCoords && startRegions) || (finishCoords && finishRegions)) {
+      if (
+        (startRegions && !startRegions.length) ||
+        (finishRegions && !finishRegions.length)
+      ) {
         posthogClient.captureEvent("plan-new-unsupported-region", {
           startCoords,
           finishCoords,
         });
-        setErrorMessage("Journey start or finish set in unsupported region");
+        setErrorMessage("Journey start or finish in unsupported region");
       } else {
-        const overlapping = startRegions.filter((sr) =>
-          finishRegions.find((fr) => fr.region === sr.region),
-        );
+        const overlapping =
+          startRegions?.filter((sr) =>
+            finishRegions?.find((fr) => fr.region === sr.region),
+          ) || [];
         if (!overlapping.length) {
           posthogClient.captureEvent("plan-new-different-regions", {
             startRegions,
             finishRegions,
           });
-          setErrorMessage("Journey start and finish are in different regions");
+          setErrorMessage("Journey start and finish is in different regions");
         } else {
           setErrorMessage(null);
         }
       }
+    } else {
+      setErrorMessage(null);
     }
   }, [finishCoords, finishRegions, startCoords, startRegions]);
 
@@ -236,7 +241,7 @@ export default function PlansNew() {
     }
   }, [currentCoords]);
 
-  const canCreateRoute = useCallback(() => {
+  const canCreateRoute = useMemo(() => {
     return (
       ((!isRoundTrip && startCoords && finishCoords && ruleSetId) ||
         (isRoundTrip &&
@@ -300,12 +305,14 @@ export default function PlansNew() {
                     trigger: "ok-button",
                   });
                 }}
-                aria-disabled={!canCreateRoute()}
+                disabled={!canCreateRoute}
+                aria-disabled={!canCreateRoute}
                 className={cn(
                   "w-full rounded-xl px-4 py-3 font-medium text-white transition-colors",
                   {
-                    "bg-[#FF5937] hover:bg-[#FF5937]/90": mapMode,
-                    "cursor-not-allowed bg-gray-200 dark:bg-gray-700": !mapMode,
+                    "bg-[#FF5937] hover:bg-[#FF5937]/90": canCreateRoute,
+                    "cursor-not-allowed bg-gray-200 dark:bg-gray-700":
+                      !canCreateRoute,
                   },
                 )}
               >
@@ -317,7 +324,7 @@ export default function PlansNew() {
                 key="save"
                 role="button"
                 onPress={() => {
-                  if (canCreateRoute()) {
+                  if (canCreateRoute) {
                     if (!startCoords || !ruleSetId) {
                       return;
                     }
@@ -354,13 +361,14 @@ export default function PlansNew() {
                     });
                   }
                 }}
-                aria-disabled={!canCreateRoute()}
+                disabled={!canCreateRoute}
+                aria-disabled={!canCreateRoute}
                 className={cn(
                   "w-full rounded-xl px-4 py-3 max-w-5xl font-medium text-white transition-colors",
                   {
-                    "bg-[#FF5937] hover:bg-[#FF5937]/90": canCreateRoute(),
+                    "bg-[#FF5937] hover:bg-[#FF5937]/90": canCreateRoute,
                     "cursor-not-allowed bg-gray-200 dark:bg-gray-700":
-                      !canCreateRoute(),
+                      !canCreateRoute,
                   },
                 )}
               >
