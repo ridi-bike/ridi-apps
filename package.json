@@ -34,7 +34,8 @@
     "prettier-plugin-astro": "^0.14.1"
   },
   "resolutions": {
-    "react": "18.2.0"
+    "react": "19.0.0",
+    "metro": "0.82.4"
   },
   "dependencies": {
     "tsx": "^4.19.3",
