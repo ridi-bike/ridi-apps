@@ -213,7 +213,7 @@ importers:
         version: 7.2.0
       '@vis.gl/react-maplibre':
         specifier: 8.0.4
-        version: 8.0.4(maplibre-gl@5.6.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+        version: 8.0.4(maplibre-gl@4.7.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       babel-plugin-react-compiler:
         specifier: 19.1.0-rc.2
         version: 19.1.0-rc.2
@@ -305,8 +305,8 @@ importers:
         specifier: ^0.516.0
         version: 0.516.0(react-native-svg@15.11.2(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0)
       maplibre-gl:
-        specifier: ^5.6.0
-        version: 5.6.0
+        specifier: ^4.7.1
+        version: 4.7.1
       moti:
         specifier: ^0.30.0
         version: 0.30.0(react-dom@19.0.0(react@19.0.0))(react-native-reanimated@3.17.5(@babel/core@7.27.4)(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(react@19.0.0)
@@ -2655,10 +2655,6 @@ packages:
 
   '@maplibre/maplibre-gl-style-spec@20.4.0':
     resolution: {integrity: sha512-AzBy3095fTFPjDjmWpR2w6HVRAZJ6hQZUCwk5Plz6EyfnfuQW1odeW5i2Ai47Y6TBA2hQnC+azscjBSALpaWgw==}
-    hasBin: true
-
-  '@maplibre/maplibre-gl-style-spec@23.3.0':
-    resolution: {integrity: sha512-IGJtuBbaGzOUgODdBRg66p8stnwj9iDXkgbYKoYcNiiQmaez5WVRfXm4b03MCDwmZyX93csbfHFWEJJYHnn5oA==}
     hasBin: true
 
   '@maplibre/maplibre-react-native@10.1.6':
@@ -8296,10 +8292,6 @@ packages:
 
   maplibre-gl@4.7.1:
     resolution: {integrity: sha512-lgL7XpIwsgICiL82ITplfS7IGwrB1OJIw/pCvprDp2dhmSSEBgmPzYRvwYYYvJGJD7fxUv1Tvpih4nZ6VrLuaA==}
-    engines: {node: '>=16.14.0', npm: '>=8.1.0'}
-
-  maplibre-gl@5.6.0:
-    resolution: {integrity: sha512-7TuHMozUC4rlIp08bSsxCixFn18P24otrlZU/7UGCO5RufFTJadFzauTrvBHr9FB67MbJ6nvFXEftGd0bUl4Iw==}
     engines: {node: '>=16.14.0', npm: '>=8.1.0'}
 
   marchingsquares@1.3.3:
@@ -14350,16 +14342,6 @@ snapshots:
       rw: 1.3.3
       tinyqueue: 3.0.0
 
-  '@maplibre/maplibre-gl-style-spec@23.3.0':
-    dependencies:
-      '@mapbox/jsonlint-lines-primitives': 2.0.2
-      '@mapbox/unitbezier': 0.0.1
-      json-stringify-pretty-compact: 4.0.0
-      minimist: 1.2.8
-      quickselect: 3.0.0
-      rw: 1.3.3
-      tinyqueue: 3.0.0
-
   '@maplibre/maplibre-react-native@10.1.6(@expo/config-plugins@10.0.2)(@types/geojson@7946.0.16)(@types/react@19.0.12)(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0)':
     dependencies:
       '@turf/distance': 7.2.0
@@ -17562,13 +17544,13 @@ snapshots:
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
 
-  '@vis.gl/react-maplibre@8.0.4(maplibre-gl@5.6.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
+  '@vis.gl/react-maplibre@8.0.4(maplibre-gl@4.7.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
       '@maplibre/maplibre-gl-style-spec': 19.3.3
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
     optionalDependencies:
-      maplibre-gl: 5.6.0
+      maplibre-gl: 4.7.1
 
   '@vitejs/plugin-react@4.3.4(vite@6.2.2(@types/node@22.13.10)(jiti@1.21.7)(lightningcss@1.29.3)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0))':
     dependencies:
@@ -21935,35 +21917,6 @@ snapshots:
       '@mapbox/vector-tile': 1.3.1
       '@mapbox/whoots-js': 3.1.0
       '@maplibre/maplibre-gl-style-spec': 20.4.0
-      '@types/geojson': 7946.0.16
-      '@types/geojson-vt': 3.2.5
-      '@types/mapbox__point-geometry': 0.1.4
-      '@types/mapbox__vector-tile': 1.3.4
-      '@types/pbf': 3.0.5
-      '@types/supercluster': 7.1.3
-      earcut: 3.0.1
-      geojson-vt: 4.0.2
-      gl-matrix: 3.4.3
-      global-prefix: 4.0.0
-      kdbush: 4.0.2
-      murmurhash-js: 1.0.0
-      pbf: 3.3.0
-      potpack: 2.0.0
-      quickselect: 3.0.0
-      supercluster: 8.0.1
-      tinyqueue: 3.0.0
-      vt-pbf: 3.1.3
-
-  maplibre-gl@5.6.0:
-    dependencies:
-      '@mapbox/geojson-rewind': 0.5.2
-      '@mapbox/jsonlint-lines-primitives': 2.0.2
-      '@mapbox/point-geometry': 0.1.0
-      '@mapbox/tiny-sdf': 2.0.6
-      '@mapbox/unitbezier': 0.0.1
-      '@mapbox/vector-tile': 1.3.1
-      '@mapbox/whoots-js': 3.1.0
-      '@maplibre/maplibre-gl-style-spec': 23.3.0
       '@types/geojson': 7946.0.16
       '@types/geojson-vt': 3.2.5
       '@types/mapbox__point-geometry': 0.1.4
