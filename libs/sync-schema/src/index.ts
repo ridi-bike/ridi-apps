@@ -1,5 +1,5 @@
 import { type Store, type Ids } from "tinybase";
-import { type z } from "zod";
+import { z } from "zod";
 
 export type StoreSchema = Record<string, z.SomeZodObject>;
 
@@ -22,9 +22,18 @@ export type StoreWithSchema<TSchema extends StoreSchema> = {
       ? TypedTable<TSchema, tableId>
       : never;
   };
+  setTables: (tables: {
+    [tableId in keyof TSchema]: tableId extends string
+      ? TypedTable<TSchema, tableId>
+      : never;
+  }) => void;
   getTable: <TTableId extends keyof TSchema>(
     tableId: Extract<TTableId, string>,
   ) => TypedTable<TSchema, TTableId>;
+  setTable: <TTableId extends keyof TSchema>(
+    tableId: Extract<TTableId, string>,
+    table: TypedTable<TSchema, TTableId>,
+  ) => void;
   getTableCellIds: <TTableId extends keyof TSchema>(
     tableId: Extract<TTableId, string>,
   ) => TableCellIds<TSchema, TTableId>[];
@@ -45,6 +54,16 @@ export type StoreWithSchema<TSchema extends StoreSchema> = {
     tableId: Extract<TTableId, string>,
     rowId: string,
   ) => z.infer<TSchema[TTableId]>;
+  setRow: <TTableId extends keyof TSchema>(
+    tableId: Extract<TTableId, string>,
+    rowId: string,
+    row: z.infer<TSchema[TTableId]>,
+  ) => void;
+  setPartialRow: <TTableId extends keyof TSchema>(
+    tableId: Extract<TTableId, string>,
+    rowId: string,
+    row: Partial<z.infer<TSchema[TTableId]>>,
+  ) => void;
   getCellIds: <TTableId extends keyof TSchema>(
     tableId: Extract<TTableId, string>,
     rowId: string,
@@ -57,6 +76,19 @@ export type StoreWithSchema<TSchema extends StoreSchema> = {
     rowId: string,
     cellId: Extract<TCellId, string>,
   ) => z.infer<TSchema[TTableId]>[TCellId];
+  setCell: <
+    TTableId extends keyof TSchema,
+    TCellId extends TableCellIds<TSchema, TTableId>,
+  >(
+    tableId: Extract<TTableId, string>,
+    rowId: string,
+    cellId: Extract<TCellId, string>,
+    cell:
+      | z.infer<TSchema[TTableId]>[TCellId]
+      | ((
+          v: z.infer<TSchema[TTableId]>[TCellId],
+        ) => z.infer<TSchema[TTableId]>[TCellId]),
+  ) => void;
 };
 
 function assertTableSchema(
@@ -115,6 +147,20 @@ export function withSchema<TSchema extends StoreSchema>(
 
       return tables as ReturnType<StoreWithSchema<TSchema>["getTables"]>;
     },
+    setTables: (tables) => {
+      for (const [tableId, table] of Object.entries(tables)) {
+        assertTableSchema(tableId, schema[tableId]);
+        for (const [rowId, row] of Object.entries(table)) {
+          const parsed = schema[tableId].safeParse(row);
+          if (!parsed.success) {
+            throw new Error(
+              `Failed to validate data for table ${tableId}:${rowId}: ${parsed.error}`,
+            );
+          }
+        }
+      }
+      store.setTables(tables);
+    },
 
     getTable: (tableId) => {
       const table = store.getTable(tableId);
@@ -130,6 +176,20 @@ export function withSchema<TSchema extends StoreSchema>(
       }
 
       return table as TypedTable<TSchema, typeof tableId>;
+    },
+
+    setTable: (tableId, table) => {
+      assertTableSchema(tableId, schema[tableId]);
+      for (const [rowId, row] of Object.entries(table)) {
+        const parsed = schema[tableId].safeParse(row);
+        if (!parsed.success) {
+          throw new Error(
+            `Failed to validate data for table ${tableId.toString()}:${rowId}: ${parsed.error}`,
+          );
+        }
+      }
+
+      store.setTable(tableId, table);
     },
 
     getTableCellIds: (tableId) => {
@@ -151,6 +211,30 @@ export function withSchema<TSchema extends StoreSchema>(
       assertTableSchema(tableId, schema[tableId]);
       return schema[tableId].parse(row);
     },
+    setRow: (tableId, rowId, row) => {
+      assertTableSchema(tableId, schema[tableId]);
+      schema[tableId].parse(row);
+      store.setRow(tableId, rowId, row);
+    },
+    setPartialRow: (tableId, rowId, partialRow) => {
+      assertTableSchema(tableId, schema[tableId]);
+      schema[tableId].parse(partialRow);
+      const partialSchema = z.object(
+        Object.keys(partialRow).reduce(
+          (res, cellId) => {
+            const cellSchema = schema[tableId]?.shape[cellId];
+            if (!cellSchema) {
+              throw new Error(`Unexpected cellId found ${cellId}`);
+            }
+            res[cellId] = cellSchema;
+            return res;
+          },
+          {} as Record<string, z.ZodSchema>,
+        ),
+      );
+
+      store.setRow(tableId, rowId, partialSchema.parse(partialRow));
+    },
 
     getCellIds: (tableId, rowId) => {
       const cellIds = store.getCellIds(tableId, rowId);
@@ -168,6 +252,24 @@ export function withSchema<TSchema extends StoreSchema>(
         );
       }
       return cellSchema.parse(cell);
+    },
+    setCell: (tableId, rowId, cellId, cell) => {
+      assertTableSchema(tableId, schema[tableId]);
+      const cellSchema = schema[tableId].shape[cellId];
+      if (!cellSchema) {
+        throw new Error(
+          `Missing cell schema in table ${tableId} for cellid ${cellId}`,
+        );
+      }
+      if (typeof cell === "function") {
+        store.setCell(tableId, rowId, cellId, (prevCell) => {
+          cellSchema.parse(prevCell);
+          const newCell = (cell as (v: unknown) => unknown)(prevCell);
+          return cellSchema.parse(newCell);
+        });
+      } else {
+        store.setCell(tableId, rowId, cellId, cell);
+      }
     },
   };
 }
