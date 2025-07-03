@@ -21,10 +21,9 @@ import {
   type TypedTables,
 } from "./store-with-schema";
 
-export function useTables<
-  TSchema extends StoreSchema,
-  TStore extends StoreWithSchema<TSchema>,
->(store: TStore): TypedTables<TSchema> {
+export function useTables<TSchema extends StoreSchema>(
+  store: StoreWithSchema<TSchema>,
+): TypedTables<TSchema> {
   const tables = useTablesOrig(store.getInternalStore());
   return useMemo(() => {
     const validator: StoreSchemaValidator<TSchema> =
@@ -36,10 +35,9 @@ export function useTables<
 
 export function useTable<
   TSchema extends StoreSchema,
-  TStore extends StoreWithSchema<TSchema>,
   TTableId extends keyof TSchema,
 >(
-  store: TStore,
+  store: StoreWithSchema<TSchema>,
   tableId: Extract<TTableId, string>,
 ): TypedTable<TSchema, TTableId> {
   const table = useTableOrig(tableId, store.getInternalStore());
@@ -51,10 +49,9 @@ export function useTable<
   }, [store, table, tableId]);
 }
 
-export function useTableIds<
-  TSchema extends StoreSchema,
-  TStore extends StoreWithSchema<TSchema>,
->(store: TStore): keyof TSchema {
+export function useTableIds<TSchema extends StoreSchema>(
+  store: StoreWithSchema<TSchema>,
+): keyof TSchema {
   const tableIds = useTableIdsOrig(store.getInternalStore());
   return useMemo(() => {
     const validator: StoreSchemaValidator<TSchema> =
@@ -66,10 +63,9 @@ export function useTableIds<
 
 export function useTableCellIds<
   TSchema extends StoreSchema,
-  TStore extends StoreWithSchema<TSchema>,
   TTableId extends keyof TSchema,
 >(
-  store: TStore,
+  store: StoreWithSchema<TSchema>,
   tableId: Extract<TTableId, string>,
 ): TableCellId<TSchema, TTableId>[] {
   const cellIds = useTableCellIdsOrig(tableId, store.getInternalStore());
@@ -92,11 +88,10 @@ export function useRowIds<
 
 export function useSortedRowIds<
   TSchema extends StoreSchema,
-  TStore extends StoreWithSchema<TSchema>,
   TTableId extends keyof TSchema,
   TCellId extends keyof TypedTable<TSchema, TTableId>[string],
 >(
-  store: TStore,
+  store: StoreWithSchema<TSchema>,
   tableId: Extract<TTableId, string>,
   cellId?: Extract<TCellId, string>,
   descending?: boolean,
@@ -116,10 +111,9 @@ export function useSortedRowIds<
 
 export function useRow<
   TSchema extends StoreSchema,
-  TStore extends StoreWithSchema<TSchema>,
   TTableId extends keyof TSchema,
 >(
-  store: TStore,
+  store: StoreWithSchema<TSchema>,
   tableId: Extract<TTableId, string>,
   rowId: string,
 ): z.infer<TSchema[TTableId]> | null {
@@ -138,10 +132,9 @@ export function useRow<
 
 export function useCellIds<
   TSchema extends StoreSchema,
-  TStore extends StoreWithSchema<TSchema>,
   TTableId extends keyof TSchema,
 >(
-  store: TStore,
+  store: StoreWithSchema<TSchema>,
   tableId: Extract<TTableId, string>,
   rowId: string,
 ): TableCellId<TSchema, TTableId>[] {
@@ -156,11 +149,10 @@ export function useCellIds<
 
 export function useCell<
   TSchema extends StoreSchema,
-  TStore extends StoreWithSchema<TSchema>,
   TTableId extends keyof TSchema,
   TCellId extends TableCellId<TSchema, TTableId>,
 >(
-  store: TStore,
+  store: StoreWithSchema<TSchema>,
   tableId: Extract<TTableId, string>,
   rowId: string,
   cellId: Extract<TCellId, string>,
