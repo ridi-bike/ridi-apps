@@ -638,7 +638,7 @@ importers:
         version: 3.52.1(@ts-rest/core@3.52.1(@types/node@22.13.10)(zod@3.24.2))(fastify@5.2.1)(zod@3.24.2)
       '@vis.gl/react-maplibre':
         specifier: 1.0.0-alpha.4
-        version: 1.0.0-alpha.4(maplibre-gl@4.7.1)(react-dom@18.2.0(react@19.0.0))(react@19.0.0)
+        version: 1.0.0-alpha.4(maplibre-gl@4.7.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       fastify:
         specifier: ^5.2.1
         version: 5.2.1
@@ -658,8 +658,8 @@ importers:
         specifier: 19.0.0
         version: 19.0.0
       react-dom:
-        specifier: 18.2.0
-        version: 18.2.0(react@19.0.0)
+        specifier: 19.0.0
+        version: 19.0.0(react@19.0.0)
       tsx:
         specifier: ^4.19.3
         version: 4.19.3
@@ -9722,11 +9722,6 @@ packages:
   react-devtools-core@6.1.2:
     resolution: {integrity: sha512-ldFwzufLletzCikNJVYaxlxMLu7swJ3T2VrGfzXlMsVhZhPDKXA38DEROidaYZVgMAmQnIjymrmqto5pyfrwPA==}
 
-  react-dom@18.2.0:
-    resolution: {integrity: sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g==}
-    peerDependencies:
-      react: 19.0.0
-
   react-dom@19.0.0:
     resolution: {integrity: sha512-4GV5sHFG0e/0AD4X+ySy6UJd3jVl1iNsNHdpad0qhABJ11twS3TTBnseqsKurKcsNqCEFeGL3uLpVChpIO3QfQ==}
     peerDependencies:
@@ -10204,9 +10199,6 @@ packages:
   saxes@6.0.0:
     resolution: {integrity: sha512-xAg7SOnEhrm5zI3puOOKyy1OMcMlIJZYNJY7xLBwSze0UjhPLnWfj2GF2EpT0jmzaJKIWKHLsaSSajf35bcYnA==}
     engines: {node: '>=v12.22.7'}
-
-  scheduler@0.23.2:
-    resolution: {integrity: sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ==}
 
   scheduler@0.25.0:
     resolution: {integrity: sha512-xFVuu11jh+xcO7JOAGJNOXld8/TcEHK/4CituBUeUb5hqxJLj9YuemAEuvm9gQ/+pgXYfbQuqAkiYu+u7YEsNA==}
@@ -17530,13 +17522,6 @@ snapshots:
     transitivePeerDependencies:
       - graphql
 
-  '@vis.gl/react-maplibre@1.0.0-alpha.4(maplibre-gl@4.7.1)(react-dom@18.2.0(react@19.0.0))(react@19.0.0)':
-    dependencies:
-      '@maplibre/maplibre-gl-style-spec': 19.3.3
-      maplibre-gl: 4.7.1
-      react: 19.0.0
-      react-dom: 18.2.0(react@19.0.0)
-
   '@vis.gl/react-maplibre@1.0.0-alpha.4(maplibre-gl@4.7.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
       '@maplibre/maplibre-gl-style-spec': 19.3.3
@@ -23693,12 +23678,6 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  react-dom@18.2.0(react@19.0.0):
-    dependencies:
-      loose-envify: 1.4.0
-      react: 19.0.0
-      scheduler: 0.23.2
-
   react-dom@19.0.0(react@19.0.0):
     dependencies:
       react: 19.0.0
@@ -24313,10 +24292,6 @@ snapshots:
   saxes@6.0.0:
     dependencies:
       xmlchars: 2.2.0
-
-  scheduler@0.23.2:
-    dependencies:
-      loose-envify: 1.4.0
 
   scheduler@0.25.0: {}
 
