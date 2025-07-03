@@ -4,6 +4,8 @@
   "include": ["src/**/*.ts", "../router-service/src/roadTags.ts"],
   "compilerOptions": {
     "allowImportingTsExtensions": true,
+    "composite": true,
+    "incremental": true,
     "types": ["node"]
   }
 }

@@ -25,6 +25,7 @@
     "postgres": "^3.4.5",
     "remeda": "^2.20.0",
     "resend": "^4.5.1",
+    "tinybase": "^6.3.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {

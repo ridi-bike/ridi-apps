@@ -9,14 +9,12 @@ import {
 import { useEffect, useMemo } from "react";
 import { ScrollView, View } from "react-native";
 
-import { ErrorBox } from "~/components/error";
-import { Loading } from "~/components/loading";
 import { PlanCard } from "~/components/plan-card";
 import { ScreenFrame } from "~/components/screen-frame";
-import { useStorePlans } from "~/lib/stores/plans-store";
+import { usePlans } from "~/lib/data-stores/plans";
 
 export default function PlansPage() {
-  const { data: plans, error, status, refetch } = useStorePlans();
+  const plans = usePlans();
   const router = useRouter();
   const animate: MotiPressableProp = useMemo(
     () =>
@@ -43,7 +41,7 @@ export default function PlansPage() {
   );
 
   useEffect(() => {
-    if (plans?.length === 0) {
+    if (Object.keys(plans).length === 0) {
       router.push("/plans/new");
     }
   }, [plans, router]);
@@ -83,19 +81,6 @@ export default function PlansPage() {
     >
       <View className="flex w-full flex-col items-center justify-start">
         <AnimatePresence>
-          {!!error && status !== "pending" && (
-            <View key="error" className="mx-2 max-w-5xl flex-1">
-              <ErrorBox error={error} retry={refetch} />
-            </View>
-          )}
-          {!plans && !error && (
-            <View
-              key="loading"
-              className="flex w-full flex-row items-center justify-center"
-            >
-              <Loading className="size-12 text-[#ff4a25]" />
-            </View>
-          )}
           {!!plans && (
             <MotiView
               key="plans"
@@ -117,9 +102,9 @@ export default function PlansPage() {
             >
               <ScrollView className="h-[calc(100vh-100px)]">
                 <View className="grid size-full grid-cols-1 gap-6 pb-24 md:grid-cols-2 lg:grid-cols-3">
-                  {plans.map((plan, index) => (
+                  {Object.entries(plans).map(([planId, plan]) => (
                     <MotiPressable
-                      key={index}
+                      key={planId}
                       onPress={() => router.navigate(`/plans/${plan.id}`)}
                       animate={animate}
                       transition={transition}

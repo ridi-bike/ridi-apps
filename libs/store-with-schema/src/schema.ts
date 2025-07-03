@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-const dateOut = z.coerce.string();
+const dateSchema = z
+  .string()
+  .regex(
+    /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/,
+  );
 const lat = z.number().min(-90).max(90);
 const lon = z.number().min(-180).max(180);
 
@@ -25,27 +29,39 @@ const planSchema = z.object({
   finishLon: lon.nullable(),
   finishDesc: z.string().nullable(),
   state: planStateSchema,
-  createdAt: dateOut,
+  createdAt: dateSchema,
   tripType: planTypeSchema,
   distance: z.coerce.number(),
   bearing: bearing,
   ruleSetId: z.string(),
   mapPreviewLight: z.string().nullable(),
   mapPreviewDark: z.string().nullable(),
+  isDeleted: z.boolean().nullable(),
 });
 
 const routeSchema = z.object({
   id: z.string(),
+  planId: z.string(),
   name: z.string(),
-  createdAt: dateOut,
-  downloadedAt: z.string().nullable(),
+  createdAt: dateSchema,
+  downloadedAt: dateSchema.nullable(),
   mapPreviewLight: z.string().nullable(),
   mapPreviewDark: z.string().nullable(),
   latLonArray: z.array(z.tuple([z.number(), z.number()])),
   lenM: z.number(),
   score: z.number(),
   junctionCount: z.number(),
+  isDeleted: z.boolean().nullable(),
 });
+
+const routeCoordsSchema = z.object({
+  id: z.string(),
+  routeId: z.string(),
+  coordsArrayString: z.string(),
+  coordsOverviewArrayString: z.string(),
+});
+
+export type Route = z.infer<typeof routeSchema>;
 
 const routeBreakdownSchema = z.object({
   id: z.string(),
@@ -64,6 +80,7 @@ const ruleSetSchema = z.object({
     .nullable(),
   isSystem: z.boolean(),
   isDefault: z.boolean(),
+  isDeleted: z.boolean().nullable(),
 });
 
 const roadTypeLargeKeys = ["motorway", "trunk"] as const;
@@ -151,6 +168,7 @@ const ruleSetRoadTagSchema = z.object({
 export const storeSchema = {
   plans: planSchema,
   routes: routeSchema,
+  routeCoords: routeCoordsSchema,
   routeBreakdowns: routeBreakdownSchema,
   ruleSets: ruleSetSchema,
   ruleSetRoadTags: ruleSetRoadTagSchema,

@@ -19,7 +19,6 @@ import {
   getCardinalDirection,
   metersToDisplay,
 } from "~/components/geo-map/util";
-import { Loading } from "~/components/loading";
 import { RouteCard } from "~/components/route-card";
 import { ScreenCard } from "~/components/screen-card";
 import { ScreenFrame } from "~/components/screen-frame";
@@ -32,8 +31,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
+import {
+  usePlan,
+  usePlanRoutes,
+  usePlanUpdate as usePlansUpdate,
+} from "~/lib/data-stores/plans";
 import { posthogClient } from "~/lib/posthog/client";
-import { useStorePlans } from "~/lib/stores/plans-store";
 import { cn } from "~/lib/utils";
 
 function DeleteConfirmDialog({
@@ -286,31 +289,13 @@ function GeneratingRoutes({
 export default function PlanDetails() {
   const router = useRouter();
   const { planId } = useLocalSearchParams();
-  const { data: plans, error, status, refetch, planDelete } = useStorePlans();
-  const plan = plans?.find((p) => p.id === planId);
-
+  const plan = usePlan(planId);
+  const { planDelete } = usePlansUpdate();
+  const routes = usePlanRoutes(planId);
   return (
     <ScreenFrame title="Plan routes" onGoBack={() => router.replace("/plans")}>
       <View className="flex w-full flex-col items-center justify-start">
         <AnimatePresence exitBeforeEnter>
-          {!plans && !error && (
-            <View
-              key="loading"
-              className="flex w-full flex-row items-center justify-center"
-            >
-              <Loading className="size-12 text-[#ff4a25]" />
-            </View>
-          )}
-          {!!error && status !== "pending" && (
-            <MotiView
-              key="error"
-              from={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mx-2 max-w-5xl flex-1"
-            >
-              <ErrorBox error={error} retry={refetch} />
-            </MotiView>
-          )}
           {plan && (
             <MotiView
               key="plan"
@@ -431,10 +416,10 @@ export default function PlanDetails() {
                     />
                   )}
                   {plan.state === "error" && <RouteGenError planId={plan.id} />}
-                  {plan.state === "done" && plan.routes.length === 0 && (
+                  {plan.state === "done" && routes.length === 0 && (
                     <NoRoutes tripType={plan.tripType} />
                   )}
-                  {plan.state === "done" && plan.routes.length > 0 && (
+                  {plan.state === "done" && routes.length > 0 && (
                     <>
                       <Text
                         role="heading"
@@ -444,10 +429,10 @@ export default function PlanDetails() {
                         Available Routes
                       </Text>
                       <View className="grid grid-cols-1 gap-6 pb-24 md:grid-cols-2 lg:grid-cols-3">
-                        {plan.routes.map((route) => (
+                        {routes.map((route) => (
                           <Link
-                            key={route.routeId}
-                            href={`/plans/${plan.id}/${route.routeId}`}
+                            key={route.id}
+                            href={`/plans/${plan.id}/${route.id}`}
                           >
                             <RouteCard routeShort={route} />
                           </Link>

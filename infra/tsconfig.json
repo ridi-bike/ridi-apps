@@ -6,6 +6,8 @@
     "outDir": "bin",
     "target": "es2020",
     "module": "commonjs",
+    "composite": true,
+    "incremental": true,
     "moduleResolution": "node",
     "sourceMap": true,
     "experimentalDecorators": true,

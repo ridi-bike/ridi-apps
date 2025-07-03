@@ -4,6 +4,8 @@
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "compilerOptions": {
     "allowImportingTsExtensions": true,
+    "composite": true,
+    "incremental": true,
     "lib": ["dom"],
     "jsx": "react-jsx"
   }

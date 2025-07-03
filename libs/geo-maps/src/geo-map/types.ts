@@ -10,7 +10,7 @@ export type GeoMapPlanViewProps = {
   mapRef?: (map: MapRef) => void;
 };
 export type GeoMapRouteViewProps = {
-  route: Coords[];
+  route: [number, number][];
   interactive: boolean;
   colorScheme: "light" | "dark";
   mapRef?: (map: MapRef) => void;

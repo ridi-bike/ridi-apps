@@ -2,31 +2,9 @@ import {
   type Request as WorkerRequest,
   type ExecutionContext,
 } from "@cloudflare/workers-types";
+import { apiContract } from "@ridi/api-contracts";
 import {
-  routeListDownloadedResponseSchema,
-  type RoadTags,
-} from "@ridi/api-contracts";
-import {
-  apiContract,
-  plansListResponseSchema,
-  routeGetRespopnseSchema,
-  ruleSetsListSchema,
-} from "@ridi/api-contracts";
-import {
-  planCreate,
-  planList,
-  routeStatsGet,
-  routesGet,
-  ruleSetGet,
-  ruleSetRoadTagsUpsert,
-  ruleSetsList,
-  ruleSetUpsert,
-  ruleSetRoadTagsList,
-  ruleSetSetDeleted,
   regionFindFromCoords,
-  routeDelete,
-  planDelete,
-  routeDeleteByPlanId,
   privateUsersGetRow,
   privateUsersUpdateSubType,
   privateCodeGet,
@@ -37,12 +15,8 @@ import {
   userClaimRuleSets,
   userClaimRuleSetRoadTags,
   geoBoundariesFindCoords,
-  routeSetDownloadedAt,
-  privateUserDecreaseDownloads,
-  routesListDownloaded,
 } from "@ridi/db-queries";
 import { RidiLogger } from "@ridi/logger";
-import { coordsDetailsGetAndFormat } from "@ridi/maps-api";
 import { Messaging } from "@ridi/messaging";
 import { StripeApi } from "@ridi/stripe-api";
 import * as Sentry from "@sentry/cloudflare";
@@ -53,10 +27,16 @@ import {
   fetchRequestHandler,
   tsr,
 } from "@ts-rest/serverless/fetch";
-import * as turf from "@turf/turf";
 import postgres from "postgres";
-import * as R from "remeda";
 import { Resend } from "resend";
+import { type Id } from "tinybase/common";
+import { createMergeableStore } from "tinybase/mergeable-store";
+import { createDurableObjectSqlStoragePersister } from "tinybase/persisters/persister-durable-object-sql-storage";
+import { type IdAddedOrRemoved } from "tinybase/store";
+import {
+  getWsServerDurableObjectFetch,
+  WsServerDurableObject,
+} from "tinybase/synchronizers/synchronizer-ws-server-durable-object";
 
 export type FieldsNotNull<T extends object> = {
   [n in keyof T]: NonNullable<T[n]>;
@@ -319,426 +299,6 @@ const router = tsr
       })),
     };
   },
-  ruleSetsList: async ({ query }, ctx) => {
-    if (query.version !== "v1") {
-      throw ctx.logger.error("Wrong version", { version: query.version });
-    }
-    const rules = await ruleSetsList(ctx.db, {
-      userId: ctx.request.user.id,
-    });
-    const tags = await ruleSetRoadTagsList(ctx.db, {
-      userId: ctx.request.user.id,
-    });
-
-    const data = {
-      version: "v1" as const,
-      data: rules.map((r) => ({
-        ...r,
-        isSystem: r.userId === null,
-        isDefault: r.defaultSet,
-        roadTags: tags
-          .filter((t) => t.ruleSetId === r.id)
-          .reduce(
-            (all, curr) => ({ ...all, [curr.tagKey]: curr.value }),
-            {} as Record<RoadTags, number | null>,
-          ),
-      })),
-    };
-    const validated = ruleSetsListSchema.safeParse(data);
-
-    if (!validated.success) {
-      throw ctx.logger.error("Validation error in ruleSetsList", {
-        error: validated.error.toString(),
-        userId: ctx.request.user.id,
-      });
-    }
-
-    return {
-      status: 200,
-      body: validated.data,
-    };
-  },
-  ruleSetSet: async ({ body }, ctx) => {
-    if (body.version !== "v1") {
-      throw ctx.logger.error("Wrong version", { version: body.version });
-    }
-
-    const ruleSetCheck = await ruleSetGet(ctx.db, {
-      id: body.data.id,
-    });
-
-    if (ruleSetCheck && !ruleSetCheck.userId) {
-      throw ctx.logger.error("Cannot modify system rule sets", {
-        ruleSetId: body.data.id,
-        userId: ctx.request.user.id,
-      });
-    }
-    const updatedRec = await ruleSetUpsert(ctx.db, {
-      userId: ctx.request.user.id,
-      id: body.data.id,
-      name: body.data.name,
-    });
-    if (!updatedRec) {
-      throw new Error("can't happen");
-    }
-
-    await Promise.all(
-      Object.entries(body.data.roadTags).map(([tagKey, value]) => {
-        return ruleSetRoadTagsUpsert(ctx.db, {
-          ruleSetId: updatedRec.id,
-          tagKey,
-          value: value as string | null, // it's number but sqlc incorrectly wants a string
-          userId: ctx.request.user.id,
-        });
-      }),
-    );
-
-    return {
-      status: 200,
-      body: {
-        version: "v1",
-        data: {
-          id: updatedRec.id,
-        },
-      },
-    };
-  },
-  ruleSetDelete: async ({ body }, ctx) => {
-    const ruleSetCheck = await ruleSetGet(ctx.db, {
-      id: body.id,
-    });
-
-    if (ruleSetCheck && !ruleSetCheck.userId) {
-      throw ctx.logger.error("Cannot delete system rule sets", {
-        ruleSetId: body.id,
-        userId: ctx.request.user.id,
-      });
-    }
-
-    await ruleSetSetDeleted(ctx.db, {
-      id: body.id,
-    });
-
-    return {
-      status: 200,
-      body: {
-        id: body.id,
-      },
-    };
-  },
-  planCreate: async ({ body: { version, data } }, ctx) => {
-    if (version !== "v1") {
-      throw ctx.logger.error("Wrong version", { version });
-    }
-    let startFinishDesc: [string, null | string];
-    try {
-      startFinishDesc = await Promise.all([
-        coordsDetailsGetAndFormat(
-          {
-            lat: Number(data.startLat),
-            lon: Number(data.startLon),
-          },
-          (coords) =>
-            geoBoundariesFindCoords(ctx.db, {
-              lat: coords.lat.toString(),
-              lon: coords.lon.toString(),
-            }),
-        ),
-        data.finishLat && data.finishLon
-          ? coordsDetailsGetAndFormat(
-              {
-                lat: Number(data.finishLat),
-                lon: Number(data.finishLon),
-              },
-              (coords) =>
-                geoBoundariesFindCoords(ctx.db, {
-                  lat: coords.lat.toString(),
-                  lon: coords.lon.toString(),
-                }),
-            )
-          : null,
-      ]);
-    } catch (error) {
-      ctx.logger.error("Error on coords description prep", { error, data });
-      startFinishDesc = [
-        `${data.startLat}, ${data.startLon}`,
-        `${data.finishLat}, ${data.finishLon}`,
-      ];
-    }
-
-    let distance = data.distance || "0";
-    if (data.finishLat && data.finishLon) {
-      const startPoint = turf.point([
-        Number(data.startLon),
-        Number(data.startLat),
-      ]);
-      const finishPoint = turf.point([
-        Number(data.finishLon),
-        Number(data.finishLat),
-      ]);
-
-      distance = turf
-        .distance(startPoint, finishPoint, {
-          units: "meters",
-        })
-        .toString();
-    }
-
-    const newPlan = await planCreate(ctx.db, {
-      ...data,
-      distance,
-      startDesc: startFinishDesc[0],
-      finishDesc: startFinishDesc[1],
-      userId: ctx.request.user.id,
-    });
-
-    if (!newPlan) {
-      throw new Error("can't happen");
-    }
-
-    await ctx.messaging.send("plan_new", { planId: newPlan.id });
-    await ctx.messaging.send("plan_map_gen", { planId: newPlan.id });
-
-    const response = {
-      version: "v1" as const,
-      data: newPlan,
-    };
-
-    return {
-      status: 200,
-      body: response,
-    };
-  },
-  plansList: async ({ query: { version } }, ctx) => {
-    if (version !== "v1") {
-      throw ctx.logger.error("Wrong version", { version });
-    }
-
-    const plansFlat = await planList(ctx.db, {
-      userId: ctx.request.user.id,
-    });
-
-    const plans = R.pipe(
-      plansFlat,
-      R.groupBy(R.prop("id")),
-      R.entries(),
-      R.map(([_planId, onePlanFlat]) => ({
-        ...R.first(onePlanFlat),
-        routes: R.first(onePlanFlat).routeId
-          ? R.pipe(
-              onePlanFlat as FieldsNotNull<(typeof onePlanFlat)[number]>[],
-              R.groupBy(R.prop("routeId")),
-              R.entries(),
-              R.map(([_routeId, oneRouteFlat]) => ({
-                ...R.first(oneRouteFlat),
-                routeDownloadedAt:
-                  R.first(oneRouteFlat).routeDownloadedAt?.toString() ?? null,
-              })),
-            )
-          : [],
-      })),
-    );
-
-    const validated = plansListResponseSchema.safeParse({
-      version: "v1",
-      data: plans,
-    });
-
-    if (!validated.success) {
-      throw ctx.logger.error("Validation error in plansList", {
-        error: validated.error.toString(),
-        userId: ctx.request.user.id,
-      });
-    }
-
-    return {
-      status: 200,
-      body: validated.data,
-    };
-  },
-  planDelete: async ({ params: { planId } }, ctx) => {
-    const deletedPlan = await planDelete(ctx.db, {
-      id: planId,
-      userId: ctx.request.user.id,
-    });
-
-    if (!deletedPlan) {
-      throw ctx.logger.error("Plan record not found", {
-        planId,
-        userId: ctx.request.user.id,
-      });
-    }
-
-    await routeDeleteByPlanId(ctx.db, {
-      planId,
-      userId: ctx.request.user.id,
-    });
-
-    return {
-      status: 200,
-      body: {
-        id: deletedPlan.id,
-      },
-    };
-  },
-  routeGet: async ({ params: { routeId }, query: { version } }, ctx) => {
-    if (version !== "v1") {
-      throw ctx.logger.error("Wrong version", { version });
-    }
-
-    try {
-      const routesFlat = await routesGet(ctx.db, {
-        id: routeId,
-        userId: ctx.request.user.id,
-      });
-
-      if (!routesFlat.length) {
-        throw ctx.logger.error("Route not found", {
-          routeId,
-          userId: ctx.request.user.id,
-        });
-      }
-
-      const statsBreakdown = await routeStatsGet(ctx.db, {
-        routeId: routeId,
-        userId: ctx.request.user.id,
-      });
-
-      const response = {
-        version: "v1",
-        data: {
-          ...routesFlat[0],
-          latLonArray: routesFlat[0].latLonArray,
-          downloadedAt: routesFlat[0].downloadedAt?.toString() ?? null,
-          plan: {
-            ...routesFlat[0],
-          },
-          stats: {
-            lenM: routesFlat[0].statsLenM,
-            junctionCount: routesFlat[0].statsJunctionCount,
-            score: routesFlat[0].statsScore,
-            breakdown: statsBreakdown,
-          },
-        },
-      };
-
-      const validated = routeGetRespopnseSchema.safeParse(response);
-
-      if (!validated.success) {
-        throw ctx.logger.error("Validation error in routeGet", {
-          error: validated.error.toString(),
-          routeId,
-          userId: ctx.request.user.id,
-        });
-      }
-      return {
-        status: 200,
-        body: validated.data,
-      };
-    } catch (error) {
-      throw ctx.logger.error("Route get error", {
-        error,
-        routeId,
-        userId: ctx.request.user.id,
-      });
-    }
-  },
-  routesListDownloaded: async ({ query: { version } }, ctx) => {
-    if (version !== "v1") {
-      throw ctx.logger.error("Wrong version", { version });
-    }
-
-    try {
-      const routesFlat = await routesListDownloaded(ctx.db, {
-        userId: ctx.request.user.id,
-      });
-
-      const response = {
-        version: "v1",
-        data: routesFlat.map((routeFlat) => ({
-          ...routeFlat,
-          downloadedAt: routeFlat.downloadedAt?.toString() ?? null,
-        })),
-      };
-
-      const validated = routeListDownloadedResponseSchema.safeParse(response);
-
-      if (!validated.success) {
-        throw ctx.logger.error("Validation error in routeGet", {
-          error: validated.error.toString(),
-          userId: ctx.request.user.id,
-        });
-      }
-      return {
-        status: 200,
-        body: validated.data,
-      };
-    } catch (error) {
-      throw ctx.logger.error("Route get error", {
-        error,
-        userId: ctx.request.user.id,
-      });
-    }
-  },
-  routeDelete: async ({ params: { routeId } }, ctx) => {
-    const deletedRoute = await routeDelete(ctx.db, {
-      id: routeId,
-      userId: ctx.request.user.id,
-    });
-
-    if (!deletedRoute) {
-      throw ctx.logger.error("Route not found for deletion", {
-        routeId,
-        userId: ctx.request.user.id,
-      });
-    }
-
-    return {
-      status: 200,
-      body: {
-        id: deletedRoute.id,
-      },
-    };
-  },
-  routeSetDownloadedAt: async (
-    {
-      params: { routeId },
-      body: {
-        version,
-        data: { downloadedAt },
-      },
-    },
-    ctx,
-  ) => {
-    if (version !== "v1") {
-      throw ctx.logger.error("Wrong version", { version });
-    }
-
-    const updatedRoute = await routeSetDownloadedAt(ctx.db, {
-      id: routeId,
-      downloadedAt: new Date(downloadedAt),
-    });
-
-    // updating only if first time download
-    if (updatedRoute) {
-      const privateUser = await privateUserDecreaseDownloads(ctx.db, {
-        userId: ctx.request.user.id,
-      });
-
-      if (!privateUser) {
-        throw ctx.logger.error("Missing private user record", {
-          userId: ctx.request.user.id,
-        });
-      }
-    }
-
-    return {
-      status: 200,
-      body: {
-        id: routeId,
-      },
-    };
-  },
 });
 
 const ridiLogger = RidiLogger.init({ service: "cfw-api" });
@@ -877,6 +437,29 @@ export default Sentry.withSentry(
         env.SUPABASE_SERVICE_ROLE_KEY,
       );
 
+      if (url.pathname.startsWith("/sync")) {
+        const authHeader = request.headers.get("Authorization");
+        const token = authHeader?.replace("Bearer ", "") || "";
+        const { data } = await supabaseClient.auth.getUser(token);
+        const user = data.user;
+        // const token = url.searchParams.get("token");
+        // if (!token) {
+        //   return new Response("Unauthorized", { status: 401 });
+        // }
+        // const { data } = await supabaseClient.auth.getUser();
+        // const user = data.user;
+
+        if (!user) {
+          return new Response(JSON.stringify({ message: "Unauthorized" }), {
+            status: 401,
+          });
+        }
+        return getWsServerDurableObjectFetch("TinyBaseDurableObjects")(
+          request,
+          env,
+        );
+      }
+
       let response: Response | undefined;
 
       await dbCon.begin(async (tx) => {
@@ -967,3 +550,24 @@ export default Sentry.withSentry(
     },
   },
 );
+
+export class TinyBaseDurableObject extends WsServerDurableObject {
+  onPathId(pathId: Id, addedOrRemoved: IdAddedOrRemoved) {
+    console.info((addedOrRemoved ? "Added" : "Removed") + ` path ${pathId}`);
+  }
+
+  onClientId(pathId: Id, clientId: Id, addedOrRemoved: IdAddedOrRemoved) {
+    console.info(
+      (addedOrRemoved ? "Added" : "Removed") +
+        ` client ${clientId} on path ${pathId}`,
+    );
+  }
+
+  createPersister() {
+    return createDurableObjectSqlStoragePersister(
+      createMergeableStore(),
+      this.ctx.storage.sql,
+      { mode: "fragmented" },
+    );
+  }
+}
