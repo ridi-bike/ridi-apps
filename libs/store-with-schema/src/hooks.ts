@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import {
   useTables as useTablesOrig,
   useTableIds as useTableIdsOrig,
@@ -25,9 +26,12 @@ export function useTables<
   TStore extends StoreWithSchema<TSchema>,
 >(store: TStore): TypedTables<TSchema> {
   const tables = useTablesOrig(store.getInternalStore());
-  const validator: StoreSchemaValidator<TSchema> = store.getInternalValidator();
-  validator.validateTables(tables);
-  return tables;
+  return useMemo(() => {
+    const validator: StoreSchemaValidator<TSchema> =
+      store.getInternalValidator();
+    validator.validateTables(tables);
+    return tables;
+  }, [store, tables]);
 }
 
 export function useTable<
@@ -39,9 +43,12 @@ export function useTable<
   tableId: Extract<TTableId, string>,
 ): TypedTable<TSchema, TTableId> {
   const table = useTableOrig(tableId, store.getInternalStore());
-  const validator: StoreSchemaValidator<TSchema> = store.getInternalValidator();
-  validator.validateTable(tableId, table);
-  return table;
+  return useMemo(() => {
+    const validator: StoreSchemaValidator<TSchema> =
+      store.getInternalValidator();
+    validator.validateTable(tableId, table);
+    return table;
+  }, [store, table, tableId]);
 }
 
 export function useTableIds<
@@ -49,9 +56,12 @@ export function useTableIds<
   TStore extends StoreWithSchema<TSchema>,
 >(store: TStore): keyof TSchema {
   const tableIds = useTableIdsOrig(store.getInternalStore());
-  const validator: StoreSchemaValidator<TSchema> = store.getInternalValidator();
-  validator.validateTableIds(tableIds);
-  return tableIds;
+  return useMemo(() => {
+    const validator: StoreSchemaValidator<TSchema> =
+      store.getInternalValidator();
+    validator.validateTableIds(tableIds);
+    return tableIds;
+  }, [store, tableIds]);
 }
 
 export function useTableCellIds<
@@ -63,9 +73,12 @@ export function useTableCellIds<
   tableId: Extract<TTableId, string>,
 ): TableCellId<TSchema, TTableId>[] {
   const cellIds = useTableCellIdsOrig(tableId, store.getInternalStore());
-  const validator: StoreSchemaValidator<TSchema> = store.getInternalValidator();
-  validator.validateCellIds(tableId, cellIds);
-  return cellIds;
+  return useMemo(() => {
+    const validator: StoreSchemaValidator<TSchema> =
+      store.getInternalValidator();
+    validator.validateCellIds(tableId, cellIds);
+    return cellIds;
+  }, [cellIds, store, tableId]);
 }
 
 export function useRowIds<
@@ -109,11 +122,18 @@ export function useRow<
   store: TStore,
   tableId: Extract<TTableId, string>,
   rowId: string,
-): z.infer<TSchema[TTableId]> {
+): z.infer<TSchema[TTableId]> | null {
+  const rowIds = useRowIdsOrig(tableId, store.getInternalStore());
   const row = useRowOrig(tableId, rowId, store.getInternalStore());
-  const validator: StoreSchemaValidator<TSchema> = store.getInternalValidator();
-  validator.validateRow(tableId, row);
-  return row;
+  return useMemo(() => {
+    if (!rowIds.includes(rowId)) {
+      return null;
+    }
+    const validator: StoreSchemaValidator<TSchema> =
+      store.getInternalValidator();
+    validator.validateRow(tableId, row);
+    return row;
+  }, [row, rowId, rowIds, store, tableId]);
 }
 
 export function useCellIds<
@@ -126,9 +146,12 @@ export function useCellIds<
   rowId: string,
 ): TableCellId<TSchema, TTableId>[] {
   const cellIds = useCellIdsOrig(tableId, rowId, store.getInternalStore());
-  const validator: StoreSchemaValidator<TSchema> = store.getInternalValidator();
-  validator.validateCellIds(tableId, cellIds);
-  return cellIds;
+  return useMemo(() => {
+    const validator: StoreSchemaValidator<TSchema> =
+      store.getInternalValidator();
+    validator.validateCellIds(tableId, cellIds);
+    return cellIds;
+  }, [cellIds, store, tableId]);
 }
 
 export function useCell<
@@ -142,8 +165,15 @@ export function useCell<
   rowId: string,
   cellId: Extract<TCellId, string>,
 ): z.infer<TSchema[TTableId]> {
+  const rowIds = useRowIdsOrig(tableId, store.getInternalStore());
   const cell = useCellOrig(tableId, rowId, cellId, store.getInternalStore());
-  const validator: StoreSchemaValidator<TSchema> = store.getInternalValidator();
-  validator.validateCell(tableId, cellId, cell);
-  return cell;
+  return useMemo(() => {
+    if (!rowIds.includes(rowId)) {
+      throw new Error(`RowId does not exist ${rowId}`);
+    }
+    const validator: StoreSchemaValidator<TSchema> =
+      store.getInternalValidator();
+    validator.validateCell(tableId, cellId, cell);
+    return cell;
+  }, [cell, cellId, rowId, rowIds, store, tableId]);
 }
