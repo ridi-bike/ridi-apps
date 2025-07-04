@@ -1,4 +1,4 @@
-import { type NativeStackHeaderProps } from "@react-navigation/native-stack/src/types";
+import { type NativeStackHeaderProps } from "@react-navigation/native-stack";
 import { Link } from "expo-router";
 import { ArrowLeft, StarIcon, UserCircle } from "lucide-react-native";
 import { View, Text, Pressable } from "react-native";

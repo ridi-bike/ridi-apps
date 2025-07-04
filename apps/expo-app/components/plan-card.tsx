@@ -2,7 +2,7 @@ import { Image } from "expo-image";
 import { CirclePause, CirclePlay, Navigation } from "lucide-react-native";
 import { View, Text } from "react-native";
 
-import { type Plan } from "~/lib/stores/plans-store";
+import { usePlan } from "~/lib/data-stores/plans";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { cn } from "~/lib/utils";
 
@@ -11,14 +11,21 @@ import { getCardinalDirection } from "./geo-map/util";
 import { ScreenCard } from "./screen-card";
 
 type RouteCardProps = {
-  plan: Plan;
+  planId: string;
 };
 
 const blurhash =
   "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
-export const PlanCard = ({
-  plan: {
+export const PlanCard = ({ planId }: RouteCardProps) => {
+  const plan = usePlan(planId);
+  const { colorScheme } = useColorScheme();
+
+  if (!plan) {
+    return null;
+  }
+
+  const {
     startDesc,
     finishDesc,
     distance,
@@ -31,9 +38,8 @@ export const PlanCard = ({
     state,
     mapPreviewDark,
     mapPreviewLight,
-  },
-}: RouteCardProps) => {
-  const { colorScheme } = useColorScheme();
+  } = plan;
+
   const mapImgUrl = colorScheme === "dark" ? mapPreviewDark : mapPreviewLight;
 
   return (

@@ -1,6 +1,5 @@
 import { makeBoxSafe } from "@ridi/geo-maps";
 import * as turf from "@turf/turf";
-import { type FillLayer } from "@vis.gl/react-maplibre";
 import { Layer, Source } from "@vis.gl/react-maplibre";
 import { type BBox } from "geojson";
 import { useMemo } from "react";
@@ -11,7 +10,7 @@ export const DIRECTIONS = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
 
 export const getCardinalDirection = (degrees: number): string => {
   const index = Math.round(degrees / 45) % 8;
-  return DIRECTIONS[index];
+  return DIRECTIONS[index] || "N";
 };
 
 export function createRoundTripPolygon(
@@ -117,7 +116,7 @@ export function useRoundTripPolygon(
   const rountdTripLayer = useMemo(() => {
     if (roundTripPolygon) {
       const routeLayerId = "round-trip-layer";
-      const layerStyle: FillLayer = {
+      const layerStyle = {
         id: routeLayerId,
         type: "fill",
         source: routeLayerId,
@@ -125,7 +124,7 @@ export function useRoundTripPolygon(
           "fill-color": "#FF5937",
           "fill-opacity": 1,
         },
-      };
+      } as const;
       return (
         <Source id={routeLayerId} type="geojson" data={roundTripPolygon}>
           <Layer {...layerStyle} />
@@ -151,10 +150,10 @@ export function combineBBox(
       ]
     : bbox1;
   return makeBoxSafe([
-    combinedBbox[0] - Math.abs(combinedBbox[0] - combinedBbox[2]) / 10,
-    combinedBbox[1] - Math.abs(combinedBbox[1] - combinedBbox[3]) / 10,
-    combinedBbox[2] + Math.abs(combinedBbox[0] - combinedBbox[2]) / 10,
-    combinedBbox[3] + Math.abs(combinedBbox[1] - combinedBbox[3]) / 10,
+    combinedBbox[0]! - Math.abs(combinedBbox[0]! - combinedBbox[2]!) / 10,
+    combinedBbox[1]! - Math.abs(combinedBbox[1]! - combinedBbox[3]!) / 10,
+    combinedBbox[2]! + Math.abs(combinedBbox[0]! - combinedBbox[2]!) / 10,
+    combinedBbox[3]! + Math.abs(combinedBbox[1]! - combinedBbox[3]!) / 10,
   ]);
 }
 
