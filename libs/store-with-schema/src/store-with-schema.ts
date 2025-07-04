@@ -304,6 +304,10 @@ export function withSchema<TSchema extends StoreSchema>(
       return cell;
     },
     setCell: (tableId, rowId, cellId, cell) => {
+      const rowIds = store.getRowIds(tableId);
+      if (!rowIds.includes(rowId)) {
+        return;
+      }
       if (typeof cell === "function") {
         store.setCell(tableId, rowId, cellId, (prevCell) => {
           validator.validateCell(tableId, cellId, prevCell);

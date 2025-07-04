@@ -1,7 +1,4 @@
-import {
-  type RuleSetsSetRequest,
-  type RuleSetsListResponse,
-} from "@ridi/api-contracts";
+import { type RuleSet } from "@ridi/store-with-schema";
 import { useRootNavigationState, useRouter } from "expo-router";
 import {
   Copy,
@@ -16,12 +13,9 @@ import {
 import { AnimatePresence, MotiView } from "moti";
 import { useCallback, useState } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
-import { generate } from "xksuid";
 import { z } from "zod";
 
 import { Button } from "~/components/button";
-import { ErrorBox } from "~/components/error";
-import { Loading } from "~/components/loading";
 import { ScreenFrame } from "~/components/screen-frame";
 import {
   AlertDialog,
@@ -32,13 +26,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
+import { useRuleSets, useRuleSetsUpdate } from "~/lib/data-stores/rule-sets";
 import { posthogClient } from "~/lib/posthog/client";
-import { useStoreRuleSets } from "~/lib/stores/rules-store";
 import { useUrlParams } from "~/lib/url-params";
 import { cn } from "~/lib/utils";
-
-type RuleSet = RuleSetsListResponse["data"][number];
-type RuleSetNew = RuleSetsSetRequest["data"];
 
 function DeleteConfirmDialog({
   children,
@@ -195,44 +186,12 @@ function ActionDialog({
 
 export default function RuleSetList() {
   const router = useRouter();
-  const {
-    data: ruleSets,
-    ruleSetSet,
-    ruleSetDelete,
-    status,
-    error,
-    refetch,
-  } = useStoreRuleSets();
+  const ruleSets = useRuleSets();
+  const { ruleSetCreate, ruleSetDuplicate, ruleSetDelete } =
+    useRuleSetsUpdate();
   const [selectedId, setSelectedId] = useUrlParams(
     "selected-rule-id",
     z.string(),
-  );
-  const addRuleSet = useCallback(() => {
-    if (ruleSets) {
-      const newRuleSet: RuleSetNew = {
-        id: generate(),
-        name: "New rule set",
-        roadTags: Object.keys(ruleSets[0].roadTags).reduce(
-          (all, curr) => ({
-            ...all,
-            [curr]: 0,
-          }),
-          {} as RuleSetNew["roadTags"],
-        ),
-      };
-      ruleSetSet(newRuleSet);
-    }
-  }, [ruleSetSet, ruleSets]);
-
-  const duplicateRuleSet = useCallback(
-    (ruleSet: RuleSet) => {
-      ruleSetSet({
-        ...ruleSet,
-        name: `Copy of ${ruleSet.name}`,
-        id: generate(),
-      });
-    },
-    [ruleSetSet],
   );
 
   const navState = useRootNavigationState();
@@ -254,7 +213,7 @@ export default function RuleSetList() {
             role="button"
             aria-label="Create new rule set"
             className="fixed bottom-8 right-8 flex size-24 items-center justify-center rounded-full bg-[#FF5937] shadow-lg transition-colors hover:bg-[#ff4a25]"
-            onPress={addRuleSet}
+            onPress={ruleSetCreate}
           >
             <Plus className="size-12 text-white dark:text-gray-900" />
           </Pressable>
@@ -264,14 +223,6 @@ export default function RuleSetList() {
       <View className="flex w-full flex-col items-center justify-start">
         <View className="mx-2 flex w-full flex-col items-center justify-start md:max-w-5xl">
           <AnimatePresence exitBeforeEnter>
-            {!ruleSets && (
-              <View
-                key="loading"
-                className="flex w-full flex-row items-center justify-center"
-              >
-                <Loading className="size-12 text-[#ff4a25]" />
-              </View>
-            )}
             {!!ruleSets && (
               <MotiView
                 key="rule-sets"
@@ -281,16 +232,6 @@ export default function RuleSetList() {
               >
                 <ScrollView className="h-[calc(100vh-130px)]">
                   <View className="mr-2 grid grid-cols-1 gap-6 pb-12 md:grid-cols-2">
-                    {!!error && status !== "pending" && (
-                      <View className="mx-2 max-w-5xl flex-1">
-                        <ErrorBox error={error} retry={refetch} />
-                      </View>
-                    )}
-                    {!ruleSets && !error && (
-                      <View className="flex w-full flex-row items-center justify-center">
-                        <Loading className="size-12 text-[#ff4a25]" />
-                      </View>
-                    )}
                     {ruleSets.map((ruleSet) => (
                       <View
                         key={ruleSet.id}
@@ -337,10 +278,10 @@ export default function RuleSetList() {
                             </Pressable>
                             <ActionDialog
                               ruleSet={ruleSet}
-                              onDuplicate={() => duplicateRuleSet(ruleSet)}
+                              onDuplicate={() => ruleSetDuplicate(ruleSet.id)}
                               onDelete={() => {
                                 if (selectedId === ruleSet.id) {
-                                  setSelectedId(ruleSets[0].id);
+                                  setSelectedId(ruleSets[0]?.id || undefined);
                                 }
                                 ruleSetDelete(ruleSet.id);
                               }}

@@ -1,4 +1,5 @@
 import { Slider } from "@miblanchard/react-native-slider";
+import { type RuleSetRoagTag } from "@ridi/store-with-schema";
 import {
   roadSmoothnessKeys,
   roadSurfacePavedKeys,
@@ -9,7 +10,7 @@ import {
   roadTypeResidentalKeys,
   roadTypeSmallKeys,
   roadTypeTinyKeys,
-} from "@ridi/api-contracts";
+} from "@ridi/store-with-schema";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import {
@@ -18,14 +19,17 @@ import {
   CircleHelp,
   RotateCcw,
 } from "lucide-react-native";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { View, Text, Pressable, TextInput, ScrollView } from "react-native";
 
-import { ErrorBox } from "~/components/error";
 import { ScreenCard } from "~/components/screen-card";
 import { ScreenFrame } from "~/components/screen-frame";
+import {
+  useRuleSetRoadTags,
+  useRuleSetRoadTagsUpdate,
+} from "~/lib/data-stores/rule-set-road-tags";
+import { useRuleSet, useRuleSetsUpdate } from "~/lib/data-stores/rule-sets";
 import { posthogClient } from "~/lib/posthog/client";
-import { useStoreRuleSets } from "~/lib/stores/rules-store";
 import { cn } from "~/lib/utils";
 
 const ruleGroups = [
@@ -40,45 +44,26 @@ const ruleGroups = [
   ["Smoothness", roadSmoothnessKeys, "smoothness"],
 ] as const;
 
-const tagValueToTagName = new Map<string, string>();
-function addTagValues<T extends readonly string[]>(vals: T, tagName: string) {
-  vals.forEach((v) => tagValueToTagName.set(v, tagName));
-}
-addTagValues(roadTypeLargeKeys, "highway");
-addTagValues(roadTypeMedKeys, "highway");
-addTagValues(roadTypeSmallKeys, "highway");
-addTagValues(roadTypeResidentalKeys, "highway");
-addTagValues(roadTypeTinyKeys, "highway");
-addTagValues(roadSurfacePavedKeys, "surface");
-addTagValues(roadSurfaceUnpavedKeys, "surface");
-addTagValues(roadSurfaceSpecialKeys, "surface");
-addTagValues(roadSmoothnessKeys, "smoothness");
-
-function roadTagsDefined<T>(v: T | undefined): asserts v is T {
-  if (!v) {
-    throw new Error("road tag must not be undefined");
-  }
-}
-
 export default function RulePackDetails() {
   const router = useRouter();
   const { ruleSetId } = useLocalSearchParams();
-  const { data: ruleSets, error, ruleSetSet, refetch } = useStoreRuleSets();
-  const ruleSet = ruleSets?.find((rp) => rp.id === ruleSetId);
-  const [roadTags, setRoadTags] = useState(ruleSet?.roadTags);
-  const [groupsExpanded, setGroupsExpanded] = useState<number[]>([]);
-  const [ruleSetName, setRuleSetName] = useState(ruleSet?.name);
-
-  useEffect(() => {
-    if (ruleSet && !roadTags) {
-      setRoadTags(ruleSet.roadTags);
-      setRuleSetName(ruleSet.name);
-    }
-  }, [roadTags, ruleSet]);
+  const ruleSetOrig = useRuleSet(ruleSetId);
+  const { ruleSetSetName } = useRuleSetsUpdate();
+  const { roadTagSetValues } = useRuleSetRoadTagsUpdate();
+  const roadTagsOrig = useRuleSetRoadTags(ruleSetId);
+  const [roadTags, setRoadTags] = useState(roadTagsOrig);
+  const [groupsExpanded, setGroupsExpanded] = useState<
+    (keyof typeof ruleGroups)[]
+  >([]);
+  const [ruleSetName, setRuleSetName] = useState(ruleSetOrig?.name);
 
   const toggleGroupExpanded = useCallback((groupIdx: number) => {
+    const group = ruleGroups[groupIdx];
+    if (!group) {
+      return;
+    }
     posthogClient.captureEvent("rule-group-expand-toggle", {
-      group: ruleGroups[groupIdx][2],
+      group: group[2],
     });
     setGroupsExpanded((ge) =>
       ge.includes(groupIdx)
@@ -89,7 +74,6 @@ export default function RulePackDetails() {
 
   const isGroupEnabled = useCallback(
     (group: (typeof ruleGroups)[number]) => {
-      roadTagsDefined(roadTags);
       return Object.entries(roadTags)
         .filter((tags) => (group[1] as readonly string[]).includes(tags[0]))
         .some((tag) => tag[1] !== null);
@@ -99,17 +83,15 @@ export default function RulePackDetails() {
 
   const getGroupTags = useCallback(
     (group: (typeof ruleGroups)[number]) => {
-      roadTagsDefined(roadTags);
-      return (
-        Object.entries(roadTags) as [keyof typeof roadTags, number | null][]
-      ).filter((tags) => (group[1] as readonly string[]).includes(tags[0]));
+      return roadTags.filter((tags) =>
+        (group[1] as readonly string[]).includes(tags.tag),
+      );
     },
     [roadTags],
   );
 
   const isGroupInSync = useCallback(
     (group: (typeof ruleGroups)[number]) => {
-      roadTagsDefined(roadTags);
       return (
         new Set(
           Object.entries(roadTags)
@@ -123,104 +105,111 @@ export default function RulePackDetails() {
 
   const toggleGroup = useCallback(
     (group: (typeof ruleGroups)[number]) => {
-      if (ruleSet?.isSystem) {
+      if (ruleSetOrig?.isSystem) {
         return;
       }
       posthogClient.captureEvent("rule-group-enabled-toggle", {
         group: group[2],
       });
-      const souldDisable = isGroupEnabled(group);
-      if (souldDisable) {
-        setRoadTags((rt) => ({
-          ...rt!,
-          ...getGroupTags(group).reduce(
-            (all, curr) => ({ ...all, [curr[0]]: null }),
-            {},
-          ),
-        }));
-      } else {
-        setRoadTags((rt) => ({
-          ...rt!,
-          ...getGroupTags(group).reduce(
-            (all, curr) => ({ ...all, [curr[0]]: 0 }),
-            {},
-          ),
-        }));
-      }
+      const shouldDisable = isGroupEnabled(group);
+      const groupTagTags = getGroupTags(group).map((t) => t.tag);
+      const setValue = (
+        tag: (typeof groupTagTags)[number],
+        value: number | null,
+      ) => {
+        if (!groupTagTags.includes(tag)) {
+          return value;
+        }
+        return shouldDisable ? null : 0;
+      };
+      setRoadTags((tags) =>
+        tags.map((t) => {
+          return {
+            ...t,
+            value: setValue(t.tag, t.value),
+          };
+        }),
+      );
     },
-    [getGroupTags, isGroupEnabled, ruleSet?.isSystem],
+    [getGroupTags, isGroupEnabled, ruleSetOrig?.isSystem],
   );
 
   const setGroupValue = useCallback(
     (group: (typeof ruleGroups)[number], value: number) => {
-      if (ruleSet?.isSystem) {
+      if (ruleSetOrig?.isSystem) {
         return;
       }
       posthogClient.captureEvent("rule-group-value-set", {
         group: group[2],
         value,
       });
-      setRoadTags((rt) => ({
-        ...rt!,
-        ...getGroupTags(group).reduce(
-          (all, curr) => ({ ...all, [curr[0]]: value }),
-          {},
-        ),
-      }));
+      setRoadTags((tags) =>
+        tags.map((t) => {
+          return {
+            ...t,
+            value,
+          };
+        }),
+      );
     },
-    [getGroupTags, ruleSet?.isSystem],
+    [ruleSetOrig?.isSystem],
   );
 
   const setTagValue = useCallback(
-    (
-      tag: [keyof NonNullable<typeof roadTags>, number | null],
-      value: number,
-    ) => {
-      if (ruleSet?.isSystem) {
+    (tag: RuleSetRoagTag, value: number) => {
+      if (ruleSetOrig?.isSystem) {
         return;
       }
       posthogClient.captureEvent("rule-tag-value-set", {
-        tag: tag[0],
+        tag: tag.tag,
         value,
       });
-      setRoadTags((rt) => ({
-        ...rt!,
-        [tag[0]]: value,
-      }));
+      setRoadTags((tags) =>
+        tags.map((t) => {
+          return {
+            ...t,
+            value: t.id === tag.id ? value : t.value,
+          };
+        }),
+      );
     },
-    [ruleSet?.isSystem],
+    [ruleSetOrig?.isSystem],
   );
 
   const toggleTag = useCallback(
-    (tag: [keyof NonNullable<typeof roadTags>, number | null]) => {
-      if (ruleSet?.isSystem) {
+    (tag: RuleSetRoagTag) => {
+      if (ruleSetOrig?.isSystem) {
         return;
       }
       posthogClient.captureEvent("rule-tag-enabled-toggle", {
-        tag: tag[0],
+        tag: tag.tag,
       });
-      setRoadTags((rt) => ({
-        ...rt!,
-        [tag[0]]: rt![tag[0]] === null ? 0 : null,
-      }));
+      setRoadTags((tags) =>
+        tags.map((t) => {
+          return {
+            ...t,
+            value: t.id === tag.id ? null : t.value,
+          };
+        }),
+      );
     },
-    [ruleSet?.isSystem],
+    [ruleSetOrig?.isSystem],
   );
 
   const unsavedChangesExist = useMemo(() => {
-    if (!ruleSet || !roadTags) {
+    if (!ruleSetOrig || !roadTags) {
       return false;
     }
-    const serverEntries = Object.entries(ruleSet.roadTags);
+    const serverEntries = Object.entries(roadTagsOrig);
     const localEntries = Object.entries(roadTags);
     return (
       serverEntries.some(
         (se) => localEntries.find((le) => le[0] === se[0])![1] !== se[1],
-      ) || ruleSetName !== ruleSet.name
+      ) || ruleSetName !== ruleSetOrig.name
     );
-  }, [roadTags, ruleSet, ruleSetName]);
+  }, [ruleSetOrig, roadTags, roadTagsOrig, ruleSetName]);
 
-  if (!ruleSet || !roadTags) {
+  if (!ruleSetOrig || !roadTags.length) {
     return (
       <ScreenFrame
         title="Plan routes"
@@ -248,20 +237,20 @@ export default function RulePackDetails() {
       title="Routing rules"
       onGoBack={() => router.replace("/rules")}
       floating={
-        !ruleSet.isSystem && (
+        !ruleSetOrig.isSystem && (
           <View className="fixed bottom-0 w-full bg-white p-4 dark:bg-gray-800">
             <Pressable
               role="button"
               onPress={() => {
                 if (unsavedChangesExist) {
                   posthogClient.captureEvent("rule-set-save", {
-                    ruleSetId: ruleSet.id,
+                    ruleSetId: ruleSetOrig.id,
                   });
-                  ruleSetSet({
-                    ...ruleSet,
-                    name: ruleSetName || "",
-                    roadTags: roadTags!,
-                  });
+                  ruleSetSetName(
+                    ruleSetOrig.id,
+                    ruleSetName || ruleSetOrig.name,
+                  );
+                  roadTagSetValues(roadTags);
                 }
               }}
               aria-disabled={!unsavedChangesExist}
@@ -283,18 +272,13 @@ export default function RulePackDetails() {
       <View className="flex w-full flex-col items-center justify-start">
         <View className="mx-2 w-full md:max-w-5xl">
           <View className="flex flex-col gap-6 pb-12">
-            {!!error && (
-              <View>
-                <ErrorBox error={error} retry={refetch} />
-              </View>
-            )}
             <View className={cn("overflow-hidden pr-6")}>
-              {ruleSet.isSystem && (
+              {ruleSetOrig.isSystem && (
                 <Text className="flex-1 rounded-xl border-2 border-black bg-white px-4 py-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200">
                   {ruleSetName}
                 </Text>
               )}
-              {!ruleSet.isSystem && (
+              {!ruleSetOrig.isSystem && (
                 <TextInput
                   value={ruleSetName}
                   onChangeText={setRuleSetName}
@@ -397,7 +381,7 @@ export default function RulePackDetails() {
                                     )}
                                     trackClickable={true}
                                     step={1}
-                                    value={getGroupTags(group)[0][1] || 0}
+                                    value={getGroupTags(group)[0]?.value || 0}
                                     maximumValue={255}
                                     minimumValue={0}
                                     trackStyle={{
@@ -410,7 +394,7 @@ export default function RulePackDetails() {
                                       backgroundColor: "transparent",
                                     }}
                                     onValueChange={(value) => {
-                                      setGroupValue(group, value[0]);
+                                      setGroupValue(group, value[0] || 0);
                                     }}
                                   />
                                 </View>
@@ -432,19 +416,19 @@ export default function RulePackDetails() {
                       <View className="space-y-4 border-t-2 border-black p-4 dark:border-gray-700">
                         {getGroupTags(group).map((tag) => (
                           <View
-                            key={tag[0]}
+                            key={tag.id}
                             className="space-y-3 rounded-xl border-2 border-black p-4 dark:border-gray-700"
                           >
                             <View className="flex flex-row items-center justify-between gap-4">
                               <View className="flex flex-row items-center justify-start gap-2">
                                 <Text className="flex-1 text-sm dark:text-gray-200">
-                                  {tag[0]}
+                                  {tag.tag}
                                 </Text>
                                 <Pressable
                                   role="button"
                                   onPress={() => {
                                     WebBrowser.openBrowserAsync(
-                                      `https://wiki.openstreetmap.org/wiki/Tag:${tagValueToTagName.get(tag[0])}%3D${tag[0]}`,
+                                      `https://wiki.openstreetmap.org/wiki/Tag:${ruleGroups.find((g) => (g[1] as readonly string[]).includes(tag.tag as string))?.at(2)}%3D${tag.tag}`,
                                     );
                                   }}
                                 >
@@ -456,9 +440,9 @@ export default function RulePackDetails() {
                                 className={cn(
                                   "h-8 w-14 rounded-full p-1 transition-colors",
                                   {
-                                    "bg-[#FF5937]": tag[1] !== null,
+                                    "bg-[#FF5937]": tag.value !== null,
                                     "bg-gray-200 dark:bg-gray-700":
-                                      tag[1] === null,
+                                      tag.value === null,
                                   },
                                 )}
                                 onPress={() => toggleTag(tag)}
@@ -467,13 +451,13 @@ export default function RulePackDetails() {
                                   className={cn(
                                     "size-6 rounded-full bg-white transition-transform dark:bg-gray-900",
                                     {
-                                      "translate-x-6": tag[1] !== null,
+                                      "translate-x-6": tag.value !== null,
                                     },
                                   )}
                                 />
                               </Pressable>
                             </View>
-                            {tag[1] !== null && (
+                            {tag.value !== null && (
                               <View className="space-y-1">
                                 <View className="relative h-12 w-full">
                                   <View className="absolute inset-0 flex flex-row items-center">
@@ -485,7 +469,7 @@ export default function RulePackDetails() {
                                     )}
                                     trackClickable={true}
                                     step={1}
-                                    value={tag[1] as number}
+                                    value={tag.value}
                                     maximumValue={255}
                                     minimumValue={0}
                                     trackStyle={{
@@ -498,7 +482,7 @@ export default function RulePackDetails() {
                                       backgroundColor: "transparent",
                                     }}
                                     onValueChange={(value) =>
-                                      setTagValue(tag, value[0])
+                                      setTagValue(tag, value[0] || 0)
                                     }
                                   />
                                 </View>

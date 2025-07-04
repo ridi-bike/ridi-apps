@@ -83,17 +83,19 @@ const ruleSetSchema = z.object({
   isDeleted: z.boolean().nullable(),
 });
 
-const roadTypeLargeKeys = ["motorway", "trunk"] as const;
+export type RuleSet = z.infer<typeof ruleSetSchema>;
 
-const roadTypeMedKeys = ["primary", "secondary"] as const;
+export const roadTypeLargeKeys = ["motorway", "trunk"] as const;
 
-const roadTypeSmallKeys = ["tertiary", "unclassified"] as const;
+export const roadTypeMedKeys = ["primary", "secondary"] as const;
 
-const roadTypeResidentalKeys = ["residential", "living_street"] as const;
+export const roadTypeSmallKeys = ["tertiary", "unclassified"] as const;
 
-const roadTypeTinyKeys = ["track", "path"] as const;
+export const roadTypeResidentalKeys = ["residential", "living_street"] as const;
 
-const roadSurfacePavedKeys = [
+export const roadTypeTinyKeys = ["track", "path"] as const;
+
+export const roadSurfacePavedKeys = [
   "paved",
   "asphalt",
   "chipseal",
@@ -109,7 +111,7 @@ const roadSurfacePavedKeys = [
   "bricks",
 ] as const;
 
-const roadSurfaceUnpavedKeys = [
+export const roadSurfaceUnpavedKeys = [
   "unpaved",
   "compacted",
   "fine_gravel",
@@ -125,7 +127,7 @@ const roadSurfaceUnpavedKeys = [
   "sand",
 ] as const;
 
-const roadSurfaceSpecialKeys = [
+export const roadSurfaceSpecialKeys = [
   "woodchips",
   "snow",
   "ice",
@@ -138,7 +140,7 @@ const roadSurfaceSpecialKeys = [
   "tiles",
 ] as const;
 
-const roadSmoothnessKeys = [
+export const roadSmoothnessKeys = [
   "excellent",
   "good",
   "intermediate",
@@ -149,21 +151,26 @@ const roadSmoothnessKeys = [
   "impassable",
 ] as const;
 
+export const ruleSetTags = [
+  ...roadTypeLargeKeys,
+  ...roadTypeMedKeys,
+  ...roadTypeSmallKeys,
+  ...roadTypeTinyKeys,
+  ...roadTypeResidentalKeys,
+  ...roadSurfacePavedKeys,
+  ...roadSurfaceUnpavedKeys,
+  ...roadSurfaceSpecialKeys,
+  ...roadSmoothnessKeys,
+] as const;
+
 const ruleSetRoadTagSchema = z.object({
   id: z.string(),
-  tag: z.enum([
-    ...roadTypeLargeKeys,
-    ...roadTypeMedKeys,
-    ...roadTypeSmallKeys,
-    ...roadTypeTinyKeys,
-    ...roadTypeResidentalKeys,
-    ...roadSurfacePavedKeys,
-    ...roadSurfaceUnpavedKeys,
-    ...roadSurfaceSpecialKeys,
-    ...roadSmoothnessKeys,
-  ]),
-  value: z.number().optional(),
+  ruleSetId: z.string(),
+  tag: z.enum(ruleSetTags),
+  value: z.number().nullable(),
 });
+
+export type RuleSetRoagTag = z.infer<typeof ruleSetRoadTagSchema>;
 
 export const storeSchema = {
   plans: planSchema,
