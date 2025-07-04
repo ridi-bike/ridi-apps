@@ -19,7 +19,7 @@ import { PointSelectDialog } from "~/components/point-select-dialog";
 import { ScreenCard } from "~/components/screen-card";
 import { ScreenFrame } from "~/components/screen-frame";
 import { coordsAddressCacheInsert } from "~/lib/coords-details";
-import { posthogClient } from "~/lib/posthog/client.web";
+import { posthogClient } from "~/lib/posthog/client";
 import { cn } from "~/lib/utils";
 
 type Location = {

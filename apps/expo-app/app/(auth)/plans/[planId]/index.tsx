@@ -36,7 +36,7 @@ import {
   usePlanRoutes,
   usePlanUpdate as usePlansUpdate,
 } from "~/lib/data-stores/plans";
-import { posthogClient } from "~/lib/posthog/client";
+import { posthogClient } from "~/lib/posthog/client.mobile";
 import { cn } from "~/lib/utils";
 
 function DeleteConfirmDialog({

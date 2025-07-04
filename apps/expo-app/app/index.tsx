@@ -9,7 +9,7 @@ import { Button } from "~/components/button";
 import { MotorcycleIcon } from "~/components/icons/motorcycle";
 import { Link } from "~/components/link";
 import { VersionCheck } from "~/components/version-check";
-import { posthogClient } from "~/lib/posthog/client";
+import { posthogClient } from "~/lib/posthog/client.mobile";
 import { usePhScreenCapture } from "~/lib/posthog/hooks";
 import { supabase } from "~/lib/supabase";
 

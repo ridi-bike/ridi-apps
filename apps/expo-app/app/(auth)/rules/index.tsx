@@ -27,7 +27,7 @@ import {
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
 import { useRuleSets, useRuleSetsUpdate } from "~/lib/data-stores/rule-sets";
-import { posthogClient } from "~/lib/posthog/client";
+import { posthogClient } from "~/lib/posthog/client.mobile";
 import { useUrlParams } from "~/lib/url-params";
 import { cn } from "~/lib/utils";
 

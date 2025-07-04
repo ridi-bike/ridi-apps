@@ -25,7 +25,7 @@ import {
   useRouteRoadStats,
   useRoutesUpdate,
 } from "~/lib/data-stores/routes";
-import { posthogClient } from "~/lib/posthog/client";
+import { posthogClient } from "~/lib/posthog/client.mobile";
 import { useUser } from "~/lib/useUser";
 import { cn } from "~/lib/utils";
 

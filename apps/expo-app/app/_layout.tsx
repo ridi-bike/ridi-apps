@@ -6,7 +6,7 @@ import maplibregl from "maplibre-gl";
 import { Protocol } from "pmtiles";
 import { useEffect } from "react";
 
-import { PhProvider, posthogClient } from "~/lib/posthog/client";
+import { PhProvider, posthogClient } from "~/lib/posthog/client.mobile";
 import { supabase } from "~/lib/supabase";
 
 Sentry.init({

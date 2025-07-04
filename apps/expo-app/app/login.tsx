@@ -11,7 +11,7 @@ import { GoogleIcon } from "~/components/icons/google";
 import { Input } from "~/components/input";
 import { VersionCheck } from "~/components/version-check";
 import { apiClient } from "~/lib/api";
-import { posthogClient } from "~/lib/posthog/client";
+import { posthogClient } from "~/lib/posthog/client.mobile";
 import { usePhScreenCapture } from "~/lib/posthog/hooks";
 import { supabase } from "~/lib/supabase";
 import { cn } from "~/lib/utils";

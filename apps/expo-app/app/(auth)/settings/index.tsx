@@ -10,7 +10,7 @@ import { ErrorBox } from "~/components/error";
 import { Link as AppLink } from "~/components/link";
 import { Loading } from "~/components/loading";
 import { ScreenFrame } from "~/components/screen-frame";
-import { posthogClient } from "~/lib/posthog/client";
+import { posthogClient } from "~/lib/posthog/client.mobile";
 import { supabase } from "~/lib/supabase";
 import { useUser } from "~/lib/useUser";
 

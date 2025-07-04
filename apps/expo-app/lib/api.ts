@@ -1,5 +1,6 @@
 import { apiContract } from "@ridi/api-contracts";
 import { initClient, tsRestFetchApi } from "@ts-rest/core";
+import { router } from "expo-router";
 
 import { supabase } from "./supabase";
 

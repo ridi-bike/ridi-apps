@@ -1,7 +1,7 @@
 import { useGlobalSearchParams, useSegments } from "expo-router";
 import { useEffect, useMemo } from "react";
 
-import { posthogClient } from "./client";
+import { posthogClient } from "./client.mobile";
 
 export function usePhScreenCapture() {
   const segments = useSegments();

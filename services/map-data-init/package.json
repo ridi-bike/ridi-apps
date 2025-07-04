@@ -17,7 +17,7 @@
     "postgres": "^3.4.5",
     "typescript": "^5.8.1-rc",
     "xmldom": "^0.6.0",
-    "zod": "^3.24.1"
+    "zod": "^3.25.73"
   },
   "devDependencies": {
     "@types/xmldom": "^0.1.34",

@@ -109,7 +109,7 @@
     "throttle-debounce": "^5.0.2",
     "tinybase": "^6.3.0",
     "xksuid": "^0.0.4",
-    "zod": "^3.25.67",
+    "zod": "^3.25.73",
     "zod-geojson": "^1.0.0"
   },
   "devDependencies": {

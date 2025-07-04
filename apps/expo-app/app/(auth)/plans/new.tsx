@@ -33,7 +33,7 @@ import { useRuleSets, useRuleSetDefaultId } from "~/lib/data-stores/rule-sets";
 import { AdvIcon } from "~/lib/icons/adv";
 import { DualsportIcon } from "~/lib/icons/dualsport";
 import { TouringIcon } from "~/lib/icons/touring";
-import { posthogClient } from "~/lib/posthog/client";
+import { posthogClient } from "~/lib/posthog/client.mobile";
 import { findRegions, type Region } from "~/lib/regions";
 import { useUrlParams } from "~/lib/url-params";
 import { cn } from "~/lib/utils";

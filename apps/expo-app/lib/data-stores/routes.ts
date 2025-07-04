@@ -3,6 +3,10 @@ import { useMemo, useCallback } from "react";
 
 import { dataStore } from "./data-store";
 
+export function useRoute(routeId: string) {
+  return useRow(dataStore, "routes", routeId);
+}
+
 export function useRouteRoadStats(
   routeId: unknown,
   statType: "type" | "surface" | "smoothenss",

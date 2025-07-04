@@ -2,8 +2,7 @@ import * as turf from "@turf/turf";
 import { type z } from "zod";
 import { GeoJSONSchema } from "zod-geojson";
 
-import { apiClient } from "./api";
-import { getSuccessResponseOrThrow } from "./stores/util";
+import { apiClient, getSuccessResponseOrThrow } from "./api";
 
 export type Region = {
   region: string;

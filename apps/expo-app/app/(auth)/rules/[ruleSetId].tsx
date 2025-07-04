@@ -29,7 +29,7 @@ import {
   useRuleSetRoadTagsUpdate,
 } from "~/lib/data-stores/rule-set-road-tags";
 import { useRuleSet, useRuleSetsUpdate } from "~/lib/data-stores/rule-sets";
-import { posthogClient } from "~/lib/posthog/client";
+import { posthogClient } from "~/lib/posthog/client.mobile";
 import { cn } from "~/lib/utils";
 
 const ruleGroups = [
