@@ -40,16 +40,7 @@ export default function MyRoutes() {
                         key={route.id}
                         href={`/plans/${route.planId}/${route.id}`}
                       >
-                        <RouteCard
-                          routeShort={{
-                            routeId: route.id,
-                            routeName: route.name,
-                            routeCreatedAt: route.createdAt,
-                            routeDownloadedAt: route.downloadedAt,
-                            routeMapPreviewDark: route.mapPreviewDark,
-                            routeMapPreviewLight: route.mapPreviewLight,
-                          }}
-                        />
+                        <RouteCard routeId={route.id} />
                       </Link>
                     ))}
                   </View>

@@ -1,4 +1,5 @@
 import { Slider } from "@miblanchard/react-native-slider";
+import { type Region } from "@ridi/store-with-schema";
 import * as turf from "@turf/turf";
 import * as Location from "expo-location";
 import { Link, useRouter } from "expo-router";
@@ -29,12 +30,12 @@ import { LocationPermsNotGiven } from "~/components/LocationPermsNotGiven";
 import { ScreenFrame } from "~/components/screen-frame";
 import { coordsAddressGet } from "~/lib/coords-details";
 import { usePlansUpdate } from "~/lib/data-stores/plans";
+import { findRegions } from "~/lib/data-stores/regions";
 import { useRuleSets, useRuleSetDefaultId } from "~/lib/data-stores/rule-sets";
 import { AdvIcon } from "~/lib/icons/adv";
 import { DualsportIcon } from "~/lib/icons/dualsport";
 import { TouringIcon } from "~/lib/icons/touring";
 import { posthogClient } from "~/lib/posthog/client.mobile";
-import { findRegions, type Region } from "~/lib/regions";
 import { useUrlParams } from "~/lib/url-params";
 import { cn } from "~/lib/utils";
 

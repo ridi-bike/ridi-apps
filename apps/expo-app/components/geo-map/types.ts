@@ -1,6 +1,5 @@
+import { type Region } from "@ridi/store-with-schema";
 import { type PropsWithChildren } from "react";
-
-import { type Region } from "~/lib/regions";
 
 export type GeoMapCoordsSelectorProps = {
   isRoundTrip: boolean;

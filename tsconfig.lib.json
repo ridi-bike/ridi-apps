@@ -4,6 +4,8 @@
   "include": ["**/src/**/*.ts", "**/src/**/*.tsx"],
   "compilerOptions": {
     "allowImportingTsExtensions": true,
+    "emitDeclarationOnly": false,
+    "noEmit": true,
     "composite": true,
     "incremental": true
   }

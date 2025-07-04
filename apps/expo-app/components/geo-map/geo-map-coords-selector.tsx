@@ -137,7 +137,7 @@ export function GeoMapCoordsSelector({
           key={region.region}
           id={layerId}
           type="geojson"
-          data={region.geojson}
+          data={JSON.parse(region.geojsonString)}
         >
           <Layer {...layerStyle} />
         </Source>
@@ -149,6 +149,8 @@ export function GeoMapCoordsSelector({
     if (mapRef.current && mapBounds && regions?.length) {
       mapRef.current.setZoom(5);
     }
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapBounds, regions?.reduce((all, curr) => all + curr, "")]);
 
   return (

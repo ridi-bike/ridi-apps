@@ -109,7 +109,7 @@ export default function PlansPage() {
                       animate={animate}
                       transition={transition}
                     >
-                      <PlanCard plan={plan} />
+                      <PlanCard planId={plan.id} />
                     </MotiPressable>
                   ))}
                 </View>

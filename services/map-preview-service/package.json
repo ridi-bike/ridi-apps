@@ -27,7 +27,6 @@
     "react": "19.0.0",
     "react-dom": "18.2.0",
     "tsx": "^4.19.3",
-    "typescript": "^5.8.1-rc",
     "xksuid": "^0.0.4",
     "zod": "^3.25.73"
   },
@@ -38,7 +37,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "globals": "^15.15.0",
     "pino-pretty": "^13.0.0",
-    "typescript": "^5.8.1-rc",
+    "typescript": "^5.8.3",
     "vite": "^6.2.0"
   }
 }

@@ -34,7 +34,7 @@ import {
 import {
   usePlan,
   usePlanRoutes,
-  usePlanUpdate as usePlansUpdate,
+  usePlansUpdate,
 } from "~/lib/data-stores/plans";
 import { posthogClient } from "~/lib/posthog/client.mobile";
 import { cn } from "~/lib/utils";
@@ -434,7 +434,7 @@ export default function PlanDetails() {
                             key={route.id}
                             href={`/plans/${plan.id}/${route.id}`}
                           >
-                            <RouteCard routeShort={route} />
+                            <RouteCard routeId={route.id} />
                           </Link>
                         ))}
                       </View>

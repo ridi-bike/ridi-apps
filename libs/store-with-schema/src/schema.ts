@@ -172,6 +172,13 @@ const ruleSetRoadTagSchema = z.object({
 
 export type RuleSetRoagTag = z.infer<typeof ruleSetRoadTagSchema>;
 
+const regionsSchema = z.object({
+  region: z.string(),
+  geojsonString: z.string(),
+});
+
+export type Region = z.infer<typeof regionsSchema>;
+
 export const storeSchema = {
   plans: planSchema,
   routes: routeSchema,
@@ -179,4 +186,5 @@ export const storeSchema = {
   routeBreakdowns: routeBreakdownSchema,
   ruleSets: ruleSetSchema,
   ruleSetRoadTags: ruleSetRoadTagSchema,
+  regions: regionsSchema,
 };
