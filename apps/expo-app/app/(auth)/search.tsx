@@ -231,8 +231,8 @@ export default function LocationSearch() {
                       isRoundTrip={
                         JSON.parse(
                           Array.isArray(isRoundTrip)
-                            ? isRoundTrip[0]
-                            : isRoundTrip,
+                            ? isRoundTrip[0] || ""
+                            : isRoundTrip || "",
                         ) === true
                       }
                       key={index}

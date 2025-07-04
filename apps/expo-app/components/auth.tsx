@@ -19,7 +19,7 @@ export function useCreateSessionFromUrl() {
     if (url) {
       const clearedUrl = new URL(url);
       clearedUrl.hash = "";
-      router.replace(clearedUrl.toString() as Href<string>);
+      router.replace(clearedUrl.toString() as Href);
     }
   }, [router, url]);
 
@@ -35,7 +35,7 @@ export function useCreateSessionFromUrl() {
     supabase.auth
       .setSession({
         access_token,
-        refresh_token,
+        refresh_token: refresh_token || "",
       })
       .then(() => {
         clearUrlParas();

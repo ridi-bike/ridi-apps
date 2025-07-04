@@ -1,7 +1,6 @@
 import { getMapStyle } from "@ridi/geo-maps";
 import * as turf from "@turf/turf";
 import {
-  type FillLayer,
   Layer,
   Map as MapLibre,
   NavigationControl,
@@ -105,7 +104,7 @@ export function GeoMapCoordsSelector({
       return null;
     }
     if (allPoints.length === 1) {
-      const p = allPoints[0];
+      const p = allPoints[0]!;
       allPoints.push([p[0] - 0.12, p[1] - 0.09]);
       allPoints.push([p[0] + 0.09, p[1] + 0.12]);
     }
@@ -124,7 +123,7 @@ export function GeoMapCoordsSelector({
   const regionLayers = useMemo(() => {
     return regions?.map((region) => {
       const layerId = `region-${region.region}`;
-      const layerStyle: FillLayer = {
+      const layerStyle = {
         id: layerId,
         type: "fill",
         source: layerId,
@@ -132,7 +131,7 @@ export function GeoMapCoordsSelector({
           "fill-color": stringToColor(region.region),
           "fill-opacity": 0.3,
         },
-      };
+      } as const;
       return (
         <Source
           key={region.region}
