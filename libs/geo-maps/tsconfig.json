@@ -1,11 +1,6 @@
 {
-  "extends": "@total-typescript/tsconfig/bundler/dom/library-monorepo", // For a library in a monorepo
-  "exclude": ["**/node_modules/**/*"],
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "extends": "../../tsconfig.lib.json",
   "compilerOptions": {
-    "allowImportingTsExtensions": true,
-    "composite": true,
-    "incremental": true,
     "lib": ["dom"],
     "jsx": "react-jsx"
   }

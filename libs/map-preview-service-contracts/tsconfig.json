@@ -1,14 +1,6 @@
 {
-  "extends": "@total-typescript/tsconfig/bundler/no-dom/library-monorepo", // For a library in a monorepo
-  "exclude": ["**/node_modules/**/*"],
-  "include": [
-    "src/**/*.ts",
-    "../../services/map-preview-service-old/src/map-preview.ts"
-  ],
+  "extends": "../../tsconfig.lib.json",
   "compilerOptions": {
-    "allowImportingTsExtensions": true,
-    "composite": true,
-    "incremental": true,
     "types": ["node"]
   }
 }

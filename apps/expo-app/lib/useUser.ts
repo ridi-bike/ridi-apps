@@ -1,8 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { apiClient } from "~/lib/api";
-
-import { getSuccessResponseOrThrow } from "./stores/util";
+import { apiClient, getSuccessResponseOrThrow } from "~/lib/api";
 
 const DATA_VERSION = "v1";
 export const USER_QUERY_KEY = ["user", DATA_VERSION];

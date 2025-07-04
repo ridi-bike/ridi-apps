@@ -25,11 +25,10 @@ export function GeoMapRouteView({
   const mapRef = useRef<MapRef | null>(null);
 
   const mapBounds = useMemo(() => {
-    const allPoints = [...route.map((p) => [p.lon, p.lat])];
-    if (!allPoints.length) {
+    if (!route.length) {
       return null;
     }
-    const features = turf.points(allPoints);
+    const features = turf.points(route);
     const mapBounds = turf.bbox(features);
     return combineBBox(mapBounds, null);
   }, [route]);
@@ -62,10 +61,7 @@ export function GeoMapRouteView({
           properties: {},
           geometry: {
             type: "LineString",
-            coordinates: route.map((routePoint) => [
-              routePoint.lon,
-              routePoint.lat,
-            ]),
+            coordinates: route,
           },
         },
       ],

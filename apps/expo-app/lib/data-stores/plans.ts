@@ -1,5 +1,6 @@
 import { useRow, useTable } from "@ridi/store-with-schema/hooks";
 import { useCallback, useMemo } from "react";
+import { generate } from "xksuid";
 
 import { dataStore } from "./data-store";
 
@@ -44,12 +45,41 @@ export function usePlanRoute(planId: unknown, routeId: unknown) {
   );
 }
 
+type PlanNew = {
+  startLat: number;
+  startLon: number;
+  finishLat: number | null;
+  finishLon: number | null;
+  distance: number;
+  bearing: number | null;
+  tripType: "round-trip" | "start-finish";
+  ruleSetId: string;
+};
+
 export function usePlansUpdate() {
   const planDelete = useCallback((planId: string) => {
     dataStore.setCell("plans", planId, "isDeleted", true);
   }, []);
 
+  const planCreate = useCallback((planNew: PlanNew) => {
+    const planId = generate();
+    dataStore.setRow("plans", planId, {
+      id: planId,
+      ...planNew,
+      name: `From: ${planNew.startLat},${planNew.startLon} to ${planNew.finishLat},${planNew.finishLon}`,
+      startDesc: `${planNew.startLat},${planNew.startLon}`,
+      finishDesc: `${planNew.finishLat},${planNew.finishLon}`,
+      state: "new",
+      isDeleted: false,
+      createdAt: new Date().toISOString(),
+      mapPreviewDark: null,
+      mapPreviewLight: null,
+    });
+    return planId;
+  }, []);
+
   return {
     planDelete,
+    planCreate,
   };
 }

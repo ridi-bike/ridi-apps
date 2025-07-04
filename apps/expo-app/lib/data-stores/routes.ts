@@ -56,3 +56,15 @@ export function useRoutesUpdate() {
     routeSetDownloaded,
   };
 }
+
+export function useRoutesDownlaoded() {
+  const routes = useTable(dataStore, "routes");
+  return useMemo(
+    () =>
+      Object.values(routes).filter(
+        (route) => !route.isDeleted && !!route.downloadedAt,
+      ),
+
+    [routes],
+  );
+}

@@ -34,6 +34,7 @@
     "@ridi/api-contracts": "workspace:^",
     "@ridi/geo-maps": "workspace:^",
     "@ridi/maps-api": "workspace:^",
+    "@ridi/store-with-schema": "workspace:^",
     "@rn-primitives/alert-dialog": "^1.2.0",
     "@rn-primitives/label": "^1.2.0",
     "@rn-primitives/popover": "^1.2.0",
@@ -106,6 +107,7 @@
     "tailwindcss": "^3.4.17",
     "tailwindcss-animate": "^1.0.7",
     "throttle-debounce": "^5.0.2",
+    "tinybase": "^6.3.0",
     "xksuid": "^0.0.4",
     "zod": "^3.25.67",
     "zod-geojson": "^1.0.0"

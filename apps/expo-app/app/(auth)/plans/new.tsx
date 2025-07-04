@@ -28,13 +28,13 @@ import { DIRECTIONS, getCardinalDirection } from "~/components/geo-map/util";
 import { LocationPermsNotGiven } from "~/components/LocationPermsNotGiven";
 import { ScreenFrame } from "~/components/screen-frame";
 import { coordsAddressGet } from "~/lib/coords-details";
+import { usePlansUpdate } from "~/lib/data-stores/plans";
+import { useRuleSets, useRuleSetDefaultId } from "~/lib/data-stores/rule-sets";
 import { AdvIcon } from "~/lib/icons/adv";
 import { DualsportIcon } from "~/lib/icons/dualsport";
 import { TouringIcon } from "~/lib/icons/touring";
 import { posthogClient } from "~/lib/posthog/client";
 import { findRegions, type Region } from "~/lib/regions";
-import { useStorePlans } from "~/lib/stores/plans-store";
-import { useStoreRuleSets } from "~/lib/stores/rules-store";
 import { useUrlParams } from "~/lib/url-params";
 import { cn } from "~/lib/utils";
 
@@ -73,7 +73,7 @@ const CANCEL_TRIGGER_TIMES = 5;
 
 export default function PlansNew() {
   const router = useRouter();
-  const { planAdd } = useStorePlans();
+  const { planCreate } = usePlansUpdate();
   const [startCoords, setStartCoords] = useUrlParams("start", coordsSchema);
   const [finishCoords, setFinishCoords] = useUrlParams("finish", coordsSchema);
   const [cancelPressedTimes, setCancelPressedTimes] = useState(0);
@@ -185,20 +185,13 @@ export default function PlansNew() {
   ]);
 
   const [ruleSetId, setRuleSetId] = useUrlParams("rule", z.string());
-  const { data: ruleSets } = useStoreRuleSets();
+  const ruleSets = useRuleSets();
+  const defaultRuleSetId = useRuleSetDefaultId();
   useEffect(() => {
-    if (!ruleSetId && ruleSets?.length) {
-      setTimeout(
-        () =>
-          setRuleSetId(
-            ruleSets.find((rp) => !rp.isSystem)?.id ||
-              ruleSets.find((rp) => rp.isDefault)?.id ||
-              ruleSets[0].id,
-          ),
-        0,
-      );
+    if (!ruleSetId && defaultRuleSetId) {
+      setRuleSetId(defaultRuleSetId);
     }
-  }, [ruleSetId, ruleSets, setRuleSetId]);
+  }, [ruleSetId, defaultRuleSetId, setRuleSetId]);
 
   useEffect(() => {
     if (startCoords) {
@@ -345,7 +338,7 @@ export default function PlansNew() {
                         units: "meters",
                       });
                     }
-                    const planId = planAdd({
+                    const planId = planCreate({
                       startLat: startCoords[0],
                       startLon: startCoords[1],
                       finishLat: finishCoords ? finishCoords[0] : null,
@@ -833,7 +826,8 @@ export default function PlansNew() {
                           posthogClient.captureEvent("plan-new-distance-set", {
                             selectedDistance,
                           });
-                          setSelectedDistance(DISTANCES[value[0]]);
+                          const distIdx = value[0] || 0;
+                          setSelectedDistance(DISTANCES[distIdx]);
                         }}
                       />
                     </View>
