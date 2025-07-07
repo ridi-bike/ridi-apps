@@ -1,0 +1,19 @@
+secret:
+  ignored_matches:
+    - match: 631e0c2a791bbf5dffa031ad9f5287732938fe610c3e573c868ab513cdd420fd
+      name: BetterStack old datasource commit://e47989afabb56f9497324c339caf5e9aa2d88646/infra/vector.yaml
+    - match: 33bd6d64c566133c18f4ee89f39f2fe7190b9ddd9025084483fab94c0b734e98
+      name: Local Docker Postgers pwd commit://e5e7f77016f63d4a08c8572ab3e404ee39d8518d/docker-compose.local.yml
+    - match: 0601b46cd5b3ca69c77cf48af5a9eb1cdc5fe82b15606f473cffd9893fb5a985
+      name: Old Auth secret for old web versioncommit://80a081b5c6073cced37aa5d21f5726f9d910414f/apps/web/.env.example
+    - match: 9e0bbb83effe4c53aeffe51c46975dfcaf09a8032465532836233be5a638689a
+      name: Revoled resend api key commit://8b527e2f38b7dbd6c879a315044c2bef463add48/services/queue-service/.env.base
+    - match: 3601d52829db20612780c2083b495d837b7cf87932f7d454da5aea12b2460401
+      name: Tmp Ngrok local keys commit://0d2d045fedb680e8fc93f03ef3a67d0ab7deb614/supabase/functions/.env.example
+    - match: 4e1e42390ac61a3cc07355d1622d951c5e89263d41a45490084c773734d36e45
+      name: Oben Observe old keys commit://8977a110b0231376980bd980af3cdadf798a3111/services/ridi-router/otel-config.yaml
+    - match: f73b410b1738ad3e6087011fa27d65f8d76807da160aec603bd1102da42d418c
+      name: Supabase Local Anon key commit://5d1801de71bd35f327a71a3076ebd7a51fc0abea/apps/expo-appwrangler.toml
+    - match: 675027b2d558146a7bf5a0fb3effac16d8c8ae4dc8c37b6bc4998cd06f0306d5
+      name: Supabase Local auth key commit://4f160266ca9de79e633d54e2b07375620c4d11cb/supabase/functions/hello-world/index.ts
+version: 2
