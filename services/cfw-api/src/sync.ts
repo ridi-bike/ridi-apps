@@ -1,39 +1,48 @@
-import {
-  getDb,
-  plansListForUserNotDeleted,
-  regionGet,
-  routeBreakdoiwnStatsListForUserNotDeleted,
-  routesListForUserNotDeleted,
-  ruleSetRoadTagsListForUserNotDeleted,
-  ruleSetsListForUserNotDeleted,
-} from "@ridi/db-queries";
+import { getDb } from "@ridi/db-queries";
 import { type storeSchema } from "@ridi/store-with-schema";
 import { createStoreWithSchema } from "@ridi/store-with-schema";
-import postgres from "postgres";
 import { type MergeableStore } from "tinybase";
 import { createMergeableStore } from "tinybase";
 import { createDurableObjectSqlStoragePersister } from "tinybase/persisters/persister-durable-object-sql-storage";
 import { WsServerDurableObject } from "tinybase/synchronizers/synchronizer-ws-server-durable-object";
-import { type z } from "zod";
+import { z } from "zod";
 
 import { type StoreWithSchema } from "../../../libs/store-with-schema/src/store-with-schema";
 
-import { notifyPayloadSchema, dataMappings } from "./data-mapping";
+import {
+  PlanHandler,
+  RegionHandler,
+  RouteBreakdownStatHandler,
+  RouteHandler,
+  RuleSetsHandler,
+  RuleSetRoadTagsHandler,
+} from "./data-handlers";
 
-function recordsToTable<TRet, TRow>(
-  rows: TRow[],
-  mapFn: (row: TRow) => TRet,
-  idGetFn: (row: TRow) => string,
-): Record<string, TRet> {
-  return rows.reduce(
-    (ret, row) => {
-      ret[idGetFn(row)] = mapFn(row);
-      return ret;
-    },
-    {} as Record<string, TRet>,
-  );
-}
+const recordSchema = z.record(z.union([z.string(), z.number(), z.boolean()]));
 
+const notifyPayloadSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("INSERT"),
+    table: z.string(),
+    schema: z.string(),
+    record: recordSchema,
+    old_record: z.null(),
+  }),
+  z.object({
+    type: z.literal("UPDATE"),
+    table: z.string(),
+    schema: z.string(),
+    record: recordSchema,
+    old_record: recordSchema,
+  }),
+  z.object({
+    type: z.literal("DELETE"),
+    table: z.string(),
+    schema: z.string(),
+    record: z.null(),
+    old_record: recordSchema,
+  }),
+]);
 export class UserStoreDurableObject extends WsServerDurableObject {
   private store: MergeableStore | null = null;
   private dataStore: StoreWithSchema<typeof storeSchema> | null = null;
@@ -124,123 +133,22 @@ export class UserStoreDurableObject extends WsServerDurableObject {
       throw new Error("Missing store, something went wrong");
     }
 
-    const [plans, routes, routeBreakdowns, ruleSets, ruleSetRoadTags, regions] =
-      await Promise.all([
-        this.db
-          .selectFrom("plans")
-          .where("userId", "=", userId)
-          .where("isDeleted", "=", false)
-          .selectAll()
-          .execute(),
-        this.db
-          .selectFrom("routes")
-          .where("userId", "=", userId)
-          .where("isDeleted", "=", false)
-          .selectAll()
-          .execute(),
-        this.db
-          .selectFrom("routeBreakdownStats")
-          .where("userId", "=", userId)
-          .execute(),
-        this.db
-          .selectFrom("ruleSets")
-          .where("userId", "=", userId)
-          .where("isDeleted", "=", false)
-          .execute(),
-        this.db
-          .selectFrom("ruleSetRoadTags")
-          .where("userId", "=", userId)
-          .execute(),
-        this.db.selectFrom("regions").execute(),
-      ]);
-
-    const planMappings = dataMappings.find((m) => m.storeTableName === "plans");
-    if (!planMappings) {
-      throw new Error("missing mapping");
-    }
-    this.dataStore.setTable(
-      "plans",
-      recordsToTable(
-        plans,
-        planMappings.mapperDbToStore,
-        planMappings.idGetterFromDb,
-      ),
-    );
-
-    const routesMappings = dataMappings.find(
-      (m) => m.storeTableName === "routes",
-    );
-    if (!routesMappings) {
-      throw new Error("missing mapping");
-    }
-    this.dataStore.setTable(
-      "routes",
-      recordsToTable(
-        routes,
-        routesMappings.mapperDbToStore,
-        routesMappings.idGetterFromDb,
-      ),
-    );
-
-    const routeBreakdownsMappings = dataMappings.find(
-      (m) => m.storeTableName === "routeBreakdowns",
-    );
-    if (!routeBreakdownsMappings) {
-      throw new Error("missing mapping");
-    }
-    this.dataStore.setTable(
-      "routeBreakdowns",
-      recordsToTable(
-        routeBreakdowns,
-        routeBreakdownsMappings.mapperDbToStore,
-        routeBreakdownsMappings.idGetterFromDb,
-      ),
-    );
-
-    const ruleSetsMappings = dataMappings.find(
-      (m) => m.storeTableName === "ruleSets",
-    );
-    if (!ruleSetsMappings) {
-      throw new Error("missing mapping");
-    }
-    this.dataStore.setTable(
-      "ruleSets",
-      recordsToTable(
-        ruleSets,
-        ruleSetsMappings.mapperDbToStore,
-        ruleSetsMappings.idGetterFromDb,
-      ),
-    );
-
-    const ruleSetRoadTagsMappings = dataMappings.find(
-      (m) => m.storeTableName === "ruleSetRoadTags",
-    );
-    if (!ruleSetRoadTagsMappings) {
-      throw new Error("missing mapping");
-    }
-    this.dataStore.setTable(
-      "ruleSetRoadTags",
-      recordsToTable(
-        ruleSetRoadTags,
-        ruleSetRoadTagsMappings.mapperDbToStore,
-        ruleSetRoadTagsMappings.idGetterFromDb,
-      ),
-    );
-
-    const regionsMappings = dataMappings.find(
-      (m) => m.storeTableName === "regions",
-    );
-    if (!regionsMappings) {
-      throw new Error("missing mapping");
-    }
-    this.dataStore.setTable(
-      "regions",
-      recordsToTable(
-        regions,
-        regionsMappings.mapperDbToStore,
-        regionsMappings.idGetterFromDb,
-      ),
-    );
+    await Promise.all([
+      new PlanHandler(this.db, this.dataStore, userId).loadAllFromDb(),
+      new RouteHandler(this.db, this.dataStore, userId).loadAllFromDb(),
+      new RouteBreakdownStatHandler(
+        this.db,
+        this.dataStore,
+        userId,
+      ).loadAllFromDb(),
+      new RuleSetsHandler(this.db, this.dataStore, userId).loadAllFromDb(),
+      new RuleSetRoadTagsHandler(
+        this.db,
+        this.dataStore,
+        userId,
+      ).loadAllFromDb(),
+      new RegionHandler(this.db, this.dataStore, userId).loadAllFromDb(),
+    ]);
   }
 
   createPersister() {

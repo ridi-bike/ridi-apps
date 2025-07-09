@@ -148,9 +148,7 @@ export class PlanHandler implements BaseHandler {
   }
 }
 
-export class RouteHandler {
-  private rowsBucket: z.infer<(typeof storeSchema)["routes"]>[] | null = null;
-
+export class RouteHandler implements BaseHandler {
   constructor(
     private readonly db: ReturnType<typeof getDb>,
     private readonly dataStore: ReturnType<typeof createStoreWithSchema>,
@@ -158,50 +156,47 @@ export class RouteHandler {
   ) {}
 
   async loadAllFromDb() {
-    const dbRows = await this.db
+    const dbRows = await this.readAllFromDb();
+    this.dataStore.setTable(
+      "routes",
+      recordsToTable(
+        dbRows.map((row) => this.rowDb2Store(row)),
+        (r) => r.id,
+      ),
+    );
+  }
+
+  async loadFromNotify(rowId: string, type: "DELETE" | "INSERT" | "UPDATE") {
+    if (type === "DELETE") {
+      this.dataStore.delRow("routes", rowId);
+    } else {
+      const dbRow = await this.db
+        .selectFrom("routes")
+        .where("userId", "=", this.userId)
+        .where("isDeleted", "=", false)
+        .where("id", "=", rowId)
+        .selectAll()
+        .executeTakeFirstOrThrow();
+
+      this.dataStore.setRow("routes", rowId, this.rowDb2Store(dbRow));
+    }
+  }
+
+  async loadRowFromStore(_rowId: string): Promise<void> {
+    throw new Error("RouteHandler is read-only - cannot update database");
+  }
+
+  private readAllFromDb() {
+    return this.db
       .selectFrom("routes")
       .where("userId", "=", this.userId)
       .where("isDeleted", "=", false)
       .selectAll()
       .execute();
-
-    this.rowsBucket = dbRows.map(
-      (row): z.infer<(typeof storeSchema)["routes"]> => this.rowDb2Store(row),
-    );
-
-    return dbRows;
-  }
-
-  loadFromDb(row: Awaited<ReturnType<typeof this.loadAllFromDb>>[number]) {
-    if (!this.rowsBucket) {
-      this.rowsBucket = [];
-    }
-    this.rowsBucket.push(this.rowDb2Store(row));
-  }
-
-  saveToStore() {
-    if (!this.rowsBucket) {
-      throw new Error("can't load what you don't have");
-    }
-
-    this.dataStore.setTable(
-      "routes",
-      recordsToTable(this.rowsBucket, (r) => r.id),
-    );
-
-    this.rowsBucket = null;
-  }
-
-  loadRowFromStore(rowId: string) {
-    if (!this.rowsBucket) {
-      this.rowsBucket = [];
-    }
-
-    this.rowsBucket.push(this.dataStore.getRow("routes", rowId));
   }
 
   private rowDb2Store(
-    row: Awaited<ReturnType<typeof this.loadAllFromDb>>[number],
+    row: Awaited<ReturnType<typeof this.readAllFromDb>>[number],
   ): z.infer<(typeof storeSchema)["routes"]> {
     return {
       id: row.id,
@@ -221,11 +216,7 @@ export class RouteHandler {
   }
 }
 
-export class RouteBreakdownStatHandler {
-  private rowsBucket:
-    | z.infer<(typeof storeSchema)["routeBreakdowns"]>[]
-    | null = null;
-
+export class RouteBreakdownStatHandler implements BaseHandler {
   constructor(
     private readonly db: ReturnType<typeof getDb>,
     private readonly dataStore: ReturnType<typeof createStoreWithSchema>,
@@ -233,50 +224,47 @@ export class RouteBreakdownStatHandler {
   ) {}
 
   async loadAllFromDb() {
-    const dbRows = await this.db
+    const dbRows = await this.readAllFromDb();
+    this.dataStore.setTable(
+      "routeBreakdowns",
+      recordsToTable(
+        dbRows.map((row) => this.rowDb2Store(row)),
+        (r) => r.id,
+      ),
+    );
+  }
+
+  async loadFromNotify(rowId: string, type: "DELETE" | "INSERT" | "UPDATE") {
+    if (type === "DELETE") {
+      this.dataStore.delRow("routeBreakdowns", rowId);
+    } else {
+      const dbRow = await this.db
+        .selectFrom("routeBreakdownStats")
+        .where("userId", "=", this.userId)
+        .where("id", "=", rowId)
+        .selectAll()
+        .executeTakeFirstOrThrow();
+
+      this.dataStore.setRow("routeBreakdowns", rowId, this.rowDb2Store(dbRow));
+    }
+  }
+
+  async loadRowFromStore(_rowId: string): Promise<void> {
+    throw new Error(
+      "RouteBreakdownStatHandler is read-only - cannot update database",
+    );
+  }
+
+  private readAllFromDb() {
+    return this.db
       .selectFrom("routeBreakdownStats")
       .where("userId", "=", this.userId)
       .selectAll()
       .execute();
-
-    this.rowsBucket = dbRows.map(
-      (row): z.infer<(typeof storeSchema)["routeBreakdowns"]> =>
-        this.rowDb2Store(row),
-    );
-
-    return dbRows;
-  }
-
-  loadFromDb(row: Awaited<ReturnType<typeof this.loadAllFromDb>>[number]) {
-    if (!this.rowsBucket) {
-      this.rowsBucket = [];
-    }
-    this.rowsBucket.push(this.rowDb2Store(row));
-  }
-
-  saveToStore() {
-    if (!this.rowsBucket) {
-      throw new Error("can't load what you don't have");
-    }
-
-    this.dataStore.setTable(
-      "routeBreakdowns",
-      recordsToTable(this.rowsBucket, (r) => r.id),
-    );
-
-    this.rowsBucket = null;
-  }
-
-  loadRowFromStore(rowId: string) {
-    if (!this.rowsBucket) {
-      this.rowsBucket = [];
-    }
-
-    this.rowsBucket.push(this.dataStore.getRow("routeBreakdowns", rowId));
   }
 
   private rowDb2Store(
-    row: Awaited<ReturnType<typeof this.loadAllFromDb>>[number],
+    row: Awaited<ReturnType<typeof this.readAllFromDb>>[number],
   ): z.infer<(typeof storeSchema)["routeBreakdowns"]> {
     return {
       id: row.id,
@@ -289,9 +277,7 @@ export class RouteBreakdownStatHandler {
   }
 }
 
-export class RuleSetHandler {
-  private rowsBucket: z.infer<(typeof storeSchema)["ruleSets"]>[] | null = null;
-
+export class RuleSetsHandler implements BaseHandler {
   constructor(
     private readonly db: ReturnType<typeof getDb>,
     private readonly dataStore: ReturnType<typeof createStoreWithSchema>,
@@ -299,67 +285,47 @@ export class RuleSetHandler {
   ) {}
 
   async loadAllFromDb() {
-    const dbRows = await this.db
-      .selectFrom("ruleSets")
-      .where((eb) =>
-        eb.or([eb("userId", "=", this.userId), eb("userId", "is", null)]),
-      )
-      .where("isDeleted", "=", false)
-      .selectAll()
-      .execute();
-
-    this.rowsBucket = dbRows.map(
-      (row): z.infer<(typeof storeSchema)["ruleSets"]> => this.rowDb2Store(row),
-    );
-
-    return dbRows;
-  }
-
-  loadFromDb(row: Awaited<ReturnType<typeof this.loadAllFromDb>>[number]) {
-    if (!this.rowsBucket) {
-      this.rowsBucket = [];
-    }
-    this.rowsBucket.push(this.rowDb2Store(row));
-  }
-
-  saveToStore() {
-    if (!this.rowsBucket) {
-      throw new Error("can't load what you don't have");
-    }
-
+    const dbRows = await this.readAllFromDb();
     this.dataStore.setTable(
       "ruleSets",
-      recordsToTable(this.rowsBucket, (r) => r.id),
+      recordsToTable(
+        dbRows.map((row) => this.rowDb2Store(row)),
+        (r) => r.id,
+      ),
     );
-
-    this.rowsBucket = null;
   }
 
-  loadRowFromStore(rowId: string) {
-    if (!this.rowsBucket) {
-      this.rowsBucket = [];
-    }
+  async loadFromNotify(rowId: string, type: "DELETE" | "INSERT" | "UPDATE") {
+    if (type === "DELETE") {
+      this.dataStore.delRow("ruleSets", rowId);
+    } else {
+      const dbRow = await this.db
+        .selectFrom("ruleSets")
+        .where((eb) =>
+          eb.or([eb("userId", "=", this.userId), eb("userId", "is", null)]),
+        )
+        .where("isDeleted", "=", false)
+        .where("id", "=", rowId)
+        .selectAll()
+        .executeTakeFirstOrThrow();
 
-    this.rowsBucket.push(this.dataStore.getRow("ruleSets", rowId));
+      this.dataStore.setRow("ruleSets", rowId, this.rowDb2Store(dbRow));
+    }
   }
 
-  async saveToDb() {
-    if (!this.rowsBucket) {
-      throw new Error("can't load what you don't have");
-    }
+  async loadRowFromStore(rowId: string) {
+    const row = this.dataStore.getRow("ruleSets", rowId);
 
     await this.db
       .insertInto("ruleSets")
-      .values(
-        this.rowsBucket.map((row) => ({
-          id: row.id,
-          userId: this.userId,
-          name: row.name,
-          defaultSet: false,
-          isDeleted: row.isDeleted || false,
-          icon: row.icon,
-        })),
-      )
+      .values({
+        id: row.id,
+        userId: this.userId,
+        name: row.name,
+        defaultSet: false,
+        isDeleted: row.isDeleted || false,
+        icon: row.icon,
+      })
       .onConflict((oc) =>
         oc.column("id").doUpdateSet({
           name: (eb) => eb.ref("excluded.name"),
@@ -371,8 +337,19 @@ export class RuleSetHandler {
       .execute();
   }
 
+  private readAllFromDb() {
+    return this.db
+      .selectFrom("ruleSets")
+      .where((eb) =>
+        eb.or([eb("userId", "=", this.userId), eb("userId", "is", null)]),
+      )
+      .where("isDeleted", "=", false)
+      .selectAll()
+      .execute();
+  }
+
   private rowDb2Store(
-    row: Awaited<ReturnType<typeof this.loadAllFromDb>>[number],
+    row: Awaited<ReturnType<typeof this.readAllFromDb>>[number],
   ): z.infer<(typeof storeSchema)["ruleSets"]> {
     return {
       id: row.id,
@@ -385,12 +362,7 @@ export class RuleSetHandler {
   }
 }
 
-// Rule Set Road Tags Handler (read-write)
-export class RuleSetRoadTagsHandler {
-  private rowsBucket:
-    | z.infer<(typeof storeSchema)["ruleSetRoadTags"]>[]
-    | null = null;
-
+export class RuleSetRoadTagsHandler implements BaseHandler {
   constructor(
     private readonly db: ReturnType<typeof getDb>,
     private readonly dataStore: ReturnType<typeof createStoreWithSchema>,
@@ -398,64 +370,47 @@ export class RuleSetRoadTagsHandler {
   ) {}
 
   async loadAllFromDb() {
-    const dbRows = await this.db
-      .selectFrom("ruleSetRoadTags")
-      .where((eb) =>
-        eb.or([eb("userId", "=", this.userId), eb("userId", "is", null)]),
-      )
-      .selectAll()
-      .execute();
-
-    this.rowsBucket = dbRows.map(
-      (row): z.infer<(typeof storeSchema)["ruleSetRoadTags"]> =>
-        this.rowDb2Store(row),
-    );
-
-    return dbRows;
-  }
-
-  loadFromDb(row: Awaited<ReturnType<typeof this.loadAllFromDb>>[number]) {
-    if (!this.rowsBucket) {
-      this.rowsBucket = [];
-    }
-    this.rowsBucket.push(this.rowDb2Store(row));
-  }
-
-  saveToStore() {
-    if (!this.rowsBucket) {
-      throw new Error("can't load what you don't have");
-    }
-
+    const dbRows = await this.readAllFromDb();
     this.dataStore.setTable(
       "ruleSetRoadTags",
-      recordsToTable(this.rowsBucket, (r) => r.id),
+      recordsToTable(
+        dbRows.map((row) => this.rowDb2Store(row)),
+        (r) => r.id,
+      ),
     );
-
-    this.rowsBucket = null;
   }
 
-  loadRowFromStore(rowId: string) {
-    if (!this.rowsBucket) {
-      this.rowsBucket = [];
-    }
+  async loadFromNotify(rowId: string, type: "DELETE" | "INSERT" | "UPDATE") {
+    if (type === "DELETE") {
+      this.dataStore.delRow("ruleSetRoadTags", rowId);
+    } else {
+      // Parse the composite ID to get ruleSetId and tagKey
+      const [ruleSetId, tagKey] = rowId.split("-");
+      const dbRow = await this.db
+        .selectFrom("ruleSetRoadTags")
+        .where((eb) =>
+          eb.or([eb("userId", "=", this.userId), eb("userId", "is", null)]),
+        )
+        .where("ruleSetId", "=", ruleSetId)
+        .where("tagKey", "=", tagKey)
+        .selectAll()
+        .executeTakeFirstOrThrow();
 
-    this.rowsBucket.push(this.dataStore.getRow("ruleSetRoadTags", rowId));
+      this.dataStore.setRow("ruleSetRoadTags", rowId, this.rowDb2Store(dbRow));
+    }
   }
 
-  async saveToDb() {
-    if (!this.rowsBucket) {
-      throw new Error("can't load what you don't have");
-    }
+  async loadRowFromStore(rowId: string) {
+    const row = this.dataStore.getRow("ruleSetRoadTags", rowId);
+
     await this.db
       .insertInto("ruleSetRoadTags")
-      .values(
-        this.rowsBucket.map((row) => ({
-          userId: this.userId,
-          ruleSetId: row.ruleSetId,
-          tagKey: row.tag,
-          value: row.value,
-        })),
-      )
+      .values({
+        userId: this.userId,
+        ruleSetId: row.ruleSetId,
+        tagKey: row.tag,
+        value: row.value,
+      })
       .onConflict((oc) =>
         oc
           .column("ruleSetId")
@@ -469,8 +424,18 @@ export class RuleSetRoadTagsHandler {
       .execute();
   }
 
+  private readAllFromDb() {
+    return this.db
+      .selectFrom("ruleSetRoadTags")
+      .where((eb) =>
+        eb.or([eb("userId", "=", this.userId), eb("userId", "is", null)]),
+      )
+      .selectAll()
+      .execute();
+  }
+
   private rowDb2Store(
-    row: Awaited<ReturnType<typeof this.loadAllFromDb>>[number],
+    row: Awaited<ReturnType<typeof this.readAllFromDb>>[number],
   ): z.infer<(typeof storeSchema)["ruleSetRoadTags"]> {
     return {
       id: `${row.ruleSetId}-${row.tagKey}`,
@@ -481,9 +446,7 @@ export class RuleSetRoadTagsHandler {
   }
 }
 
-export class RegionHandler {
-  private rowsBucket: z.infer<(typeof storeSchema)["regions"]>[] | null = null;
-
+export class RegionHandler implements BaseHandler {
   constructor(
     private readonly db: ReturnType<typeof getDb>,
     private readonly dataStore: ReturnType<typeof createStoreWithSchema>,
@@ -491,45 +454,40 @@ export class RegionHandler {
   ) {}
 
   async loadAllFromDb() {
-    const dbRows = await this.db.selectFrom("regions").selectAll().execute();
-
-    this.rowsBucket = dbRows.map(
-      (row): z.infer<(typeof storeSchema)["regions"]> => this.rowDb2Store(row),
-    );
-
-    return dbRows;
-  }
-
-  loadFromDb(row: Awaited<ReturnType<typeof this.loadAllFromDb>>[number]) {
-    if (!this.rowsBucket) {
-      this.rowsBucket = [];
-    }
-    this.rowsBucket.push(this.rowDb2Store(row));
-  }
-
-  saveToStore() {
-    if (!this.rowsBucket) {
-      throw new Error("can't load what you don't have");
-    }
-
+    const dbRows = await this.readAllFromDb();
     this.dataStore.setTable(
       "regions",
-      recordsToTable(this.rowsBucket, (r) => r.region),
+      recordsToTable(
+        dbRows.map((row) => this.rowDb2Store(row)),
+        (r) => r.region,
+      ),
     );
-
-    this.rowsBucket = null;
   }
 
-  loadRowFromStore(rowId: string) {
-    if (!this.rowsBucket) {
-      this.rowsBucket = [];
-    }
+  async loadFromNotify(rowId: string, type: "DELETE" | "INSERT" | "UPDATE") {
+    if (type === "DELETE") {
+      this.dataStore.delRow("regions", rowId);
+    } else {
+      const dbRow = await this.db
+        .selectFrom("regions")
+        .where("region", "=", rowId)
+        .selectAll()
+        .executeTakeFirstOrThrow();
 
-    this.rowsBucket.push(this.dataStore.getRow("regions", rowId));
+      this.dataStore.setRow("regions", rowId, this.rowDb2Store(dbRow));
+    }
+  }
+
+  async loadRowFromStore(_rowId: string): Promise<void> {
+    throw new Error("RegionHandler is read-only - cannot update database");
+  }
+
+  private readAllFromDb() {
+    return this.db.selectFrom("regions").selectAll().execute();
   }
 
   private rowDb2Store(
-    row: Awaited<ReturnType<typeof this.loadAllFromDb>>[number],
+    row: Awaited<ReturnType<typeof this.readAllFromDb>>[number],
   ): z.infer<(typeof storeSchema)["regions"]> {
     return {
       region: row.region,
