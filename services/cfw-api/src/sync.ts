@@ -6,16 +6,18 @@ import {
   ruleSetRoadTagsListForUserNotDeleted,
   ruleSetsListForUserNotDeleted,
 } from "@ridi/db-queries";
-import { createStoreWithSchema, storeSchema } from "@ridi/store-with-schema";
+import { type storeSchema } from "@ridi/store-with-schema";
+import { createStoreWithSchema } from "@ridi/store-with-schema";
 import postgres from "postgres";
-import { type Id, type IdAddedOrRemoved, type MergeableStore } from "tinybase";
+import { type MergeableStore } from "tinybase";
 import { createMergeableStore } from "tinybase";
 import { createDurableObjectSqlStoragePersister } from "tinybase/persisters/persister-durable-object-sql-storage";
 import { WsServerDurableObject } from "tinybase/synchronizers/synchronizer-ws-server-durable-object";
 import { type z } from "zod";
 
+import { type StoreWithSchema } from "../../../libs/store-with-schema/src/store-with-schema";
+
 import { notifyPayloadSchema, dataMappings } from "./data-mapping";
-import { StoreWithSchema } from "../../../libs/store-with-schema/src/store-with-schema";
 
 function recordsToTable<TRet, TRow>(
   rows: TRow[],
@@ -102,12 +104,12 @@ export class UserStoreDurableObject extends WsServerDurableObject {
 
     if (payload.type === "DELETE") {
       const rowId = dataMap.idGetterFromDb(
-        dataMap.dbSchema.parse(payload.old_record),
+        dataMap.dbReadSchema.parse(payload.old_record),
       );
       this.dataStore.delRow(dataMap.storeTableName, rowId);
     }
     if (payload.type === "INSERT" || payload.type === "UPDATE") {
-      const row = dataMap.dbSchema.parse(payload.record);
+      const row = dataMap.dbReadSchema.parse(payload.record);
       this.dataStore.setRow(
         dataMap.storeTableName,
         dataMap.idGetterFromDb(row),
