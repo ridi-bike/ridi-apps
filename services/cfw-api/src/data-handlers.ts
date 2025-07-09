@@ -18,85 +18,78 @@ function recordsToTable<TRow>(
   );
 }
 
-export class PlanHandler {
-  private rowsBucket: z.infer<(typeof storeSchema)["plans"]>[] | null = null;
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export interface BaseHandler {
+  loadAllFromDb(): Promise<void>;
+  loadFromNotify(
+    rowId: string,
+    type: "DELETE" | "INSERT" | "UPDATE",
+  ): Promise<void>;
+  loadRowFromStore(rowId: string): Promise<void>;
+}
+
+export class PlanHandler implements BaseHandler {
   constructor(
     private readonly db: ReturnType<typeof getDb>,
     private readonly dataStore: ReturnType<typeof createStoreWithSchema>,
     private readonly userId: string,
   ) {}
   async loadAllFromDb() {
-    const dbRows = await this.db
-      .selectFrom("plans")
-      .where("userId", "=", this.userId)
-      .where("isDeleted", "=", false)
-      .selectAll()
-      .execute();
-
-    this.rowsBucket = dbRows.map(
-      (row): z.infer<(typeof storeSchema)["plans"]> => this.rowDb2Store(row),
-    );
-
-    return dbRows;
-  }
-  loadFromDb(row: Awaited<ReturnType<typeof this.loadAllFromDb>>[number]) {
-    if (!this.rowsBucket) {
-      this.rowsBucket = [];
-    }
-    this.rowsBucket.push(this.rowDb2Store(row));
-  }
-  saveToStore() {
-    if (!this.rowsBucket) {
-      throw new Error("can't load what you don't have");
-    }
-
+    const dbRows = await this.readAllFromDb();
     this.dataStore.setTable(
       "plans",
-      recordsToTable(this.rowsBucket, (r) => r.id),
+      recordsToTable(
+        dbRows.map(
+          (row): z.infer<(typeof storeSchema)["plans"]> =>
+            this.rowDb2Store(row),
+        ),
+        (r) => r.id,
+      ),
     );
-
-    this.rowsBucket = null;
   }
+  async loadFromNotify(rowId: string, type: "DELETE" | "INSERT" | "UPDATE") {
+    if (type === "DELETE") {
+      this.dataStore.delRow("plans", rowId);
+    } else {
+      const dbRow = await this.db
+        .selectFrom("plans")
+        .where("userId", "=", this.userId)
+        .where("isDeleted", "=", false)
+        .where("id", "=", rowId)
+        .selectAll()
+        .executeTakeFirstOrThrow();
 
-  loadRowFromStore(rowId: string) {
-    if (!this.rowsBucket) {
-      this.rowsBucket = [];
+      this.dataStore.setRow("plans", rowId, this.rowDb2Store(dbRow));
     }
-
-    this.rowsBucket.push(this.dataStore.getRow("plans", rowId));
   }
+  async loadRowFromStore(rowId: string) {
+    const row = this.dataStore.getRow("plans", rowId);
 
-  async saveToDb() {
-    if (!this.rowsBucket) {
-      throw new Error("can't load what you don't have");
-    }
     await this.db
       .insertInto("plans")
-      .values(
-        this.rowsBucket.map((row) => ({
-          id: row.id,
-          userId: this.userId,
-          name: row.name,
-          state: row.state,
-          startLat: row.startLat.toString(),
-          startLon: row.startLon.toString(),
-          startDesc: row.startDesc,
-          finishLat: row.finishLat !== null ? row.finishLat.toString() : null,
-          finishLon: row.finishLon !== null ? row.finishLon.toString() : null,
-          finishDesc: row.finishDesc,
-          bearing: row.bearing !== null ? row.bearing.toString() : null,
-          distance: row.distance.toString(),
-          createdAt: new Date(row.createdAt),
-          isDeleted: row.isDeleted || false,
-          tripType: row.tripType,
-          ruleSetId: row.ruleSetId,
-          mapPreviewDark: row.mapPreviewDark,
-          mapPreviewLight: row.mapPreviewLight,
-          error: null,
-          modifiedAt: new Date(),
-          region: null,
-        })),
-      )
+      .values({
+        id: row.id,
+        userId: this.userId,
+        name: row.name,
+        state: row.state,
+        startLat: row.startLat.toString(),
+        startLon: row.startLon.toString(),
+        startDesc: row.startDesc,
+        finishLat: row.finishLat !== null ? row.finishLat.toString() : null,
+        finishLon: row.finishLon !== null ? row.finishLon.toString() : null,
+        finishDesc: row.finishDesc,
+        bearing: row.bearing !== null ? row.bearing.toString() : null,
+        distance: row.distance.toString(),
+        createdAt: new Date(row.createdAt),
+        isDeleted: row.isDeleted || false,
+        tripType: row.tripType,
+        ruleSetId: row.ruleSetId,
+        mapPreviewDark: row.mapPreviewDark,
+        mapPreviewLight: row.mapPreviewLight,
+        error: null,
+        modifiedAt: new Date(),
+        region: null,
+      })
       .onConflict((oc) =>
         oc.column("id").doUpdateSet({
           name: (eb) => eb.ref("excluded.name"),
@@ -122,8 +115,16 @@ export class PlanHandler {
       )
       .execute();
   }
+  private readAllFromDb() {
+    return this.db
+      .selectFrom("plans")
+      .where("userId", "=", this.userId)
+      .where("isDeleted", "=", false)
+      .selectAll()
+      .execute();
+  }
   private rowDb2Store(
-    row: Awaited<ReturnType<typeof this.loadAllFromDb>>[number],
+    row: Awaited<ReturnType<typeof this.readAllFromDb>>[number],
   ): z.infer<(typeof storeSchema)["plans"]> {
     return {
       id: row.id,
