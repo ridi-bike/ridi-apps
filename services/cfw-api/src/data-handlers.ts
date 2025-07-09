@@ -19,7 +19,7 @@ function recordsToTable<TRow>(
 }
 
 export class PlanHandler {
-  private rowsBucket: z.infer<(typeof storeSchema)["rows"]>[] | null = null;
+  private rowsBucket: z.infer<(typeof storeSchema)["plans"]>[] | null = null;
   constructor(
     private readonly db: ReturnType<typeof getDb>,
     private readonly dataStore: ReturnType<typeof createStoreWithSchema>,
@@ -27,7 +27,7 @@ export class PlanHandler {
   ) {}
   async loadAllFromDb() {
     const dbRows = await this.db
-      .selectFrom("rows")
+      .selectFrom("plans")
       .where("userId", "=", this.userId)
       .where("isDeleted", "=", false)
       .selectAll()
@@ -51,7 +51,7 @@ export class PlanHandler {
     }
 
     this.dataStore.setTable(
-      "rows",
+      "plans",
       recordsToTable(this.rowsBucket, (r) => r.id),
     );
 
@@ -63,7 +63,7 @@ export class PlanHandler {
       this.rowsBucket = [];
     }
 
-    this.rowsBucket.push(this.dataStore.getRow("rows", rowId));
+    this.rowsBucket.push(this.dataStore.getRow("plans", rowId));
   }
 
   async saveToDb() {
@@ -71,8 +71,7 @@ export class PlanHandler {
       throw new Error("can't load what you don't have");
     }
     await this.db
-      .insertInto("rows")
-
+      .insertInto("plans")
       .values(
         this.rowsBucket.map((row) => ({
           id: row.id,
@@ -82,10 +81,10 @@ export class PlanHandler {
           startLat: row.startLat.toString(),
           startLon: row.startLon.toString(),
           startDesc: row.startDesc,
-          finishLat: row.finishLat !== null ? plan.finishLat.toString() : null,
-          finishLon: row.finishLon !== null ? plan.finishLon.toString() : null,
+          finishLat: row.finishLat !== null ? row.finishLat.toString() : null,
+          finishLon: row.finishLon !== null ? row.finishLon.toString() : null,
           finishDesc: row.finishDesc,
-          bearing: row.bearing !== null ? plan.bearing.toString() : null,
+          bearing: row.bearing !== null ? row.bearing.toString() : null,
           distance: row.distance.toString(),
           createdAt: new Date(row.createdAt),
           isDeleted: row.isDeleted || false,
@@ -125,7 +124,7 @@ export class PlanHandler {
   }
   private rowDb2Store(
     row: Awaited<ReturnType<typeof this.loadAllFromDb>>[number],
-  ): z.infer<(typeof storeSchema)["rows"]> {
+  ): z.infer<(typeof storeSchema)["plans"]> {
     return {
       id: row.id,
       name: row.name,
@@ -133,10 +132,10 @@ export class PlanHandler {
       startLat: Number(row.startLat),
       startLon: Number(row.startLon),
       startDesc: row.startDesc,
-      finishLat: row.finishLat !== null ? Number(plan.finishLat) : null,
-      finishLon: row.finishLon !== null ? Number(plan.finishLon) : null,
+      finishLat: row.finishLat !== null ? Number(row.finishLat) : null,
+      finishLon: row.finishLon !== null ? Number(row.finishLon) : null,
       finishDesc: row.finishDesc,
-      bearing: row.bearing !== null ? Number(plan.bearing) : null,
+      bearing: row.bearing !== null ? Number(row.bearing) : null,
       distance: Number(row.distance),
       createdAt: row.createdAt.toISOString(),
       isDeleted: row.isDeleted,
