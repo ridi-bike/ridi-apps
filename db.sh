@@ -29,6 +29,11 @@ case "$1" in
   # supabase gen types --lang=typescript --local >./services/ridi-router/packages/lib/supabase.ts
   # supabase gen types --lang=typescript --local >./services/cfw-api/src/supabase.ts
   ./db.sh sqlc
+  ./db.sh kyseley
+  ;;
+"kysely")
+  (cd ./libs/db-queries/ && pnpm run typegen)
+  sed -i 's/import/import type /g' ./libs/db-queries/src/queries_sql.ts
   ;;
 "sqlc")
   devbox run sqlc

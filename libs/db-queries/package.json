@@ -3,7 +3,16 @@
   "version": "1.0.0",
   "main": "src/index.ts",
   "type": "module",
+  "scripts": {
+    "typegen": "kysely-codegen --out-file ./src/kysely-db.d.ts --default-schema=public --env-file ./.env.base --camel-case"
+  },
   "dependencies": {
+    "kysely": "^0.28.2",
+    "pg": "^8.16.3",
     "postgres": "^3.4.5"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.15.4",
+    "kysely-codegen": "^0.18.5"
   }
 }

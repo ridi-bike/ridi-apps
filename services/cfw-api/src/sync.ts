@@ -1,4 +1,5 @@
 import {
+  getDb,
   plansListForUserNotDeleted,
   regionGet,
   routeBreakdoiwnStatsListForUserNotDeleted,
@@ -36,12 +37,12 @@ function recordsToTable<TRet, TRow>(
 export class UserStoreDurableObject extends WsServerDurableObject {
   private store: MergeableStore | null = null;
   private dataStore: StoreWithSchema<typeof storeSchema> | null = null;
-  private db: ReturnType<typeof postgres>;
+  private db: ReturnType<typeof getDb>;
 
   constructor(ctx: DurableObjectState, env: CloudflareBindings) {
     super(ctx, env);
 
-    this.db = postgres(env.SUPABASE_DB_URL);
+    this.db = getDb(env.SUPABASE_DB_URL);
   }
 
   private async isTokenOk(token: string) {
@@ -125,22 +126,32 @@ export class UserStoreDurableObject extends WsServerDurableObject {
 
     const [plans, routes, routeBreakdowns, ruleSets, ruleSetRoadTags, regions] =
       await Promise.all([
-        plansListForUserNotDeleted(this.db, {
-          userId,
-        }),
-        routesListForUserNotDeleted(this.db, {
-          userId,
-        }),
-        routeBreakdoiwnStatsListForUserNotDeleted(this.db, {
-          userId,
-        }),
-        ruleSetsListForUserNotDeleted(this.db, {
-          userId,
-        }),
-        ruleSetRoadTagsListForUserNotDeleted(this.db, {
-          userId,
-        }),
-        regionGet(this.db),
+        this.db
+          .selectFrom("plans")
+          .where("userId", "=", userId)
+          .where("isDeleted", "=", false)
+          .selectAll()
+          .execute(),
+        this.db
+          .selectFrom("routes")
+          .where("userId", "=", userId)
+          .where("isDeleted", "=", false)
+          .selectAll()
+          .execute(),
+        this.db
+          .selectFrom("routeBreakdownStats")
+          .where("userId", "=", userId)
+          .execute(),
+        this.db
+          .selectFrom("ruleSets")
+          .where("userId", "=", userId)
+          .where("isDeleted", "=", false)
+          .execute(),
+        this.db
+          .selectFrom("ruleSetRoadTags")
+          .where("userId", "=", userId)
+          .execute(),
+        this.db.selectFrom("regions").execute(),
       ]);
 
     const planMappings = dataMappings.find((m) => m.storeTableName === "plans");
