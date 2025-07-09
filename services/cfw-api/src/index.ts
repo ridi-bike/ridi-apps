@@ -2,6 +2,7 @@ import {
   type Request as WorkerRequest,
   type ExecutionContext,
 } from "@cloudflare/workers-types";
+import { storeSchema } from "@ridi/store-with-schema";
 import { apiContract } from "@ridi/api-contracts";
 import {
   regionFindFromCoords,
@@ -20,7 +21,7 @@ import { RidiLogger } from "@ridi/logger";
 import { Messaging } from "@ridi/messaging";
 import { StripeApi } from "@ridi/stripe-api";
 import * as Sentry from "@sentry/cloudflare";
-import { type User } from "@supabase/supabase-js";
+import { SupabaseClient, type User } from "@supabase/supabase-js";
 import { createClient } from "@supabase/supabase-js";
 import {
   TsRestResponse,
@@ -30,7 +31,8 @@ import {
 import postgres from "postgres";
 import { Resend } from "resend";
 import { type Id } from "tinybase/common";
-import { createMergeableStore } from "tinybase/mergeable-store";
+import { createMergeableStore, MergeableStore } from "tinybase/mergeable-store";
+import { createCustomPersister, Persists } from "tinybase/persisters";
 import { createDurableObjectSqlStoragePersister } from "tinybase/persisters/persister-durable-object-sql-storage";
 import { type IdAddedOrRemoved } from "tinybase/store";
 import {
@@ -432,33 +434,17 @@ export default Sentry.withSentry(
         return response;
       }
 
-      const supabaseClient = createClient(
-        env.SUPABASE_URL,
-        env.SUPABASE_SERVICE_ROLE_KEY,
-      );
-
       if (url.pathname.startsWith("/sync")) {
-        const authHeader = request.headers.get("Authorization");
-        const token = authHeader?.replace("Bearer ", "") || "";
-        const { data } = await supabaseClient.auth.getUser(token);
-        const user = data.user;
-        // const token = url.searchParams.get("token");
-        // if (!token) {
-        //   return new Response("Unauthorized", { status: 401 });
-        // }
-        // const { data } = await supabaseClient.auth.getUser();
-        // const user = data.user;
-
-        if (!user) {
-          return new Response(JSON.stringify({ message: "Unauthorized" }), {
-            status: 401,
-          });
-        }
         return getWsServerDurableObjectFetch("TinyBaseDurableObjects")(
           request,
           env,
         );
       }
+
+      const supabaseClient = createClient(
+        env.SUPABASE_URL,
+        env.SUPABASE_SERVICE_ROLE_KEY,
+      );
 
       let response: Response | undefined;
 
@@ -551,23 +537,4 @@ export default Sentry.withSentry(
   },
 );
 
-export class TinyBaseDurableObject extends WsServerDurableObject {
-  onPathId(pathId: Id, addedOrRemoved: IdAddedOrRemoved) {
-    console.info((addedOrRemoved ? "Added" : "Removed") + ` path ${pathId}`);
-  }
-
-  onClientId(pathId: Id, clientId: Id, addedOrRemoved: IdAddedOrRemoved) {
-    console.info(
-      (addedOrRemoved ? "Added" : "Removed") +
-        ` client ${clientId} on path ${pathId}`,
-    );
-  }
-
-  createPersister() {
-    return createDurableObjectSqlStoragePersister(
-      createMergeableStore(),
-      this.ctx.storage.sql,
-      { mode: "fragmented" },
-    );
-  }
-}
+export { TinyBaseDurableObject } from "./sync";

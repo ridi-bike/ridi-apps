@@ -283,6 +283,9 @@ importers:
       expo-splash-screen:
         specifier: ~0.30.9
         version: 0.30.9(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(babel-plugin-react-compiler@19.1.0-rc.2)(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))
+      expo-sqlite:
+        specifier: ~15.2.13
+        version: 15.2.13(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(babel-plugin-react-compiler@19.1.0-rc.2)(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0)
       expo-status-bar:
         specifier: ~2.2.3
         version: 2.2.3(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0)
@@ -384,7 +387,7 @@ importers:
         version: 5.0.2
       tinybase:
         specifier: ^6.3.0
-        version: 6.3.0(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(babel-plugin-react-compiler@19.1.0-rc.2)(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(ws@8.18.2)
+        version: 6.3.0(expo-sqlite@15.2.13(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(babel-plugin-react-compiler@19.1.0-rc.2)(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(babel-plugin-react-compiler@19.1.0-rc.2)(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(ws@8.18.2)
       xksuid:
         specifier: ^0.0.4
         version: 0.0.4
@@ -516,7 +519,7 @@ importers:
     dependencies:
       tinybase:
         specifier: ^6.3.0
-        version: 6.3.0(@cloudflare/workers-types@4.20250313.0)(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(postgres@3.4.5)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(ws@8.18.2)
+        version: 6.3.0(@cloudflare/workers-types@4.20250313.0)(expo-sqlite@15.2.13(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(postgres@3.4.5)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(ws@8.18.2)
       zod:
         specifier: ^3.25.73
         version: 3.25.73
@@ -554,6 +557,9 @@ importers:
       '@ridi/messaging':
         specifier: workspace:^
         version: link:../../libs/messaging
+      '@ridi/store-with-schema':
+        specifier: workspace:^
+        version: link:../../libs/store-with-schema
       '@ridi/stripe-api':
         specifier: workspace:^
         version: link:../../libs/stripe-api
@@ -586,7 +592,7 @@ importers:
         version: 4.5.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       tinybase:
         specifier: ^6.3.0
-        version: 6.3.0(@cloudflare/workers-types@4.20250313.0)(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(postgres@3.4.5)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(ws@8.18.2)
+        version: 6.3.0(@cloudflare/workers-types@4.20250313.0)(expo-sqlite@15.2.13(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(postgres@3.4.5)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(ws@8.18.2)
       zod:
         specifier: ^3.25.73
         version: 3.25.73
@@ -5137,6 +5143,9 @@ packages:
   avvio@9.1.0:
     resolution: {integrity: sha512-fYASnYi600CsH/j9EQov7lECAniYiBFiiAtBNuZYLA2leLe9qOvZzqYHFjtIj6gD2VMoMLP14834LFWvr4IfDw==}
 
+  await-lock@2.2.2:
+    resolution: {integrity: sha512-aDczADvlvTGajTDjcjpJMqRkOF6Qdz3YbPZm/PyW6tKPkx2hlYBzxMhEywM/tU72HrVZjgl5VCdRuMlA7pZ8Gw==}
+
   axe-core@4.10.3:
     resolution: {integrity: sha512-Xm7bpRXnDSX2YE2YFfBk2FnF0ep6tmG7xPh8iHee8MIcrgq762Nkce856dYtJYLkuIoYZvGfTs/PbZhideTcEg==}
     engines: {node: '>=4'}
@@ -6633,6 +6642,13 @@ packages:
     resolution: {integrity: sha512-curHUaZxUTZ2dWvz32ao3xPv5mJr1LBqn5V8xm/IULAehB9RGCn8iKiROMN1PYebSG+56vPMuJmBm9P+ayvJpA==}
     peerDependencies:
       expo: '*'
+
+  expo-sqlite@15.2.13:
+    resolution: {integrity: sha512-CQ++NEVhpyivpWWjgZBFYzZbLVSqCr/6WdW4p12TzMOkxYqWnmvFF61N5tdhlqu7rpQeXbXq9EDlJ0nws8RFug==}
+    peerDependencies:
+      expo: '*'
+      react: 19.0.0
+      react-native: '*'
 
   expo-status-bar@2.2.3:
     resolution: {integrity: sha512-+c8R3AESBoduunxTJ8353SqKAKpxL6DvcD8VKBuh81zzJyUUbfB4CVjr1GufSJEKsMzNPXZU+HJwXx7Xh7lx8Q==}
@@ -18147,6 +18163,8 @@ snapshots:
       '@fastify/error': 4.1.0
       fastq: 1.19.1
 
+  await-lock@2.2.2: {}
+
   axe-core@4.10.3: {}
 
   axios@1.8.4:
@@ -19990,6 +20008,21 @@ snapshots:
       expo: 53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(babel-plugin-react-compiler@19.1.0-rc.2)(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0)
     transitivePeerDependencies:
       - supports-color
+
+  expo-sqlite@15.2.13(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(babel-plugin-react-compiler@19.1.0-rc.2)(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0):
+    dependencies:
+      await-lock: 2.2.2
+      expo: 53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(babel-plugin-react-compiler@19.1.0-rc.2)(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0)
+      react: 19.0.0
+      react-native: 0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)
+
+  expo-sqlite@15.2.13(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0):
+    dependencies:
+      await-lock: 2.2.2
+      expo: 53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0)
+      react: 19.0.0
+      react-native: 0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)
+    optional: true
 
   expo-status-bar@2.2.3(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0):
     dependencies:
@@ -25270,18 +25303,20 @@ snapshots:
 
   thunky@1.1.0: {}
 
-  tinybase@6.3.0(@cloudflare/workers-types@4.20250313.0)(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(postgres@3.4.5)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(ws@8.18.2):
+  tinybase@6.3.0(@cloudflare/workers-types@4.20250313.0)(expo-sqlite@15.2.13(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(postgres@3.4.5)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(ws@8.18.2):
     optionalDependencies:
       '@cloudflare/workers-types': 4.20250313.0
       expo: 53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0)
+      expo-sqlite: 15.2.13(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0)
       postgres: 3.4.5
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
       ws: 8.18.2
 
-  tinybase@6.3.0(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(babel-plugin-react-compiler@19.1.0-rc.2)(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(ws@8.18.2):
+  tinybase@6.3.0(expo-sqlite@15.2.13(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(babel-plugin-react-compiler@19.1.0-rc.2)(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(babel-plugin-react-compiler@19.1.0-rc.2)(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(ws@8.18.2):
     optionalDependencies:
       expo: 53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(babel-plugin-react-compiler@19.1.0-rc.2)(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0)
+      expo-sqlite: 15.2.13(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(babel-plugin-react-compiler@19.1.0-rc.2)(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0)
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
       ws: 8.18.2

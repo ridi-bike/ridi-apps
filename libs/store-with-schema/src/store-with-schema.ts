@@ -185,6 +185,10 @@ export type StoreWithSchema<TSchema extends StoreSchema> = {
     rowId: string,
     row: z.infer<TSchema[TTableId]>,
   ) => void;
+  delRow: <TTableId extends keyof TSchema>(
+    tableId: Extract<TTableId, string>,
+    rowId: string,
+  ) => void;
   setPartialRow: <TTableId extends keyof TSchema>(
     tableId: Extract<TTableId, string>,
     rowId: string,
@@ -279,13 +283,17 @@ export function withSchema<TSchema extends StoreSchema>(
     },
 
     getRow: (tableId, rowId) => {
-      const row = store.getRow(tableId, rowId);
       assertTableSchema(tableId, schema[tableId]);
+      const row = store.getRow(tableId, rowId);
       return schema[tableId].parse(row);
     },
     setRow: (tableId, rowId, row) => {
       validator.validateRow(tableId, row);
       store.setRow(tableId, rowId, row);
+    },
+    delRow: (tableId, rowId) => {
+      assertTableSchema(tableId, schema[tableId]);
+      store.delRow(tableId, rowId);
     },
     setPartialRow: (tableId, rowId, partialRow) => {
       validator.validatePartialRow(tableId, partialRow);

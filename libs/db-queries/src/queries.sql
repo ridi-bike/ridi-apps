@@ -1,3 +1,49 @@
+-- name: PlansListForUserNotDeleted :many
+select * from plans
+where user_id = $1
+  and is_deleted = false;
+
+-- name: RoutesListForUserNotDeleted :many
+with points_array as (
+	select 
+		id, 
+		array_agg(array[postgis.st_y(p.geom), postgis.st_x(p.geom)] order by p.path) as lat_lon_array
+	from routes r, postgis.st_dumppoints(r.linestring) p
+  where r.user_id = $1
+    and is_deleted = false
+	group by r.id
+) 
+select 
+  r.*,
+	pa.lat_lon_array
+from routes r
+inner join points_array pa
+	on pa.id = r.id
+where r.user_id = $1
+  and is_deleted = false;
+
+-- name: RouteBreakdoiwnStatsListForUserNotDeleted :many
+select * from route_breakdown_stats stats
+join routes r 
+on r.id = stats.route_id
+where r.user_id = $1
+  and is_deleted = false;
+
+-- name: RuleSetsListForUserNotDeleted :many
+select * from rule_sets
+where ( 
+    user_id = $1 
+    or user_id is null 
+  )
+  and is_deleted = false;
+
+-- name: RuleSetRoadTagsListForUserNotDeleted :many
+select tags.* from rule_set_road_tags tags
+join rule_sets rs 
+on rs.id = tags.rule_set_id
+where rs.user_id = $1
+  and is_deleted = false;
+
 -- name: UserGet :one
 select id, email from auth.users
 where id = sqlc.arg(user_id)::uuid;
@@ -209,7 +255,7 @@ where (rule_set_road_tags.user_id = $1
   or rule_set_road_tags.user_id is null)
   and rule_set_road_tags.rule_set_id = $2;
 
--- name: RuleSetUpsert :one
+-- name: RuleSetUpsert :exec
 insert into rule_sets (
   id,
   user_id, 
@@ -221,10 +267,9 @@ values (
   $3
 )
 on conflict (id) do update
-set name = excluded.name
-returning *;
+set name = excluded.name;
 
--- name: RuleSetRoadTagsUpsert :one
+-- name: RuleSetRoadTagsUpsert :exec
 insert into rule_set_road_tags (
   user_id,
   rule_set_id,
@@ -238,8 +283,7 @@ values (
   $4
 )
 on conflict (rule_set_id, tag_key) do update
-set value = excluded.value
-returning *;
+set value = excluded.value;
 
 -- name: RuleSetGet :one
 select * from rule_sets
@@ -327,23 +371,30 @@ order by
 	p.created_at desc,
   r.stats_len_m asc;
 
--- name: PlanCreate :one
+-- name: PlanUpsert :exec
 insert into plans (
-  user_id, 
-  id, 
-  name, 
-  start_lat, 
-  start_lon, 
-  finish_lat, 
-  finish_lon, 
-  start_desc, 
-  finish_desc, 
+  id,
+  user_id,
+  created_at,
+  modified_at,
+  start_lat,
+  start_lon,
+  finish_lat,
+  finish_lon,
+  state,
+  name,
+  error,
   trip_type,
   distance,
   bearing,
-  rule_set_id
+  start_desc,
+  finish_desc,
+  rule_set_id,
+  region,
+  is_deleted,
+  map_preview_light,
+  map_preview_dark
 )
-
 values (
   $1, 
   $2, 
@@ -357,9 +408,38 @@ values (
   $10,
   $11,
   $12,
-  $13
+  $13,
+  $14,
+  $15,
+  $16,
+  $17,
+  $18,
+  $19,
+  $20,
+  $21
 )
-returning id;
+on conflict (id) do update
+set 
+  user_id = excluded.user_id,
+  created_at = excluded.created_at,
+  modified_at = excluded.modified_at,
+  start_lat = excluded.start_lat,
+  start_lon = excluded.start_lon,
+  finish_lat = excluded.finish_lat,
+  finish_lon = excluded.finish_lon,
+  state = excluded.state,
+  name = excluded.name,
+  error = excluded.error,
+  trip_type = excluded.trip_type,
+  distance = excluded.distance,
+  bearing = excluded.bearing,
+  start_desc = excluded.start_desc,
+  finish_desc = excluded.finish_desc,
+  rule_set_id = excluded.rule_set_id,
+  region = excluded.region,
+  is_deleted = excluded.is_deleted,
+  map_preview_light = excluded.map_preview_light,
+  map_preview_dark = excluded.map_preview_dark;
 
 -- name: RegionGet :many
 select * from regions;

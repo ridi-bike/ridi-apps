@@ -15,6 +15,7 @@
     "@ridi/logger": "workspace:^",
     "@ridi/maps-api": "workspace:^",
     "@ridi/messaging": "workspace:^",
+    "@ridi/store-with-schema": "workspace:^",
     "@ridi/stripe-api": "workspace:^",
     "@sentry/cli": "^2.42.4",
     "@sentry/cloudflare": "^9.8.0",

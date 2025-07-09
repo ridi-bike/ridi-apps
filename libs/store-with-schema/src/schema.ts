@@ -47,19 +47,20 @@ const routeSchema = z.object({
   downloadedAt: dateSchema.nullable(),
   mapPreviewLight: z.string().nullable(),
   mapPreviewDark: z.string().nullable(),
-  latLonArray: z.array(z.tuple([z.number(), z.number()])),
   lenM: z.number(),
   score: z.number(),
   junctionCount: z.number(),
+  coordsArrayString: z.string(),
+  coordsOverviewArrayString: z.string(),
   isDeleted: z.boolean().nullable(),
 });
 
-const routeCoordsSchema = z.object({
-  id: z.string(),
-  routeId: z.string(),
-  coordsArrayString: z.string(),
-  coordsOverviewArrayString: z.string(),
-});
+// const routeCoordsSchema = z.object({
+//   id: z.string(),
+//   routeId: z.string(),
+//   coordsArrayString: z.string(),
+//   coordsOverviewArrayString: z.string(),
+// });
 
 export type Route = z.infer<typeof routeSchema>;
 
@@ -182,7 +183,7 @@ export type Region = z.infer<typeof regionsSchema>;
 export const storeSchema = {
   plans: planSchema,
   routes: routeSchema,
-  routeCoords: routeCoordsSchema,
+  // routeCoords: routeCoordsSchema,
   routeBreakdowns: routeBreakdownSchema,
   ruleSets: ruleSetSchema,
   ruleSetRoadTags: ruleSetRoadTagSchema,

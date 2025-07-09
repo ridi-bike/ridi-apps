@@ -2,6 +2,242 @@
 
 import type  { Sql } from "postgres";
 
+export const plansListForUserNotDeletedQuery = `-- name: PlansListForUserNotDeleted :many
+select id, user_id, created_at, modified_at, start_lat, start_lon, finish_lat, finish_lon, state, name, error, trip_type, distance, bearing, start_desc, finish_desc, rule_set_id, region, is_deleted, map_preview_light, map_preview_dark from plans
+where user_id = $1
+  and is_deleted = false`;
+
+export interface PlansListForUserNotDeletedArgs {
+    userId: string;
+}
+
+export interface PlansListForUserNotDeletedRow {
+    id: string;
+    userId: string;
+    createdAt: Date;
+    modifiedAt: Date | null;
+    startLat: string;
+    startLon: string;
+    finishLat: string | null;
+    finishLon: string | null;
+    state: "new" | "planning" | "planning-wider" | "done" | "error";
+    name: string;
+    error: string | null;
+    tripType: "round-trip" | "start-finish";
+    distance: string;
+    bearing: string | null;
+    startDesc: string;
+    finishDesc: string | null;
+    ruleSetId: string;
+    region: string | null;
+    isDeleted: boolean;
+    mapPreviewLight: string | null;
+    mapPreviewDark: string | null;
+}
+
+export async function plansListForUserNotDeleted(sql: Sql, args: PlansListForUserNotDeletedArgs): Promise<PlansListForUserNotDeletedRow[]> {
+    return (await sql.unsafe(plansListForUserNotDeletedQuery, [args.userId]).values()).map(row => ({
+        id: row[0],
+        userId: row[1],
+        createdAt: row[2],
+        modifiedAt: row[3],
+        startLat: row[4],
+        startLon: row[5],
+        finishLat: row[6],
+        finishLon: row[7],
+        state: row[8],
+        name: row[9],
+        error: row[10],
+        tripType: row[11],
+        distance: row[12],
+        bearing: row[13],
+        startDesc: row[14],
+        finishDesc: row[15],
+        ruleSetId: row[16],
+        region: row[17],
+        isDeleted: row[18],
+        mapPreviewLight: row[19],
+        mapPreviewDark: row[20]
+    }));
+}
+
+export const routesListForUserNotDeletedQuery = `-- name: RoutesListForUserNotDeleted :many
+with points_array as (
+	select 
+		id, 
+		array_agg(array[postgis.st_y(p.geom), postgis.st_x(p.geom)] order by p.path) as lat_lon_array
+	from routes r, postgis.st_dumppoints(r.linestring) p
+  where r.user_id = $1
+    and is_deleted = false
+	group by r.id
+) 
+select 
+  r.id, r.user_id, r.created_at, r.plan_id, r.name, r.linestring, r.stats_len_m, r.stats_score, r.stats_junction_count, r.is_deleted, r.map_preview_light, r.map_preview_dark, r.downloaded_at,
+	pa.lat_lon_array
+from routes r
+inner join points_array pa
+	on pa.id = r.id
+where r.user_id = $1
+  and is_deleted = false`;
+
+export interface RoutesListForUserNotDeletedArgs {
+    userId: string;
+}
+
+export interface RoutesListForUserNotDeletedRow {
+    id: string;
+    userId: string;
+    createdAt: Date;
+    planId: string;
+    name: string;
+    linestring: string | null;
+    statsLenM: string;
+    statsScore: string;
+    statsJunctionCount: string;
+    isDeleted: boolean;
+    mapPreviewLight: string | null;
+    mapPreviewDark: string | null;
+    downloadedAt: Date | null;
+    latLonArray: string[];
+}
+
+export async function routesListForUserNotDeleted(sql: Sql, args: RoutesListForUserNotDeletedArgs): Promise<RoutesListForUserNotDeletedRow[]> {
+    return (await sql.unsafe(routesListForUserNotDeletedQuery, [args.userId]).values()).map(row => ({
+        id: row[0],
+        userId: row[1],
+        createdAt: row[2],
+        planId: row[3],
+        name: row[4],
+        linestring: row[5],
+        statsLenM: row[6],
+        statsScore: row[7],
+        statsJunctionCount: row[8],
+        isDeleted: row[9],
+        mapPreviewLight: row[10],
+        mapPreviewDark: row[11],
+        downloadedAt: row[12],
+        latLonArray: row[13]
+    }));
+}
+
+export const routeBreakdoiwnStatsListForUserNotDeletedQuery = `-- name: RouteBreakdoiwnStatsListForUserNotDeleted :many
+select stats.id, stats.user_id, route_id, stat_type, stat_name, len_m, percentage, r.id, r.user_id, created_at, plan_id, name, linestring, stats_len_m, stats_score, stats_junction_count, is_deleted, map_preview_light, map_preview_dark, downloaded_at from route_breakdown_stats stats
+join routes r 
+on r.id = stats.route_id
+where r.user_id = $1
+  and is_deleted = false`;
+
+export interface RouteBreakdoiwnStatsListForUserNotDeletedArgs {
+    userId: string;
+}
+
+export interface RouteBreakdoiwnStatsListForUserNotDeletedRow {
+    id: string;
+    userId: string;
+    routeId: string;
+    statType: "type" | "surface" | "smoothness";
+    statName: string;
+    lenM: string;
+    percentage: string;
+    id_2: string;
+    userId_2: string;
+    createdAt: Date;
+    planId: string;
+    name: string;
+    linestring: string | null;
+    statsLenM: string;
+    statsScore: string;
+    statsJunctionCount: string;
+    isDeleted: boolean;
+    mapPreviewLight: string | null;
+    mapPreviewDark: string | null;
+    downloadedAt: Date | null;
+}
+
+export async function routeBreakdoiwnStatsListForUserNotDeleted(sql: Sql, args: RouteBreakdoiwnStatsListForUserNotDeletedArgs): Promise<RouteBreakdoiwnStatsListForUserNotDeletedRow[]> {
+    return (await sql.unsafe(routeBreakdoiwnStatsListForUserNotDeletedQuery, [args.userId]).values()).map(row => ({
+        id: row[0],
+        userId: row[1],
+        routeId: row[2],
+        statType: row[3],
+        statName: row[4],
+        lenM: row[5],
+        percentage: row[6],
+        id_2: row[7],
+        userId_2: row[8],
+        createdAt: row[9],
+        planId: row[10],
+        name: row[11],
+        linestring: row[12],
+        statsLenM: row[13],
+        statsScore: row[14],
+        statsJunctionCount: row[15],
+        isDeleted: row[16],
+        mapPreviewLight: row[17],
+        mapPreviewDark: row[18],
+        downloadedAt: row[19]
+    }));
+}
+
+export const ruleSetsListForUserNotDeletedQuery = `-- name: RuleSetsListForUserNotDeleted :many
+select id, user_id, name, default_set, is_deleted, icon from rule_sets
+where ( 
+    user_id = $1 
+    or user_id is null 
+  )
+  and is_deleted = false`;
+
+export interface RuleSetsListForUserNotDeletedArgs {
+    userId: string | null;
+}
+
+export interface RuleSetsListForUserNotDeletedRow {
+    id: string;
+    userId: string | null;
+    name: string;
+    defaultSet: boolean;
+    isDeleted: boolean;
+    icon: ("touring" | "dualsport" | "adv") | null;
+}
+
+export async function ruleSetsListForUserNotDeleted(sql: Sql, args: RuleSetsListForUserNotDeletedArgs): Promise<RuleSetsListForUserNotDeletedRow[]> {
+    return (await sql.unsafe(ruleSetsListForUserNotDeletedQuery, [args.userId]).values()).map(row => ({
+        id: row[0],
+        userId: row[1],
+        name: row[2],
+        defaultSet: row[3],
+        isDeleted: row[4],
+        icon: row[5]
+    }));
+}
+
+export const ruleSetRoadTagsListForUserNotDeletedQuery = `-- name: RuleSetRoadTagsListForUserNotDeleted :many
+select tags.user_id, tags.rule_set_id, tags.tag_key, tags.value from rule_set_road_tags tags
+join rule_sets rs 
+on rs.id = tags.rule_set_id
+where rs.user_id = $1
+  and is_deleted = false`;
+
+export interface RuleSetRoadTagsListForUserNotDeletedArgs {
+    userId: string | null;
+}
+
+export interface RuleSetRoadTagsListForUserNotDeletedRow {
+    userId: string | null;
+    ruleSetId: string;
+    tagKey: string;
+    value: number | null;
+}
+
+export async function ruleSetRoadTagsListForUserNotDeleted(sql: Sql, args: RuleSetRoadTagsListForUserNotDeletedArgs): Promise<RuleSetRoadTagsListForUserNotDeletedRow[]> {
+    return (await sql.unsafe(ruleSetRoadTagsListForUserNotDeletedQuery, [args.userId]).values()).map(row => ({
+        userId: row[0],
+        ruleSetId: row[1],
+        tagKey: row[2],
+        value: row[3]
+    }));
+}
+
 export const userGetQuery = `-- name: UserGet :one
 select id, email from auth.users
 where id = $1::uuid`;
@@ -1024,7 +1260,7 @@ export async function ruleSetRoadTagsListByRuleSetIdWithDeleted(sql: Sql, args: 
     }));
 }
 
-export const ruleSetUpsertQuery = `-- name: RuleSetUpsert :one
+export const ruleSetUpsertQuery = `-- name: RuleSetUpsert :exec
 insert into rule_sets (
   id,
   user_id, 
@@ -1036,8 +1272,7 @@ values (
   $3
 )
 on conflict (id) do update
-set name = excluded.name
-returning id, user_id, name, default_set, is_deleted, icon`;
+set name = excluded.name`;
 
 export interface RuleSetUpsertArgs {
     id: string;
@@ -1045,35 +1280,11 @@ export interface RuleSetUpsertArgs {
     name: string;
 }
 
-export interface RuleSetUpsertRow {
-    id: string;
-    userId: string | null;
-    name: string;
-    defaultSet: boolean;
-    isDeleted: boolean;
-    icon: ("touring" | "dualsport" | "adv") | null;
+export async function ruleSetUpsert(sql: Sql, args: RuleSetUpsertArgs): Promise<void> {
+    await sql.unsafe(ruleSetUpsertQuery, [args.id, args.userId, args.name]);
 }
 
-export async function ruleSetUpsert(sql: Sql, args: RuleSetUpsertArgs): Promise<RuleSetUpsertRow | null> {
-    const rows = await sql.unsafe(ruleSetUpsertQuery, [args.id, args.userId, args.name]).values();
-    if (rows.length !== 1) {
-        return null;
-    }
-    const row = rows[0];
-    if (!row) {
-        return null;
-    }
-    return {
-        id: row[0],
-        userId: row[1],
-        name: row[2],
-        defaultSet: row[3],
-        isDeleted: row[4],
-        icon: row[5]
-    };
-}
-
-export const ruleSetRoadTagsUpsertQuery = `-- name: RuleSetRoadTagsUpsert :one
+export const ruleSetRoadTagsUpsertQuery = `-- name: RuleSetRoadTagsUpsert :exec
 insert into rule_set_road_tags (
   user_id,
   rule_set_id,
@@ -1087,8 +1298,7 @@ values (
   $4
 )
 on conflict (rule_set_id, tag_key) do update
-set value = excluded.value
-returning user_id, rule_set_id, tag_key, value`;
+set value = excluded.value`;
 
 export interface RuleSetRoadTagsUpsertArgs {
     userId: string | null;
@@ -1097,28 +1307,8 @@ export interface RuleSetRoadTagsUpsertArgs {
     value: string | null;
 }
 
-export interface RuleSetRoadTagsUpsertRow {
-    userId: string | null;
-    ruleSetId: string;
-    tagKey: string;
-    value: number | null;
-}
-
-export async function ruleSetRoadTagsUpsert(sql: Sql, args: RuleSetRoadTagsUpsertArgs): Promise<RuleSetRoadTagsUpsertRow | null> {
-    const rows = await sql.unsafe(ruleSetRoadTagsUpsertQuery, [args.userId, args.ruleSetId, args.tagKey, args.value]).values();
-    if (rows.length !== 1) {
-        return null;
-    }
-    const row = rows[0];
-    if (!row) {
-        return null;
-    }
-    return {
-        userId: row[0],
-        ruleSetId: row[1],
-        tagKey: row[2],
-        value: row[3]
-    };
+export async function ruleSetRoadTagsUpsert(sql: Sql, args: RuleSetRoadTagsUpsertArgs): Promise<void> {
+    await sql.unsafe(ruleSetRoadTagsUpsertQuery, [args.userId, args.ruleSetId, args.tagKey, args.value]);
 }
 
 export const ruleSetGetQuery = `-- name: RuleSetGet :one
@@ -1371,23 +1561,30 @@ export async function planList(sql: Sql, args: PlanListArgs): Promise<PlanListRo
     }));
 }
 
-export const planCreateQuery = `-- name: PlanCreate :one
+export const planUpsertQuery = `-- name: PlanUpsert :exec
 insert into plans (
-  user_id, 
-  id, 
-  name, 
-  start_lat, 
-  start_lon, 
-  finish_lat, 
-  finish_lon, 
-  start_desc, 
-  finish_desc, 
+  id,
+  user_id,
+  created_at,
+  modified_at,
+  start_lat,
+  start_lon,
+  finish_lat,
+  finish_lon,
+  state,
+  name,
+  error,
   trip_type,
   distance,
   bearing,
-  rule_set_id
+  start_desc,
+  finish_desc,
+  rule_set_id,
+  region,
+  is_deleted,
+  map_preview_light,
+  map_preview_dark
 )
-
 values (
   $1, 
   $2, 
@@ -1401,42 +1598,65 @@ values (
   $10,
   $11,
   $12,
-  $13
+  $13,
+  $14,
+  $15,
+  $16,
+  $17,
+  $18,
+  $19,
+  $20,
+  $21
 )
-returning id`;
+on conflict (id) do update
+set 
+  user_id = excluded.user_id,
+  created_at = excluded.created_at,
+  modified_at = excluded.modified_at,
+  start_lat = excluded.start_lat,
+  start_lon = excluded.start_lon,
+  finish_lat = excluded.finish_lat,
+  finish_lon = excluded.finish_lon,
+  state = excluded.state,
+  name = excluded.name,
+  error = excluded.error,
+  trip_type = excluded.trip_type,
+  distance = excluded.distance,
+  bearing = excluded.bearing,
+  start_desc = excluded.start_desc,
+  finish_desc = excluded.finish_desc,
+  rule_set_id = excluded.rule_set_id,
+  region = excluded.region,
+  is_deleted = excluded.is_deleted,
+  map_preview_light = excluded.map_preview_light,
+  map_preview_dark = excluded.map_preview_dark`;
 
-export interface PlanCreateArgs {
-    userId: string;
+export interface PlanUpsertArgs {
     id: string;
-    name: string;
+    userId: string;
+    createdAt: Date;
+    modifiedAt: Date | null;
     startLat: string;
     startLon: string;
     finishLat: string | null;
     finishLon: string | null;
-    startDesc: string;
-    finishDesc: string | null;
+    state: "new" | "planning" | "planning-wider" | "done" | "error";
+    name: string;
+    error: string | null;
     tripType: "round-trip" | "start-finish";
     distance: string;
     bearing: string | null;
+    startDesc: string;
+    finishDesc: string | null;
     ruleSetId: string;
+    region: string | null;
+    isDeleted: string;
+    mapPreviewLight: string | null;
+    mapPreviewDark: string | null;
 }
 
-export interface PlanCreateRow {
-    id: string;
-}
-
-export async function planCreate(sql: Sql, args: PlanCreateArgs): Promise<PlanCreateRow | null> {
-    const rows = await sql.unsafe(planCreateQuery, [args.userId, args.id, args.name, args.startLat, args.startLon, args.finishLat, args.finishLon, args.startDesc, args.finishDesc, args.tripType, args.distance, args.bearing, args.ruleSetId]).values();
-    if (rows.length !== 1) {
-        return null;
-    }
-    const row = rows[0];
-    if (!row) {
-        return null;
-    }
-    return {
-        id: row[0]
-    };
+export async function planUpsert(sql: Sql, args: PlanUpsertArgs): Promise<void> {
+    await sql.unsafe(planUpsertQuery, [args.id, args.userId, args.createdAt, args.modifiedAt, args.startLat, args.startLon, args.finishLat, args.finishLon, args.state, args.name, args.error, args.tripType, args.distance, args.bearing, args.startDesc, args.finishDesc, args.ruleSetId, args.region, args.isDeleted, args.mapPreviewLight, args.mapPreviewDark]);
 }
 
 export const regionGetQuery = `-- name: RegionGet :many

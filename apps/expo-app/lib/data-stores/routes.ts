@@ -27,19 +27,19 @@ export function useRouteCoords(
   routeId: unknown,
   overview: boolean,
 ): null | [number, number][] {
-  const coords = useRow(
+  const routes = useRow(
     dataStore,
-    "routeCoords",
+    "routes",
     typeof routeId === "string" ? routeId : "",
   );
   return useMemo(() => {
-    if (!coords) {
+    if (!routes) {
       return null;
     }
     return JSON.parse(
-      overview ? coords.coordsOverviewArrayString : coords.coordsArrayString,
+      overview ? routes.coordsOverviewArrayString : routes.coordsArrayString,
     );
-  }, [coords, overview]);
+  }, [routes, overview]);
 }
 
 export function useRoutesUpdate() {
