@@ -21,7 +21,7 @@ import { RidiLogger } from "@ridi/logger";
 import { Messaging } from "@ridi/messaging";
 import { StripeApi } from "@ridi/stripe-api";
 import * as Sentry from "@sentry/cloudflare";
-import { SupabaseClient, type User } from "@supabase/supabase-js";
+import { type User } from "@supabase/supabase-js";
 import { createClient } from "@supabase/supabase-js";
 import {
   TsRestResponse,
@@ -30,15 +30,7 @@ import {
 } from "@ts-rest/serverless/fetch";
 import postgres from "postgres";
 import { Resend } from "resend";
-import { type Id } from "tinybase/common";
-import { createMergeableStore, MergeableStore } from "tinybase/mergeable-store";
-import { createCustomPersister, Persists } from "tinybase/persisters";
-import { createDurableObjectSqlStoragePersister } from "tinybase/persisters/persister-durable-object-sql-storage";
-import { type IdAddedOrRemoved } from "tinybase/store";
-import {
-  getWsServerDurableObjectFetch,
-  WsServerDurableObject,
-} from "tinybase/synchronizers/synchronizer-ws-server-durable-object";
+import { getWsServerDurableObjectFetch } from "tinybase/synchronizers/synchronizer-ws-server-durable-object";
 
 export type FieldsNotNull<T extends object> = {
   [n in keyof T]: NonNullable<T[n]>;
@@ -435,7 +427,7 @@ export default Sentry.withSentry(
       }
 
       if (url.pathname.startsWith("/sync")) {
-        return getWsServerDurableObjectFetch("TinyBaseDurableObjects")(
+        return getWsServerDurableObjectFetch("UserStoreDurableObject")(
           request,
           env,
         );
@@ -537,4 +529,4 @@ export default Sentry.withSentry(
   },
 );
 
-export { TinyBaseDurableObject } from "./sync";
+export { UserStoreDurableObject } from "./sync";

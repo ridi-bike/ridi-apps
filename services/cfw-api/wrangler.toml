@@ -34,9 +34,9 @@ RESEND_AUD_GENERAL_ID = "226e0e44-d07c-416d-9abb-0d88110ef628"
 # binding = "MY_SERVICE"
 # service = "my-service"
 [[durable_objects.bindings]]
-name = "TinyBaseDurableObjects"
-class_name = "TinyBaseDurableObject"
+name = "UserStoreDurableObject"
+class_name = "UserStoreDurableObject"
 
 [[migrations]]
 tag = "v1"
-new_sqlite_classes = ["TinyBaseDurableObject"]
+new_sqlite_classes = ["UserStoreDurableObject"]
