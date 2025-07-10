@@ -59,7 +59,7 @@ const inputRulesWithBasicDefaults = {
     },
     progression_direction: {
       enabled: true,
-      check_junctions_back: 50,
+      check_junctions_back: 150,
     },
     progression_speed: {
       enabled: false,
@@ -159,6 +159,18 @@ export class RouterClient {
       },
       {} as InputRules,
     );
+
+    if (!this.ruleInput.basic) {
+      this.ruleInput.basic = {};
+    }
+    if (!this.ruleInput.basic.progression_direction) {
+      this.ruleInput.basic.progression_direction = {
+        enabled: true,
+        check_junctions_back:
+          inputRulesWithBasicDefaults.basic.progression_direction
+            .check_junctions_back,
+      };
+    }
   }
   adjustReq(retryAttempt: number): boolean {
     const roundTripBearingStep = 10;
