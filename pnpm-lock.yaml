@@ -453,14 +453,14 @@ importers:
   libs/geo-maps:
     dependencies:
       '@protomaps/basemaps':
-        specifier: ^5.0.0
-        version: 5.0.0
+        specifier: ^5.4.1
+        version: 5.4.1
       '@turf/turf':
         specifier: ^7.2.0
         version: 7.2.0
       '@vis.gl/react-maplibre':
-        specifier: 1.0.0-alpha.4
-        version: 1.0.0-alpha.4(maplibre-gl@4.7.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+        specifier: 8.0.4
+        version: 8.0.4(maplibre-gl@4.7.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       geojson:
         specifier: ^0.5.0
         version: 0.5.0
