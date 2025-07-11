@@ -201,8 +201,7 @@ export default function RuleSetList() {
     error,
     refetch,
   } = useStoreRuleSets();
-  const [selectedId] = useUrlParams("rule", z.string());
-  const setSelectedId = () => undefined;
+  const [selectedId, setSelectedId] = useUrlParams("rule", z.string());
   const addRuleSet = useCallback(() => {
     if (ruleSets) {
       const newRuleSet: RuleSetNew = {
