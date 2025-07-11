@@ -8,7 +8,7 @@ const config = new pulumi.Config();
 export const ridiInfraVersion = Date.now();
 
 export const routerVersion = "v0.8.0";
-export const routerVersionNext = "v0.8.0";
+export const routerVersionNext = "v0.8.1";
 
 export const mapDataVersionDate = "2025-06-28";
 export const mapDataVersionDateNext = "2025-06-28";
