@@ -690,9 +690,11 @@ export default function PlansNew() {
             <Pressable
               role="button"
               onPress={() => {
-                router.navigate("/rules");
-                router.setParams({
-                  "selected-rule-id": JSON.stringify(ruleSetId),
+                router.push({
+                  pathname: "/rules",
+                  params: {
+                    rule: JSON.stringify(ruleSetId),
+                  },
                 });
               }}
               className={cn(
