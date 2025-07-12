@@ -231,7 +231,11 @@ export default function PlansNew() {
       return;
     }
 
-    const location = await Location.getCurrentPositionAsync({});
+    const location = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Balanced,
+      distanceInterval: 1000, // 1km
+      timeInterval: 10 * 60 * 1000, // 10 min
+    });
 
     if (location) {
       posthogClient.captureEvent("plan-new-current-location-gotten");
