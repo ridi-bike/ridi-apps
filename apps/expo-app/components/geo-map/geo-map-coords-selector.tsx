@@ -1,4 +1,7 @@
 import { getMapStyle } from "@ridi/geo-maps";
+
+import { useStorePlans } from "~/lib/stores/plans-store";
+
 import * as turf from "@turf/turf";
 import {
   type FillLayer,
@@ -63,6 +66,7 @@ export function GeoMapCoordsSelector({
   regions,
   children,
   onCoordsSelectCancel,
+  initialCoords,
 }: GeoMapCoordsSelectorProps) {
   const { colorScheme } = useColorScheme();
   const mapRef = useRef<MapRef>(null);
@@ -162,9 +166,9 @@ export function GeoMapCoordsSelector({
               bounds: mapBounds,
             }
           : {
-              longitude: 24.853,
-              latitude: 57.153,
-              zoom: 4,
+              longitude: initialCoords[1],
+              latitude: initialCoords[0],
+              zoom: 5,
             }
       }
       mapStyle={getMapStyle(colorScheme)}

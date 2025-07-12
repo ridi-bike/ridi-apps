@@ -73,7 +73,7 @@ const CANCEL_TRIGGER_TIMES = 5;
 
 export default function PlansNew() {
   const router = useRouter();
-  const { planAdd } = useStorePlans();
+  const { planAdd, data: plans } = useStorePlans();
   const [startCoords, setStartCoords] = useUrlParams("start", coordsSchema);
   const [finishCoords, setFinishCoords] = useUrlParams("finish", coordsSchema);
   const [cancelPressedTimes, setCancelPressedTimes] = useState(0);
@@ -263,6 +263,11 @@ export default function PlansNew() {
 
   const [mapMode, setMapMode] = useUrlParams("map-mode", z.boolean());
 
+  const initialCoords = useMemo(() => {
+    const prevPlan = plans?.[0];
+    return prevPlan ? [prevPlan.startLat, prevPlan.startLon] : null;
+  }, [plans]);
+
   return (
     <ScreenFrame
       title="New plan"
@@ -381,7 +386,7 @@ export default function PlansNew() {
     >
       <View className="flex flex-col items-center justify-start">
         <AnimatePresence>
-          {mapMode && (
+          {mapMode && initialCoords && (
             <MotiView
               key="big-map"
               className="fixed top-0 z-50 mt-16 w-[98vw] bg-white p-4 pb-40 dark:bg-gray-900"
@@ -391,6 +396,7 @@ export default function PlansNew() {
               transition={{ type: "timing" }}
             >
               <GeoMapCoordsSelector
+                initialCoords={initialCoords}
                 onCoordsSelectCancel={() => {
                   setCancelPressedTimes((t) => t + 1);
                   if (cancelPressedTimes >= CANCEL_TRIGGER_TIMES) {
@@ -725,23 +731,26 @@ export default function PlansNew() {
             }}
           >
             <GroupWithTitle title="Overview" className="h-48">
-              <GeoMapPlanView
-                bearing={isRoundTrip ? (bearing ?? null) : null}
-                distance={(selectedDistance || 0) * 1000}
-                start={
-                  startCoords
-                    ? {
-                        lat: startCoords[0],
-                        lon: startCoords[1],
-                      }
-                    : null
-                }
-                finish={
-                  finishCoords
-                    ? { lat: finishCoords[0], lon: finishCoords[1] }
-                    : null
-                }
-              />
+              {!!initialCoords && (
+                <GeoMapPlanView
+                  bearing={isRoundTrip ? (bearing ?? null) : null}
+                  distance={(selectedDistance || 0) * 1000}
+                  initialCoords={initialCoords}
+                  start={
+                    startCoords
+                      ? {
+                          lat: startCoords[0],
+                          lon: startCoords[1],
+                        }
+                      : null
+                  }
+                  finish={
+                    finishCoords
+                      ? { lat: finishCoords[0], lon: finishCoords[1] }
+                      : null
+                  }
+                />
+              )}
             </GroupWithTitle>
           </Pressable>
           <AnimatePresence>
