@@ -32,7 +32,11 @@ export function getPbfLocation(region: string, dataVersion: string) {
 export function getKmlLocation(region: string, dataVersion: string) {
   return `${getMapDataLocation(region, dataVersion)}/map.kml`;
 }
-export function getCacheLocation(region: string, dataVersion: string) {
+export function getCacheLocation(
+  region: string,
+  dataVersion: string,
+  routerVersion: string,
+) {
   return `${ridiDataRootPath}/cache/${routerVersion}/${dataVersion}/${region}`;
 }
 
