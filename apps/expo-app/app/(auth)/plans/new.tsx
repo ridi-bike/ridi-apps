@@ -73,7 +73,7 @@ const CANCEL_TRIGGER_TIMES = 5;
 
 export default function PlansNew() {
   const router = useRouter();
-  const { planAdd, data: plans } = useStorePlans();
+  const { planAdd, data: plans, loading: plansLoading } = useStorePlans();
   const [startCoords, setStartCoords] = useUrlParams("start", coordsSchema);
   const [finishCoords, setFinishCoords] = useUrlParams("finish", coordsSchema);
   const [cancelPressedTimes, setCancelPressedTimes] = useState(0);
@@ -265,8 +265,11 @@ export default function PlansNew() {
 
   const initialCoords = useMemo(() => {
     const prevPlan = plans?.[0];
+    if (!plansLoading && !prevPlan) {
+      return [57.153614, 24.85391];
+    }
     return prevPlan ? [prevPlan.startLat, prevPlan.startLon] : null;
-  }, [plans]);
+  }, [plans, plansLoading]);
 
   return (
     <ScreenFrame
