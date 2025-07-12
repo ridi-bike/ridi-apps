@@ -2,7 +2,7 @@ import {
   type RuleSetsSetRequest,
   type RuleSetsListResponse,
 } from "@ridi/api-contracts";
-import { useRootNavigationState, useRouter } from "expo-router";
+import { router } from "expo-router";
 import {
   Copy,
   Eye,
@@ -110,7 +110,6 @@ function ActionDialog({
   onDelete: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const router = useRouter();
   return (
     <AlertDialog
       className="w-full"
@@ -194,7 +193,6 @@ function ActionDialog({
 }
 
 export default function RuleSetList() {
-  const router = useRouter();
   const {
     data: ruleSets,
     ruleSetSet,
@@ -203,10 +201,7 @@ export default function RuleSetList() {
     error,
     refetch,
   } = useStoreRuleSets();
-  const [selectedId, setSelectedId] = useUrlParams(
-    "selected-rule-id",
-    z.string(),
-  );
+  const [selectedId, setSelectedId] = useUrlParams("rule", z.string());
   const addRuleSet = useCallback(() => {
     if (ruleSets) {
       const newRuleSet: RuleSetNew = {
@@ -235,14 +230,14 @@ export default function RuleSetList() {
     [ruleSetSet],
   );
 
-  const navState = useRootNavigationState();
-  const gotoNewScreen = useCallback(() => {
-    if (navState.routes[(navState.index || 0) - 1]?.name === "plans/new") {
-      router.back(); // TODO not quite working, seems to be replacing
+  const gotoNewScreen = useCallback((params?: Record<string, string>) => {
+    if (router.canGoBack()) {
+      router.back();
     } else {
       router.replace("/plans/new");
     }
-  }, [navState.index, navState.routes, router]);
+    setTimeout(() => router.setParams(params), 500);
+  }, []);
 
   return (
     <ScreenFrame
@@ -317,9 +312,7 @@ export default function RuleSetList() {
                             <Pressable
                               role="button"
                               onPress={() => {
-                                setSelectedId(ruleSet.id);
-                                gotoNewScreen();
-                                router.setParams({
+                                gotoNewScreen({
                                   rule: JSON.stringify(ruleSet.id),
                                 });
                               }}
