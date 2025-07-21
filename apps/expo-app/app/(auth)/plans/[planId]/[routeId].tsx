@@ -27,6 +27,15 @@ import { useStoreRoute } from "~/lib/stores/routes-store";
 import { useUser } from "~/lib/useUser";
 import { cn } from "~/lib/utils";
 
+function descOrLatLon(
+  desc: string | undefined,
+  lat: number,
+  lon: number,
+): string {
+  const latLon = `${lat},${lon}`;
+  return desc ? desc.split(",")[0] || latLon : latLon;
+}
+
 function DownloadGpxDialog({
   children,
   onDownload,
@@ -393,7 +402,10 @@ export default function RouteDetails() {
                                   const link = document.createElement("a");
 
                                   link.href = `data:application/gpx+xml;charset=utf-8,${encodeURIComponent(buildGPX(gpxData.toObject()))}`;
-                                  link.download = "route.gpx";
+                                  link.download =
+                                    plan.tripType === "start-finish"
+                                      ? `${descOrLatLon(plan.startDesc, plan.startLat, plan.startLon)}-${descOrLatLon(plan.finishDesc, plan.finishLat, plan.finishLon)}-${Math.round(route.data.stats.lenM / 1000)}km-${new Date().toISOString().substring(0, 10)}.gpx`
+                                      : `${descOrLatLon(plan.startDesc, plan.startLat, plan.startLon)}-${plan.bearing}deg-${Math.round(route.data.stats.lenM / 1000)}km-${new Date().toISOString().substring(0, 10)}.gpx`;
                                   link.click();
 
                                   routeSetDownloaded({
