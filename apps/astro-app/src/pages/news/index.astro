@@ -1,0 +1,25 @@
+---
+import { getCollection, render } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+
+const newsList = await getCollection("news");
+---
+
+<Layout>
+  <main class="pt-32 pb-20">
+    <div class="max-w-screen-xl mx-auto px-6 lg:px-8 xl:px-10">
+      <div class="max-w-3xl mx-auto">
+        <h1 class="text-4xl font-medium mb-8">Privacy Policy</h1>
+        <p class="text-lg mb-4">Last Updated: 2025-07-11</p>
+        <p class="text-lg mb-8">
+          This Privacy Policy explains how Ridi ("we," "us," or "our") collects,
+          uses, and protects your personal information when you use our route
+          generation application.
+        </p>
+      </div>
+      <p>omgomg</p>
+      {newsList.map((newsEntry) => <h1>{newsEntry.data.title}</h1>)}
+      <p>lllllll</p>
+    </div>
+  </main>
+</Layout>
