@@ -1,8 +1,9 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
+import slugify from "@sindresorhus/slugify";
 import { buildGPX, BaseBuilder } from "gpx-builder";
 import { Trophy, Trash2, Ruler } from "lucide-react-native";
 import { AnimatePresence, MotiView } from "moti";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { View, Text, ScrollView, Pressable } from "react-native";
 
 import { Button } from "~/components/button";
@@ -26,15 +27,6 @@ import { useStorePlans } from "~/lib/stores/plans-store";
 import { useStoreRoute } from "~/lib/stores/routes-store";
 import { useUser } from "~/lib/useUser";
 import { cn } from "~/lib/utils";
-
-function descOrLatLon(
-  desc: string | undefined,
-  lat: number,
-  lon: number,
-): string {
-  const latLon = `${lat},${lon}`;
-  return desc ? desc.split(",")[0] || latLon : latLon;
-}
 
 function DownloadGpxDialog({
   children,
@@ -279,6 +271,29 @@ export default function RouteDetails() {
       : null;
   }, [route]);
 
+  const getFileName = useCallback(() => {
+    function descOrLatLon(
+      desc: string | undefined,
+      lat: number,
+      lon: number,
+    ): string {
+      const latLon = `${lat.toFixed(3)}-${lon.toFixed(3)}`;
+      return desc
+        ? slugify(desc).split(",")[0]?.slice(0, 30) || latLon
+        : latLon;
+    }
+    const date = new Date(plan.createdAt).toISOString().substring(0, 10);
+    const startLoc = descOrLatLon(plan.startDesc, plan.startLat, plan.startLon);
+    const finishLoc =
+      plan.tripType === "start-finish"
+        ? descOrLatLon(plan.finishDesc, plan.finishLat, plan.finishLon)
+        : null;
+    const dist = Math.round(route.data.stats.lenM / 1000);
+    return plan.tripType === "start-finish"
+      ? `${startLoc}_${finishLoc}_${dist}km_${date}.gpx`
+      : `${startLoc}_${plan.bearing}deg_${dist}km_${date}.gpx`;
+  }, [plan, route]);
+
   return (
     <ScreenFrame
       title="Route details"
@@ -402,10 +417,7 @@ export default function RouteDetails() {
                                   const link = document.createElement("a");
 
                                   link.href = `data:application/gpx+xml;charset=utf-8,${encodeURIComponent(buildGPX(gpxData.toObject()))}`;
-                                  link.download =
-                                    plan.tripType === "start-finish"
-                                      ? `${descOrLatLon(plan.startDesc, plan.startLat, plan.startLon)}-${descOrLatLon(plan.finishDesc, plan.finishLat, plan.finishLon)}-${Math.round(route.data.stats.lenM / 1000)}km-${new Date().toISOString().substring(0, 10)}.gpx`
-                                      : `${descOrLatLon(plan.startDesc, plan.startLat, plan.startLon)}-${plan.bearing}deg-${Math.round(route.data.stats.lenM / 1000)}km-${new Date().toISOString().substring(0, 10)}.gpx`;
+                                  link.download = getFileName();
                                   link.click();
 
                                   routeSetDownloaded({
