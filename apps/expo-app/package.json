@@ -43,6 +43,7 @@
     "@rn-primitives/types": "^1.2.0",
     "@sentry/cli": "^2.46.0",
     "@sentry/react-native": "^6.15.1",
+    "@sindresorhus/slugify": "^2.2.1",
     "@supabase/supabase-js": "^2.50.0",
     "@tanstack/query-async-storage-persister": "^5.80.7",
     "@tanstack/query-persist-client-core": "^5.80.7",
