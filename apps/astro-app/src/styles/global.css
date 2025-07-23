@@ -1,1 +1,28 @@
+/* custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #000000;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Space Grotesk", sans-serif;
+  --color-ridiorange: #f75835;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-primary: #7c2d12;
+  --color-gray: #0d0c22;
+  --color-stone: #231f20;
+}
