@@ -13,3 +13,9 @@ some test
 
 > some quoted text here
 > second quote line
+
+```js
+const a = 1;
+const a = 1;
+const a = 1;
+```

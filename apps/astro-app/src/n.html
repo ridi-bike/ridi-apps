@@ -1,0 +1,780 @@
+<body class="bg-white">
+  <div class="mt-24">
+    <nav class="w-full top-0 left-0 z-50 fixed bg-white">
+      <div class="max-w-screen-xl mx-auto px-6 lg:px-8 xl:px-10">
+        <header
+          class="flex flex-col lg:flex-row justify-between items-center my-5"
+        >
+          <div class="flex w-full lg:w-auto items-center justify-between">
+            <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
+              <img src="/Name-tagline.svg" class="h-12" alt="Logo" />
+            </a>
+            <div class="block lg:hidden">
+              <button id="astronav-menu" aria-label="Toggle Menu">
+                <svg
+                  fill="currentColor"
+                  class="w-8 h-8 text-black"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <title>Toggle Menu</title>
+                  <path
+                    class="astronav-close-icon astronav-toggle hidden"
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M18.278 16.864a1 1 0 01-1.414 1.414l-4.829-4.828-4.828 4.828a1 1 0 01-1.414-1.414l4.828-4.829-4.828-4.828a1 1 0 011.414-1.414l4.829 4.828 4.828-4.828a1 1 0 111.414 1.414l-4.828 4.829 4.828 4.828z"
+                  ></path>
+                  <path
+                    class="astronav-open-icon astronav-toggle"
+                    fill-rule="evenodd"
+                    d="M4 5h16a1 1 0 010 2H4a1 1 0 110-2zm0 6h16a1 1 0 010 2H4a1 1 0 010-2zm0 6h16a1 1 0 010 2H4a1 1 0 010-2z"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <nav
+            class="astronav-items astronav-toggle hidden w-full lg:w-auto mt-2 lg:flex lg:mt-0"
+          >
+            <ul
+              class="font-medium flex flex-col p-4 lg:p-0 mt-4 border rounded-lg lg:flex-row lg:space-x-8 lg:mt-0 lg:border-0"
+            >
+              <li>
+                <a
+                  href="/"
+                  class="block py-2 px-3 text-black rounded lg:bg-transparent lg:p-0"
+                >
+                  Home
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/#how-it-works"
+                  class="block py-2 px-3 text-black rounded lg:bg-transparent lg:p-0"
+                >
+                  How it works
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/#pricing"
+                  class="block py-2 px-3 text-black rounded lg:bg-transparent lg:p-0"
+                >
+                  Price
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/privacy"
+                  class="block py-2 px-3 text-black rounded lg:bg-transparent lg:p-0"
+                >
+                  Privacy policy
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/tos"
+                  class="block py-2 px-3 text-black rounded lg:bg-transparent lg:p-0"
+                >
+                  Terms of Service
+                </a>
+              </li>
+            </ul>
+          </nav>
+
+          <a
+            href="https://app.ridi.bike/login"
+            target="_blank"
+            class="px-4 py-2 bg-[#f75835] hover:bg-white rounded-lg text-center text-white hover:text-black border border-black text-xl font-normal leading-7"
+          >
+            Open App
+          </a>
+        </header>
+      </div>
+    </nav>
+  </div>
+  <main>
+    <div class="max-w-screen-xl mx-auto px-6 lg:px-8 xl:px-10">
+      <div
+        class="relative flex flex-col-reverse items-center md:flex-row"
+        id="hero"
+      >
+        <div class="row items-center py-5 md:w-6/12 md:pb-12 md:pt-10">
+          <div class="text-left space-y-3">
+            <h1
+              class="text-5xl font-medium leading-none md:text-6xl text-center md:text-left"
+            >
+              The motorcycle route app for your perfect route, every time.
+            </h1>
+            <p
+              class="mt-6 mb-8 text-xl font-normal leading-7 sm:mb-12 text-center md:text-left"
+            >
+              Made to enjoy the ride, not to study maps.
+            </p>
+            <div
+              class="w-full justify-center md:justify-start items-center inline-flex"
+            >
+              <a
+                href="https://app.ridi.bike"
+                target="_blank"
+                class="px-8 py-5 bg-[#f75835] hover:bg-white rounded-2xl text-center text-white border-black hover:text-black border text-xl font-normal leading-7"
+              >
+                Generate your first route now
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center py-5 md:w-6/12 md:pb-20 md:pt-10">
+          <img src="/hero-image.png" width="100%" alt="Hero" />
+        </div>
+      </div>
+    </div>
+    <div class="max-w-screen-xl mx-auto px-6 lg:px-8 xl:px-10">
+      <div class="relative flex flex-col items-center" id="how-it-works">
+        <div class="flex-row items-center py-5 mb-8">
+          <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- card start-->
+            <div
+              class="md:h-[310px] h-[620px] p-12 rounded-[45px] shadow-card border border-black justify-between items-center flex md:flex-row flex-col text-black bg-zinc-100"
+            >
+              <div
+                class="flex flex-col justify-center p-6 items-center md:items-start gap-[93px]"
+              >
+                <div
+                  class="flex flex-col justify-start items-start max-w-[50%]"
+                >
+                  <div
+                    class="px-[7px] rounded-[7px] flex-col justify-start items-start gap-2.5 flex"
+                  >
+                    <div class="text-3xl font-medium">IMAGINE</div>
+                  </div>
+                  <div
+                    class="px-[7px] rounded-[7px] flex-col justify-start items-start gap-2.5 flex"
+                  >
+                    <div class="text-3xl font-medium">How you want to ride</div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="pt-0.5 pb-[1.95px] size-full justify-center items-center flex"
+              >
+                <img
+                  class="max-h-[270px] size-full object-contain h-full"
+                  src="/plan-trip.png"
+                />
+              </div>
+            </div>
+            <div
+              class="md:h-[310px] h-[620px] p-12 rounded-[45px] shadow-card border border-black justify-between items-center flex md:flex-row flex-col text-black bg-ridiorange"
+            >
+              <div
+                class="flex flex-col justify-center p-6 items-center md:items-start gap-[93px]"
+              >
+                <div
+                  class="flex flex-col justify-start items-start max-w-[50%]"
+                >
+                  <div
+                    class="px-[7px] rounded-[7px] flex-col justify-start items-start gap-2.5 flex"
+                  >
+                    <div class="text-3xl font-medium">Set Route</div>
+                  </div>
+                  <div
+                    class="px-[7px] rounded-[7px] flex-col justify-start items-start gap-2.5 flex"
+                  >
+                    <div class="text-3xl font-medium">Rules</div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="pt-0.5 pb-[1.95px] size-full justify-center items-center flex"
+              >
+                <img
+                  class="max-h-[270px] size-full object-contain h-full"
+                  src="/options.png"
+                />
+              </div>
+            </div>
+            <div
+              class="md:h-[310px] h-[620px] p-12 rounded-[45px] shadow-card border border-black justify-between items-center flex md:flex-row flex-col bg-black text-white"
+            >
+              <div
+                class="flex flex-col justify-center p-6 items-center md:items-start gap-[93px]"
+              >
+                <div
+                  class="flex flex-col justify-start items-start max-w-[50%]"
+                >
+                  <div
+                    class="px-[7px] rounded-[7px] flex-col justify-start items-start gap-2.5 flex"
+                  >
+                    <div class="text-3xl font-medium">Pick</div>
+                  </div>
+                  <div
+                    class="px-[7px] rounded-[7px] flex-col justify-start items-start gap-2.5 flex"
+                  >
+                    <div class="text-3xl font-medium">The Best One</div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="pt-0.5 pb-[1.95px] size-full justify-center items-center flex"
+              >
+                <img
+                  class="max-h-[270px] size-full object-contain h-full"
+                  src="/choose-routes.png"
+                />
+              </div>
+            </div>
+            <div
+              class="md:h-[310px] h-[620px] p-12 rounded-[45px] shadow-card border border-black justify-between items-center flex md:flex-row flex-col text-black bg-zinc-100"
+            >
+              <div
+                class="flex flex-col justify-center p-6 items-center md:items-start gap-[93px]"
+              >
+                <div
+                  class="flex flex-col justify-start items-start max-w-[50%]"
+                >
+                  <div
+                    class="px-[7px] rounded-[7px] flex-col justify-start items-start gap-2.5 flex"
+                  >
+                    <div class="text-3xl font-medium">Ride</div>
+                  </div>
+                  <div
+                    class="px-[7px] rounded-[7px] flex-col justify-start items-start gap-2.5 flex"
+                  >
+                    <div class="text-3xl font-medium">GO</div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="pt-0.5 pb-[1.95px] size-full justify-center items-center flex"
+              >
+                <img
+                  class="max-h-[270px] size-full object-contain h-full"
+                  src="/go.png"
+                />
+              </div>
+            </div>
+            <!-- card end-->
+          </div>
+        </div>
+        <div class="grid place-items-center gap-5 mb-10 md:flex">
+          <h2
+            class="text-4xl sm:text-5xl px-1.5 font-medium bg-ridiorange rounded-md"
+          >
+            HOW IT WORKS
+          </h2>
+          <p class="text-xl font-normal text-center md:text-start lg:w-2/3">
+            I want to ride, not navigate. So, I built Ridi, an app that takes
+            all the guesswork out of it. You tell it what kind of roads you love
+            – highways, primaries, unclassified’s, tracks, paths, residential?
+            Gravel, sand? Smooth roads or tracks? Choose your style and it’ll
+            whip up a perfect route tailored to your exact preferences. Or just
+            choose one of the default rule sets. Whether it’s a quick spin
+            through scenic roads or a heart-pounding journey through twisty
+            paths, Ridi’s got you covered.
+          </p>
+        </div>
+        <div
+          class="w-full justify-center md:justify-start items-center inline-flex"
+        >
+          <a
+            href="https://app.ridi.bike"
+            target="_blank"
+            class="px-8 py-5 bg-[#f75835] hover:bg-white rounded-2xl text-center text-white border-black hover:text-black border text-xl font-normal leading-7"
+          >
+            Try it now
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="max-w-screen-xl mx-auto px-6 lg:px-8 xl:px-10">
+      <div
+        class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6"
+        id="pricing"
+      >
+        <div class="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
+          <h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900">
+            Support Ridi
+          </h2>
+          <p class="mb-5 font-light text-gray-500 sm:text-xl">
+            I am actively working on more features and would with your support
+            be able to improve Ridi and build something special
+          </p>
+        </div>
+        <div
+          class="space-y-8 lg:flex lg:flex-row lg:justify-around sm:gap-6 xl:gap-10 lg:space-y-0"
+        >
+          <!-- Pricing Card -->
+          <div
+            class="flex flex-col flex-1 p-6 mx-auto max-w-lg min-w-52 text-center text-gray-900 bg-white rounded-3xl border border-gray-500 shadow-card"
+          >
+            <h3 class="mb-4 text-2xl font-semibold">Free</h3>
+            <p class="font-light text-gray-500 sm:text-lg">
+              Test if Ridi works for you
+            </p>
+            <div class="flex justify-center items-baseline my-8">
+              <span class="mr-2 text-5xl font-extrabold">€0</span>
+            </div>
+            <!-- List -->
+            <ul role="list" class="mb-8 space-y-4 text-left">
+              <li class="flex items-center space-x-3">
+                <!-- Icon -->
+                <svg
+                  class="flex-shrink-0 w-5 h-5 text-green-500"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+                <span>Generate unlimited routes</span>
+              </li>
+              <li class="flex items-center space-x-3">
+                <!-- Icon -->
+                <svg
+                  class="flex-shrink-0 w-5 h-5 text-green-500"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+                <span>Create custom rules</span>
+              </li>
+              <li class="flex items-center space-x-3">
+                <!-- Icon -->
+                <svg
+                  class="flex-shrink-0 w-5 h-5 text-green-500"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+                <span>Download 5 routes as GPX</span>
+              </li>
+            </ul>
+            <a
+              href="https://app.ridi.bike/login"
+              class="text-black hover:text-white bg-ridiorange hover:bg-black focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+              >Get started</a
+            >
+          </div>
+          <div
+            class="flex flex-col flex-1 p-6 mx-auto max-w-lg min-w-52 text-center text-gray-900 bg-white rounded-3xl border border-gray-500 shadow-card"
+          >
+            <h3 class="mb-4 text-2xl font-semibold">Yearly</h3>
+            <p class="font-light text-gray-500 sm:text-lg">
+              Support with a yearly payment
+            </p>
+            <div class="flex justify-center items-baseline my-8">
+              <span class="mr-2 text-5xl font-extrabold">€24.96</span>
+              <span class="text-gray-500">/year</span>
+            </div>
+            <!-- List -->
+            <ul role="list" class="mb-8 space-y-4 text-left">
+              <li class="flex items-center space-x-3">
+                <!-- Icon -->
+                <svg
+                  class="flex-shrink-0 w-5 h-5 text-green-500"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+                <span>Generate unlimited routes</span>
+              </li>
+              <li class="flex items-center space-x-3">
+                <!-- Icon -->
+                <svg
+                  class="flex-shrink-0 w-5 h-5 text-green-500"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+                <span>Create custom rules</span>
+              </li>
+              <li class="flex items-center space-x-3">
+                <!-- Icon -->
+                <svg
+                  class="flex-shrink-0 w-5 h-5 text-green-500"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+                <span>Download unlimited routes as GPX</span>
+              </li>
+            </ul>
+            <a
+              href="https://app.ridi.bike/login"
+              class="text-black hover:text-white bg-ridiorange hover:bg-black focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+              >Get started</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="max-w-screen-xl mx-auto px-6 lg:px-8 xl:px-10">
+      <div class="flex-row items-center my-6 p-14 bg-zinc-100 rounded-[45px]">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex-col justify-start items-center gap-[275px] flex">
+            <div
+              class="flex-col justify-start items-start gap-[26px] inline-flex text-black"
+            >
+              <div class="text-3xl font-medium">Get notified</div>
+              <div class="md:hidden flex flex-col items-center justify-center">
+                <img src="/email.png" width="80%" alt="cat" />
+              </div>
+              <div class="text-lg font-normal">
+                I will email you when big stuff happens
+              </div>
+              <style>
+                astro-island,
+                astro-slot,
+                astro-static-slot {
+                  display: contents;
+                }
+              </style>
+              <script data-astro-exec="">
+                (() => {
+                  var a = (s, i, o) => {
+                    let r = async () => {
+                        await (
+                          await s()
+                        )();
+                      },
+                      t = typeof i.value == "object" ? i.value : void 0,
+                      c = { rootMargin: t == null ? void 0 : t.rootMargin },
+                      n = new IntersectionObserver((e) => {
+                        for (let l of e)
+                          if (l.isIntersecting) {
+                            n.disconnect(), r();
+                            break;
+                          }
+                      }, c);
+                    for (let e of o.children) n.observe(e);
+                  };
+                  (self.Astro || (self.Astro = {})).visible = a;
+                  window.dispatchEvent(new Event("astro:visible"));
+                })();
+              </script>
+              <script data-astro-exec="">
+                (() => {
+                  var A = Object.defineProperty;
+                  var g = (i, o, a) =>
+                    o in i
+                      ? A(i, o, {
+                          enumerable: !0,
+                          configurable: !0,
+                          writable: !0,
+                          value: a,
+                        })
+                      : (i[o] = a);
+                  var l = (i, o, a) =>
+                    g(i, typeof o != "symbol" ? o + "" : o, a);
+                  {
+                    let i = {
+                        0: (t) => y(t),
+                        1: (t) => a(t),
+                        2: (t) => new RegExp(t),
+                        3: (t) => new Date(t),
+                        4: (t) => new Map(a(t)),
+                        5: (t) => new Set(a(t)),
+                        6: (t) => BigInt(t),
+                        7: (t) => new URL(t),
+                        8: (t) => new Uint8Array(t),
+                        9: (t) => new Uint16Array(t),
+                        10: (t) => new Uint32Array(t),
+                        11: (t) => (1 / 0) * t,
+                      },
+                      o = (t) => {
+                        let [h, e] = t;
+                        return h in i ? i[h](e) : void 0;
+                      },
+                      a = (t) => t.map(o),
+                      y = (t) =>
+                        typeof t != "object" || t === null
+                          ? t
+                          : Object.fromEntries(
+                              Object.entries(t).map(([h, e]) => [h, o(e)]),
+                            );
+                    class f extends HTMLElement {
+                      constructor() {
+                        super(...arguments);
+                        l(this, "Component");
+                        l(this, "hydrator");
+                        l(this, "hydrate", async () => {
+                          var b;
+                          if (!this.hydrator || !this.isConnected) return;
+                          let e =
+                            (b = this.parentElement) == null
+                              ? void 0
+                              : b.closest("astro-island[ssr]");
+                          if (e) {
+                            e.addEventListener("astro:hydrate", this.hydrate, {
+                              once: !0,
+                            });
+                            return;
+                          }
+                          let c = this.querySelectorAll("astro-slot"),
+                            n = {},
+                            p = this.querySelectorAll(
+                              "template[data-astro-template]",
+                            );
+                          for (let r of p) {
+                            let s = r.closest(this.tagName);
+                            s != null &&
+                              s.isSameNode(this) &&
+                              ((n[
+                                r.getAttribute("data-astro-template") ||
+                                  "default"
+                              ] = r.innerHTML),
+                              r.remove());
+                          }
+                          for (let r of c) {
+                            let s = r.closest(this.tagName);
+                            s != null &&
+                              s.isSameNode(this) &&
+                              (n[r.getAttribute("name") || "default"] =
+                                r.innerHTML);
+                          }
+                          let u;
+                          try {
+                            u = this.hasAttribute("props")
+                              ? y(JSON.parse(this.getAttribute("props")))
+                              : {};
+                          } catch (r) {
+                            let s =
+                                this.getAttribute("component-url") ||
+                                "<unknown>",
+                              v = this.getAttribute("component-export");
+                            throw (
+                              (v && (s += ` (export ${v})`),
+                              console.error(
+                                `[hydrate] Error parsing props for component ${s}`,
+                                this.getAttribute("props"),
+                                r,
+                              ),
+                              r)
+                            );
+                          }
+                          let d,
+                            m = this.hydrator(this);
+                          (d = performance.now()),
+                            await m(this.Component, u, n, {
+                              client: this.getAttribute("client"),
+                            }),
+                            d &&
+                              this.setAttribute(
+                                "client-render-time",
+                                (performance.now() - d).toString(),
+                              ),
+                            this.removeAttribute("ssr"),
+                            this.dispatchEvent(
+                              new CustomEvent("astro:hydrate"),
+                            );
+                        });
+                        l(this, "unmount", () => {
+                          this.isConnected ||
+                            this.dispatchEvent(
+                              new CustomEvent("astro:unmount"),
+                            );
+                        });
+                      }
+                      disconnectedCallback() {
+                        document.removeEventListener(
+                          "astro:after-swap",
+                          this.unmount,
+                        ),
+                          document.addEventListener(
+                            "astro:after-swap",
+                            this.unmount,
+                            { once: !0 },
+                          );
+                      }
+                      connectedCallback() {
+                        if (
+                          !this.hasAttribute("await-children") ||
+                          document.readyState === "interactive" ||
+                          document.readyState === "complete"
+                        )
+                          this.childrenConnectedCallback();
+                        else {
+                          let e = () => {
+                              document.removeEventListener(
+                                "DOMContentLoaded",
+                                e,
+                              ),
+                                c.disconnect(),
+                                this.childrenConnectedCallback();
+                            },
+                            c = new MutationObserver(() => {
+                              var n;
+                              ((n = this.lastChild) == null
+                                ? void 0
+                                : n.nodeType) === Node.COMMENT_NODE &&
+                                this.lastChild.nodeValue === "astro:end" &&
+                                (this.lastChild.remove(), e());
+                            });
+                          c.observe(this, { childList: !0 }),
+                            document.addEventListener("DOMContentLoaded", e);
+                        }
+                      }
+                      async childrenConnectedCallback() {
+                        let e = this.getAttribute("before-hydration-url");
+                        e && (await import(e)), this.start();
+                      }
+                      async start() {
+                        let e = JSON.parse(this.getAttribute("opts")),
+                          c = this.getAttribute("client");
+                        if (Astro[c] === void 0) {
+                          window.addEventListener(
+                            `astro:${c}`,
+                            () => this.start(),
+                            { once: !0 },
+                          );
+                          return;
+                        }
+                        try {
+                          await Astro[c](
+                            async () => {
+                              let n = this.getAttribute("renderer-url"),
+                                [p, { default: u }] = await Promise.all([
+                                  import(this.getAttribute("component-url")),
+                                  n ? import(n) : () => () => {},
+                                ]),
+                                d =
+                                  this.getAttribute("component-export") ||
+                                  "default";
+                              if (!d.includes(".")) this.Component = p[d];
+                              else {
+                                this.Component = p;
+                                for (let m of d.split("."))
+                                  this.Component = this.Component[m];
+                              }
+                              return (this.hydrator = u), this.hydrate;
+                            },
+                            e,
+                            this,
+                          );
+                        } catch (n) {
+                          console.error(
+                            `[astro-island] Error hydrating ${this.getAttribute("component-url")}`,
+                            n,
+                          );
+                        }
+                      }
+                      attributeChangedCallback() {
+                        this.hydrate();
+                      }
+                    }
+                    l(f, "observedAttributes", ["props"]),
+                      customElements.get("astro-island") ||
+                        customElements.define("astro-island", f);
+                  }
+                })();
+              </script>
+              <astro-island
+                uid="XwBmp"
+                prefix="r1"
+                component-url="/src/components/Waitlist.tsx"
+                component-export="Waitlist"
+                renderer-url="/node_modules/.vite/deps/@astrojs_react_client__js.js?v=435e5dc4"
+                props="{}"
+                client="visible"
+                before-hydration-url="/@id/astro:scripts/before-hydration.js"
+                opts='{"name":"Waitlist","value":true}'
+                server-render-time="0.6214880011975765"
+                await-children=""
+                client-render-time="1.8999999910593033"
+                ><form>
+                  <input
+                    class="mb-4 mr-3 h-12 w-64 bg-white appearance-none rounded-[14px] px-3 py-2 text-gray-600 focus:border-gray-400 focus:bg-gray-300 focus:text-gray-800 focus:outline-none"
+                    type="email"
+                    placeholder="some@example.com"
+                    aria-label="Email Address"
+                    required=""
+                    name="email"
+                  /><button
+                    type="submit"
+                    class="inline-flex w-64 items-start justify-start gap-2.5 rounded-[14px] border bg-zinc-900 px-[35px] py-5 text-white hover:bg-white hover:text-black"
+                  >
+                    <div class="text-center text-xl font-normal leading-7">
+                      Get notified
+                    </div>
+                  </button>
+                </form>
+                <!--astro:end--></astro-island
+              >
+            </div>
+          </div>
+          <div class="hidden md:grid justify-items-center -m-20">
+            <img src="/email.png" width="70%" alt="me" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer class="bg-ridiorange/10 bg-fixed bg-bottom text-black">
+    <div class="max-w-screen-xl mx-auto px-6 lg:px-8 xl:px-10">
+      <div class="py-6">
+        <div class="flex flex-col items-center justify-between md:flex-row">
+          <div class="flex items-center space-x-3 rtl:space-x-reverse">
+            <img class="w-32" src="/Logo.svg" alt="Logo" />
+          </div>
+          <div class="flex mt-4 md:m-0">
+            <div class="-mx-4">
+              <span id="currentYear"></span> Made with
+              <a
+                href="https://astro.build/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="underline"
+                >Astro</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <script data-astro-exec="">
+    const year = new Date().getFullYear();
+    document.getElementById("currentYear").innerHTML = `${year}`;
+  </script>
+  <astro-dev-toolbar></astro-dev-toolbar>
+  <div aria-live="assertive" aria-atomic="true" class="astro-route-announcer">
+    Ridi to ride
+  </div>
+</body>
