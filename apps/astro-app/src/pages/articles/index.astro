@@ -14,7 +14,7 @@ console.log({ articleList });
       >
         <h1 class="text-4xl font-medium mb-8 text-ridiorange">Articles</h1>
         {
-          articleList.map((article) => (
+          articleList.toReversed().map((article) => (
             <a
               href={`/articles/${article.data.slug}`}
               class="border-l-2 border-ridiorange w-full pl-4"
