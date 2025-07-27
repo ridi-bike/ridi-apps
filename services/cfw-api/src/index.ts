@@ -210,7 +210,10 @@ const router = tsr
     const privateUser = await privateUsersGetRow(ctx.db, {
       userId: ctx.request.user.id,
     });
-    if (privateUser?.subType === "code") {
+    if (!privateUser) {
+      throw new Error("User must exist");
+    }
+    if (privateUser.subType === "code") {
       return {
         status: 200,
         body: {
@@ -224,7 +227,10 @@ const router = tsr
         },
       };
     }
-    const prices = await stripeApi.getPrices();
+    const prices = await stripeApi.getPrices({
+      id: ctx.request.user.id,
+      email: ctx.request.user.email,
+    });
     return {
       status: 200,
       body: {
@@ -237,7 +243,7 @@ const router = tsr
                 isActive: privateUser.stripeStatus === "active",
                 status: privateUser.stripeStatus,
                 price:
-                  prices.find((p) => p.id === privateUser.stripePriceId) ||
+                  prices.find((p) => p?.id === privateUser.stripePriceId) ||
                   null,
                 currentPeriodEndDate:
                   privateUser.stripeCurrentPeriodEnd?.toString() || null,
@@ -905,6 +911,7 @@ export default Sentry.withSentry(
           router,
           options: {
             errorHandler(err, req) {
+              console.error(err);
               Sentry.captureException(err, {
                 data: {
                   req,
