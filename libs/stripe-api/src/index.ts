@@ -75,7 +75,7 @@ export class StripeApi {
     priceType: "montly" | "yearly",
   ) {
     this.logger.info("Creating Stripe checkout", { userId: user.id });
-    const privateUser = await this.getUser();
+    const privateUser = await this.getUser(user);
 
     if (privateUser?.subType !== "none") {
       throw this.logger.error("Subscription already in place", { privateUser });
