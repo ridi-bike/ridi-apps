@@ -6,10 +6,17 @@ import { ClientRouter } from "astro:transitions";
 import PostHog from "../components/Posthog.astro";
 import GTag from "../components/GTag.astro";
 
-const title = "Ridi motorcycle route generator";
-const description =
-  "Generate the perfect motorcycling route based based on your preferences with Ridi";
-const image = "https://ridi.bike/og-image.png";
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+}
+
+const {
+  title = "Ridi motorcycle route generator",
+  description = "Generate the perfect motorcycling route based based on your preferences with Ridi",
+  image = "https://ridi.bike/og-image.png",
+} = Astro.props;
 ---
 
 <!doctype html>
