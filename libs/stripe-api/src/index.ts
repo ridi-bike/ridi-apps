@@ -316,7 +316,18 @@ export class StripeApi {
       return [];
     }
     return [
-      subbedPrice && subbedPrice.id !== this.priceYearly ? subbedPrice : null,
+      subbedPrice && subbedPrice.id !== this.priceYearly
+        ? {
+            id: subbedPrice.id,
+            priceType:
+              subbedPrice.recurring?.interval === "month"
+                ? "monthly"
+                : "yearly",
+            price: subbedPrice.unit_amount / 100,
+            priceMontly:
+              Math.round((subbedProce.unit_amount / 100 / 12) * 100) / 100,
+          }
+        : null,
       {
         id: this.priceYearly,
         priceType: "yearly",
