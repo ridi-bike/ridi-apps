@@ -47,14 +47,18 @@ export default function BillingPage() {
     if (stripeSuccess) {
       posthogClient.captureEvent("billing-subscription-success");
       setLoading(true);
-      apiClient
-        .stripeSuccess()
-        .then(() => {
-          setStripeSuccess();
-          setLoading(false);
-          refetch();
-        })
-        .catch(console.error);
+      setTimeout(
+        () =>
+          apiClient
+            .stripeSuccess()
+            .then(() => {
+              setStripeSuccess();
+              setLoading(false);
+              refetch();
+            })
+            .catch(console.error),
+        500,
+      );
     }
   }, [refetch, setStripeSuccess, stripeSuccess]);
 

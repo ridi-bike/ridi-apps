@@ -58,11 +58,7 @@ export class StripeApi {
     this.priceYearly = priceYearly;
     this.stripeWebhookSecret = stripeWebhookSecret;
   }
-  async createStripeCheckoutUrl(
-    user: { id: string; email: string },
-    priceType: "montly" | "yearly",
-  ) {
-    this.logger.info("Creating Stripe checkout", { userId: user.id });
+  async getUser(user: { id: string; email: string }) {
     let privateUser = await privateUsersGetRow(this.dbClient, {
       userId: user.id,
     });
@@ -72,6 +68,14 @@ export class StripeApi {
         userId: user.id,
       });
     }
+    return privateUser!;
+  }
+  async createStripeCheckoutUrl(
+    user: { id: string; email: string },
+    priceType: "montly" | "yearly",
+  ) {
+    this.logger.info("Creating Stripe checkout", { userId: user.id });
+    const privateUser = await this.getUser(user);
 
     if (privateUser?.subType !== "none") {
       throw this.logger.error("Subscription already in place", { privateUser });
@@ -294,10 +298,15 @@ export class StripeApi {
     return portal.url;
   }
 
-  async getPrices() {
-    const [montlyPrice, yearlyPrice] = await Promise.all([
+  async getPrices(user: { id: string; email: string }) {
+    const privateUser = await this.getUser(user);
+
+    const [montlyPrice, yearlyPrice, subbedPrice] = await Promise.all([
       this.stripe.prices.retrieve(this.priceMontly),
       this.stripe.prices.retrieve(this.priceYearly),
+      privateUser.subType === "stripe" && privateUser.stripePriceId
+        ? this.stripe.prices.retrieve(privateUser.stripePriceId)
+        : null,
     ]);
     if (!montlyPrice.unit_amount || !yearlyPrice.unit_amount) {
       this.logger.error("Price unit_amount missing", {
@@ -307,12 +316,7 @@ export class StripeApi {
       return [];
     }
     return [
-      // {
-      //   id: this.priceMontly,
-      //   priceType: "montly",
-      //   price: montlyPrice.unit_amount / 100,
-      //   priceMontly: montlyPrice.unit_amount / 100,
-      // } as const,
+      subbedPrice && subbedPrice.id !== this.priceYearly ? subbedPrice : null,
       {
         id: this.priceYearly,
         priceType: "yearly",
