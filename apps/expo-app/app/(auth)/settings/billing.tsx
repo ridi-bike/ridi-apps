@@ -210,99 +210,101 @@ export default function BillingPage() {
                     {(!data?.subscription ||
                       data.subscription.status !== "active") && (
                       <View className="mb-8 flex w-full flex-col gap-4 md:max-w-2xl">
-                        {data?.prices?.map((price) => (
-                          <View
-                            key={price.id}
-                            className={cn(
-                              "bg-white dark:bg-gray-900 rounded-2xl shadow-lg border-2 border-black dark:border-gray-700 p-6",
-                              {
-                                "relative overflow-hidden":
-                                  price.priceType === "yearly",
-                              },
-                            )}
-                          >
-                            <View className="mb-4 flex flex-row items-start justify-between">
-                              <View>
-                                <Text
-                                  role="heading"
-                                  aria-level={3}
-                                  className="text-lg font-bold dark:text-gray-100"
-                                >
-                                  {price.priceType === "yearly"
-                                    ? "Yearly"
-                                    : "Monthly"}{" "}
-                                  Supporter
-                                </Text>
-                                <Text className="mt-2 text-2xl font-bold dark:text-gray-100">
-                                  {price.price.toFixed(2)} EUR
-                                  <Text className="text-base font-normal text-gray-600 dark:text-gray-200">
-                                    /
-                                    {price.priceType === "yearly"
-                                      ? "year"
-                                      : "month"}
-                                  </Text>
-                                </Text>
-                                {price.priceType === "yearly" && (
-                                  <Text className="mt-1 text-sm text-gray-600 dark:text-gray-200">
-                                    Only {price.priceMontly.toFixed(2)}{" "}
-                                    EUR/month
-                                  </Text>
-                                )}
-                              </View>
-                            </View>
-                            <View role="list" className="mb-6 space-y-2">
-                              <View
-                                role="listitem"
-                                className="flex flex-row items-center gap-2"
-                              >
-                                <CheckIcon className="size-5 text-[#FF5937]" />
-                                <Text className="dark:text-gray-200">
-                                  Your support helps further Ridi development
-                                </Text>
-                              </View>
-                              <View
-                                role="listitem"
-                                className="flex flex-row items-center gap-2"
-                              >
-                                <CheckIcon className="size-5 text-[#FF5937]" />
-                                <Text className="dark:text-gray-200">
-                                  Download as many GPX files as you want and
-                                  ride as much as you can!
-                                </Text>
-                              </View>
-                            </View>
-                            <Pressable
-                              role="button"
-                              onPress={() => {
-                                posthogClient.captureEvent(
-                                  "billing-subscription-selected",
-                                  { ...price },
-                                );
-                                setLoading(true);
-                                apiClient
-                                  .stripeCheckout({
-                                    query: {
-                                      priceType: price.priceType,
-                                    },
-                                  })
-                                  .then(
-                                    (checkout) =>
-                                      (window.location.href =
-                                        getSuccessResponseOrThrow(
-                                          200,
-                                          checkout,
-                                        ).stripeUrl),
-                                  );
-                              }}
-                              accessibilityRole="button"
-                              className="w-full rounded-xl border-2 border-black bg-[#FF5937] px-4 py-2 font-medium text-white transition-colors hover:bg-[#ff4a25] dark:border-gray-700"
+                        {data?.prices
+                          ?.filter((price) => !!price)
+                          .map((price) => (
+                            <View
+                              key={price.id}
+                              className={cn(
+                                "bg-white dark:bg-gray-900 rounded-2xl shadow-lg border-2 border-black dark:border-gray-700 p-6",
+                                {
+                                  "relative overflow-hidden":
+                                    price.priceType === "yearly",
+                                },
+                              )}
                             >
-                              <Text className="text-center font-medium text-white">
-                                Choose Plan
-                              </Text>
-                            </Pressable>
-                          </View>
-                        ))}
+                              <View className="mb-4 flex flex-row items-start justify-between">
+                                <View>
+                                  <Text
+                                    role="heading"
+                                    aria-level={3}
+                                    className="text-lg font-bold dark:text-gray-100"
+                                  >
+                                    {price.priceType === "yearly"
+                                      ? "Yearly"
+                                      : "Monthly"}{" "}
+                                    Supporter
+                                  </Text>
+                                  <Text className="mt-2 text-2xl font-bold dark:text-gray-100">
+                                    {price.price.toFixed(2)} EUR
+                                    <Text className="text-base font-normal text-gray-600 dark:text-gray-200">
+                                      /
+                                      {price.priceType === "yearly"
+                                        ? "year"
+                                        : "month"}
+                                    </Text>
+                                  </Text>
+                                  {price.priceType === "yearly" && (
+                                    <Text className="mt-1 text-sm text-gray-600 dark:text-gray-200">
+                                      Only {price.priceMontly.toFixed(2)}{" "}
+                                      EUR/month
+                                    </Text>
+                                  )}
+                                </View>
+                              </View>
+                              <View role="list" className="mb-6 space-y-2">
+                                <View
+                                  role="listitem"
+                                  className="flex flex-row items-center gap-2"
+                                >
+                                  <CheckIcon className="size-5 text-[#FF5937]" />
+                                  <Text className="dark:text-gray-200">
+                                    Your support helps further Ridi development
+                                  </Text>
+                                </View>
+                                <View
+                                  role="listitem"
+                                  className="flex flex-row items-center gap-2"
+                                >
+                                  <CheckIcon className="size-5 text-[#FF5937]" />
+                                  <Text className="dark:text-gray-200">
+                                    Download as many GPX files as you want and
+                                    ride as much as you can!
+                                  </Text>
+                                </View>
+                              </View>
+                              <Pressable
+                                role="button"
+                                onPress={() => {
+                                  posthogClient.captureEvent(
+                                    "billing-subscription-selected",
+                                    { ...price },
+                                  );
+                                  setLoading(true);
+                                  apiClient
+                                    .stripeCheckout({
+                                      query: {
+                                        priceType: price.priceType,
+                                      },
+                                    })
+                                    .then(
+                                      (checkout) =>
+                                        (window.location.href =
+                                          getSuccessResponseOrThrow(
+                                            200,
+                                            checkout,
+                                          ).stripeUrl),
+                                    );
+                                }}
+                                accessibilityRole="button"
+                                className="w-full rounded-xl border-2 border-black bg-[#FF5937] px-4 py-2 font-medium text-white transition-colors hover:bg-[#ff4a25] dark:border-gray-700"
+                              >
+                                <Text className="text-center font-medium text-white">
+                                  Choose Plan
+                                </Text>
+                              </Pressable>
+                            </View>
+                          ))}
                         <View
                           className={cn(
                             "bg-white dark:bg-gray-900 rounded-2xl w-full shadow-lg border-2 border-black dark:border-gray-700 p-6",
