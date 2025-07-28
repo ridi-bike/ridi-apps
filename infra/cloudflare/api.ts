@@ -1,18 +1,40 @@
-import * as pulumi from "@pulumi/pulumi";
-import * as cloudflare from "@pulumi/cloudflare";
 import * as fs from "fs";
 import * as path from "path";
-import { accountId, cloudflareProvider, domain, zoneId } from ".";
+
+import * as cloudflare from "@pulumi/cloudflare";
+import * as command from "@pulumi/command";
+import * as pulumi from "@pulumi/pulumi";
+
+import { accountId, cloudflareProvider, domain, zoneId } from "./common";
 
 const projectName = pulumi.getProject();
 const stackName = pulumi.getStack();
 const config = new pulumi.Config();
 
+const apiPath = path.resolve(__dirname, "../../services/cfw-api/");
+const distPath = path.resolve(__dirname, "../../services/cfw-api/dist");
+
+const build = new command.local.Command("worker-api-build", {
+  create: pulumi.interpolate`pnpm build`,
+  dir: apiPath,
+  environment: {
+    SENTRY_AUTH_TOKEN: config.requireSecret("sentry_token"),
+    SENTRY_ORG: config.require("sentry_org"),
+    SENTRY_PROJECT: config.require("sentry_project"),
+  },
+});
+
+const distArchive = build.stdout.apply(() => {
+  return new pulumi.asset.FileArchive(distPath);
+});
+
 const workerScriptPath = path.resolve(
   __dirname,
   "../../services/cfw-api/dist/index.js",
 );
-const workerScriptContent = fs.readFileSync(workerScriptPath, "utf8");
+const workerScriptContent = distArchive.apply(() => {
+  return fs.readFileSync(workerScriptPath, "utf8");
+});
 
 const workerName = pulumi.interpolate`${projectName}-${stackName}-api`;
 
@@ -91,7 +113,7 @@ const workersScriptResource = new cloudflare.WorkersScript(
       enabled: true,
     },
   },
-  { provider: cloudflareProvider },
+  { provider: cloudflareProvider, dependsOn: [build] },
 );
 
 const subdomain = "api";
@@ -106,6 +128,20 @@ const workerRoute = new cloudflare.WorkersRoute(
   { provider: cloudflareProvider },
 );
 
+const releaseFin = new command.local.Command(
+  "astro-app-release-fin",
+  {
+    create: pulumi.interpolate`pnpm release:fin`,
+    dir: apiPath,
+    environment: {
+      SENTRY_AUTH_TOKEN: config.requireSecret("sentry_token"),
+      SENTRY_ORG: config.require("sentry_org"),
+      SENTRY_PROJECT: config.require("sentry_project"),
+    },
+  },
+  { dependsOn: [workersScriptResource, workerRoute] },
+);
+
 const dnsRecord = new cloudflare.DnsRecord(
   "api-worker-dns",
   {
@@ -116,7 +152,7 @@ const dnsRecord = new cloudflare.DnsRecord(
     ttl: 1,
     proxied: true,
   },
-  { provider: cloudflareProvider },
+  { provider: cloudflareProvider, dependsOn: [releaseFin] },
 );
 
-export const workerUrl = pulumi.interpolate`https://${fqdn}`;
+export const apiUrl = pulumi.interpolate`https://${dnsRecord.name}`;

@@ -1,3 +1,3 @@
 import "./landing";
-import "./app";
+// import "./app";
 import "./api";
