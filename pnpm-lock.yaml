@@ -432,6 +432,9 @@ importers:
 
   infra:
     dependencies:
+      '@pulumi/cloudflare':
+        specifier: ^6.4.1
+        version: 6.4.1(typescript@5.8.2)
       '@pulumi/docker-build':
         specifier: ^0.0.10
         version: 0.0.10(typescript@5.8.2)
@@ -441,6 +444,9 @@ importers:
       '@pulumi/pulumi':
         specifier: ^3.113.0
         version: 3.156.0(typescript@5.8.2)
+      '@pulumi/supabase':
+        specifier: file:sdks/supabase
+        version: file:infra/sdks/supabase(typescript@5.8.2)
 
   libs/api-contracts:
     dependencies:
@@ -2936,6 +2942,9 @@ packages:
     resolution: {integrity: sha512-fL20rGWW/Nf4D9Yx1S/WJ50jL+vUN/lr/WyMtpwv1yPcY7W9g9LRssThtlTv+Q8O9nUEpBV9sqO9W0AE7k/0Aw==}
     hasBin: true
 
+  '@pulumi/cloudflare@6.4.1':
+    resolution: {integrity: sha512-H6ao7yVdnHhGCHgucSS2nBxLg7H0mUhKAW1Urpsk2bOYGHACHjBQn6aD3nrp2ERyFBQWTX0DWhhIjEbR3IXWow==}
+
   '@pulumi/docker-build@0.0.10':
     resolution: {integrity: sha512-b+IrUIFzMr9fOEkZPTT7GvVjtG3r8uUVjYkHwg+1yuFGXSQ33z+7Pd/qqoe8sPitJepRJSq1WMUJ9vJ9eMpK0w==}
 
@@ -2956,6 +2965,9 @@ packages:
 
   '@pulumi/query@0.3.0':
     resolution: {integrity: sha512-xfo+yLRM2zVjVEA4p23IjQWzyWl1ZhWOGobsBqRpIarzLvwNH/RAGaoehdxlhx4X92302DrpdIFgTICMN4P38w==}
+
+  '@pulumi/supabase@file:infra/sdks/supabase':
+    resolution: {directory: infra/sdks/supabase, type: directory}
 
   '@puppeteer/browsers@2.8.0':
     resolution: {integrity: sha512-yTwt2KWRmCQAfhvbCRjebaSX8pV1//I0Y3g+A7f/eS7gf0l4eRJoUCvcYdVtboeU4CTOZQuqYbZNS8aBYb8ROQ==}
@@ -5225,6 +5237,9 @@ packages:
 
   async-limiter@1.0.1:
     resolution: {integrity: sha512-csOlWGAcRFJaI6m+F2WKdnMKr4HhdhFVBk0H/QbJFMCr+uO2kwohwXQPxw/9OCxp05r5ghVBFSyioixx3gfkNQ==}
+
+  async-mutex@0.5.0:
+    resolution: {integrity: sha512-1A94B18jkJ3DYq284ohPxoXbfTA5HsQ7/Mf4DEhcyLx3Bz27Rh59iScbB6EPiP+B+joue6YCxcMXSbFC1tZKwA==}
 
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
@@ -15008,6 +15023,15 @@ snapshots:
     dependencies:
       tsx: 4.20.3
 
+  '@pulumi/cloudflare@6.4.1(typescript@5.8.2)':
+    dependencies:
+      '@pulumi/pulumi': 3.156.0(typescript@5.8.2)
+    transitivePeerDependencies:
+      - bluebird
+      - supports-color
+      - ts-node
+      - typescript
+
   '@pulumi/docker-build@0.0.10(typescript@5.8.2)':
     dependencies:
       '@pulumi/pulumi': 3.156.0(typescript@5.8.2)
@@ -15066,6 +15090,16 @@ snapshots:
       - supports-color
 
   '@pulumi/query@0.3.0': {}
+
+  '@pulumi/supabase@file:infra/sdks/supabase(typescript@5.8.2)':
+    dependencies:
+      '@pulumi/pulumi': 3.156.0(typescript@5.8.2)
+      async-mutex: 0.5.0
+    transitivePeerDependencies:
+      - bluebird
+      - supports-color
+      - ts-node
+      - typescript
 
   '@puppeteer/browsers@2.8.0':
     dependencies:
@@ -18476,6 +18510,10 @@ snapshots:
   async-function@1.0.0: {}
 
   async-limiter@1.0.1: {}
+
+  async-mutex@0.5.0:
+    dependencies:
+      tslib: 2.8.1
 
   asynckit@0.4.0: {}
 

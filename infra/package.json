@@ -2,6 +2,7 @@
   "name": "infra",
   "main": "index.ts",
   "dependencies": {
+    "@pulumi/cloudflare": "^6.4.1",
     "@pulumi/docker-build": "^0.0.10",
     "@pulumi/kubernetes": "^4.0.0",
     "@pulumi/pulumi": "^3.113.0"
