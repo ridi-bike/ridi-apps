@@ -17,15 +17,27 @@ const distPath = path.resolve(__dirname, "../../services/cfw-api/dist");
 const build = new command.local.Command("worker-api-build", {
   create: pulumi.interpolate`pnpm build`,
   dir: apiPath,
+  triggers: [new Date().getTime()],
   environment: {
     SENTRY_AUTH_TOKEN: config.requireSecret("sentry_token"),
     SENTRY_ORG: config.require("sentry_org"),
-    SENTRY_PROJECT: config.require("sentry_project"),
+    SENTRY_PROJECT: config.require("sentry_project_api"),
   },
 });
 
 const distArchive = build.stdout.apply(() => {
   return new pulumi.asset.FileArchive(distPath);
+});
+
+new command.local.Command("api-worker-release-new", {
+  create: pulumi.interpolate`pnpm release:new`,
+  triggers: [distArchive],
+  dir: apiPath,
+  environment: {
+    SENTRY_AUTH_TOKEN: config.requireSecret("sentry_token"),
+    SENTRY_ORG: config.require("sentry_org"),
+    SENTRY_PROJECT: config.require("sentry_project_api"),
+  },
 });
 
 const workerScriptPath = path.resolve(
@@ -113,7 +125,7 @@ const workersScriptResource = new cloudflare.WorkersScript(
       enabled: true,
     },
   },
-  { provider: cloudflareProvider, dependsOn: [build] },
+  { provider: cloudflareProvider },
 );
 
 const subdomain = "api";
@@ -128,19 +140,16 @@ const workerRoute = new cloudflare.WorkersRoute(
   { provider: cloudflareProvider },
 );
 
-const releaseFin = new command.local.Command(
-  "astro-app-release-fin",
-  {
-    create: pulumi.interpolate`pnpm release:fin`,
-    dir: apiPath,
-    environment: {
-      SENTRY_AUTH_TOKEN: config.requireSecret("sentry_token"),
-      SENTRY_ORG: config.require("sentry_org"),
-      SENTRY_PROJECT: config.require("sentry_project"),
-    },
+const releaseFin = new command.local.Command("api-worker-release-fin", {
+  create: pulumi.interpolate`pnpm release:fin`,
+  triggers: [distArchive],
+  dir: apiPath,
+  environment: {
+    SENTRY_AUTH_TOKEN: config.requireSecret("sentry_token"),
+    SENTRY_ORG: config.require("sentry_org"),
+    SENTRY_PROJECT: config.require("sentry_project_api"),
   },
-  { dependsOn: [workersScriptResource, workerRoute] },
-);
+});
 
 const dnsRecord = new cloudflare.DnsRecord(
   "api-worker-dns",

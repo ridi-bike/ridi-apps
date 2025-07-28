@@ -14,7 +14,7 @@ const config = new pulumi.Config();
 const pagesName = pulumi.interpolate`${projectName}-${stackName}-astro`;
 
 const pagesProject = new cloudflare.PagesProject(
-  "asto-app",
+  "astro-app",
   {
     accountId,
     name: pagesName,
@@ -40,6 +40,7 @@ const build = new command.local.Command(
   "astro-app-build",
   {
     create: pulumi.interpolate`pnpm build`,
+    triggers: [new Date().getTime()],
     dir: astoPath,
   },
   {
@@ -54,7 +55,7 @@ const distArchive = build.stdout.apply(() => {
 const deployment = new command.local.Command(
   "astro-app-deployment",
   {
-    create: pulumi.interpolate`pnpm exec wrangler pages deploy ${distPath} --project-name=${pagesProject.name}`,
+    create: pulumi.interpolate`pnpm exec wrangler pages deploy ${distPath} --project-name=${pagesProject.name} --branch=main`,
     triggers: [distArchive],
     environment: {
       CLOUDFLARE_ACCOUNT_ID: accountId,
@@ -62,15 +63,25 @@ const deployment = new command.local.Command(
     },
   },
   {
-    dependsOn: [pagesProject, build],
+    dependsOn: [pagesProject],
   },
 );
 
+const pagesDomain = new cloudflare.PagesDomain(
+  "astro-pages-domain",
+  {
+    accountId,
+    name: domain,
+    projectName: pagesProject.name,
+  },
+  { provider: cloudflareProvider, dependsOn: [deployment] },
+);
+
 const dnsRecord = new cloudflare.DnsRecord(
-  "pages-dns-record",
+  "astro-pages-dns-record",
   {
     zoneId,
-    name: domain,
+    name: pagesDomain.name,
     content: pulumi.interpolate`${pagesProject.name}.pages.dev`,
     type: "CNAME",
     ttl: 1,
@@ -79,4 +90,4 @@ const dnsRecord = new cloudflare.DnsRecord(
   { provider: cloudflareProvider, dependsOn: [deployment] },
 );
 
-export const landingUrl = pulumi.interpolate`https://${dnsRecord.name}`;
+export const astroUrl = pulumi.interpolate`https://${dnsRecord.name}`;
