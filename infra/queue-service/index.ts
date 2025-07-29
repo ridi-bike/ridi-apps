@@ -105,11 +105,11 @@ new k8s.apps.v1.Deployment(queueServiceName, {
               },
               {
                 name: "RESEND_SECRET",
-                value: config.require("resend_secret"),
+                value: config.require("resend_secret_key"),
               },
               {
                 name: "RESEND_AUDIENCE_ID",
-                value: config.require("resend_audience_id"),
+                value: config.require("resend_audience_id_general"),
               },
             ],
             startupProbe: {

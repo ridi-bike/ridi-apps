@@ -17,6 +17,13 @@ const {
   description = "Generate the perfect motorcycling route based based on your preferences with Ridi",
   image = "https://ridi.bike/og-image.png",
 } = Astro.props;
+
+if (!import.meta.env.PUBLIC_RIDI_APP_URL) {
+  throw new Error("Missing APP url");
+}
+if (!import.meta.env.PUBLIC_RIDI_API_URL) {
+  throw new Error("Missing API url");
+}
 ---
 
 <!doctype html>

@@ -19,32 +19,6 @@ const pagesProject = new cloudflare.PagesProject(
     accountId,
     name: pagesName,
     productionBranch: "main",
-    deploymentConfigs: {
-      production: {
-        envVars: {
-          EXPO_PUBLIC_SUPABASE_URL: {
-            type: "plain_text",
-            value: config.require("supabase_url"),
-          },
-          EXPO_PUBLIC_SUPABASE_ANON_KEY: {
-            type: "plain_text",
-            value: config.require("supabase_anon_key"),
-          },
-          EXPO_PUBLIC_API_URL: {
-            type: "plain_text",
-            value: apiUrl,
-          },
-          EXPO_PUBLIC_SENTRY_DSN: {
-            type: "plain_text",
-            value: config.require("sentry_dsn"),
-          },
-          EXPO_PUBLIC_POSTHOG_KEY: {
-            type: "plain_text",
-            value: config.require("posthog_key"),
-          },
-        },
-      },
-    },
   },
   { provider: cloudflareProvider },
 );
@@ -52,23 +26,69 @@ const pagesProject = new cloudflare.PagesProject(
 const expoPath = path.resolve(__dirname, "../../apps/expo-app/");
 const distPath = path.resolve(__dirname, "../../apps/expo-app/dist");
 
+// const envCreate = new command.local.Command(
+//   "expo-app-build-env-create",
+//   {
+//     create: pulumi.interpolate`echo "
+// EXPO_PUBLIC_SUPABASE_URL:config.require("supabase_url")}
+// EXPO_PUBLIC_SUPABASE_ANON_KEY:config.require("supabase_anon_key")}
+// EXPO_PUBLIC_API_URL:apiUrl}
+// EXPO_PUBLIC_SENTRY_DSN:config.require("sentry_dsn")}
+// EXPO_PUBLIC_POSTHOG_KEY:config.require("posthog_key")}
+// " > .env`,
+//     triggers: [new Date().getTime()],
+//     dir: expoPath,
+//     environment: {},
+//   },
+//   {
+//     dependsOn: [pagesProject],
+//   },
+// );
+//
 const build = new command.local.Command(
   "expo-app-build",
   {
     create: pulumi.interpolate`pnpm build:web`,
     triggers: [new Date().getTime()],
     dir: expoPath,
+    environment: {
+      EXPO_PUBLIC_SUPABASE_URL: config.require("supabase_url"),
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: config.require("supabase_anon_key"),
+      EXPO_PUBLIC_API_URL: apiUrl,
+      EXPO_PUBLIC_SENTRY_DSN: config.require("sentry_dsn"),
+      EXPO_PUBLIC_POSTHOG_KEY: config.require("posthog_key"),
+      SENTRY_AUTH_TOKEN: config.requireSecret("sentry_token"),
+      SENTRY_ORG: config.require("sentry_org"),
+      SENTRY_PROJECT: config.require("sentry_project_expo"),
+    },
   },
   {
     dependsOn: [pagesProject],
   },
 );
 
-const buildHash = new command.local.Command("expo-app-build-hash", {
-  create: pulumi.interpolate`find ./ -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum`,
-  triggers: [build],
-  dir: distPath,
-});
+// const envRem = new command.local.Command(
+//   "expo-app-build-env-remove",
+//   {
+//     create: pulumi.interpolate`rm .env`,
+//     triggers: [new Date().getTime()],
+//     dir: expoPath,
+//     environment: {},
+//   },
+//   {
+//     dependsOn: [build],
+//   },
+// );
+
+const buildHash = new command.local.Command(
+  "expo-app-build-hash",
+  {
+    create: pulumi.interpolate`find ./ -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum`,
+    triggers: [new Date().getTime()],
+    dir: distPath,
+  },
+  { dependsOn: [build] },
+);
 
 const relNew = new command.local.Command("expo-app-release-new", {
   create: pulumi.interpolate`pnpm release:web:new`,
