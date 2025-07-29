@@ -94,7 +94,7 @@ const mapPreviewServiceDeployment = new k8s.apps.v1.Deployment(
               env: [
                 {
                   name: "SUPABASE_DB_URL",
-                  value: config.require("supabase_db_url"),
+                  value: config.require("supabase_db_url_stateful"),
                 },
                 {
                   name: "PORT",

@@ -93,7 +93,7 @@ new k8s.apps.v1.Deployment(queueServiceName, {
             env: [
               {
                 name: "SUPABASE_DB_URL",
-                value: config.require("supabase_db_url"),
+                value: config.require("supabase_db_url_stateful"),
               },
               {
                 name: "ROUTER_SERVICE_LIST",

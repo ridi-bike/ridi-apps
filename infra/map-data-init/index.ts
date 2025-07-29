@@ -89,7 +89,7 @@ export const getMapDataInitContainer = (
       },
       {
         name: "SUPABASE_DB_URL",
-        value: config.requireSecret("supabase_db_url"),
+        value: config.requireSecret("supabase_db_url_stateful"),
       },
     ],
     volumeMounts: [ridiDataVolumeSetup.volumeMount],

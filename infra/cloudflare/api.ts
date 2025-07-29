@@ -64,7 +64,7 @@ const workersScriptResource = new cloudflare.WorkersScript(
       {
         name: "SUPABASE_DB_URL",
         type: "plain_text",
-        text: config.requireSecret("supabase_db_url"),
+        text: config.requireSecret("supabase_db_url_stateless"),
       },
       {
         name: "RIDI_APP_URL",
