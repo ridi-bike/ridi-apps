@@ -86,7 +86,6 @@ const mapPreviewServiceDeployment = new k8s.apps.v1.Deployment(
           },
         },
         spec: {
-          hostNetwork: stackName === "dev",
           containers: [
             {
               name: mapPreviewServiceName,

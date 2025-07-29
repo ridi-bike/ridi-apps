@@ -85,7 +85,6 @@ new k8s.apps.v1.Deployment(queueServiceName, {
         },
       },
       spec: {
-        hostNetwork: stackName === "dev",
         containers: [
           {
             name: queueServiceName,

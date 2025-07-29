@@ -90,7 +90,6 @@ regions.forEach((region, regionIdx) => {
           backoffLimit: 10,
           template: {
             spec: {
-              hostNetwork: stackName === "dev",
               restartPolicy: "OnFailure",
               containers: [
                 {
