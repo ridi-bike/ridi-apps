@@ -64,9 +64,7 @@ const build = new command.local.Command(
   },
 );
 
-const distArchive = build.stdout.apply(() => {
-  return new pulumi.asset.FileArchive(distPath);
-});
+const distArchive = new pulumi.asset.FileArchive(distPath);
 
 new command.local.Command(
   "expo-app-release-new",
@@ -81,7 +79,7 @@ new command.local.Command(
     },
   },
   {
-    dependsOn: [pagesProject],
+    dependsOn: [pagesProject, build],
   },
 );
 
@@ -96,7 +94,7 @@ const deployment = new command.local.Command(
     },
   },
   {
-    dependsOn: [pagesProject],
+    dependsOn: [pagesProject, build],
   },
 );
 
@@ -113,7 +111,7 @@ new command.local.Command(
     },
   },
   {
-    dependsOn: [pagesProject],
+    dependsOn: [pagesProject, deployment],
   },
 );
 
@@ -121,7 +119,7 @@ const pagesDomain = new cloudflare.PagesDomain(
   "expo-pages-domain",
   {
     accountId,
-    name: domain,
+    name: `app.${domain}`,
     projectName: pagesProject.name,
   },
   { provider: cloudflareProvider, dependsOn: [deployment] },
@@ -140,4 +138,4 @@ const dnsRecord = new cloudflare.DnsRecord(
   { provider: cloudflareProvider, dependsOn: [deployment] },
 );
 
-export const expoUrl = pulumi.interpolate`https://${dnsRecord.name}`;
+// export const expoUrl = pulumi.interpolate`https://${pagesDomain.name}`;

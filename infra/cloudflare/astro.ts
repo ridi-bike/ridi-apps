@@ -90,4 +90,4 @@ const dnsRecord = new cloudflare.DnsRecord(
   { provider: cloudflareProvider, dependsOn: [deployment] },
 );
 
-export const astroUrl = pulumi.interpolate`https://${dnsRecord.name}`;
+// export const astroUrl = pulumi.interpolate`https://${pagesDomain.name}`;
