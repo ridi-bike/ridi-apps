@@ -52,20 +52,14 @@ const distArchive = build.stdout.apply(() => {
   return new pulumi.asset.FileArchive(distPath);
 });
 
-const deployment = new command.local.Command(
-  "astro-app-deployment",
-  {
-    create: pulumi.interpolate`pnpm exec wrangler pages deploy ${distPath} --project-name=${pagesProject.name} --branch=main`,
-    triggers: [distArchive],
-    environment: {
-      CLOUDFLARE_ACCOUNT_ID: accountId,
-      CLOUDFLARE_API_TOKEN: config.requireSecret("cloudflare_api_token"),
-    },
+new command.local.Command("astro-app-deployment", {
+  create: pulumi.interpolate`pnpm exec wrangler pages deploy ${distPath} --project-name=${pagesProject.name} --branch=main`,
+  triggers: [distArchive],
+  environment: {
+    CLOUDFLARE_ACCOUNT_ID: accountId,
+    CLOUDFLARE_API_TOKEN: config.requireSecret("cloudflare_api_token"),
   },
-  {
-    dependsOn: [pagesProject],
-  },
-);
+});
 
 const pagesDomain = new cloudflare.PagesDomain(
   "astro-pages-domain",
@@ -74,7 +68,7 @@ const pagesDomain = new cloudflare.PagesDomain(
     name: domain,
     projectName: pagesProject.name,
   },
-  { provider: cloudflareProvider, dependsOn: [deployment] },
+  { provider: cloudflareProvider },
 );
 
 const dnsRecord = new cloudflare.DnsRecord(
@@ -87,7 +81,7 @@ const dnsRecord = new cloudflare.DnsRecord(
     ttl: 1,
     proxied: true,
   },
-  { provider: cloudflareProvider, dependsOn: [deployment] },
+  { provider: cloudflareProvider },
 );
 
-// export const astroUrl = pulumi.interpolate`https://${pagesDomain.name}`;
+export const astroUrl = pulumi.interpolate`https://${dnsRecord.name}`;

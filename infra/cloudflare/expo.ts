@@ -64,45 +64,36 @@ const build = new command.local.Command(
   },
 );
 
-const distArchive = new pulumi.asset.FileArchive(distPath);
+const buildHash = new command.local.Command("expo-app-build-hash", {
+  create: pulumi.interpolate`find ./ -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum`,
+  triggers: [build],
+  dir: distPath,
+});
 
-new command.local.Command(
-  "expo-app-release-new",
-  {
-    create: pulumi.interpolate`pnpm release:web:new`,
-    triggers: [distArchive],
-    dir: expoPath,
-    environment: {
-      SENTRY_AUTH_TOKEN: config.requireSecret("sentry_token"),
-      SENTRY_ORG: config.require("sentry_org"),
-      SENTRY_PROJECT: config.require("sentry_project_expo"),
-    },
+const relNew = new command.local.Command("expo-app-release-new", {
+  create: pulumi.interpolate`pnpm release:web:new`,
+  triggers: [buildHash.stdout],
+  dir: expoPath,
+  environment: {
+    SENTRY_AUTH_TOKEN: config.requireSecret("sentry_token"),
+    SENTRY_ORG: config.require("sentry_org"),
+    SENTRY_PROJECT: config.require("sentry_project_expo"),
   },
-  {
-    dependsOn: [pagesProject, build],
-  },
-);
+});
 
-const deployment = new command.local.Command(
-  "expo-app-deployment",
-  {
-    create: pulumi.interpolate`pnpm exec wrangler pages deploy ${distPath} --project-name=${pagesProject.name} --branch=main`,
-    triggers: [distArchive],
-    environment: {
-      CLOUDFLARE_ACCOUNT_ID: accountId,
-      CLOUDFLARE_API_TOKEN: config.requireSecret("cloudflare_api_token"),
-    },
+new command.local.Command("expo-app-deployment", {
+  create: pulumi.interpolate`pnpm exec wrangler pages deploy ${distPath} --project-name=${pagesProject.name} --branch=main`,
+  triggers: [buildHash.stdout],
+  environment: {
+    CLOUDFLARE_ACCOUNT_ID: accountId,
+    CLOUDFLARE_API_TOKEN: config.requireSecret("cloudflare_api_token"),
   },
-  {
-    dependsOn: [pagesProject, build],
-  },
-);
+});
 
 new command.local.Command(
   "expo-app-release-fin",
   {
     create: pulumi.interpolate`pnpm release:web:fin`,
-    triggers: [distArchive],
     dir: expoPath,
     environment: {
       SENTRY_AUTH_TOKEN: config.requireSecret("sentry_token"),
@@ -111,7 +102,7 @@ new command.local.Command(
     },
   },
   {
-    dependsOn: [pagesProject, deployment],
+    dependsOn: [relNew],
   },
 );
 
@@ -122,7 +113,7 @@ const pagesDomain = new cloudflare.PagesDomain(
     name: `app.${domain}`,
     projectName: pagesProject.name,
   },
-  { provider: cloudflareProvider, dependsOn: [deployment] },
+  { provider: cloudflareProvider },
 );
 
 const dnsRecord = new cloudflare.DnsRecord(
@@ -135,7 +126,7 @@ const dnsRecord = new cloudflare.DnsRecord(
     ttl: 1,
     proxied: true,
   },
-  { provider: cloudflareProvider, dependsOn: [deployment] },
+  { provider: cloudflareProvider },
 );
 
-// export const expoUrl = pulumi.interpolate`https://${pagesDomain.name}`;
+export const expoUrl = pulumi.interpolate`https://${dnsRecord.name}`;

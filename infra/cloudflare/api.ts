@@ -25,27 +25,23 @@ const build = new command.local.Command("worker-api-build", {
   },
 });
 
-const distArchive = build.stdout.apply(() => {
-  return new pulumi.asset.FileArchive(distPath);
+const workerScriptPath = path.resolve(
+  __dirname,
+  "../../services/cfw-api/dist/index.js",
+);
+const workerScriptContent = build.stdout.apply(() => {
+  return fs.readFileSync(workerScriptPath, "utf8");
 });
 
-new command.local.Command("api-worker-release-new", {
+const relNew = new command.local.Command("api-worker-release-new", {
   create: pulumi.interpolate`pnpm release:new`,
-  triggers: [distArchive],
+  triggers: [workerScriptContent],
   dir: apiPath,
   environment: {
     SENTRY_AUTH_TOKEN: config.requireSecret("sentry_token"),
     SENTRY_ORG: config.require("sentry_org"),
     SENTRY_PROJECT: config.require("sentry_project_api"),
   },
-});
-
-const workerScriptPath = path.resolve(
-  __dirname,
-  "../../services/cfw-api/dist/index.js",
-);
-const workerScriptContent = distArchive.apply(() => {
-  return fs.readFileSync(workerScriptPath, "utf8");
 });
 
 const workerName = pulumi.interpolate`${projectName}-${stackName}-api`;
@@ -142,7 +138,7 @@ const workerRoute = new cloudflare.WorkersRoute(
 
 const releaseFin = new command.local.Command("api-worker-release-fin", {
   create: pulumi.interpolate`pnpm release:fin`,
-  triggers: [distArchive],
+  triggers: [relNew],
   dir: apiPath,
   environment: {
     SENTRY_AUTH_TOKEN: config.requireSecret("sentry_token"),
