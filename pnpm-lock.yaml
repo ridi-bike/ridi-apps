@@ -432,6 +432,12 @@ importers:
 
   infra:
     dependencies:
+      '@pulumi/cloudflare':
+        specifier: ^6.4.1
+        version: 6.4.1(typescript@5.8.2)
+      '@pulumi/command':
+        specifier: ^1.1.0
+        version: 1.1.0(typescript@5.8.2)
       '@pulumi/docker-build':
         specifier: ^0.0.10
         version: 0.0.10(typescript@5.8.2)
@@ -2935,6 +2941,12 @@ packages:
   '@protomaps/basemaps@5.4.1':
     resolution: {integrity: sha512-fL20rGWW/Nf4D9Yx1S/WJ50jL+vUN/lr/WyMtpwv1yPcY7W9g9LRssThtlTv+Q8O9nUEpBV9sqO9W0AE7k/0Aw==}
     hasBin: true
+
+  '@pulumi/cloudflare@6.4.1':
+    resolution: {integrity: sha512-H6ao7yVdnHhGCHgucSS2nBxLg7H0mUhKAW1Urpsk2bOYGHACHjBQn6aD3nrp2ERyFBQWTX0DWhhIjEbR3IXWow==}
+
+  '@pulumi/command@1.1.0':
+    resolution: {integrity: sha512-ovVec+gXeqpcm76xwYYZvfJym8bG9NRvlBGQWbn0+c0fKQziZIjiv5V+AxTKfb+dLWKe7Otyt206L1IWq41hyw==}
 
   '@pulumi/docker-build@0.0.10':
     resolution: {integrity: sha512-b+IrUIFzMr9fOEkZPTT7GvVjtG3r8uUVjYkHwg+1yuFGXSQ33z+7Pd/qqoe8sPitJepRJSq1WMUJ9vJ9eMpK0w==}
@@ -15007,6 +15019,24 @@ snapshots:
   '@protomaps/basemaps@5.4.1':
     dependencies:
       tsx: 4.20.3
+
+  '@pulumi/cloudflare@6.4.1(typescript@5.8.2)':
+    dependencies:
+      '@pulumi/pulumi': 3.156.0(typescript@5.8.2)
+    transitivePeerDependencies:
+      - bluebird
+      - supports-color
+      - ts-node
+      - typescript
+
+  '@pulumi/command@1.1.0(typescript@5.8.2)':
+    dependencies:
+      '@pulumi/pulumi': 3.156.0(typescript@5.8.2)
+    transitivePeerDependencies:
+      - bluebird
+      - supports-color
+      - ts-node
+      - typescript
 
   '@pulumi/docker-build@0.0.10(typescript@5.8.2)':
     dependencies:
