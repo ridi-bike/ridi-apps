@@ -4,9 +4,14 @@ import * as cloudflare from "@pulumi/cloudflare";
 import * as command from "@pulumi/command";
 import * as pulumi from "@pulumi/pulumi";
 
-import { apiUrl } from "./api";
-import { accountId, cloudflareProvider, domain, zoneId } from "./common";
-import { expoUrl } from "./expo";
+import {
+  accountId,
+  apiUrl,
+  cloudflareProvider,
+  domain,
+  expoUrl,
+  zoneId,
+} from "./common";
 
 const projectName = pulumi.getProject();
 const stackName = pulumi.getStack();
@@ -66,7 +71,7 @@ const pagesDomain = new cloudflare.PagesDomain(
   { provider: cloudflareProvider },
 );
 
-const dnsRecord = new cloudflare.DnsRecord(
+new cloudflare.DnsRecord(
   "astro-pages-dns-record",
   {
     zoneId,
@@ -78,5 +83,3 @@ const dnsRecord = new cloudflare.DnsRecord(
   },
   { provider: cloudflareProvider },
 );
-
-export const astroUrl = pulumi.interpolate`https://${dnsRecord.name}`;

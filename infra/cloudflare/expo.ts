@@ -4,8 +4,13 @@ import * as cloudflare from "@pulumi/cloudflare";
 import * as command from "@pulumi/command";
 import * as pulumi from "@pulumi/pulumi";
 
-import { apiUrl } from "./api";
-import { accountId, cloudflareProvider, domain, zoneId } from "./common";
+import {
+  accountId,
+  apiUrl,
+  cloudflareProvider,
+  domain,
+  zoneId,
+} from "./common";
 
 const projectName = pulumi.getProject();
 const stackName = pulumi.getStack();
@@ -26,25 +31,6 @@ const pagesProject = new cloudflare.PagesProject(
 const expoPath = path.resolve(__dirname, "../../apps/expo-app/");
 const distPath = path.resolve(__dirname, "../../apps/expo-app/dist");
 
-// const envCreate = new command.local.Command(
-//   "expo-app-build-env-create",
-//   {
-//     create: pulumi.interpolate`echo "
-// EXPO_PUBLIC_SUPABASE_URL:config.require("supabase_url")}
-// EXPO_PUBLIC_SUPABASE_ANON_KEY:config.require("supabase_anon_key")}
-// EXPO_PUBLIC_API_URL:apiUrl}
-// EXPO_PUBLIC_SENTRY_DSN:config.require("sentry_dsn")}
-// EXPO_PUBLIC_POSTHOG_KEY:config.require("posthog_key")}
-// " > .env`,
-//     triggers: [new Date().getTime()],
-//     dir: expoPath,
-//     environment: {},
-//   },
-//   {
-//     dependsOn: [pagesProject],
-//   },
-// );
-//
 const build = new command.local.Command(
   "expo-app-build",
   {
@@ -66,19 +52,6 @@ const build = new command.local.Command(
     dependsOn: [pagesProject],
   },
 );
-
-// const envRem = new command.local.Command(
-//   "expo-app-build-env-remove",
-//   {
-//     create: pulumi.interpolate`rm .env`,
-//     triggers: [new Date().getTime()],
-//     dir: expoPath,
-//     environment: {},
-//   },
-//   {
-//     dependsOn: [build],
-//   },
-// );
 
 const buildHash = new command.local.Command(
   "expo-app-build-hash",
@@ -136,7 +109,7 @@ const pagesDomain = new cloudflare.PagesDomain(
   { provider: cloudflareProvider },
 );
 
-const dnsRecord = new cloudflare.DnsRecord(
+new cloudflare.DnsRecord(
   "expo-pages-dns-record",
   {
     zoneId,
@@ -148,5 +121,3 @@ const dnsRecord = new cloudflare.DnsRecord(
   },
   { provider: cloudflareProvider },
 );
-
-export const expoUrl = pulumi.interpolate`https://${dnsRecord.name}`;

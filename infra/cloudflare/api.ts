@@ -5,14 +5,20 @@ import * as cloudflare from "@pulumi/cloudflare";
 import * as command from "@pulumi/command";
 import * as pulumi from "@pulumi/pulumi";
 
-import { accountId, cloudflareProvider, domain, zoneId } from "./common";
+import {
+  accountId,
+  apiDomain,
+  astroUrl,
+  cloudflareProvider,
+  expoUrl,
+  zoneId,
+} from "./common";
 
 const projectName = pulumi.getProject();
 const stackName = pulumi.getStack();
 const config = new pulumi.Config();
 
 const apiPath = path.resolve(__dirname, "../../services/cfw-api/");
-const distPath = path.resolve(__dirname, "../../services/cfw-api/dist");
 
 const build = new command.local.Command("worker-api-build", {
   create: pulumi.interpolate`pnpm build`,
@@ -63,27 +69,27 @@ const workersScriptResource = new cloudflare.WorkersScript(
       },
       {
         name: "SUPABASE_DB_URL",
-        type: "plain_text",
+        type: "secret_text",
         text: config.requireSecret("supabase_db_url_stateless"),
       },
       {
         name: "RIDI_APP_URL",
         type: "plain_text",
-        text: config.require("stripe_price_id_yearly"),
+        text: expoUrl,
       },
       {
         name: "RIDI_LANDING_URL",
         type: "plain_text",
-        text: config.require("stripe_price_id_yearly"),
+        text: astroUrl,
       },
       {
         name: "SUPABASE_SERVICE_ROLE_KEY",
-        type: "plain_text",
+        type: "secret_text",
         text: config.requireSecret("supabase_service_role_key"),
       },
       {
         name: "STRIPE_SECRET_KEY",
-        type: "plain_text",
+        type: "secret_text",
         text: config.requireSecret("stripe_secret_key"),
       },
       {
@@ -93,7 +99,7 @@ const workersScriptResource = new cloudflare.WorkersScript(
       },
       {
         name: "STRIPE_WEBHOOK_SECRET",
-        type: "plain_text",
+        type: "secret_text",
         text: config.requireSecret("stripe_webhook_secret"),
       },
       {
@@ -108,7 +114,7 @@ const workersScriptResource = new cloudflare.WorkersScript(
       },
       {
         name: "RESEND_KEY",
-        type: "plain_text",
+        type: "secret_text",
         text: config.requireSecret("resend_secret_key"),
       },
       {
@@ -124,19 +130,29 @@ const workersScriptResource = new cloudflare.WorkersScript(
   { provider: cloudflareProvider },
 );
 
-const subdomain = "api";
-const fqdn = `${subdomain}.${domain}`;
-const workerRoute = new cloudflare.WorkersRoute(
+new cloudflare.WorkersRoute(
   "api-worker-route",
   {
     zoneId: zoneId,
-    pattern: fqdn,
+    pattern: `${apiDomain}/*`,
     script: workersScriptResource.scriptName,
   },
   { provider: cloudflareProvider },
 );
 
-const releaseFin = new command.local.Command("api-worker-release-fin", {
+new cloudflare.WorkersCustomDomain(
+  "api-worker-domain",
+  {
+    accountId,
+    environment: "production",
+    hostname: apiDomain,
+    service: workersScriptResource.scriptName,
+    zoneId,
+  },
+  { provider: cloudflareProvider },
+);
+
+new command.local.Command("api-worker-release-fin", {
   create: pulumi.interpolate`pnpm release:fin`,
   triggers: [relNew],
   dir: apiPath,
@@ -146,18 +162,3 @@ const releaseFin = new command.local.Command("api-worker-release-fin", {
     SENTRY_PROJECT: config.require("sentry_project_api"),
   },
 });
-
-const dnsRecord = new cloudflare.DnsRecord(
-  "api-worker-dns",
-  {
-    zoneId: zoneId,
-    name: workerRoute.pattern,
-    type: "A",
-    content: "192.0.2.1",
-    ttl: 1,
-    proxied: true,
-  },
-  { provider: cloudflareProvider, dependsOn: [releaseFin] },
-);
-
-export const apiUrl = pulumi.interpolate`https://${dnsRecord.name}`;
