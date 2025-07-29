@@ -1,0 +1,22 @@
+name: Deploy Full Stack
+
+on:
+  workflow_dispatch:
+    inputs:
+      stack:
+        description: "Pulumi stack"
+        required: true
+        default: "dev"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.stack }}
+
+    steps:
+      - name: Checkout out repo
+        uses: actions/checkout@v3
+
+      - name: Run Pulumi Deploy
+        run: pulumi up -s ${{ github.event.inputs.stack }}
+        working-directory: ./infra
