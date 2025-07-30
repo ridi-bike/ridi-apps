@@ -17,6 +17,9 @@ jobs:
       - name: Checkout out repo
         uses: actions/checkout@v3
 
+      - name: Install Deps
+        run: pnpm install
+
       - name: Run Pulumi Deploy
         run: pulumi up -s ${{ github.event.inputs.stack }}
         working-directory: ./infra

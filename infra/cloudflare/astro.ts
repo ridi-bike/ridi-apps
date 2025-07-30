@@ -4,8 +4,14 @@ import * as cloudflare from "@pulumi/cloudflare";
 import * as command from "@pulumi/command";
 import * as pulumi from "@pulumi/pulumi";
 
-import { apiUrl } from "./api";
-import { accountId, cloudflareProvider, domain, zoneId } from "./common";
+import {
+  accountId,
+  apiUrl,
+  cloudflareProvider,
+  domain,
+  expoUrl,
+  zoneId,
+} from "./common";
 
 const projectName = pulumi.getProject();
 const stackName = pulumi.getStack();
@@ -19,16 +25,6 @@ const pagesProject = new cloudflare.PagesProject(
     accountId,
     name: pagesName,
     productionBranch: "main",
-    deploymentConfigs: {
-      production: {
-        envVars: {
-          PUBLIC_RIDI_API_URL: {
-            type: "plain_text",
-            value: apiUrl,
-          },
-        },
-      },
-    },
   },
   { provider: cloudflareProvider },
 );
@@ -42,6 +38,10 @@ const build = new command.local.Command(
     create: pulumi.interpolate`pnpm build`,
     triggers: [new Date().getTime()],
     dir: astoPath,
+    environment: {
+      PUBLIC_RIDI_API_URL: apiUrl,
+      PUBLIC_RIDI_APP_URL: expoUrl,
+    },
   },
   {
     dependsOn: [pagesProject],
@@ -71,7 +71,7 @@ const pagesDomain = new cloudflare.PagesDomain(
   { provider: cloudflareProvider },
 );
 
-const dnsRecord = new cloudflare.DnsRecord(
+new cloudflare.DnsRecord(
   "astro-pages-dns-record",
   {
     zoneId,
@@ -83,5 +83,3 @@ const dnsRecord = new cloudflare.DnsRecord(
   },
   { provider: cloudflareProvider },
 );
-
-export const astroUrl = pulumi.interpolate`https://${dnsRecord.name}`;

@@ -751,7 +751,7 @@ const ridiLogger = RidiLogger.init({ service: "cfw-api" });
 
 export default Sentry.withSentry(
   (env: CloudflareBindings) => ({
-    enabled: env.RIDI_ENV === "prod",
+    enabled: env.RIDI_ENV !== "local",
     dsn: env.SENTRY_DSN,
     environment: env.RIDI_ENV,
     sendDefaultPii: true,
