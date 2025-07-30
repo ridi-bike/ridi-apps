@@ -105,7 +105,7 @@ const workersScriptResource = new cloudflare.WorkersScript(
       {
         name: "SENTRY_DSN",
         type: "plain_text",
-        text: config.requireSecret("sentry_dsn"),
+        text: config.requireSecret("sentry_dsn_api"),
       },
       {
         name: "RIDI_ENV",
