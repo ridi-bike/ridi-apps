@@ -21,5 +21,5 @@ jobs:
         run: pnpm install
 
       - name: Run Pulumi Deploy
-        run: pulumi up -s ${{ github.event.inputs.stack }}
+        run: pulumi up -s ${{ github.event.inputs.stack }} --skip-preview
         working-directory: ./infra
