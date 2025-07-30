@@ -1,5 +1,7 @@
 FROM node:23-bookworm AS build
 
+ENV DOCKER_ENV="true"
+
 WORKDIR /app
 
 ARG ROUTER_VERSION
@@ -19,6 +21,7 @@ RUN npm install -g pnpm
 COPY ./libs/ ./libs
 COPY ./services/router-service ./services/router-service
 COPY ./package.json ./package.json
+COPY ./husky.sh ./husky.sh
 COPY ./pnpm-workspace.yaml ./pnpm-workspace.yaml
 
 RUN pnpm install --prod
