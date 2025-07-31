@@ -39,9 +39,7 @@ export class MessageHandlerMapPreview {
     const response = await this.mapPreviewServiceClient.callMapPreviewService({
       type: "route",
       reqId: routeId,
-      route: (routeRecord.latLonArray as unknown as [number, number][]).filter(
-        (_c, i) => i % Math.ceil(routeRecord.latLonArray.length / 25) === 0,
-      ),
+      route: routeRecord.latLonArray as unknown as [number, number][],
     });
 
     if (response.status !== 200) {
