@@ -1,0 +1,12 @@
+---
+export const prerender = false;
+
+const { referral } = Astro.params;
+if (referral) {
+  Astro.cookies.set("ridi-referral", referral, {
+    domain: import.meta.env.PUBLIC_RIDI_DOMAIN,
+  });
+  return Astro.redirect(`/?utm_source=${referral}`);
+}
+return Astro.redirect("/");
+---
