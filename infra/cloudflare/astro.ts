@@ -17,69 +17,72 @@ const projectName = pulumi.getProject();
 const stackName = pulumi.getStack();
 const config = new pulumi.Config();
 
-const pagesName = pulumi.interpolate`${projectName}-${stackName}-astro`;
-
-const pagesProject = new cloudflare.PagesProject(
-  "astro-app",
-  {
-    accountId,
-    name: pagesName,
-    productionBranch: "main",
-  },
-  { provider: cloudflareProvider },
-);
+const workerName = pulumi.interpolate`${projectName}-${stackName}-astro`;
 
 const astoPath = path.resolve(__dirname, "../../apps/astro-app/");
 const distPath = path.resolve(__dirname, "../../apps/astro-app/dist");
 
-const build = new command.local.Command(
-  "astro-app-build",
-  {
-    create: pulumi.interpolate`pnpm build`,
-    triggers: [new Date().getTime()],
-    dir: astoPath,
-    environment: {
-      PUBLIC_RIDI_API_URL: apiUrl,
-      PUBLIC_RIDI_APP_URL: expoUrl,
-    },
+const build = new command.local.Command("astro-app-build", {
+  create: pulumi.interpolate`pnpm build`,
+  triggers: [new Date().getTime()],
+  dir: astoPath,
+  environment: {
+    PUBLIC_RIDI_API_URL: apiUrl,
+    PUBLIC_RIDI_APP_URL: expoUrl,
+    PUBLIC_RIDI_DOMAIN: domain,
   },
-  {
-    dependsOn: [pagesProject],
-  },
-);
+});
 
 const distArchive = build.stdout.apply(() => {
   return new pulumi.asset.FileArchive(distPath);
 });
 
-new command.local.Command("astro-app-deployment", {
-  create: pulumi.interpolate`pnpm exec wrangler pages deploy ${distPath} --project-name=${pagesProject.name} --branch=main`,
+const deploy = new command.local.Command("astro-app-deploy", {
+  // delete: pulumi.interpolate`pnpm exec wrangler delete "${distPath}/_worker.js/index.js"\
+  // --name ${workerName}`,
+  create: pulumi.interpolate`pnpm exec wrangler deploy "${distPath}/_worker.js/index.js"\
+    --name ${workerName} \
+    --compatibility-date "2025-03-25" \
+    --compatibility-flags "nodejs_compat" \
+    --assets "${distPath}" \
+    --var "PUBLIC_RIDI_API_URL=${apiUrl}" \
+    --var "PUBLIC_RIDI_DOMAIN=${domain}" \
+    --var "RIDI_ENV=${stackName}" \
+    --var "NODE_VERSION=22.0.0"`,
+  update: pulumi.interpolate`pnpm exec wrangler deploy "${distPath}/_worker.js/index.js"\
+    --name ${workerName} \
+    --compatibility-date "2025-03-25" \
+    --compatibility-flags "nodejs_compat" \
+    --assets "${distPath}" \
+    --var "PUBLIC_RIDI_API_URL=${apiUrl}" \
+    --var "PUBLIC_RIDI_DOMAIN=${domain}" \
+    --var "RIDI_ENV=${stackName}" \
+    --var "NODE_VERSION=22.0.0"`,
   triggers: [distArchive],
+  dir: astoPath,
   environment: {
-    CLOUDFLARE_ACCOUNT_ID: accountId,
     CLOUDFLARE_API_TOKEN: config.requireSecret("cloudflare_api_token"),
   },
 });
 
-const pagesDomain = new cloudflare.PagesDomain(
-  "astro-pages-domain",
+const workersRoute = new cloudflare.WorkersRoute(
+  "astro-worker-route",
   {
-    accountId,
-    name: domain,
-    projectName: pagesProject.name,
+    zoneId: zoneId,
+    pattern: `${domain}/*`,
+    script: workerName,
   },
-  { provider: cloudflareProvider },
+  { provider: cloudflareProvider, dependsOn: [deploy] },
 );
 
-new cloudflare.DnsRecord(
-  "astro-pages-dns-record",
+new cloudflare.WorkersCustomDomain(
+  "astro-worker-domain",
   {
+    accountId,
+    environment: "production",
+    hostname: domain,
+    service: workerName,
     zoneId,
-    name: pagesDomain.name,
-    content: pulumi.interpolate`${pagesProject.name}.pages.dev`,
-    type: "CNAME",
-    ttl: 1,
-    proxied: true,
   },
-  { provider: cloudflareProvider },
+  { provider: cloudflareProvider, dependsOn: [workersRoute] },
 );
