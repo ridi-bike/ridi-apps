@@ -15,6 +15,7 @@ import {
 
 const projectName = pulumi.getProject();
 const stackName = pulumi.getStack();
+const config = new pulumi.Config();
 
 const workerName = pulumi.interpolate`${projectName}-${stackName}-astro`;
 
@@ -37,22 +38,35 @@ const distArchive = build.stdout.apply(() => {
 });
 
 const deploy = new command.local.Command("astro-app-deploy", {
-  create: pulumi.interpolate`pnpm exec wrangler deploy \
+  // delete: pulumi.interpolate`pnpm exec wrangler delete "${distPath}/_worker.js/index.js"\
+  // --name ${workerName}`,
+  create: pulumi.interpolate`pnpm exec wrangler deploy "${distPath}/_worker.js/index.js"\
     --name ${workerName} \
-    --main "/dist/_worker.js/index.js" \
     --compatibility-date "2025-03-25" \
     --compatibility-flags "nodejs_compat" \
     --assets "${distPath}" \
     --var "PUBLIC_RIDI_API_URL=${apiUrl}" \
     --var "PUBLIC_RIDI_DOMAIN=${domain}" \
-    --var "NODE_VERSION=22.0.0" \
-    --observability-enabled`,
+    --var "RIDI_ENV=${stackName}" \
+    --var "NODE_VERSION=22.0.0"`,
+  update: pulumi.interpolate`pnpm exec wrangler deploy "${distPath}/_worker.js/index.js"\
+    --name ${workerName} \
+    --compatibility-date "2025-03-25" \
+    --compatibility-flags "nodejs_compat" \
+    --assets "${distPath}" \
+    --var "PUBLIC_RIDI_API_URL=${apiUrl}" \
+    --var "PUBLIC_RIDI_DOMAIN=${domain}" \
+    --var "RIDI_ENV=${stackName}" \
+    --var "NODE_VERSION=22.0.0"`,
   triggers: [distArchive],
   dir: astoPath,
+  environment: {
+    CLOUDFLARE_API_TOKEN: config.requireSecret("cloudflare_api_token"),
+  },
 });
 
 const workersRoute = new cloudflare.WorkersRoute(
-  "api-worker-route",
+  "astro-worker-route",
   {
     zoneId: zoneId,
     pattern: `${domain}/*`,
@@ -62,7 +76,7 @@ const workersRoute = new cloudflare.WorkersRoute(
 );
 
 new cloudflare.WorkersCustomDomain(
-  "api-worker-domain",
+  "astro-worker-domain",
   {
     accountId,
     environment: "production",
