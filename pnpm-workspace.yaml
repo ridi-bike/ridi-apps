@@ -4,4 +4,8 @@ packages:
   - ./libs/*
   - ./services/*
   - ./tests/*
+
+onlyBuiltDependencies:
+  - cypress
+
 sideEffectsCache: false

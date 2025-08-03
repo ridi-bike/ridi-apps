@@ -192,6 +192,7 @@ export default function LocationSearch() {
               />
               <Pressable
                 role="button"
+                aria-label="Start Search"
                 onPress={handleSearch}
                 className={cn(
                   "flex-row items-center justify-center rounded-xl bg-[#FF5937] px-6 py-3",

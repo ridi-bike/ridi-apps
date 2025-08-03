@@ -3,12 +3,14 @@
   "version": "1.0.0",
   "main": "src/index.ts",
   "scripts": {
-    "cy:open": "cypress open"
+    "cy": "cypress run",
+    "cy:open": "cypress open",
+    "prepare": "./cypress.sh"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "cypress": "^14.3.3"
+    "cypress": "^14.5.3"
   }
 }

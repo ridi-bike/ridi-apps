@@ -813,7 +813,7 @@ importers:
   tests/expo-app:
     devDependencies:
       cypress:
-        specifier: ^14.3.3
+        specifier: ^14.5.3
         version: 14.5.3
 
 packages:

@@ -1,31 +1,37 @@
 describe("ridi basic", () => {
-  beforeEach(() => {
-    cy.visit("http://127.0.0.1:8081/");
-  });
+  it("create start-finish logged out", () => {
+    cy.visit(Cypress.env("RIDI_APP_URL"));
 
-  it("create round trip", () => {
-    cy.get(".r-WebkitOverflowScrolling-150rngu").click();
-    cy.get(".border-black > .css-text-146c3p1").click();
-    cy.get(".maplibregl-canvas").click();
-    cy.get(".maplibregl-interactive > .maplibregl-canvas").click();
-    cy.get(".py-3 > .css-text-146c3p1").click();
-    cy.get(".text-center").click();
-    cy.get(
-      ".css-view-175oi2r:nth-child(1) > .css-view-175oi2r > .css-view-175oi2r > .css-view-175oi2r:nth-child(2) > .css-view-175oi2r > .css-view-175oi2r:nth-child(4)",
-    ).click();
-    cy.get(
-      ".css-view-175oi2r:nth-child(2) > .css-view-175oi2r > .css-view-175oi2r > .css-view-175oi2r > .css-view-175oi2r > .css-view-175oi2r:nth-child(4)",
-    ).click();
-    cy.get(
-      ".css-view-175oi2r:nth-child(1) > .css-view-175oi2r:nth-child(1) > .css-view-175oi2r:nth-child(2) > .css-text-146c3p1:nth-child(2)",
-    ).click();
-  });
+    cy.get("button").contains("Try it out").click();
+    cy.wait(2000);
+    cy.get("button[aria-label*='Dualsport']").click();
+    cy.get("button").contains("Trip details").click({ force: true });
+    cy.wait(2000);
 
-  it("open generated route", () => {
-    cy.get(".r-WebkitOverflowScrolling-150rngu").click();
-    cy.get(".mb-4 > .css-view-175oi2r:nth-child(2)").click();
-    cy.get(
-      ".css-text-146c3p1:nth-child(1) > .css-view-175oi2r > .css-view-175oi2r:nth-child(2) > .css-view-175oi2r:nth-child(1)",
-    ).click();
+    cy.get("a[aria-label*='Search']").click();
+    cy.get("input[placeholder*='Search coordinates']").type("sigulda");
+    cy.get("button[aria-label*='Start Search']").click();
+    cy.wait(2000);
+    cy.get("button").contains("Sigulda").click();
+    cy.get("button").contains("Set Start").click();
+    cy.wait(2000);
+
+    cy.get("a[aria-label*='Search']").click();
+    cy.get("input[placeholder*='Search coordinates']").type("cēsis");
+    cy.get("button[aria-label*='Start Search']").click();
+    cy.wait(2000);
+    cy.get("button").contains("Cēsis").click();
+    cy.get("button").contains("Set Finish").click();
+    cy.wait(2000);
+
+    cy.get("button").contains("OK").click();
+    cy.get("button").contains("OK").click();
+    cy.wait(2 * 60 * 1000);
+
+    cy.get("a").contains("Road Type Breakdown").click();
+    cy.wait(2000);
+
+    cy.get("button").contains("Download Route GPX").click();
+    cy.get("button").contains("Login").should("be.visible");
   });
 });
