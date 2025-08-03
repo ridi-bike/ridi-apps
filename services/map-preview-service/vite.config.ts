@@ -5,7 +5,10 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   server: {
-    allowedHosts: ["map-preview-service.ridi-prod.svc.cluster.local"],
+    allowedHosts: [
+      "map-preview-service.ridi-prod.svc.cluster.local",
+      "map-preview-service.ridi-dev.svc.cluster.local",
+    ],
   },
   root: path.join(import.meta.dirname, "src/client"),
   plugins: [viteReact(), viteFastify()],

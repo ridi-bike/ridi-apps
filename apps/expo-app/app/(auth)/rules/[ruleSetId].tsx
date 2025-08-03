@@ -224,7 +224,9 @@ export default function RulePackDetails() {
     return (
       <ScreenFrame
         title="Plan routes"
-        onGoBack={() => router.replace("/rules")}
+        onGoBack={() =>
+          router.canGoBack() ? router.back() : router.replace("/rules")
+        }
       >
         <View className="mx-2 max-w-5xl flex-1">
           <ScreenCard
@@ -246,7 +248,9 @@ export default function RulePackDetails() {
   return (
     <ScreenFrame
       title="Routing rules"
-      onGoBack={() => router.replace("/rules")}
+      onGoBack={() =>
+        router.canGoBack() ? router.back() : router.replace("/rules")
+      }
       floating={
         !ruleSet.isSystem && (
           <View className="fixed bottom-0 w-full bg-white p-4 dark:bg-gray-800">
@@ -262,6 +266,11 @@ export default function RulePackDetails() {
                     name: ruleSetName || "",
                     roadTags: roadTags!,
                   });
+                  if (router.canGoBack()) {
+                    router.back();
+                  } else {
+                    router.replace("/rules");
+                  }
                 }
               }}
               aria-disabled={!unsavedChangesExist}
@@ -274,7 +283,7 @@ export default function RulePackDetails() {
                 },
               )}
             >
-              <Text className="text-center text-white">Save</Text>
+              <Text className="text-center text-white">Ok</Text>
             </Pressable>
           </View>
         )

@@ -21,8 +21,16 @@ export class MapPreviewGenerator {
     this.browser = await puppeteer.launch({
       executablePath: env.CHROME_BIN,
       headless: !env.PUPPETEER_WINDOWED,
+      args: env.PUPPETEER_WINDOWED
+        ? ["--enable-features=UseOzonePlatform", "--ozone-platform=wayland"]
+        : undefined,
     });
     this.state = "running";
+  }
+
+  public async stop() {
+    this.state = "not-running";
+    await this.browser?.close();
   }
 
   public getState() {
@@ -93,6 +101,7 @@ export class MapPreviewGenerator {
           renderingDoneReject,
         });
       }
+      this.stop();
       renderingDoneReject(
         this.logger.error("Map rendering timeout", { renderingTimeout }),
       );

@@ -5,10 +5,16 @@ import { apiClient } from "~/lib/api";
 import { getSuccessResponseOrThrow } from "./stores/util";
 
 const DATA_VERSION = "v1";
+export const USER_QUERY_KEY = ["user", DATA_VERSION];
+type OkResp = Extract<
+  Awaited<ReturnType<(typeof apiClient)["userGet"]>>,
+  { status: 200 }
+>;
+export type UserResponse = OkResp["body"];
 
 export function useUser() {
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["user", DATA_VERSION],
+    queryKey: USER_QUERY_KEY,
     queryFn: () =>
       apiClient
         .userGet({

@@ -3,7 +3,6 @@ import * as turf from "@turf/turf";
 import * as Location from "expo-location";
 import { Link, useRouter } from "expo-router";
 import {
-  ArrowRightCircle,
   CirclePauseIcon,
   CirclePlayIcon,
   Compass,
@@ -19,7 +18,7 @@ import {
   Waypoints,
 } from "lucide-react-native";
 import { AnimatePresence, MotiView, ScrollView } from "moti";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import * as z from "zod";
 
@@ -74,7 +73,7 @@ const CANCEL_TRIGGER_TIMES = 5;
 
 export default function PlansNew() {
   const router = useRouter();
-  const { planAdd } = useStorePlans();
+  const { planAdd, data: plans, loading: plansLoading } = useStorePlans();
   const [startCoords, setStartCoords] = useUrlParams("start", coordsSchema);
   const [finishCoords, setFinishCoords] = useUrlParams("finish", coordsSchema);
   const [cancelPressedTimes, setCancelPressedTimes] = useState(0);
@@ -124,32 +123,38 @@ export default function PlansNew() {
     if (finishCoords) {
       findRegions(finishCoords).then((regions) => setFinishRegions(regions));
     } else {
-      setStartRegions(null);
+      setFinishRegions(null);
     }
   }, [finishCoords]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   useEffect(() => {
-    if (startCoords && finishCoords && startRegions && finishRegions) {
-      if (!startRegions.length || !finishRegions.length) {
+    if ((startCoords && startRegions) || (finishCoords && finishRegions)) {
+      if (
+        (startRegions && !startRegions.length) ||
+        (finishRegions && !finishRegions.length)
+      ) {
         posthogClient.captureEvent("plan-new-unsupported-region", {
           startCoords,
           finishCoords,
         });
-        setErrorMessage("Journey start or finish set in unsupported region");
+        setErrorMessage("Journey start or finish in unsupported region");
       } else {
-        const overlapping = startRegions.filter((sr) =>
-          finishRegions.find((fr) => fr.region === sr.region),
-        );
-        if (!overlapping.length) {
+        const overlapping =
+          startRegions?.filter((sr) =>
+            finishRegions?.find((fr) => fr.region === sr.region),
+          ) || [];
+        if (startRegions && finishRegions && !overlapping.length) {
           posthogClient.captureEvent("plan-new-different-regions", {
             startRegions,
             finishRegions,
           });
-          setErrorMessage("Journey start and finish are in different regions");
+          setErrorMessage("Journey start and finish is in different regions");
         } else {
           setErrorMessage(null);
         }
       }
+    } else {
+      setErrorMessage(null);
     }
   }, [finishCoords, finishRegions, startCoords, startRegions]);
 
@@ -226,7 +231,11 @@ export default function PlansNew() {
       return;
     }
 
-    const location = await Location.getCurrentPositionAsync({});
+    const location = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Balanced,
+      distanceInterval: 1000, // 1km
+      timeInterval: 10 * 60 * 1000, // 10 min
+    });
 
     if (location) {
       posthogClient.captureEvent("plan-new-current-location-gotten");
@@ -236,7 +245,7 @@ export default function PlansNew() {
     }
   }, [currentCoords]);
 
-  const canCreateRoute = useCallback(() => {
+  const canCreateRoute = useMemo(() => {
     return (
       ((!isRoundTrip && startCoords && finishCoords && ruleSetId) ||
         (isRoundTrip &&
@@ -257,6 +266,14 @@ export default function PlansNew() {
   ]);
 
   const [mapMode, setMapMode] = useUrlParams("map-mode", z.boolean());
+
+  const initialCoords = useMemo(() => {
+    const prevPlan = plans?.[0];
+    if (!plansLoading && !prevPlan) {
+      return [57.153614, 24.85391];
+    }
+    return prevPlan ? [prevPlan.startLat, prevPlan.startLon] : null;
+  }, [plans, plansLoading]);
 
   return (
     <ScreenFrame
@@ -300,12 +317,14 @@ export default function PlansNew() {
                     trigger: "ok-button",
                   });
                 }}
-                aria-disabled={!canCreateRoute()}
+                disabled={!canCreateRoute}
+                aria-disabled={!canCreateRoute}
                 className={cn(
                   "w-full rounded-xl px-4 py-3 font-medium text-white transition-colors",
                   {
-                    "bg-[#FF5937] hover:bg-[#FF5937]/90": mapMode,
-                    "cursor-not-allowed bg-gray-200 dark:bg-gray-700": !mapMode,
+                    "bg-[#FF5937] hover:bg-[#FF5937]/90": canCreateRoute,
+                    "cursor-not-allowed bg-gray-200 dark:bg-gray-700":
+                      !canCreateRoute,
                   },
                 )}
               >
@@ -317,7 +336,7 @@ export default function PlansNew() {
                 key="save"
                 role="button"
                 onPress={() => {
-                  if (canCreateRoute()) {
+                  if (canCreateRoute) {
                     if (!startCoords || !ruleSetId) {
                       return;
                     }
@@ -354,13 +373,14 @@ export default function PlansNew() {
                     });
                   }
                 }}
-                aria-disabled={!canCreateRoute()}
+                disabled={!canCreateRoute}
+                aria-disabled={!canCreateRoute}
                 className={cn(
                   "w-full rounded-xl px-4 py-3 max-w-5xl font-medium text-white transition-colors",
                   {
-                    "bg-[#FF5937] hover:bg-[#FF5937]/90": canCreateRoute(),
+                    "bg-[#FF5937] hover:bg-[#FF5937]/90": canCreateRoute,
                     "cursor-not-allowed bg-gray-200 dark:bg-gray-700":
-                      !canCreateRoute(),
+                      !canCreateRoute,
                   },
                 )}
               >
@@ -373,7 +393,7 @@ export default function PlansNew() {
     >
       <View className="flex flex-col items-center justify-start">
         <AnimatePresence>
-          {mapMode && (
+          {mapMode && initialCoords && (
             <MotiView
               key="big-map"
               className="fixed top-0 z-50 mt-16 w-[98vw] bg-white p-4 pb-40 dark:bg-gray-900"
@@ -383,6 +403,7 @@ export default function PlansNew() {
               transition={{ type: "timing" }}
             >
               <GeoMapCoordsSelector
+                initialCoords={initialCoords}
                 onCoordsSelectCancel={() => {
                   setCancelPressedTimes((t) => t + 1);
                   if (cancelPressedTimes >= CANCEL_TRIGGER_TIMES) {
@@ -491,7 +512,7 @@ export default function PlansNew() {
                     {!searchPoints && (
                       <Link
                         href={`/search?isRoundTrip=${JSON.stringify(isRoundTrip || false)}`}
-                        className="flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 border-black bg-white p-4 dark:border-gray-700 dark:bg-gray-900"
+                        className="pointer-events-auto flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 border-black bg-white p-4 dark:border-gray-700 dark:bg-gray-900"
                       >
                         <Search className="size-4 dark:text-gray-200" />
                       </Link>
@@ -682,9 +703,11 @@ export default function PlansNew() {
             <Pressable
               role="button"
               onPress={() => {
-                router.navigate("/rules");
-                router.setParams({
-                  "selected-rule-id": JSON.stringify(ruleSetId),
+                router.push({
+                  pathname: "/rules",
+                  params: {
+                    rule: JSON.stringify(ruleSetId),
+                  },
                 });
               }}
               className={cn(
@@ -715,23 +738,26 @@ export default function PlansNew() {
             }}
           >
             <GroupWithTitle title="Overview" className="h-48">
-              <GeoMapPlanView
-                bearing={isRoundTrip ? (bearing ?? null) : null}
-                distance={(selectedDistance || 0) * 1000}
-                start={
-                  startCoords
-                    ? {
-                        lat: startCoords[0],
-                        lon: startCoords[1],
-                      }
-                    : null
-                }
-                finish={
-                  finishCoords
-                    ? { lat: finishCoords[0], lon: finishCoords[1] }
-                    : null
-                }
-              />
+              {!!initialCoords && (
+                <GeoMapPlanView
+                  bearing={isRoundTrip ? (bearing ?? null) : null}
+                  distance={(selectedDistance || 0) * 1000}
+                  initialCoords={initialCoords}
+                  start={
+                    startCoords
+                      ? {
+                          lat: startCoords[0],
+                          lon: startCoords[1],
+                        }
+                      : null
+                  }
+                  finish={
+                    finishCoords
+                      ? { lat: finishCoords[0], lon: finishCoords[1] }
+                      : null
+                  }
+                />
+              )}
             </GroupWithTitle>
           </Pressable>
           <AnimatePresence>

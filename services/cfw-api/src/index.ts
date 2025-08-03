@@ -2,7 +2,10 @@ import {
   type Request as WorkerRequest,
   type ExecutionContext,
 } from "@cloudflare/workers-types";
-import { type RoadTags } from "@ridi/api-contracts";
+import {
+  routeListDownloadedResponseSchema,
+  type RoadTags,
+} from "@ridi/api-contracts";
 import {
   apiContract,
   plansListResponseSchema,
@@ -34,6 +37,9 @@ import {
   userClaimRuleSets,
   userClaimRuleSetRoadTags,
   geoBoundariesFindCoords,
+  routeSetDownloadedAt,
+  privateUserDecreaseDownloads,
+  routesListDownloaded,
 } from "@ridi/db-queries";
 import { RidiLogger } from "@ridi/logger";
 import { coordsDetailsGetAndFormat } from "@ridi/maps-api";
@@ -183,6 +189,7 @@ const router = tsr
           userId: ctx.request.user.id,
           isAnonymous: !!ctx.request.user.is_anonymous,
           subType: privateUser?.subType || "none",
+          downloadCountRemain: privateUser?.downloadCountRemain || 0,
           email: ctx.request.user.email || null,
         },
       },
@@ -203,7 +210,10 @@ const router = tsr
     const privateUser = await privateUsersGetRow(ctx.db, {
       userId: ctx.request.user.id,
     });
-    if (privateUser?.subType === "code") {
+    if (!privateUser) {
+      throw new Error("User must exist");
+    }
+    if (privateUser.subType === "code") {
       return {
         status: 200,
         body: {
@@ -217,7 +227,10 @@ const router = tsr
         },
       };
     }
-    const prices = await stripeApi.getPrices();
+    const prices = await stripeApi.getPrices({
+      id: ctx.request.user.id,
+      email: ctx.request.user.email,
+    });
     return {
       status: 200,
       body: {
@@ -230,7 +243,7 @@ const router = tsr
                 isActive: privateUser.stripeStatus === "active",
                 status: privateUser.stripeStatus,
                 price:
-                  prices.find((p) => p.id === privateUser.stripePriceId) ||
+                  prices.find((p) => p?.id === privateUser.stripePriceId) ||
                   null,
                 currentPeriodEndDate:
                   privateUser.stripeCurrentPeriodEnd?.toString() || null,
@@ -506,6 +519,7 @@ const router = tsr
     if (version !== "v1") {
       throw ctx.logger.error("Wrong version", { version });
     }
+
     const plansFlat = await planList(ctx.db, {
       userId: ctx.request.user.id,
     });
@@ -523,6 +537,8 @@ const router = tsr
               R.entries(),
               R.map(([_routeId, oneRouteFlat]) => ({
                 ...R.first(oneRouteFlat),
+                routeDownloadedAt:
+                  R.first(oneRouteFlat).routeDownloadedAt?.toString() ?? null,
               })),
             )
           : [],
@@ -599,6 +615,7 @@ const router = tsr
         data: {
           ...routesFlat[0],
           latLonArray: routesFlat[0].latLonArray,
+          downloadedAt: routesFlat[0].downloadedAt?.toString() ?? null,
           plan: {
             ...routesFlat[0],
           },
@@ -612,6 +629,7 @@ const router = tsr
       };
 
       const validated = routeGetRespopnseSchema.safeParse(response);
+
       if (!validated.success) {
         throw ctx.logger.error("Validation error in routeGet", {
           error: validated.error.toString(),
@@ -627,6 +645,43 @@ const router = tsr
       throw ctx.logger.error("Route get error", {
         error,
         routeId,
+        userId: ctx.request.user.id,
+      });
+    }
+  },
+  routesListDownloaded: async ({ query: { version } }, ctx) => {
+    if (version !== "v1") {
+      throw ctx.logger.error("Wrong version", { version });
+    }
+
+    try {
+      const routesFlat = await routesListDownloaded(ctx.db, {
+        userId: ctx.request.user.id,
+      });
+
+      const response = {
+        version: "v1",
+        data: routesFlat.map((routeFlat) => ({
+          ...routeFlat,
+          downloadedAt: routeFlat.downloadedAt?.toString() ?? null,
+        })),
+      };
+
+      const validated = routeListDownloadedResponseSchema.safeParse(response);
+
+      if (!validated.success) {
+        throw ctx.logger.error("Validation error in routeGet", {
+          error: validated.error.toString(),
+          userId: ctx.request.user.id,
+        });
+      }
+      return {
+        status: 200,
+        body: validated.data,
+      };
+    } catch (error) {
+      throw ctx.logger.error("Route get error", {
+        error,
         userId: ctx.request.user.id,
       });
     }
@@ -651,13 +706,52 @@ const router = tsr
       },
     };
   },
+  routeSetDownloadedAt: async (
+    {
+      params: { routeId },
+      body: {
+        version,
+        data: { downloadedAt },
+      },
+    },
+    ctx,
+  ) => {
+    if (version !== "v1") {
+      throw ctx.logger.error("Wrong version", { version });
+    }
+
+    const updatedRoute = await routeSetDownloadedAt(ctx.db, {
+      id: routeId,
+      downloadedAt: new Date(downloadedAt),
+    });
+
+    // updating only if first time download
+    if (updatedRoute) {
+      const privateUser = await privateUserDecreaseDownloads(ctx.db, {
+        userId: ctx.request.user.id,
+      });
+
+      if (!privateUser) {
+        throw ctx.logger.error("Missing private user record", {
+          userId: ctx.request.user.id,
+        });
+      }
+    }
+
+    return {
+      status: 200,
+      body: {
+        id: routeId,
+      },
+    };
+  },
 });
 
 const ridiLogger = RidiLogger.init({ service: "cfw-api" });
 
 export default Sentry.withSentry(
   (env: CloudflareBindings) => ({
-    enabled: env.RIDI_ENV === "prod",
+    enabled: env.RIDI_ENV !== "local",
     dsn: env.SENTRY_DSN,
     environment: env.RIDI_ENV,
     sendDefaultPii: true,
@@ -817,6 +911,7 @@ export default Sentry.withSentry(
           router,
           options: {
             errorHandler(err, req) {
+              console.error(err);
               Sentry.captureException(err, {
                 data: {
                   req,

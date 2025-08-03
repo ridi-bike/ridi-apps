@@ -4,6 +4,7 @@ import { type Region } from "~/lib/regions";
 
 export type GeoMapCoordsSelectorProps = {
   isRoundTrip: boolean;
+  initialCoords: [number, number];
   start?: Coords | null;
   finish?: Coords | null;
   current?: Coords | null;

@@ -1,3 +1,7 @@
+-- name: UserGet :one
+select id, email from auth.users
+where id = sqlc.arg(user_id)::uuid;
+
 -- name: GeoBoundariesFindCoords :many
 select * from geo_boundaries
 where postgis.st_within(postgis.st_point(sqlc.arg(lon), sqlc.arg(lat)), geo_boundaries.polygon);
@@ -20,6 +24,20 @@ inner join points_array pa
 where r.id = $1
 order by 
 	r.created_at desc;
+
+-- name: RoutesListDownloaded :many
+select * from routes r
+where r.downloaded_at is not null
+  and r.user_id = $1
+  and is_deleted = false
+order by 
+	r.created_at desc;
+
+-- name: RouteSetDownloadedAt :one
+update routes
+set downloaded_at = $1
+where id = $2 and downloaded_at is null
+returning *;
 
 -- name: RouteUpdateMapPreview :exec
 update routes
@@ -71,6 +89,12 @@ where code = $2;
 -- name: PrivateUserInsert :one
 insert into private.users (user_id)
 values ($1)
+returning *;
+
+-- name: PrivateUserDecreaseDownloads :one
+update private.users
+set download_count_remain = download_count_remain - 1
+where user_id = $1
 returning *;
 
 -- name: PrivateUsersUpdateWithSubscriptionCode :exec
@@ -150,6 +174,7 @@ update routes
 set is_deleted = true
 where plan_id = $1
   and user_id = $2
+  and downloaded_at is null
 returning *;
 
 -- name: RegionInsertOrUpdate :one
@@ -241,6 +266,7 @@ select
 	r.id,
 	r.name,
 	r.created_at,
+	r.downloaded_at,
   r.stats_score,
   r.stats_len_m,
   r.stats_junction_count,
@@ -253,7 +279,6 @@ select
 from routes r
 inner join plans p
 	on p.id = r.plan_id 
-    and p.is_deleted = false
 inner join points_array pa
 	on pa.id = r.id
 where r.user_id = $1
@@ -290,7 +315,8 @@ select
 	r.created_at as route_created_at,
   r.stats_len_m,
   r.map_preview_light as route_map_preview_light,
-  r.map_preview_dark as route_map_preview_dark
+  r.map_preview_dark as route_map_preview_dark,
+  r.downloaded_at as route_downloaded_at
 from plans p
 left join routes r 
 	on r.plan_id = p.id

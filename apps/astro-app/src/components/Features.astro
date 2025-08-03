@@ -1,60 +1,90 @@
 ---
 import Container from "./Container.astro";
 import Topic from "./Topic.astro";
-import servicesData from "./Data/services.json";
-import { cn } from "../utils.ts";
+import Houses from "./icons/houses.astro";
+import OpenSource from "./icons/open-source.astro";
+import Bikes from "./icons/bikes.astro";
+import Trophy from "./icons/trophy.astro";
+
+const features: {
+  title: string;
+  desc: string;
+  url: string;
+  classCard: string;
+  classIcon: string;
+  EntryIcon: (props: Record<string, any>) => any;
+}[] = [
+  {
+    title: "Fits many riding styles",
+    desc: "Predefined rule sets for adventure, dualsport or touring riding, functions to create custom rules",
+    url: "",
+    EntryIcon: Bikes,
+    classCard: "bg-zinc-100",
+    classIcon: "size-16 fill-ridiorange",
+  },
+  {
+    title: "Avoids residential areas",
+    desc: "Routing identifies and tries to avoid residential areas to maximise safety and riding fun",
+    url: "",
+    EntryIcon: Houses,
+    classCard: "bg-ridiorange",
+    classIcon: "size-24 fill-black",
+  },
+  {
+    title: "Calculates a 'fun' score",
+    desc: "Calculates a score based on how curvy the route is and how well it fits the riders style",
+    url: "",
+    EntryIcon: Trophy,
+    classCard: "bg-black text-white",
+    classIcon: "size-24 fill-ridiorange",
+  },
+  {
+    title: "Fully open source",
+    desc: "All the code for the routing engine and the app is fully open source",
+    url: "",
+    EntryIcon: OpenSource,
+    classCard: "bg-zinc-100",
+    classIcon: "size-24 fill-ridiorange",
+  },
+];
 ---
 
 <Container>
-  <div class="relative flex flex-col items-center" id="how-it-works">
-    <div class="flex-row items-center py-5 mb-8">
-      <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- card start-->
+  <div class="relative flex flex-col items-center size-full" id="how-it-works">
+    <div class="flex-row items-center py-5 mb-8 size-full">
+      <div
+        class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-4 size-full"
+      >
         {
-          servicesData.map(({ name1, name2, image }, idx) => (
-            <div
-              class={cn(
-                "md:h-[310px] h-[620px] p-12 bg-zinc-100 rounded-[45px] shadow-card border border-black justify-between items-center flex md:flex-row flex-col text-black",
-                {
-                  "bg-zinc-100": [0, 3].includes(idx),
-                  "bg-ridiorange": [1, 4].includes(idx),
-                  "bg-black text-white": [2, 5].includes(idx),
-                  "md:col-span-2": idx === 4,
-                },
-              )}
-            >
-              <div class="flex flex-col justify-center p-6 items-center md:items-start gap-[93px]">
-                <div class="flex flex-col justify-start items-start max-w-[50%]">
-                  <div class="px-[7px] rounded-[7px] flex-col justify-start items-start gap-2.5 flex">
-                    <div class=" text-3xl font-medium">{name1}</div>
-                  </div>
-                  <div class="px-[7px] rounded-[7px] flex-col justify-start items-start gap-2.5 flex">
-                    <div class="text-3xl font-medium">{name2}</div>
-                  </div>
+          features.map(
+            ({ title, desc, url, EntryIcon, classCard, classIcon }, idx) => (
+              <div
+                class:list={[
+                  "md:h-[310px] h-[400px] w-full p-12 rounded-[45px] shadow-card border border-black justify-between items-center flex lg:flex-row flex-col text-black",
+                  classCard,
+                ]}
+              >
+                <div class="flex flex-col gap-2">
+                  <h2 class="text-xl font-semibold">{title}</h2>
+                  <p>{desc}</p>
                 </div>
+                <EntryIcon class:list={[classIcon]} />
               </div>
-              <div class="pt-0.5 pb-[1.95px] size-full justify-center items-center flex">
-                <img
-                  class="max-h-[270px] size-full object-contain h-full"
-                  src={image}
-                />
-              </div>
-            </div>
-          ))
+            ),
+          )
         }
-        <!-- card end-->
       </div>
     </div>
 
     <Topic
       title="HOW IT WORKS"
-      description="I want to ride, not navigate. So, I built Ridi, an app that takes all the guesswork out of it. You tell it what kind of roads you love – highways, primaries, unclassified’s, tracks, paths, residential? Gravel, sand? Smooth roads or tracks? Choose your style and it’ll whip up a perfect route tailored to your exact preferences. Or just choose one of the default rule sets. Whether it’s a quick spin through scenic roads or a heart-pounding journey through twisty paths, Ridi’s got you covered."
+      description="I want to ride, not navigate. So, I built Ridi, an app that takes all the guesswork out of it. You tell it what kind of roads you love – highways, primaries, tracks? Gravel, sand? Smooth roads or tracks? Choose your style and it’ll whip up a perfect route tailored to your exact preferences. Or just choose one of the default rule sets. Whether it’s a quick spin through scenic roads or a heart-pounding journey through twisty paths, Ridi’s got you covered."
     />
     <div
       class="w-full justify-center md:justify-start items-center inline-flex"
     >
       <a
-        href="https://app.ridi.bike"
+        href={import.meta.env.PUBLIC_RIDI_APP_URL}
         target="_blank"
         class="px-8 py-5 bg-[#f75835] hover:bg-white rounded-2xl text-center text-white border-black hover:text-black border text-xl font-normal leading-7"
       >

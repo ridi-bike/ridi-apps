@@ -85,7 +85,6 @@ new k8s.apps.v1.Deployment(queueServiceName, {
         },
       },
       spec: {
-        hostNetwork: stackName === "dev",
         containers: [
           {
             name: queueServiceName,
@@ -93,7 +92,7 @@ new k8s.apps.v1.Deployment(queueServiceName, {
             env: [
               {
                 name: "SUPABASE_DB_URL",
-                value: config.require("supabase_db_url"),
+                value: config.require("supabase_db_url_stateful"),
               },
               {
                 name: "ROUTER_SERVICE_LIST",
@@ -102,6 +101,14 @@ new k8s.apps.v1.Deployment(queueServiceName, {
               {
                 name: "MAP_PREVIEW_SERVICE_URL",
                 value: mapPreviewServiceUrl,
+              },
+              {
+                name: "RESEND_SECRET",
+                value: config.require("resend_secret_key"),
+              },
+              {
+                name: "RESEND_AUDIENCE_ID",
+                value: config.require("resend_audience_id_general"),
               },
             ],
             startupProbe: {

@@ -1,15 +1,15 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
+import slugify from "@sindresorhus/slugify";
 import { buildGPX, BaseBuilder } from "gpx-builder";
 import { Trophy, Trash2, Ruler } from "lucide-react-native";
 import { AnimatePresence, MotiView } from "moti";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { View, Text, ScrollView, Pressable } from "react-native";
 
 import { Button } from "~/components/button";
 import { ErrorBox } from "~/components/error";
 import { GeoMapRouteView } from "~/components/geo-map/geo-map-route-view";
 import { metersToDisplay } from "~/components/geo-map/util";
-import { GpxIcon } from "~/components/icons/gpx";
 import { Loading } from "~/components/loading";
 import { ScreenCard } from "~/components/screen-card";
 import { ScreenFrame } from "~/components/screen-frame";
@@ -31,9 +31,11 @@ import { cn } from "~/lib/utils";
 function DownloadGpxDialog({
   children,
   onDownload,
+  downloadedAt,
 }: {
   children: React.ReactNode;
   onDownload: () => void;
+  downloadedAt: string | null;
 }) {
   const router = useRouter();
   const user = useUser();
@@ -52,19 +54,48 @@ function DownloadGpxDialog({
           </AlertDialogTitle>
           <AlertDialogDescription>
             {user.user && (
-              <>
-                {user.user.subType === "none" && (
+              <View className="flex flex-col gap-1">
+                {user.user.isAnonymous && (
                   <Text className="dark:text-gray-100">
-                    Become a Ridi supporter to download GPX
+                    Log in to download GPX
                   </Text>
                 )}
-                {user.user.subType !== "none" && (
-                  <Text className="dark:text-gray-100">
-                    Start the GPX download and open the file in your favourite
-                    navigatior
-                  </Text>
+                {!user.user.isAnonymous && (
+                  <>
+                    {!downloadedAt && (
+                      <>
+                        {user.user.subType === "none" &&
+                          user.user.downloadCountRemain <= 0 && (
+                            <Text className="dark:text-gray-100">
+                              Become a Ridi supporter to download GPX
+                            </Text>
+                          )}
+                        {(user.user.subType !== "none" ||
+                          user.user.downloadCountRemain > 0) && (
+                          <View className="flex flex-col gap-1">
+                            {user.user.subType === "none" && (
+                              <Text className="dark:text-gray-100">
+                                Available downloads:{" "}
+                                {user.user.downloadCountRemain}
+                              </Text>
+                            )}
+                            <Text className="dark:text-gray-100">
+                              Start the GPX download and open the file in your
+                              favourite navigatior
+                            </Text>
+                          </View>
+                        )}
+                      </>
+                    )}
+                    {!!downloadedAt && (
+                      <Text className="dark:text-gray-100">
+                        Start the GPX download and open the file in your
+                        favourite navigatior
+                      </Text>
+                    )}
+                  </>
                 )}
-              </>
+              </View>
             )}
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -81,33 +112,53 @@ function DownloadGpxDialog({
                 <Text className="dark:text-gray-200">Login</Text>
               </Button>
             )}
-            {user.user &&
-              !user.user.isAnonymous &&
-              user.user.subType === "none" && (
-                <Button
-                  variant="primary"
-                  className="flex w-full flex-row items-center justify-center"
-                  onPress={() => {
-                    router.replace("/settings/billing");
-                  }}
-                >
-                  <Text className="dark:text-gray-200">Become a supporter</Text>
-                </Button>
-              )}
-            {user.user &&
-              !user.user.isAnonymous &&
-              user.user.subType !== "none" && (
-                <Button
-                  variant="primary"
-                  className="flex w-full flex-row items-center justify-center"
-                  onPress={() => {
-                    setOpen(false);
-                    onDownload();
-                  }}
-                >
-                  <Text className="dark:text-gray-200">Billing</Text>
-                </Button>
-              )}
+            {user.user && !user.user.isAnonymous && (
+              <>
+                {!!downloadedAt && (
+                  <Button
+                    variant="primary"
+                    className="flex w-full flex-row items-center justify-center"
+                    onPress={() => {
+                      setOpen(false);
+                      onDownload();
+                    }}
+                  >
+                    <Text className="dark:text-gray-200">Download</Text>
+                  </Button>
+                )}
+                {!downloadedAt && (
+                  <>
+                    {user.user.subType === "none" &&
+                      user.user.downloadCountRemain <= 0 && (
+                        <Button
+                          variant="primary"
+                          className="flex w-full flex-row items-center justify-center"
+                          onPress={() => {
+                            router.replace("/settings/billing");
+                          }}
+                        >
+                          <Text className="dark:text-gray-200">
+                            Become a supporter
+                          </Text>
+                        </Button>
+                      )}
+                    {(user.user.subType !== "none" ||
+                      user.user.downloadCountRemain > 0) && (
+                      <Button
+                        variant="primary"
+                        className="flex w-full flex-row items-center justify-center"
+                        onPress={() => {
+                          setOpen(false);
+                          onDownload();
+                        }}
+                      >
+                        <Text className="dark:text-gray-200">Download</Text>
+                      </Button>
+                    )}
+                  </>
+                )}
+              </>
+            )}
             <Button
               variant="secondary"
               className="flex w-full flex-row items-center justify-center"
@@ -184,13 +235,13 @@ export default function RouteDetails() {
     refetch,
   } = useStorePlans();
   const plan = plans?.find((p) => p.id === planId);
-  const planRoute = plan?.routes.find((r) => r.routeId === routeId);
   const {
     data: route,
     error,
     status,
     routeDelete,
-  } = useStoreRoute(planRoute?.routeId || "");
+    routeSetDownloaded,
+  } = useStoreRoute(Array.isArray(routeId) ? "" : routeId || "");
 
   const breakdownSurface = useMemo(() => {
     if (!route) {
@@ -220,30 +271,53 @@ export default function RouteDetails() {
       : null;
   }, [route]);
 
+  const getFileName = useCallback(() => {
+    function descOrLatLon(
+      desc: string | undefined,
+      lat: number,
+      lon: number,
+    ): string {
+      const latLon = `${lat.toFixed(3)}-${lon.toFixed(3)}`;
+      return desc
+        ? slugify(desc).split(",")[0]?.slice(0, 30) || latLon
+        : latLon;
+    }
+    const date = new Date(plan.createdAt).toISOString().substring(0, 10);
+    const startLoc = descOrLatLon(plan.startDesc, plan.startLat, plan.startLon);
+    const finishLoc =
+      plan.tripType === "start-finish"
+        ? descOrLatLon(plan.finishDesc, plan.finishLat, plan.finishLon)
+        : null;
+    const dist = Math.round(route.data.stats.lenM / 1000);
+    return plan.tripType === "start-finish"
+      ? `${startLoc}_${finishLoc}_${dist}km_${date}.gpx`
+      : `${startLoc}_${plan.bearing}deg_${dist}km_${date}.gpx`;
+  }, [plan, route]);
+
   return (
     <ScreenFrame
       title="Route details"
-      onGoBack={() => router.replace(`/plans/${planId}`)}
+      onGoBack={() =>
+        router.canGoBack() ? router.back() : router.replace(`/plans/${planId}`)
+      }
     >
       <View className="flex w-full flex-col items-center justify-start">
         <AnimatePresence>
-          {(!plans && !planError) ||
-            (!route && !error && (
-              <View
-                key="loading"
-                className="flex w-full flex-row items-center justify-center"
-              >
-                <Loading className="size-12 text-[#ff4a25]" />
-              </View>
-            ))}
+          {!route && !error && (
+            <View
+              key="loading"
+              className="flex w-full flex-row items-center justify-center"
+            >
+              <Loading className="size-12 text-[#ff4a25]" />
+            </View>
+          )}
           {!!error && status !== "pending" && (
             <ErrorBox key="error" error={error} retry={refetch} />
           )}
           {!!planError && planStatus !== "pending" && (
             <ErrorBox key="other-error" error={planError} retry={refetch} />
           )}
-          {!!plan &&
-            !!route &&
+          {!!route &&
             !!breakdownSurface &&
             !!breakdownRoadType &&
             !!routeOverview && (
@@ -266,13 +340,17 @@ export default function RouteDetails() {
                       middle={
                         <>
                           <View className="flex flex-row items-center justify-between">
-                            <Text className="text-lg font-bold dark:text-gray-200">
-                              {plan.startDesc}
-                            </Text>
-                            {!!plan.finishDesc && (
-                              <Text className="text-lg font-bold dark:text-gray-200">
-                                {plan.finishDesc}
-                              </Text>
+                            {!!plan && (
+                              <>
+                                <Text className="text-lg font-bold dark:text-gray-200">
+                                  {plan.startDesc}
+                                </Text>
+                                {!!plan.finishDesc && (
+                                  <Text className="text-lg font-bold dark:text-gray-200">
+                                    {plan.finishDesc}
+                                  </Text>
+                                )}
+                              </>
                             )}
                             <View className="flex flex-row items-center gap-2">
                               <Trophy className="size-5 text-[#FF5937]" />
@@ -299,7 +377,11 @@ export default function RouteDetails() {
                                     routeId: route.data.id,
                                   });
                                   routeDelete(route.data.id);
-                                  router.replace(`/plans/${planId}`);
+                                  if (router.canGoBack()) {
+                                    router.back();
+                                  } else {
+                                    router.replace(`/plans/${planId}`);
+                                  }
                                 }}
                               >
                                 <Pressable
@@ -314,6 +396,7 @@ export default function RouteDetails() {
                             </View>
                             <View className="flex flex-col items-end justify-center">
                               <DownloadGpxDialog
+                                downloadedAt={route.data.downloadedAt}
                                 onDownload={() => {
                                   posthogClient.captureEvent(
                                     "route-gpx-downloaded",
@@ -321,6 +404,7 @@ export default function RouteDetails() {
                                       routeId: route.data.id,
                                     },
                                   );
+
                                   const { Point } = BaseBuilder.MODELS;
                                   const points = route.data.latLonArray.map(
                                     (latLon) => new Point(latLon[0], latLon[1]),
@@ -333,8 +417,13 @@ export default function RouteDetails() {
                                   const link = document.createElement("a");
 
                                   link.href = `data:application/gpx+xml;charset=utf-8,${encodeURIComponent(buildGPX(gpxData.toObject()))}`;
-                                  link.download = "route.gpx";
+                                  link.download = getFileName();
                                   link.click();
+
+                                  routeSetDownloaded({
+                                    id: route.data.id,
+                                    downloadedAt: new Date(),
+                                  });
                                 }}
                               >
                                 <Pressable
@@ -343,7 +432,9 @@ export default function RouteDetails() {
                                     "dark:border-green-700 dark:hover:bg-green-950 w-full h-14 flex-row items-center px-4 gap-3 rounded-xl border-[3px] border-green-500 text-green-500 hover:bg-green-50 transition-colors",
                                   )}
                                 >
-                                  <GpxIcon className="size-6 fill-green-700" />
+                                  <Text className="dark:text-gray-200">
+                                    Download Route GPX
+                                  </Text>
                                 </Pressable>
                               </DownloadGpxDialog>
                             </View>

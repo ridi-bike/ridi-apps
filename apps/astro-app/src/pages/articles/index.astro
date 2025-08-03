@@ -1,0 +1,37 @@
+---
+import { getCollection, render } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+
+const articleList = await getCollection("articles");
+console.log({ articleList });
+---
+
+<Layout
+  title="Ridi Articles"
+  description="News, updates and other interesting stuff around Ridi"
+>
+  <main class="pt-32 pb-20">
+    <div class="max-w-screen-xl mx-auto px-6 lg:px-8 xl:px-10">
+      <div
+        class="max-w-3xl mx-auto flex flex-col justify-start items-start gap-8"
+      >
+        <h1 class="text-4xl font-medium mb-8 text-ridiorange">Articles</h1>
+        {
+          articleList.toReversed().map((article) => (
+            <a
+              href={`/articles/${article.data.slug}`}
+              class="border-l-2 border-ridiorange w-full pl-4"
+            >
+              <h2 class="text-2xl">{article.data.title}</h2>
+              <p class="text-xs">
+                Published:{" "}
+                {article.data.publish_date.toISOString().slice(0, 10)}
+              </p>
+              <p>{article.data.description}</p>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </main>
+</Layout>

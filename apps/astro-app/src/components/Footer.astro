@@ -1,23 +1,42 @@
 ---
 import Container from "./Container.astro";
+import Reddit from "./icons/reddit.astro";
+import Github from "./icons/github.astro";
+import Bluesky from "./icons/bluesky.astro";
 ---
 
 <footer class="bg-ridiorange/10 bg-fixed bg-bottom text-black">
   <Container>
     <div class="py-6">
-      <div class="flex flex-col items-center justify-between md:flex-row">
-        <div class="flex items-center space-x-3 rtl:space-x-reverse">
-          <img class="w-32" src="/Logo.svg" alt="Logo" />
+      <div class="flex flex-col items-center justify-between md:flex-row gap-6">
+        <div class="flex items-center justify-center flex-row gap-6">
+          <a href="/">
+            <img class="w-32" src="/Logo.svg" alt="Ridi logo" />
+          </a>
+          <a href="https://github.com/ridi-bike" target="_blank">
+            <Github class="size-8 fill-ridiorange" />
+          </a>
+          <a href="https://reddit.com/r/ridiapp" target="_blank">
+            <Reddit class="size-8 fill-ridiorange" />
+          </a>
+          <a
+            href="https://bsky.app/profile/tomsjansons.bsky.social"
+            target="_blank"
+          >
+            <Bluesky class="size-8 fill-ridiorange" /></a
+          >
         </div>
-        <div class="flex mt-4 md:m-0">
-          <div class="-mx-4">
-            <span id="currentYear"></span> Made with <a
-              href="https://astro.build/"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="underline">Astro</a
-            >
-          </div>
+        <div class="flex items-center justify-center flex-row gap-6">
+          <a href="/tos">Terms of Service</a>
+          <a href="/privacy">Privacy policy</a>
+        </div>
+        <div class="-mx-4">
+          <span id="currentYear"></span> Made with <a
+            href="https://astro.build/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="underline">Astro</a
+          >
         </div>
       </div>
     </div>

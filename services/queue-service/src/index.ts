@@ -8,6 +8,8 @@ import { env } from "./env.ts";
 import { MapPreviewServiceClient } from "./map-preview-service-client.ts";
 import { MessageHandlerMapPreview } from "./message-handler-map-preview.ts";
 import { MessageHandlerNewPlan } from "./message-handler-new-plan.ts";
+import { MessageHandlerUserNew } from "./message-handler-user-new.ts";
+import { ResendClient } from "./resend-client.ts";
 import { RouterServiceLookup } from "./router-service-lookup.ts";
 
 const pgClient = postgres(env.SUPABASE_DB_URL);
@@ -25,6 +27,11 @@ const messageHandlerMapPreview = new MessageHandlerMapPreview(
   logger,
   pgClient,
   new MapPreviewServiceClient(logger),
+);
+const messageHandlerUserNew = new MessageHandlerUserNew(
+  logger,
+  pgClient,
+  new ResendClient(),
 );
 
 const MAX_RETRY_COUNT = 10;
@@ -84,6 +91,12 @@ function constructMessageHandler<
   };
 }
 
+messaging.listen(
+  "user_new",
+  constructMessageHandler("user_new", (data) =>
+    messageHandlerUserNew.handleUserNew(data.userId),
+  ),
+);
 messaging.listen(
   "plan_map_gen",
   constructMessageHandler("plan_map_gen", (data) =>

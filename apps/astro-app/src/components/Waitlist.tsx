@@ -24,7 +24,7 @@ export function Waitlist() {
       }}
     >
       <input
-        className="mb-4 mr-3 h-12 w-64 appearance-none rounded-[14px] bg-transparent px-3 py-2 text-gray-200 focus:border-gray-400 focus:bg-gray-300 focus:text-gray-800 focus:outline-none"
+        className="mb-4 mr-3 h-12 w-64 bg-white appearance-none rounded-[14px] px-3 py-2 text-gray-600 focus:border-gray-400 focus:bg-gray-300 focus:text-gray-800 focus:outline-none"
         type="email"
         ref={emailRef}
         name="email"

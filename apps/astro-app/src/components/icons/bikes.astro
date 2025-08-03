@@ -1,0 +1,13 @@
+---
+import Adv from "./adv.astro";
+import Dualsport from "./dualsport.astro";
+import Touring from "./touring.astro";
+
+const { class: className } = Astro.props;
+---
+
+<div class:list={["flex md:flex-col flex-row"]}>
+  <Adv class={className} />
+  <Dualsport class={className} />
+  <Touring class={className} />
+</div>

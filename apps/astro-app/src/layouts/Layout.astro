@@ -2,14 +2,28 @@
 import "../styles/global.css";
 import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
-import { ViewTransitions } from "astro:transitions";
+import { ClientRouter } from "astro:transitions";
 import PostHog from "../components/Posthog.astro";
 import GTag from "../components/GTag.astro";
 
-const title = "Ridi motorcycle route generator";
-const description =
-  "Generate the perfect motorcycling route based based on your preferences with Ridi";
-const image = "https://ridi.bike/og-image.png";
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+}
+
+const {
+  title = "Ridi motorcycle route generator",
+  description = "Generate the perfect motorcycling route based based on your preferences with Ridi",
+  image = "https://ridi.bike/og-image.png",
+} = Astro.props;
+
+if (!import.meta.env.PUBLIC_RIDI_APP_URL) {
+  throw new Error("Missing APP url");
+}
+if (!import.meta.env.PUBLIC_RIDI_API_URL) {
+  throw new Error("Missing API url");
+}
 ---
 
 <!doctype html>
@@ -39,9 +53,9 @@ const image = "https://ridi.bike/og-image.png";
     />
     <PostHog />
     <GTag />
-    <ViewTransitions />
+    <ClientRouter />
   </head>
-  <body class="bg-white font-SpaceGrotesk">
+  <body class="bg-white">
     <Navbar />
     <slot />
     <Footer />

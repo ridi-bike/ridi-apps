@@ -2,4 +2,5 @@
 !./libs
 !./services/queue-service
 !./package.json
+!./husky.sh
 !./pnpm-workspace.yaml

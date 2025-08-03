@@ -14,6 +14,7 @@ export type Messages = {
   plan_map_gen: { planId: string };
   route_map_gen: { routeId: string };
   plan_new: { planId: string; widerRetryNum?: number };
+  user_new: { userId: string };
 };
 
 async function retryUntil(
@@ -101,7 +102,7 @@ export class Messaging {
 
       const messages = await readMessages(this.db, {
         queueName,
-        visibilityTimeoutSeconds: 5,
+        visibilityTimeoutSeconds: 10,
         qty: 1,
       });
 

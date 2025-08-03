@@ -1,8 +1,7 @@
 const { withNativeWind } = require("nativewind/metro");
 const path = require("path");
-const {
-  getSentryExpoConfig
-} = require("@sentry/react-native/metro");
+const { getSentryExpoConfig } = require("@sentry/react-native/metro");
+require("expo/metro-config");
 
 // Find the project and workspace directories
 const projectRoot = __dirname;
@@ -20,3 +19,4 @@ config.resolver.nodeModulesPaths = [
 ];
 
 module.exports = withNativeWind(config, { input: "./global.css" });
+

@@ -9,12 +9,18 @@ import { useEffect } from "react";
 import { PhProvider, posthogClient } from "~/lib/posthog/client";
 import { supabase } from "~/lib/supabase";
 
+let env = process.env.EXPO_PUBLIC_RIDI_ENV;
+
+if (!env) {
+  env = "local";
+}
+
 Sentry.init({
   enabled: !__DEV__,
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
   autoSessionTracking: true,
   attachScreenshot: true,
-  environment: __DEV__ ? "dev" : "prod",
+  environment: env,
   sendDefaultPii: true,
   tracesSampleRate: 1.0,
   profilesSampleRate: 1.0,
