@@ -301,16 +301,14 @@ export class StripeApi {
   async getPrices(user: { id: string; email: string }) {
     const privateUser = await this.getUser(user);
 
-    const [montlyPrice, yearlyPrice, subbedPrice] = await Promise.all([
-      this.stripe.prices.retrieve(this.priceMontly),
+    const [yearlyPrice, subbedPrice] = await Promise.all([
       this.stripe.prices.retrieve(this.priceYearly),
       privateUser.subType === "stripe" && privateUser.stripePriceId
         ? this.stripe.prices.retrieve(privateUser.stripePriceId)
         : null,
     ]);
-    if (!montlyPrice.unit_amount || !yearlyPrice.unit_amount) {
+    if (!yearlyPrice.unit_amount || (subbedPrice && !subbedPrice.unit_amount)) {
       this.logger.error("Price unit_amount missing", {
-        montlyPrice,
         yearlyPrice,
       });
       return [];
@@ -323,9 +321,9 @@ export class StripeApi {
               subbedPrice.recurring?.interval === "month"
                 ? "monthly"
                 : "yearly",
-            price: subbedPrice.unit_amount / 100,
+            price: subbedPrice.unit_amount || 0 / 100,
             priceMontly:
-              Math.round((subbedProce.unit_amount / 100 / 12) * 100) / 100,
+              Math.round((subbedPrice.unit_amount || 0 / 100 / 12) * 100) / 100,
           }
         : null,
       {
