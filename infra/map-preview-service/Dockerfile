@@ -27,7 +27,7 @@ COPY ./husky.sh ./husky.sh
 COPY ./pnpm-workspace.yaml ./pnpm-workspace.yaml
 
 RUN pnpm install
-RUN pnpm build
+RUN pnpm --filter=@ridi/map-preview-service build
 
 # RUN pnpm run --filter=@ridi/map-preview-service build
 
