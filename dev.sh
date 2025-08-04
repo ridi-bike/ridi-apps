@@ -18,6 +18,8 @@ supabase start
 if [ "$COMMAND" = "full" ]; then
   echo "Running in full mode"
 
+  sudo ss -lptn 'sport = :2730' | grep -o 'pid=[0-9]*' | sed 's/pid=//' | xargs -r kill
+
   (cd ./services/map-data-init/ && pnpm tsc && node --import=tsx --env-file=./.env.base --env-file=./.env.latvia ./src/index.ts | pino-pretty)
   (cd ./services/map-data-init/ && node --import=tsx --env-file=./.env.base --env-file=./.env.greece ./src/index.ts | pino-pretty)
   (cd ./services/map-data-init/ && node --import=tsx --env-file=./.env.base --env-file=./.env.estonia ./src/index.ts | pino-pretty)
