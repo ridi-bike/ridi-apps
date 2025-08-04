@@ -11,7 +11,7 @@ export default defineConfig({
     ],
   },
   root: path.join(import.meta.dirname, "src/client"),
-  plugins: [viteReact(), viteFastify()],
+  plugins: [viteReact(), viteFastify({ spa: true })],
   build: {
     emptyOutDir: true,
     outDir: path.join(import.meta.dirname, "dist/client"),
