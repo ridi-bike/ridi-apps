@@ -27,6 +27,7 @@ COPY ./husky.sh ./husky.sh
 COPY ./pnpm-workspace.yaml ./pnpm-workspace.yaml
 
 RUN pnpm install
+RUN pnpm build
 
 # RUN pnpm run --filter=@ridi/map-preview-service build
 
@@ -36,4 +37,4 @@ USER nodeuser
 
 EXPOSE ${PORT}
 
-CMD ["node", "--import=tsx", "./services/map-preview-service/src/server.ts", "--dev"]
+CMD ["node", "--import=tsx", "./services/map-preview-service/src/server.ts"]
