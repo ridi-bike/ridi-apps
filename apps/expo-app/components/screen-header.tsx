@@ -15,6 +15,7 @@ export function ScreenHeader(props: ScreenHeaderProps) {
       <View className="flex h-full w-14 items-center justify-center">
         {(props.onGoBack || props.headerProps.navigation.canGoBack()) && (
           <Pressable
+            aria-label="Go back"
             role="button"
             onPress={() => {
               if (props.onGoBack) {

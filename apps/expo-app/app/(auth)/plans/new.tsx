@@ -808,6 +808,7 @@ export default function PlansNew() {
                         <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
                       </View>
                       <Slider
+                        id="bearing-slider"
                         renderThumbComponent={() => (
                           <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
                         )}
@@ -850,6 +851,7 @@ export default function PlansNew() {
                         <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
                       </View>
                       <Slider
+                        id="distance-slider"
                         renderThumbComponent={() => (
                           <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
                         )}
