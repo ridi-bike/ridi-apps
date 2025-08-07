@@ -715,6 +715,7 @@ export default function PlansNew() {
               ))}
             <Pressable
               role="button"
+              aria-label="Rule Set Overview"
               onPress={() => {
                 router.push({
                   pathname: "/rules",

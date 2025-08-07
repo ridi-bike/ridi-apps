@@ -51,8 +51,8 @@ describe("ridi basic", () => {
   //   cy.get("button").contains("Set Start/Finish").click();
   //   cy.wait(2000);
   //
-  //   cy.get("button[aria-label*='Go back']").last().click();
-  //   cy.wait(2000);
+  //   cy.get("button[aria-label*='Go back']").filter(":visible").click();
+  //   cy.wait(3000);
   //
   //   cy.get("#bearing-slider").click(); // should click in the middle
   //   cy.wait(2000);
@@ -208,34 +208,144 @@ describe("ridi basic", () => {
   //   cy.get("button").contains("Clear Point").click();
   //   cy.wait(2000);
   // });
-  it("hint", () => {
+  // it("hint", () => {
+  //   cy.visit(Cypress.env("RIDI_APP_URL"));
+  //
+  //   cy.get("button").contains("Try it out").click();
+  //   cy.wait(2000);
+  //
+  //   cy.get("button").contains("Trip details").click({ force: true });
+  //   cy.wait(2000);
+  //
+  //   cy.get("#map-coords-selector").click();
+  //   cy.get("button").contains("Cancel").click();
+  //   cy.wait(2000);
+  //   cy.get("#map-coords-selector").click();
+  //   cy.get("button").contains("Cancel").click();
+  //   cy.wait(2000);
+  //   cy.get("#map-coords-selector").click();
+  //   cy.get("button").contains("Cancel").click();
+  //   cy.wait(2000);
+  //   cy.get("#map-coords-selector").click();
+  //   cy.get("button").contains("Cancel").click();
+  //   cy.wait(2000);
+  //   cy.get("#map-coords-selector").click();
+  //   cy.get("button").contains("Cancel").click();
+  //   cy.wait(2000);
+  //   cy.get("#map-coords-selector").click();
+  //   cy.get("button").contains("Cancel").click();
+  //   cy.wait(2000);
+  //
+  //   cy.contains("div", "Try using map center selector").should("be.visible");
+  // });
+  it("rules", () => {
     cy.visit(Cypress.env("RIDI_APP_URL"));
 
     cy.get("button").contains("Try it out").click();
+    cy.wait(4000);
+
+    cy.get("button").contains("Round Trip").click();
     cy.wait(2000);
 
-    cy.get("button").contains("Trip details").click({ force: true });
+    cy.get("button[aria-label*='Rule Set Overview']").click();
     cy.wait(2000);
 
-    cy.get("#map-coords-selector").click();
-    cy.get("button").contains("Cancel").click();
-    cy.wait(2000);
-    cy.get("#map-coords-selector").click();
-    cy.get("button").contains("Cancel").click();
-    cy.wait(2000);
-    cy.get("#map-coords-selector").click();
-    cy.get("button").contains("Cancel").click();
-    cy.wait(2000);
-    cy.get("#map-coords-selector").click();
-    cy.get("button").contains("Cancel").click();
-    cy.wait(2000);
-    cy.get("#map-coords-selector").click();
-    cy.get("button").contains("Cancel").click();
-    cy.wait(2000);
-    cy.get("#map-coords-selector").click();
-    cy.get("button").contains("Cancel").click();
+    cy.contains("div:has(button)", "All surfaces").within(() => {
+      cy.get("button.bg-\\[\\#FF5937\\]").should("be.visible");
+    });
+
+    cy.get("button[aria-label*='Go back']").filter(":visible").click();
+    cy.wait(3000);
+
+    cy.get("button[aria-label*='Adv']").should("have.class", "bg-[#FF5937]");
+
+    cy.get("button[aria-label*='Dualsport']").click();
+    cy.get("button[aria-label*='Rule Set Overview']").click();
     cy.wait(2000);
 
-    cy.contains("div", "Try using map center selector").should("be.visible");
+    cy.contains("div", "Prefer Unpaved")
+      .get("button")
+      .should("have.class", "bg-[#FF5937]");
+
+    cy.contains("div:has(button)", "All surfaces").within(() => {
+      cy.get("button[aria-label='Open options']").click({ force: true });
+    });
+
+    cy.contains("button", "Duplicate").click();
+    cy.wait(2000);
+
+    cy.contains("div:has(button)", "Copy of All surfaces").within(() => {
+      cy.get("button[aria-label='Open options']").click({ force: true });
+    });
+    cy.contains("button", "Edit").click();
+    cy.get("button[aria-label='Toggle group Large Roads'").click({
+      force: true,
+    });
+    cy.get("div[aria-label='Priority for group Medium Roads'").within(() => {
+      cy.get("div").click({ multiple: true, force: true });
+    });
+    cy.get("button[aria-label='Expand group Small Roads'").click({
+      force: true,
+    });
+    cy.get("button[aria-label='Toggle tag tertiary'").click({
+      force: true,
+    });
+    cy.get("div[aria-label='Priority for tag unclassified'").within(() => {
+      cy.get("div").click({ multiple: true, force: true });
+    });
+    cy.get("input[placeholder='Rule set name...']")
+      .clear({ force: true })
+      .type("Custom rules", {
+        force: true,
+      });
+    cy.wait(2000);
+
+    cy.contains("button", "Save").click();
+
+    cy.contains("div:has(button)", "Custom rules").within(() => {
+      cy.get("button[aria-label='Open options']").click({ force: true });
+    });
+    cy.contains("button", "Edit").click();
+
+    cy.get("button[aria-label='Toggle group Large Roads'").should(
+      "not.have.class",
+      "bg-[#FF5937]",
+    );
+    cy.get("button[aria-label='Reset group Small Roads'").should("be.visible");
+    cy.get("input[placeholder='Rule set name...']").should(
+      "have.value",
+      "Custom rules",
+    );
+    cy.get("button[aria-label*='Go back']").filter(":visible").click();
+    cy.wait(3000);
+
+    cy.contains("div:has(button)", "Custom rules").within(() => {
+      cy.get("button[aria-label*='Select rule set']").click();
+    });
+    cy.wait(3000);
+
+    cy.contains("button", "Round Trip").should("have.class", "bg-[#FF5937]");
+
+    cy.get("button[aria-label*='Rule Set Overview']").should(
+      "have.class",
+      "bg-[#FF5937]",
+    );
+
+    cy.get("button[aria-label*='Rule Set Overview']").click();
+    cy.wait(2000);
+
+    cy.contains("div:has(button)", "Custom rules").within(() => {
+      cy.get("button[aria-label='Open options']").click({ force: true });
+    });
+    cy.contains("button", "Delete").click();
+    cy.contains("button.bg-\\[\\#FF5937\\]", "Delete").click();
+    cy.wait(2000);
+
+    cy.contains("div:has(button)", "All surfaces").within(() => {
+      cy.get("button.bg-\\[\\#FF5937\\]").should("be.visible");
+    });
+    cy.get("button[aria-label*='Go back']").filter(":visible").click();
+    cy.wait(3000);
+    cy.get("button[aria-label*='Adv']").should("have.class", "bg-[#FF5937]");
   });
 });
