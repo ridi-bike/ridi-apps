@@ -1,5 +1,4 @@
 import * as turf from "@turf/turf";
-import { type FillLayer } from "@vis.gl/react-maplibre";
 import { Layer, Source } from "@vis.gl/react-maplibre";
 import { type BBox } from "geojson";
 import { useMemo } from "react";
@@ -116,7 +115,7 @@ export function useRoundTripPolygon(
   const rountdTripLayer = useMemo(() => {
     if (roundTripPolygon) {
       const routeLayerId = "round-trip-layer";
-      const layerStyle: FillLayer = {
+      const layerStyle = {
         id: routeLayerId,
         type: "fill",
         source: routeLayerId,
@@ -124,7 +123,7 @@ export function useRoundTripPolygon(
           "fill-color": "#FF5937",
           "fill-opacity": 1,
         },
-      };
+      } as const;
       return (
         <Source id={routeLayerId} type="geojson" data={roundTripPolygon}>
           <Layer {...layerStyle} />

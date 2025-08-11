@@ -3,7 +3,7 @@ import slugify from "@sindresorhus/slugify";
 import { buildGPX, BaseBuilder } from "gpx-builder";
 import { Trophy, Trash2, Ruler } from "lucide-react-native";
 import { AnimatePresence, MotiView } from "moti";
-import { useMemo, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { View, Text, ScrollView, Pressable } from "react-native";
 
 import { Button } from "~/components/button";
@@ -238,6 +238,9 @@ export default function RouteDetails() {
   const coords = useRouteCoords(routeId, false);
 
   const getFileName = useCallback(() => {
+    if (!plan || !route) {
+      return "route.gpx";
+    }
     function descOrLatLon(
       desc: string | undefined,
       lat: number,
@@ -252,9 +255,13 @@ export default function RouteDetails() {
     const startLoc = descOrLatLon(plan.startDesc, plan.startLat, plan.startLon);
     const finishLoc =
       plan.tripType === "start-finish"
-        ? descOrLatLon(plan.finishDesc, plan.finishLat, plan.finishLon)
+        ? descOrLatLon(
+            plan.finishDesc || "",
+            plan.finishLat || 0,
+            plan.finishLon || 0,
+          )
         : null;
-    const dist = Math.round(route.data.stats.lenM / 1000);
+    const dist = Math.round(route.lenM / 1000);
     return plan.tripType === "start-finish"
       ? `${startLoc}_${finishLoc}_${dist}km_${date}.gpx`
       : `${startLoc}_${plan.bearing}deg_${dist}km_${date}.gpx`;
@@ -307,9 +314,9 @@ export default function RouteDetails() {
                               <DeleteConfirmDialog
                                 onDelete={() => {
                                   posthogClient.captureEvent("route-deleted", {
-                                    routeId: route.data.id,
+                                    routeId: route.id,
                                   });
-                                  routeDelete(route.data.id);
+                                  routeDelete(route.id);
                                   if (router.canGoBack()) {
                                     router.back();
                                   } else {
@@ -329,17 +336,22 @@ export default function RouteDetails() {
                             </View>
                             <View className="flex flex-col items-end justify-center">
                               <DownloadGpxDialog
-                                downloadedAt={route.data.downloadedAt}
+                                downloadedAt={route.downloadedAt}
                                 onDownload={() => {
                                   posthogClient.captureEvent(
                                     "route-gpx-downloaded",
                                     {
-                                      routeId: route.data.id,
+                                      routeId: route.id,
                                     },
                                   );
 
                                   const { Point } = BaseBuilder.MODELS;
-                                  const points = route.data.latLonArray.map(
+                                  const points = (
+                                    JSON.parse(route.coordsArrayString) as [
+                                      number,
+                                      number,
+                                    ][]
+                                  ).map(
                                     (latLon) => new Point(latLon[0], latLon[1]),
                                   );
 
@@ -353,10 +365,7 @@ export default function RouteDetails() {
                                   link.download = getFileName();
                                   link.click();
 
-                                  routeSetDownloaded({
-                                    id: route.data.id,
-                                    downloadedAt: new Date(),
-                                  });
+                                  routeSetDownloaded(route.id);
                                 }}
                               >
                                 <Pressable

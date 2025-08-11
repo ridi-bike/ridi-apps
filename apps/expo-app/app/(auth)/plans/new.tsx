@@ -29,7 +29,7 @@ import { DIRECTIONS, getCardinalDirection } from "~/components/geo-map/util";
 import { LocationPermsNotGiven } from "~/components/LocationPermsNotGiven";
 import { ScreenFrame } from "~/components/screen-frame";
 import { coordsAddressGet } from "~/lib/coords-details";
-import { usePlansUpdate } from "~/lib/data-stores/plans";
+import { usePlans, usePlansUpdate } from "~/lib/data-stores/plans";
 import { findRegions } from "~/lib/data-stores/regions";
 import { useRuleSets, useRuleSetDefaultId } from "~/lib/data-stores/rule-sets";
 import { AdvIcon } from "~/lib/icons/adv";
@@ -74,7 +74,6 @@ const CANCEL_TRIGGER_TIMES = 5;
 
 export default function PlansNew() {
   const router = useRouter();
-  const { planAdd, data: plans, loading: plansLoading } = useStorePlans();
   const [startCoords, setStartCoords] = useUrlParams("start", coordsSchema);
   const [finishCoords, setFinishCoords] = useUrlParams("finish", coordsSchema);
   const [cancelPressedTimes, setCancelPressedTimes] = useState(0);
@@ -261,13 +260,16 @@ export default function PlansNew() {
 
   const [mapMode, setMapMode] = useUrlParams("map-mode", z.boolean());
 
-  const initialCoords = useMemo(() => {
+  const { planCreate } = usePlansUpdate();
+
+  const plans = usePlans();
+  const initialCoords = useMemo((): [number, number] => {
     const prevPlan = plans?.[0];
-    if (!plansLoading && !prevPlan) {
+    if (!prevPlan) {
       return [57.153614, 24.85391];
     }
-    return prevPlan ? [prevPlan.startLat, prevPlan.startLon] : null;
-  }, [plans, plansLoading]);
+    return [prevPlan.startLat, prevPlan.startLon];
+  }, [plans]);
 
   return (
     <ScreenFrame
@@ -803,7 +805,7 @@ export default function PlansNew() {
                         <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
                       </View>
                       <Slider
-                        id="bearing-slider"
+                        {...{ id: "bearing-slider" }}
                         renderThumbComponent={() => (
                           <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
                         )}
@@ -846,7 +848,7 @@ export default function PlansNew() {
                         <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
                       </View>
                       <Slider
-                        id="distance-slider"
+                        {...{ id: "distance-slider" }}
                         renderThumbComponent={() => (
                           <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
                         )}

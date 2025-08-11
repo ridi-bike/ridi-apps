@@ -16,7 +16,7 @@
     "build:web": "expo export -p web --dump-sourcemap --clear && pnpm run version-update && sentry-expo-upload-sourcemaps dist",
     "release:web:new": "sentry-cli releases new \"ridi-apps-expo@$(sentry-cli releases propose-version)\" && sentry-cli releases set-commits \"ridi-apps-expo@$(sentry-cli releases propose-version)\" --auto --ignore-missing",
     "release:web:fin": "sentry-cli releases finalize \"ridi-apps-expo@$(sentry-cli releases propose-version)\"",
-    "tsc": "tsc --watch",
+    "tsc": "tsc",
     "type-check": "node ./scripts/type-check.mjs"
   },
   "jest": {

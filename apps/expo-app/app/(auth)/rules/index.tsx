@@ -1,9 +1,5 @@
 import { type RuleSet } from "@ridi/store-with-schema";
-import { useRootNavigationState, useRouter } from "expo-router";
-import {
-  type RuleSetsSetRequest,
-  type RuleSetsListResponse,
-} from "@ridi/api-contracts";
+import { useRouter } from "expo-router";
 import { router } from "expo-router";
 import {
   Copy,

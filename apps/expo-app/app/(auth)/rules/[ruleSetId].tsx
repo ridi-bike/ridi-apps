@@ -445,7 +445,7 @@ export default function RulePackDetails() {
                                 </Pressable>
                               </View>
                               <Pressable
-                                aria-label={`Toggle tag ${tag[0]}`}
+                                aria-label={`Toggle tag ${tag.tag}`}
                                 role="button"
                                 className={cn(
                                   "h-8 w-14 rounded-full p-1 transition-colors",
@@ -474,7 +474,7 @@ export default function RulePackDetails() {
                                     <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
                                   </View>
                                   <Slider
-                                    aria-label={`Priority for tag ${tag[0]}`}
+                                    aria-label={`Priority for tag ${tag.tag}`}
                                     renderThumbComponent={() => (
                                       <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
                                     )}

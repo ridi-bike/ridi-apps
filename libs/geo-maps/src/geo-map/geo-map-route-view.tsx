@@ -1,6 +1,5 @@
 import * as turf from "@turf/turf";
 import {
-  type LineLayer,
   Layer,
   Map as MapLibre,
   Source,
@@ -44,7 +43,7 @@ export function GeoMapRouteView({
       return null;
     }
     const routeLayerId = "route-layer";
-    const layerStyle: LineLayer = {
+    const layerStyle = {
       id: "route-layer",
       type: "line",
       source: routeLayerId,
@@ -52,7 +51,7 @@ export function GeoMapRouteView({
         "line-color": "#BD37FF",
         "line-width": 3,
       },
-    };
+    } as const;
     const geojson: FeatureCollection = {
       type: "FeatureCollection",
       features: [

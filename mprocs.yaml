@@ -18,7 +18,7 @@ procs:
     cwd: "./services/queue-service/"
     stop: SIGTERM
   queue-service-tsc:
-    shell: "pnpm run tsc --watch"
+    shell: "pnpm run tsc"
     cwd: "./services/queue-service/"
   router-service-latvia:
     shell: "node --import=tsx --watch-path=./src --env-file=.env.latvia src/index.ts | pino-pretty"
@@ -33,12 +33,12 @@ procs:
     cwd: "./services/router-service/"
     stop: SIGTERM
   router-service-tsc:
-    shell: "pnpm run tsc --watch"
+    shell: "pnpm run tsc"
     cwd: "./services/router-service/"
   map-preview-service:
     shell: "node --import=tsx --env-file=.env.base --env-file=.env ./src/server.ts --dev | pino-pretty "
     cwd: "./services/map-preview-service/"
     stop: SIGTERM
   map-preview-service-tsc:
-    shell: "pnpm run tsc --watch"
+    shell: "pnpm run tsc"
     cwd: "./services/map-preview-service/"

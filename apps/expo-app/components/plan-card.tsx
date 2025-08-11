@@ -55,6 +55,7 @@ export const PlanCard = ({ planId }: RouteCardProps) => {
           />
         ) : (
           <GeoMapPlanView
+            initialCoords={[0, 0]}
             start={{ lat: startLat, lon: startLon }}
             finish={
               finishLat && finishLon ? { lat: finishLat, lon: finishLon } : null
