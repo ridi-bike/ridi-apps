@@ -8,6 +8,7 @@ display_help() {
   echo ""
   echo "Available commands:"
   echo "  migrate   Reset database, generate Supabase TypeScript types, and run sqlc"
+  echo "  kysely    Generate kysely types"
   echo "  sqlc      Generate SQLC types"
   echo ""
   echo "Error: Invalid or no command provided."
@@ -29,7 +30,7 @@ case "$1" in
   # supabase gen types --lang=typescript --local >./services/ridi-router/packages/lib/supabase.ts
   # supabase gen types --lang=typescript --local >./services/cfw-api/src/supabase.ts
   ./db.sh sqlc
-  ./db.sh kyseley
+  ./db.sh kysely
   ;;
 "kysely")
   (cd ./libs/db-queries/ && pnpm run typegen)

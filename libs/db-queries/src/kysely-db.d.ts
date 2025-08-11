@@ -47,164 +47,167 @@ export type RouteStatType = "smoothness" | "surface" | "type";
 
 export type RuleSetIcon = "adv" | "dualsport" | "touring";
 
+export type StorageBuckettype = "ANALYTICS" | "STANDARD";
+
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export interface _RealtimeExtensions {
   id: string;
-  insertedAt: Timestamp;
+  inserted_at: Timestamp;
   settings: Json | null;
-  tenantExternalId: string | null;
+  tenant_external_id: string | null;
   type: string | null;
-  updatedAt: Timestamp;
+  updated_at: Timestamp;
 }
 
 export interface _RealtimeSchemaMigrations {
-  insertedAt: Timestamp | null;
+  inserted_at: Timestamp | null;
   version: Int8;
 }
 
 export interface _RealtimeTenants {
-  externalId: string | null;
+  broadcast_adapter: Generated<string | null>;
+  external_id: string | null;
   id: string;
-  insertedAt: Timestamp;
-  jwtJwks: Json | null;
-  jwtSecret: string | null;
-  maxBytesPerSecond: Generated<number>;
-  maxChannelsPerClient: Generated<number>;
-  maxConcurrentUsers: Generated<number>;
-  maxEventsPerSecond: Generated<number>;
-  maxJoinsPerSecond: Generated<number>;
-  migrationsRan: Generated<number | null>;
+  inserted_at: Timestamp;
+  jwt_jwks: Json | null;
+  jwt_secret: string | null;
+  max_bytes_per_second: Generated<number>;
+  max_channels_per_client: Generated<number>;
+  max_concurrent_users: Generated<number>;
+  max_events_per_second: Generated<number>;
+  max_joins_per_second: Generated<number>;
+  migrations_ran: Generated<number | null>;
   name: string | null;
-  notifyPrivateAlpha: Generated<boolean | null>;
-  postgresCdcDefault: Generated<string | null>;
-  privateOnly: Generated<boolean>;
+  notify_private_alpha: Generated<boolean | null>;
+  postgres_cdc_default: Generated<string | null>;
+  private_only: Generated<boolean>;
   suspend: Generated<boolean | null>;
-  updatedAt: Timestamp;
+  updated_at: Timestamp;
 }
 
 export interface AuthAuditLogEntries {
-  createdAt: Timestamp | null;
+  created_at: Timestamp | null;
   id: string;
-  instanceId: string | null;
-  ipAddress: Generated<string>;
+  instance_id: string | null;
+  ip_address: Generated<string>;
   payload: Json | null;
 }
 
 export interface AuthFlowState {
-  authCode: string;
-  authCodeIssuedAt: Timestamp | null;
-  authenticationMethod: string;
-  codeChallenge: string;
-  codeChallengeMethod: AuthCodeChallengeMethod;
-  createdAt: Timestamp | null;
+  auth_code: string;
+  auth_code_issued_at: Timestamp | null;
+  authentication_method: string;
+  code_challenge: string;
+  code_challenge_method: AuthCodeChallengeMethod;
+  created_at: Timestamp | null;
   id: string;
-  providerAccessToken: string | null;
-  providerRefreshToken: string | null;
-  providerType: string;
-  updatedAt: Timestamp | null;
-  userId: string | null;
+  provider_access_token: string | null;
+  provider_refresh_token: string | null;
+  provider_type: string;
+  updated_at: Timestamp | null;
+  user_id: string | null;
 }
 
 export interface AuthIdentities {
-  createdAt: Timestamp | null;
+  created_at: Timestamp | null;
   /**
    * Auth: Email is a generated column that references the optional email property in the identity_data
    */
   email: Generated<string | null>;
   id: Generated<string>;
-  identityData: Json;
-  lastSignInAt: Timestamp | null;
+  identity_data: Json;
+  last_sign_in_at: Timestamp | null;
   provider: string;
-  providerId: string;
-  updatedAt: Timestamp | null;
-  userId: string;
+  provider_id: string;
+  updated_at: Timestamp | null;
+  user_id: string;
 }
 
 export interface AuthInstances {
-  createdAt: Timestamp | null;
+  created_at: Timestamp | null;
   id: string;
-  rawBaseConfig: string | null;
-  updatedAt: Timestamp | null;
+  raw_base_config: string | null;
+  updated_at: Timestamp | null;
   uuid: string | null;
 }
 
 export interface AuthMfaAmrClaims {
-  authenticationMethod: string;
-  createdAt: Timestamp;
+  authentication_method: string;
+  created_at: Timestamp;
   id: string;
-  sessionId: string;
-  updatedAt: Timestamp;
+  session_id: string;
+  updated_at: Timestamp;
 }
 
 export interface AuthMfaChallenges {
-  createdAt: Timestamp;
-  factorId: string;
+  created_at: Timestamp;
+  factor_id: string;
   id: string;
-  ipAddress: string;
-  otpCode: string | null;
-  verifiedAt: Timestamp | null;
-  webAuthnSessionData: Json | null;
+  ip_address: string;
+  otp_code: string | null;
+  verified_at: Timestamp | null;
+  web_authn_session_data: Json | null;
 }
 
 export interface AuthMfaFactors {
-  createdAt: Timestamp;
-  factorType: AuthFactorType;
-  friendlyName: string | null;
+  created_at: Timestamp;
+  factor_type: AuthFactorType;
+  friendly_name: string | null;
   id: string;
-  lastChallengedAt: Timestamp | null;
+  last_challenged_at: Timestamp | null;
   phone: string | null;
   secret: string | null;
   status: AuthFactorStatus;
-  updatedAt: Timestamp;
-  userId: string;
-  webAuthnAaguid: string | null;
-  webAuthnCredential: Json | null;
+  updated_at: Timestamp;
+  user_id: string;
+  web_authn_aaguid: string | null;
+  web_authn_credential: Json | null;
 }
 
 export interface AuthOneTimeTokens {
-  createdAt: Generated<Timestamp>;
+  created_at: Generated<Timestamp>;
   id: string;
-  relatesTo: string;
-  tokenHash: string;
-  tokenType: AuthOneTimeTokenType;
-  updatedAt: Generated<Timestamp>;
-  userId: string;
+  relates_to: string;
+  token_hash: string;
+  token_type: AuthOneTimeTokenType;
+  updated_at: Generated<Timestamp>;
+  user_id: string;
 }
 
 export interface AuthRefreshTokens {
-  createdAt: Timestamp | null;
+  created_at: Timestamp | null;
   id: Generated<Int8>;
-  instanceId: string | null;
+  instance_id: string | null;
   parent: string | null;
   revoked: boolean | null;
-  sessionId: string | null;
+  session_id: string | null;
   token: string | null;
-  updatedAt: Timestamp | null;
-  userId: string | null;
+  updated_at: Timestamp | null;
+  user_id: string | null;
 }
 
 export interface AuthSamlProviders {
-  attributeMapping: Json | null;
-  createdAt: Timestamp | null;
-  entityId: string;
+  attribute_mapping: Json | null;
+  created_at: Timestamp | null;
+  entity_id: string;
   id: string;
-  metadataUrl: string | null;
-  metadataXml: string;
-  nameIdFormat: string | null;
-  ssoProviderId: string;
-  updatedAt: Timestamp | null;
+  metadata_url: string | null;
+  metadata_xml: string;
+  name_id_format: string | null;
+  sso_provider_id: string;
+  updated_at: Timestamp | null;
 }
 
 export interface AuthSamlRelayStates {
-  createdAt: Timestamp | null;
-  flowStateId: string | null;
-  forEmail: string | null;
+  created_at: Timestamp | null;
+  flow_state_id: string | null;
+  for_email: string | null;
   id: string;
-  redirectTo: string | null;
-  requestId: string;
-  ssoProviderId: string;
-  updatedAt: Timestamp | null;
+  redirect_to: string | null;
+  request_id: string;
+  sso_provider_id: string;
+  updated_at: Timestamp | null;
 }
 
 export interface AuthSchemaMigrations {
@@ -213,129 +216,129 @@ export interface AuthSchemaMigrations {
 
 export interface AuthSessions {
   aal: AuthAalLevel | null;
-  createdAt: Timestamp | null;
-  factorId: string | null;
+  created_at: Timestamp | null;
+  factor_id: string | null;
   id: string;
   ip: string | null;
   /**
    * Auth: Not after is a nullable column that contains a timestamp after which the session should be regarded as expired.
    */
-  notAfter: Timestamp | null;
-  refreshedAt: Timestamp | null;
+  not_after: Timestamp | null;
+  refreshed_at: Timestamp | null;
   tag: string | null;
-  updatedAt: Timestamp | null;
-  userAgent: string | null;
-  userId: string;
+  updated_at: Timestamp | null;
+  user_agent: string | null;
+  user_id: string;
 }
 
 export interface AuthSsoDomains {
-  createdAt: Timestamp | null;
+  created_at: Timestamp | null;
   domain: string;
   id: string;
-  ssoProviderId: string;
-  updatedAt: Timestamp | null;
+  sso_provider_id: string;
+  updated_at: Timestamp | null;
 }
 
 export interface AuthSsoProviders {
-  createdAt: Timestamp | null;
+  created_at: Timestamp | null;
   id: string;
   /**
    * Auth: Uniquely identifies a SSO provider according to a user-chosen resource ID (case insensitive), useful in infrastructure as code.
    */
-  resourceId: string | null;
-  updatedAt: Timestamp | null;
+  resource_id: string | null;
+  updated_at: Timestamp | null;
 }
 
 export interface AuthUsers {
   aud: string | null;
-  bannedUntil: Timestamp | null;
-  confirmationSentAt: Timestamp | null;
-  confirmationToken: string | null;
-  confirmedAt: Generated<Timestamp | null>;
-  createdAt: Timestamp | null;
-  deletedAt: Timestamp | null;
+  banned_until: Timestamp | null;
+  confirmation_sent_at: Timestamp | null;
+  confirmation_token: string | null;
+  confirmed_at: Generated<Timestamp | null>;
+  created_at: Timestamp | null;
+  deleted_at: Timestamp | null;
   email: string | null;
-  emailChange: string | null;
-  emailChangeConfirmStatus: Generated<number | null>;
-  emailChangeSentAt: Timestamp | null;
-  emailChangeTokenCurrent: Generated<string | null>;
-  emailChangeTokenNew: string | null;
-  emailConfirmedAt: Timestamp | null;
-  encryptedPassword: string | null;
+  email_change: string | null;
+  email_change_confirm_status: Generated<number | null>;
+  email_change_sent_at: Timestamp | null;
+  email_change_token_current: Generated<string | null>;
+  email_change_token_new: string | null;
+  email_confirmed_at: Timestamp | null;
+  encrypted_password: string | null;
   id: string;
-  instanceId: string | null;
-  invitedAt: Timestamp | null;
-  isAnonymous: Generated<boolean>;
+  instance_id: string | null;
+  invited_at: Timestamp | null;
+  is_anonymous: Generated<boolean>;
   /**
    * Auth: Set this column to true when the account comes from SSO. These accounts can have duplicate emails.
    */
-  isSsoUser: Generated<boolean>;
-  isSuperAdmin: boolean | null;
-  lastSignInAt: Timestamp | null;
+  is_sso_user: Generated<boolean>;
+  is_super_admin: boolean | null;
+  last_sign_in_at: Timestamp | null;
   phone: Generated<string | null>;
-  phoneChange: Generated<string | null>;
-  phoneChangeSentAt: Timestamp | null;
-  phoneChangeToken: Generated<string | null>;
-  phoneConfirmedAt: Timestamp | null;
-  rawAppMetaData: Json | null;
-  rawUserMetaData: Json | null;
-  reauthenticationSentAt: Timestamp | null;
-  reauthenticationToken: Generated<string | null>;
-  recoverySentAt: Timestamp | null;
-  recoveryToken: string | null;
+  phone_change: Generated<string | null>;
+  phone_change_sent_at: Timestamp | null;
+  phone_change_token: Generated<string | null>;
+  phone_confirmed_at: Timestamp | null;
+  raw_app_meta_data: Json | null;
+  raw_user_meta_data: Json | null;
+  reauthentication_sent_at: Timestamp | null;
+  reauthentication_token: Generated<string | null>;
+  recovery_sent_at: Timestamp | null;
+  recovery_token: string | null;
   role: string | null;
-  updatedAt: Timestamp | null;
+  updated_at: Timestamp | null;
 }
 
 export interface ExtensionsPgStatStatements {
-  blkReadTime: number | null;
-  blkWriteTime: number | null;
+  blk_read_time: number | null;
+  blk_write_time: number | null;
   calls: Int8 | null;
   dbid: number | null;
-  jitEmissionCount: Int8 | null;
-  jitEmissionTime: number | null;
-  jitFunctions: Int8 | null;
-  jitGenerationTime: number | null;
-  jitInliningCount: Int8 | null;
-  jitInliningTime: number | null;
-  jitOptimizationCount: Int8 | null;
-  jitOptimizationTime: number | null;
-  localBlksDirtied: Int8 | null;
-  localBlksHit: Int8 | null;
-  localBlksRead: Int8 | null;
-  localBlksWritten: Int8 | null;
-  maxExecTime: number | null;
-  maxPlanTime: number | null;
-  meanExecTime: number | null;
-  meanPlanTime: number | null;
-  minExecTime: number | null;
-  minPlanTime: number | null;
+  jit_emission_count: Int8 | null;
+  jit_emission_time: number | null;
+  jit_functions: Int8 | null;
+  jit_generation_time: number | null;
+  jit_inlining_count: Int8 | null;
+  jit_inlining_time: number | null;
+  jit_optimization_count: Int8 | null;
+  jit_optimization_time: number | null;
+  local_blks_dirtied: Int8 | null;
+  local_blks_hit: Int8 | null;
+  local_blks_read: Int8 | null;
+  local_blks_written: Int8 | null;
+  max_exec_time: number | null;
+  max_plan_time: number | null;
+  mean_exec_time: number | null;
+  mean_plan_time: number | null;
+  min_exec_time: number | null;
+  min_plan_time: number | null;
   plans: Int8 | null;
   query: string | null;
   queryid: Int8 | null;
   rows: Int8 | null;
-  sharedBlksDirtied: Int8 | null;
-  sharedBlksHit: Int8 | null;
-  sharedBlksRead: Int8 | null;
-  sharedBlksWritten: Int8 | null;
-  stddevExecTime: number | null;
-  stddevPlanTime: number | null;
-  tempBlkReadTime: number | null;
-  tempBlksRead: Int8 | null;
-  tempBlksWritten: Int8 | null;
-  tempBlkWriteTime: number | null;
+  shared_blks_dirtied: Int8 | null;
+  shared_blks_hit: Int8 | null;
+  shared_blks_read: Int8 | null;
+  shared_blks_written: Int8 | null;
+  stddev_exec_time: number | null;
+  stddev_plan_time: number | null;
+  temp_blk_read_time: number | null;
+  temp_blk_write_time: number | null;
+  temp_blks_read: Int8 | null;
+  temp_blks_written: Int8 | null;
   toplevel: boolean | null;
-  totalExecTime: number | null;
-  totalPlanTime: number | null;
+  total_exec_time: number | null;
+  total_plan_time: number | null;
   userid: number | null;
-  walBytes: Numeric | null;
-  walFpi: Int8 | null;
-  walRecords: Int8 | null;
+  wal_bytes: Numeric | null;
+  wal_fpi: Int8 | null;
+  wal_records: Int8 | null;
 }
 
 export interface ExtensionsPgStatStatementsInfo {
   dealloc: Int8 | null;
-  statsReset: Timestamp | null;
+  stats_reset: Timestamp | null;
 }
 
 export interface GeoBoundaries {
@@ -343,7 +346,7 @@ export interface GeoBoundaries {
   level: number;
   name: string;
   polygon: string;
-  updatedAt: Timestamp;
+  updated_at: Timestamp;
 }
 
 export interface NetHttpRequestQueue {
@@ -351,196 +354,196 @@ export interface NetHttpRequestQueue {
   headers: Json;
   id: Generated<Int8>;
   method: string;
-  timeoutMilliseconds: number;
+  timeout_milliseconds: number;
   url: string;
 }
 
 export interface NetHttpResponse {
   content: string | null;
-  contentType: string | null;
+  content_type: string | null;
   created: Generated<Timestamp>;
-  errorMsg: string | null;
+  error_msg: string | null;
   headers: Json | null;
   id: Int8 | null;
-  statusCode: number | null;
-  timedOut: boolean | null;
+  status_code: number | null;
+  timed_out: boolean | null;
 }
 
 export interface PgmqAPlanMapGen {
-  archivedAt: Generated<Timestamp>;
-  enqueuedAt: Generated<Timestamp>;
+  archived_at: Generated<Timestamp>;
+  enqueued_at: Generated<Timestamp>;
   message: Json | null;
-  msgId: Int8;
-  readCt: Generated<number>;
+  msg_id: Int8;
+  read_ct: Generated<number>;
   vt: Timestamp;
 }
 
 export interface PgmqAPlanNew {
-  archivedAt: Generated<Timestamp>;
-  enqueuedAt: Generated<Timestamp>;
+  archived_at: Generated<Timestamp>;
+  enqueued_at: Generated<Timestamp>;
   message: Json | null;
-  msgId: Int8;
-  readCt: Generated<number>;
+  msg_id: Int8;
+  read_ct: Generated<number>;
   vt: Timestamp;
 }
 
 export interface PgmqARouteMapGen {
-  archivedAt: Generated<Timestamp>;
-  enqueuedAt: Generated<Timestamp>;
+  archived_at: Generated<Timestamp>;
+  enqueued_at: Generated<Timestamp>;
   message: Json | null;
-  msgId: Int8;
-  readCt: Generated<number>;
+  msg_id: Int8;
+  read_ct: Generated<number>;
   vt: Timestamp;
 }
 
 export interface PgmqAUserNew {
-  archivedAt: Generated<Timestamp>;
-  enqueuedAt: Generated<Timestamp>;
+  archived_at: Generated<Timestamp>;
+  enqueued_at: Generated<Timestamp>;
   message: Json | null;
-  msgId: Int8;
-  readCt: Generated<number>;
+  msg_id: Int8;
+  read_ct: Generated<number>;
   vt: Timestamp;
 }
 
 export interface PgmqMeta {
-  createdAt: Generated<Timestamp>;
-  isPartitioned: boolean;
-  isUnlogged: boolean;
-  queueName: string;
+  created_at: Generated<Timestamp>;
+  is_partitioned: boolean;
+  is_unlogged: boolean;
+  queue_name: string;
 }
 
 export interface PgmqQPlanMapGen {
-  enqueuedAt: Generated<Timestamp>;
+  enqueued_at: Generated<Timestamp>;
   message: Json | null;
-  msgId: Generated<Int8>;
-  readCt: Generated<number>;
+  msg_id: Generated<Int8>;
+  read_ct: Generated<number>;
   vt: Timestamp;
 }
 
 export interface PgmqQPlanNew {
-  enqueuedAt: Generated<Timestamp>;
+  enqueued_at: Generated<Timestamp>;
   message: Json | null;
-  msgId: Generated<Int8>;
-  readCt: Generated<number>;
+  msg_id: Generated<Int8>;
+  read_ct: Generated<number>;
   vt: Timestamp;
 }
 
 export interface PgmqQRouteMapGen {
-  enqueuedAt: Generated<Timestamp>;
+  enqueued_at: Generated<Timestamp>;
   message: Json | null;
-  msgId: Generated<Int8>;
-  readCt: Generated<number>;
+  msg_id: Generated<Int8>;
+  read_ct: Generated<number>;
   vt: Timestamp;
 }
 
 export interface PgmqQUserNew {
-  enqueuedAt: Generated<Timestamp>;
+  enqueued_at: Generated<Timestamp>;
   message: Json | null;
-  msgId: Generated<Int8>;
-  readCt: Generated<number>;
+  msg_id: Generated<Int8>;
+  read_ct: Generated<number>;
   vt: Timestamp;
 }
 
 export interface Plans {
   bearing: Numeric | null;
-  createdAt: Generated<Timestamp>;
+  created_at: Generated<Timestamp>;
   distance: Numeric;
   error: string | null;
-  finishDesc: string | null;
-  finishLat: Numeric | null;
-  finishLon: Numeric | null;
+  finish_desc: string | null;
+  finish_lat: Numeric | null;
+  finish_lon: Numeric | null;
   id: Generated<string>;
-  isDeleted: Generated<boolean>;
-  mapPreviewDark: string | null;
-  mapPreviewLight: string | null;
-  modifiedAt: Timestamp | null;
+  is_deleted: Generated<boolean>;
+  map_preview_dark: string | null;
+  map_preview_light: string | null;
+  modified_at: Timestamp | null;
   name: string;
   region: string | null;
-  ruleSetId: string;
-  startDesc: string;
-  startLat: Numeric;
-  startLon: Numeric;
+  rule_set_id: string;
+  start_desc: string;
+  start_lat: Numeric;
+  start_lon: Numeric;
   state: Generated<PlanState>;
-  tripType: PlanType;
-  userId: string;
+  trip_type: PlanType;
+  user_id: string;
 }
 
 export interface PostgisGeographyColumns {
-  coordDimension: number | null;
-  fGeographyColumn: string | null;
-  fTableCatalog: string | null;
-  fTableName: string | null;
-  fTableSchema: string | null;
+  coord_dimension: number | null;
+  f_geography_column: string | null;
+  f_table_catalog: string | null;
+  f_table_name: string | null;
+  f_table_schema: string | null;
   srid: number | null;
   type: string | null;
 }
 
 export interface PostgisGeometryColumns {
-  coordDimension: number | null;
-  fGeometryColumn: string | null;
-  fTableCatalog: string | null;
-  fTableName: string | null;
-  fTableSchema: string | null;
+  coord_dimension: number | null;
+  f_geometry_column: string | null;
+  f_table_catalog: string | null;
+  f_table_name: string | null;
+  f_table_schema: string | null;
   srid: number | null;
   type: string | null;
 }
 
 export interface PostgisSpatialRefSys {
-  authName: string | null;
-  authSrid: number | null;
+  auth_name: string | null;
+  auth_srid: number | null;
   proj4text: string | null;
   srid: number;
   srtext: string | null;
 }
 
 export interface PrivateCodes {
-  claimedAt: Timestamp | null;
-  claimedByUserId: string | null;
+  claimed_at: Timestamp | null;
+  claimed_by_user_id: string | null;
   code: string;
-  createdAt: Timestamp;
+  created_at: Timestamp;
   id: Generated<string>;
 }
 
 export interface PrivateUsers {
-  downloadCountRemain: Generated<number>;
-  stripeCancelAtPeriodEnd: boolean | null;
-  stripeCheckoutId: string | null;
-  stripeCurrentPeriodEnd: Timestamp | null;
-  stripeCurrentPeriodStart: Timestamp | null;
-  stripeCustomerId: string | null;
-  stripeFlowStatus: Generated<PrivateStripeStatus>;
-  stripePaymentMethod: string | null;
-  stripePriceId: string | null;
-  stripeStatus: string | null;
-  stripeSubscriptionId: string | null;
-  subType: Generated<PrivateUserSubType>;
-  userId: string;
+  download_count_remain: Generated<number>;
+  stripe_cancel_at_period_end: boolean | null;
+  stripe_checkout_id: string | null;
+  stripe_current_period_end: Timestamp | null;
+  stripe_current_period_start: Timestamp | null;
+  stripe_customer_id: string | null;
+  stripe_flow_status: Generated<PrivateStripeStatus>;
+  stripe_payment_method: string | null;
+  stripe_price_id: string | null;
+  stripe_status: string | null;
+  stripe_subscription_id: string | null;
+  sub_type: Generated<PrivateUserSubType>;
+  user_id: string;
 }
 
 export interface RealtimeMessages {
   event: string | null;
   extension: string;
   id: Generated<string>;
-  insertedAt: Generated<Timestamp>;
+  inserted_at: Generated<Timestamp>;
   payload: Json | null;
   private: Generated<boolean | null>;
   topic: string;
-  updatedAt: Generated<Timestamp>;
+  updated_at: Generated<Timestamp>;
 }
 
 export interface RealtimeSchemaMigrations {
-  insertedAt: Timestamp | null;
+  inserted_at: Timestamp | null;
   version: Int8;
 }
 
 export interface RealtimeSubscription {
   claims: Json;
-  claimsRole: Generated<string>;
-  createdAt: Generated<Timestamp>;
+  claims_role: Generated<string>;
+  created_at: Generated<Timestamp>;
   entity: string;
   filters: Generated<string[]>;
   id: Generated<Int8>;
-  subscriptionId: string;
+  subscription_id: string;
 }
 
 export interface Regions {
@@ -551,74 +554,101 @@ export interface Regions {
 
 export interface RouteBreakdownStats {
   id: Generated<string>;
-  lenM: Numeric;
+  len_m: Numeric;
   percentage: Numeric;
-  routeId: string;
-  statName: string;
-  statType: RouteStatType;
-  userId: string;
+  route_id: string;
+  stat_name: string;
+  stat_type: RouteStatType;
+  user_id: string;
 }
 
 export interface Routes {
-  createdAt: Generated<Timestamp>;
-  downloadedAt: Timestamp | null;
+  created_at: Generated<Timestamp>;
+  downloaded_at: Timestamp | null;
   id: Generated<string>;
-  isDeleted: Generated<boolean>;
+  is_deleted: Generated<boolean>;
   linestring: string | null;
-  mapPreviewDark: string | null;
-  mapPreviewLight: string | null;
+  map_preview_dark: string | null;
+  map_preview_light: string | null;
   name: string;
-  planId: string;
-  statsJunctionCount: Numeric;
-  statsLenM: Numeric;
-  statsScore: Numeric;
-  userId: string;
+  plan_id: string;
+  stats_junction_count: Numeric;
+  stats_len_m: Numeric;
+  stats_score: Numeric;
+  user_id: string;
 }
 
 export interface RuleSetRoadTags {
-  ruleSetId: string;
-  tagKey: string;
-  userId: string | null;
+  rule_set_id: string;
+  tag_key: string;
+  user_id: string | null;
   value: number | null;
 }
 
 export interface RuleSets {
-  defaultSet: Generated<boolean>;
+  default_set: Generated<boolean>;
   icon: RuleSetIcon | null;
   id: Generated<string>;
-  isDeleted: Generated<boolean>;
+  is_deleted: Generated<boolean>;
   name: string;
-  userId: string | null;
+  user_id: string | null;
 }
 
 export interface StorageBuckets {
-  allowedMimeTypes: string[] | null;
-  avifAutodetection: Generated<boolean | null>;
-  createdAt: Generated<Timestamp | null>;
-  fileSizeLimit: Int8 | null;
+  allowed_mime_types: string[] | null;
+  avif_autodetection: Generated<boolean | null>;
+  created_at: Generated<Timestamp | null>;
+  file_size_limit: Int8 | null;
   id: string;
   name: string;
   /**
    * Field is deprecated, use owner_id instead
    */
   owner: string | null;
-  ownerId: string | null;
+  owner_id: string | null;
   public: Generated<boolean | null>;
-  updatedAt: Generated<Timestamp | null>;
+  type: Generated<StorageBuckettype>;
+  updated_at: Generated<Timestamp | null>;
+}
+
+export interface StorageBucketsAnalytics {
+  created_at: Generated<Timestamp>;
+  format: Generated<string>;
+  id: string;
+  type: Generated<StorageBuckettype>;
+  updated_at: Generated<Timestamp>;
+}
+
+export interface StorageIcebergNamespaces {
+  bucket_id: string;
+  created_at: Generated<Timestamp>;
+  id: Generated<string>;
+  name: string;
+  updated_at: Generated<Timestamp>;
+}
+
+export interface StorageIcebergTables {
+  bucket_id: string;
+  created_at: Generated<Timestamp>;
+  id: Generated<string>;
+  location: string;
+  name: string;
+  namespace_id: string;
+  updated_at: Generated<Timestamp>;
 }
 
 export interface StorageMigrations {
-  executedAt: Generated<Timestamp | null>;
+  executed_at: Generated<Timestamp | null>;
   hash: string;
   id: number;
   name: string;
 }
 
 export interface StorageObjects {
-  bucketId: string | null;
-  createdAt: Generated<Timestamp | null>;
+  bucket_id: string | null;
+  created_at: Generated<Timestamp | null>;
   id: Generated<string>;
-  lastAccessedAt: Generated<Timestamp | null>;
+  last_accessed_at: Generated<Timestamp | null>;
   level: number | null;
   metadata: Json | null;
   name: string | null;
@@ -626,56 +656,56 @@ export interface StorageObjects {
    * Field is deprecated, use owner_id instead
    */
   owner: string | null;
-  ownerId: string | null;
-  pathTokens: Generated<string[] | null>;
-  updatedAt: Generated<Timestamp | null>;
-  userMetadata: Json | null;
+  owner_id: string | null;
+  path_tokens: Generated<string[] | null>;
+  updated_at: Generated<Timestamp | null>;
+  user_metadata: Json | null;
   version: string | null;
 }
 
 export interface StoragePrefixes {
-  bucketId: string;
-  createdAt: Generated<Timestamp | null>;
+  bucket_id: string;
+  created_at: Generated<Timestamp | null>;
   level: Generated<number>;
   name: string;
-  updatedAt: Generated<Timestamp | null>;
+  updated_at: Generated<Timestamp | null>;
 }
 
 export interface StorageS3MultipartUploads {
-  bucketId: string;
-  createdAt: Generated<Timestamp>;
+  bucket_id: string;
+  created_at: Generated<Timestamp>;
   id: string;
-  inProgressSize: Generated<Int8>;
+  in_progress_size: Generated<Int8>;
   key: string;
-  ownerId: string | null;
-  uploadSignature: string;
-  userMetadata: Json | null;
+  owner_id: string | null;
+  upload_signature: string;
+  user_metadata: Json | null;
   version: string;
 }
 
 export interface StorageS3MultipartUploadsParts {
-  bucketId: string;
-  createdAt: Generated<Timestamp>;
+  bucket_id: string;
+  created_at: Generated<Timestamp>;
   etag: string;
   id: Generated<string>;
   key: string;
-  ownerId: string | null;
-  partNumber: number;
+  owner_id: string | null;
+  part_number: number;
   size: Generated<Int8>;
-  uploadId: string;
+  upload_id: string;
   version: string;
 }
 
 export interface SupabaseFunctionsHooks {
-  createdAt: Generated<Timestamp>;
-  hookName: string;
-  hookTableId: number;
+  created_at: Generated<Timestamp>;
+  hook_name: string;
+  hook_table_id: number;
   id: Generated<Int8>;
-  requestId: Int8 | null;
+  request_id: Int8 | null;
 }
 
 export interface SupabaseFunctionsMigrations {
-  insertedAt: Generated<Timestamp>;
+  inserted_at: Generated<Timestamp>;
   version: string;
 }
 
@@ -691,86 +721,89 @@ export interface SupabaseMigrationsSeedFiles {
 }
 
 export interface VaultDecryptedSecrets {
-  createdAt: Timestamp | null;
-  decryptedSecret: string | null;
+  created_at: Timestamp | null;
+  decrypted_secret: string | null;
   description: string | null;
   id: string | null;
-  keyId: string | null;
+  key_id: string | null;
   name: string | null;
   nonce: Buffer | null;
   secret: string | null;
-  updatedAt: Timestamp | null;
+  updated_at: Timestamp | null;
 }
 
 export interface VaultSecrets {
-  createdAt: Generated<Timestamp>;
+  created_at: Generated<Timestamp>;
   description: Generated<string>;
   id: Generated<string>;
-  keyId: string | null;
+  key_id: string | null;
   name: string | null;
   nonce: Generated<Buffer | null>;
   secret: string;
-  updatedAt: Generated<Timestamp>;
+  updated_at: Generated<Timestamp>;
 }
 
 export interface DB {
-  "_Realtime.extensions": _RealtimeExtensions;
-  "_Realtime.schemaMigrations": _RealtimeSchemaMigrations;
-  "_Realtime.tenants": _RealtimeTenants;
-  "auth.auditLogEntries": AuthAuditLogEntries;
-  "auth.flowState": AuthFlowState;
+  "_realtime.extensions": _RealtimeExtensions;
+  "_realtime.schema_migrations": _RealtimeSchemaMigrations;
+  "_realtime.tenants": _RealtimeTenants;
+  "auth.audit_log_entries": AuthAuditLogEntries;
+  "auth.flow_state": AuthFlowState;
   "auth.identities": AuthIdentities;
   "auth.instances": AuthInstances;
-  "auth.mfaAmrClaims": AuthMfaAmrClaims;
-  "auth.mfaChallenges": AuthMfaChallenges;
-  "auth.mfaFactors": AuthMfaFactors;
-  "auth.oneTimeTokens": AuthOneTimeTokens;
-  "auth.refreshTokens": AuthRefreshTokens;
-  "auth.samlProviders": AuthSamlProviders;
-  "auth.samlRelayStates": AuthSamlRelayStates;
-  "auth.schemaMigrations": AuthSchemaMigrations;
+  "auth.mfa_amr_claims": AuthMfaAmrClaims;
+  "auth.mfa_challenges": AuthMfaChallenges;
+  "auth.mfa_factors": AuthMfaFactors;
+  "auth.one_time_tokens": AuthOneTimeTokens;
+  "auth.refresh_tokens": AuthRefreshTokens;
+  "auth.saml_providers": AuthSamlProviders;
+  "auth.saml_relay_states": AuthSamlRelayStates;
+  "auth.schema_migrations": AuthSchemaMigrations;
   "auth.sessions": AuthSessions;
-  "auth.ssoDomains": AuthSsoDomains;
-  "auth.ssoProviders": AuthSsoProviders;
+  "auth.sso_domains": AuthSsoDomains;
+  "auth.sso_providers": AuthSsoProviders;
   "auth.users": AuthUsers;
-  "extensions.pgStatStatements": ExtensionsPgStatStatements;
-  "extensions.pgStatStatementsInfo": ExtensionsPgStatStatementsInfo;
-  geoBoundaries: GeoBoundaries;
-  "net.httpRequestQueue": NetHttpRequestQueue;
-  "net.HttpResponse": NetHttpResponse;
-  "pgmq.aPlanMapGen": PgmqAPlanMapGen;
-  "pgmq.aPlanNew": PgmqAPlanNew;
-  "pgmq.aRouteMapGen": PgmqARouteMapGen;
-  "pgmq.aUserNew": PgmqAUserNew;
+  "extensions.pg_stat_statements": ExtensionsPgStatStatements;
+  "extensions.pg_stat_statements_info": ExtensionsPgStatStatementsInfo;
+  geo_boundaries: GeoBoundaries;
+  "net._http_response": NetHttpResponse;
+  "net.http_request_queue": NetHttpRequestQueue;
+  "pgmq.a_plan_map_gen": PgmqAPlanMapGen;
+  "pgmq.a_plan_new": PgmqAPlanNew;
+  "pgmq.a_route_map_gen": PgmqARouteMapGen;
+  "pgmq.a_user_new": PgmqAUserNew;
   "pgmq.meta": PgmqMeta;
-  "pgmq.qPlanMapGen": PgmqQPlanMapGen;
-  "pgmq.qPlanNew": PgmqQPlanNew;
-  "pgmq.qRouteMapGen": PgmqQRouteMapGen;
-  "pgmq.qUserNew": PgmqQUserNew;
+  "pgmq.q_plan_map_gen": PgmqQPlanMapGen;
+  "pgmq.q_plan_new": PgmqQPlanNew;
+  "pgmq.q_route_map_gen": PgmqQRouteMapGen;
+  "pgmq.q_user_new": PgmqQUserNew;
   plans: Plans;
-  "postgis.geographyColumns": PostgisGeographyColumns;
-  "postgis.geometryColumns": PostgisGeometryColumns;
-  "postgis.spatialRefSys": PostgisSpatialRefSys;
+  "postgis.geography_columns": PostgisGeographyColumns;
+  "postgis.geometry_columns": PostgisGeometryColumns;
+  "postgis.spatial_ref_sys": PostgisSpatialRefSys;
   "private.codes": PrivateCodes;
   "private.users": PrivateUsers;
   "realtime.messages": RealtimeMessages;
-  "realtime.schemaMigrations": RealtimeSchemaMigrations;
+  "realtime.schema_migrations": RealtimeSchemaMigrations;
   "realtime.subscription": RealtimeSubscription;
   regions: Regions;
-  routeBreakdownStats: RouteBreakdownStats;
+  route_breakdown_stats: RouteBreakdownStats;
   routes: Routes;
-  ruleSetRoadTags: RuleSetRoadTags;
-  ruleSets: RuleSets;
+  rule_set_road_tags: RuleSetRoadTags;
+  rule_sets: RuleSets;
   "storage.buckets": StorageBuckets;
+  "storage.buckets_analytics": StorageBucketsAnalytics;
+  "storage.iceberg_namespaces": StorageIcebergNamespaces;
+  "storage.iceberg_tables": StorageIcebergTables;
   "storage.migrations": StorageMigrations;
   "storage.objects": StorageObjects;
   "storage.prefixes": StoragePrefixes;
-  "storage.s3MultipartUploads": StorageS3MultipartUploads;
-  "storage.s3MultipartUploadsParts": StorageS3MultipartUploadsParts;
-  "supabaseFunctions.hooks": SupabaseFunctionsHooks;
-  "supabaseFunctions.migrations": SupabaseFunctionsMigrations;
-  "supabaseMigrations.schemaMigrations": SupabaseMigrationsSchemaMigrations;
-  "supabaseMigrations.seedFiles": SupabaseMigrationsSeedFiles;
-  "vault.decryptedSecrets": VaultDecryptedSecrets;
+  "storage.s3_multipart_uploads": StorageS3MultipartUploads;
+  "storage.s3_multipart_uploads_parts": StorageS3MultipartUploadsParts;
+  "supabase_functions.hooks": SupabaseFunctionsHooks;
+  "supabase_functions.migrations": SupabaseFunctionsMigrations;
+  "supabase_migrations.schema_migrations": SupabaseMigrationsSchemaMigrations;
+  "supabase_migrations.seed_files": SupabaseMigrationsSeedFiles;
+  "vault.decrypted_secrets": VaultDecryptedSecrets;
   "vault.secrets": VaultSecrets;
 }

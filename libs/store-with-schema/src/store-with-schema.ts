@@ -163,7 +163,7 @@ export type StoreWithSchema<TSchema extends StoreSchema> = {
   getTableCellIds: <TTableId extends keyof TSchema>(
     tableId: Extract<TTableId, string>,
   ) => TableCellId<TSchema, TTableId>[];
-  getRowIds: <TTableId extends keyof StoreSchema>(
+  getRowIds: <TTableId extends keyof TSchema>(
     tableId: Extract<TTableId, string>,
   ) => string[];
   getSortedRowIds: <

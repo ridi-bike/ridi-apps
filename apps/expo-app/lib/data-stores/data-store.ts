@@ -17,7 +17,7 @@ export async function initSync(userId: string) {
   dataStorePersister.startAutoPersisting();
   const synchronizer = await createWsSynchronizer(
     store,
-    new WebSocket(`${apiUrl}/sync/${userId}`),
+    new WebSocket(`${apiUrl}/sync/${userId}?token=dfsdfsd&action=sync`),
   );
   await synchronizer.startSync();
 }

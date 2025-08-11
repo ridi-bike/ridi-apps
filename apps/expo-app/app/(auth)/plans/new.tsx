@@ -29,6 +29,7 @@ import { DIRECTIONS, getCardinalDirection } from "~/components/geo-map/util";
 import { LocationPermsNotGiven } from "~/components/LocationPermsNotGiven";
 import { ScreenFrame } from "~/components/screen-frame";
 import { coordsAddressGet } from "~/lib/coords-details";
+import { dataStore } from "~/lib/data-stores/data-store";
 import { usePlans, usePlansUpdate } from "~/lib/data-stores/plans";
 import { findRegions } from "~/lib/data-stores/regions";
 import { useRuleSets, useRuleSetDefaultId } from "~/lib/data-stores/rule-sets";
@@ -270,6 +271,10 @@ export default function PlansNew() {
     }
     return [prevPlan.startLat, prevPlan.startLon];
   }, [plans]);
+
+  console.log("ruleSets", useRuleSets());
+  const allRegions = dataStore.getTable("regions");
+  console.log({ allRegions });
 
   return (
     <ScreenFrame

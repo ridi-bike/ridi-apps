@@ -1,5 +1,5 @@
 import globals from "globals";
-import tailwindcss from "eslint-plugin-tailwindcss";
+// import tailwindcss from "eslint-plugin-tailwindcss";
 import { fixupPluginRules, fixupConfigRules } from "@eslint/compat";
 import react from "eslint-plugin-react";
 import jsxA11Y from "eslint-plugin-jsx-a11y";
@@ -39,26 +39,26 @@ export default [
       },
     },
   },
-  ...compat.extends("plugin:tailwindcss/recommended").map((config) => ({
-    ...config,
-    files: ["**/*.{js,jsx,ts,tsx}"],
-  })),
-  {
-    files: ["**/*.{js,jsx,ts,tsx}"],
-
-    plugins: {
-      tailwindcss,
-    },
-
-    rules: {
-      "tailwindcss/no-custom-classname": [
-        2,
-        {
-          cssFiles: ["**/*.css"],
-        },
-      ],
-    },
-  },
+  // ...compat.extends("plugin:tailwindcss/recommended").map((config) => ({
+  //   ...config,
+  //   files: ["**/*.{js,jsx,ts,tsx}"],
+  // })),
+  // {
+  //   files: ["**/*.{js,jsx,ts,tsx}"],
+  //
+  //   plugins: {
+  //     tailwindcss,
+  //   },
+  //
+  //   rules: {
+  //     "tailwindcss/no-custom-classname": [
+  //       2,
+  //       {
+  //         cssFiles: ["**/*.css"],
+  //       },
+  //     ],
+  //   },
+  // },
   ...fixupConfigRules(
     compat.extends(
       "plugin:react/recommended",

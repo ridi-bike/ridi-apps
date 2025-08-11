@@ -14,6 +14,7 @@ export function getDb(connectionString: string) {
   });
 
   return new Kysely<DB>({
+    log: ["query", "error"],
     dialect,
   });
 }

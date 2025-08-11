@@ -4,7 +4,7 @@
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "typegen": "kysely-codegen --out-file ./src/kysely-db.d.ts --default-schema=public --env-file ./.env.base --camel-case"
+    "typegen": "kysely-codegen --out-file ./src/kysely-db.d.ts --default-schema=public --env-file ./.env.base"
   },
   "dependencies": {
     "kysely": "^0.28.2",

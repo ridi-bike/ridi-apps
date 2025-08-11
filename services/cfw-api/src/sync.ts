@@ -55,7 +55,7 @@ export class UserStoreDurableObject extends WsServerDurableObject {
     this.db = getDb(env.SUPABASE_DB_URL);
   }
 
-  private async isTokenOk(token: string) {
+  private async isTokenOk(_token: string) {
     console.warn("TODO token check does not exist");
     return true;
   }
@@ -63,7 +63,6 @@ export class UserStoreDurableObject extends WsServerDurableObject {
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
     const userId = url.pathname.split("/")[2];
-    console.log({ userId });
     const action = url.searchParams.get("action");
     const token = url.searchParams.get("token");
 
@@ -79,6 +78,34 @@ export class UserStoreDurableObject extends WsServerDurableObject {
       return new Response("Missing action", { status: 400 });
     }
     if (action === "sync") {
+      this.store?.addTablesListener((listenerStore) => {
+        const changedTables = listenerStore.getTransactionChanges()[0];
+        for (const [changedTableId, changedRows] of Object.entries(
+          changedTables,
+        )) {
+          if (!changedRows) {
+            continue;
+          }
+          const DataHandler =
+            dataHandlers[changedTableId as keyof typeof dataHandlers];
+          if (!DataHandler) {
+            throw new Error(
+              `missing mapping, unexpectedted tableId ${changedTableId}`,
+            );
+          }
+
+          if (this.dataStore) {
+            const dataHandler = new DataHandler(this.db, this.dataStore);
+            for (const changedRowId of Object.keys(changedRows || {})) {
+              dataHandler.loadRowFromStore(changedRowId, userId);
+            }
+          }
+        }
+      });
+
+      if (!this.dataStore?.getRowIds("regions").length) {
+        this.syncAllDataFromDb(userId);
+      }
       return (
         super.fetch?.(request) ||
         new Response("Internal error", { status: 500 })
@@ -114,11 +141,12 @@ export class UserStoreDurableObject extends WsServerDurableObject {
       throw new Error(`missing mapping, unexpectedted tableId ${tableId}`);
     }
 
-    const dataHandler = new DataHandler(this.db, this.dataStore, userId);
+    const dataHandler = new DataHandler(this.db, this.dataStore);
 
     dataHandler.loadFromNotify(
       payload.record || payload.old_record,
       payload.type,
+      userId,
     );
   }
 
@@ -128,52 +156,20 @@ export class UserStoreDurableObject extends WsServerDurableObject {
     }
 
     await Promise.all([
-      new PlanHandler(this.db, this.dataStore, userId).loadAllFromDb(),
-      new RouteHandler(this.db, this.dataStore, userId).loadAllFromDb(),
-      new RouteBreakdownStatHandler(
-        this.db,
-        this.dataStore,
+      new PlanHandler(this.db, this.dataStore).loadAllFromDb(userId),
+      new RouteHandler(this.db, this.dataStore).loadAllFromDb(userId),
+      new RouteBreakdownStatHandler(this.db, this.dataStore).loadAllFromDb(
         userId,
-      ).loadAllFromDb(),
-      new RuleSetsHandler(this.db, this.dataStore, userId).loadAllFromDb(),
-      new RuleSetRoadTagsHandler(
-        this.db,
-        this.dataStore,
-        userId,
-      ).loadAllFromDb(),
-      new RegionHandler(this.db, this.dataStore, userId).loadAllFromDb(),
+      ),
+      new RuleSetsHandler(this.db, this.dataStore).loadAllFromDb(userId),
+      new RuleSetRoadTagsHandler(this.db, this.dataStore).loadAllFromDb(userId),
+      new RegionHandler(this.db, this.dataStore).loadAllFromDb(userId),
     ]);
   }
 
   createPersister() {
-    const userId = this.getPathId().split("/")[2];
-
     this.store = createMergeableStore();
-    const dataStore = createStoreWithSchema(this.store);
-    this.dataStore = dataStore;
-
-    this.store.addTablesListener((listenerStore) => {
-      const changedTables = listenerStore.getTransactionChanges()[0];
-      for (const [changedTableId, changedRows] of Object.entries(
-        changedTables,
-      )) {
-        if (!changedRows) {
-          continue;
-        }
-        const DataHandler =
-          dataHandlers[changedTableId as keyof typeof dataHandlers];
-        if (!DataHandler) {
-          throw new Error(
-            `missing mapping, unexpectedted tableId ${changedTableId}`,
-          );
-        }
-
-        const dataHandler = new DataHandler(this.db, dataStore, userId);
-        for (const changedRowId of Object.keys(changedRows || {})) {
-          dataHandler.loadRowFromStore(changedRowId);
-        }
-      }
-    });
+    this.dataStore = createStoreWithSchema(this.store);
 
     return createDurableObjectSqlStoragePersister(
       this.store,

@@ -2,7 +2,6 @@ import {
   type Request as WorkerRequest,
   type ExecutionContext,
 } from "@cloudflare/workers-types";
-import { storeSchema } from "@ridi/store-with-schema";
 import { apiContract } from "@ridi/api-contracts";
 import {
   regionFindFromCoords,
@@ -31,6 +30,8 @@ import {
 import postgres from "postgres";
 import { Resend } from "resend";
 import { getWsServerDurableObjectFetch } from "tinybase/synchronizers/synchronizer-ws-server-durable-object";
+
+export { UserStoreDurableObject } from "./sync";
 
 export type FieldsNotNull<T extends object> = {
   [n in keyof T]: NonNullable<T[n]>;
@@ -535,5 +536,3 @@ export default Sentry.withSentry(
     },
   },
 );
-
-export { UserStoreDurableObject } from "./sync";

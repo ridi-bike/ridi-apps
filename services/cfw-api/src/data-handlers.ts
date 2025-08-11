@@ -4,7 +4,8 @@ import {
   type createStoreWithSchema,
 } from "@ridi/store-with-schema";
 import { type z } from "zod";
-import { recordSchema } from "./notify";
+
+import { type recordSchema } from "./notify";
 
 function recordsToTable<TRow>(
   rows: TRow[],
@@ -19,32 +20,29 @@ function recordsToTable<TRow>(
   );
 }
 
-export type BaseHandlerConstructor = {
-  new (
-    db: ReturnType<typeof getDb>,
-    dataStore: ReturnType<typeof createStoreWithSchema>,
-    userId: string,
-  ): BaseHandler;
-};
+export type BaseHandlerConstructor = new (
+  db: ReturnType<typeof getDb>,
+  dataStore: ReturnType<typeof createStoreWithSchema>,
+) => BaseHandler;
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export interface BaseHandler {
-  loadAllFromDb(): Promise<void>;
+  loadAllFromDb(userId: string): Promise<void>;
   loadFromNotify(
     row: z.infer<typeof recordSchema>,
     type: "DELETE" | "INSERT" | "UPDATE",
+    userId: string,
   ): Promise<void>;
-  loadRowFromStore(rowId: string): Promise<void>;
+  loadRowFromStore(rowId: string, userId: string): Promise<void>;
 }
 
 export class PlanHandler implements BaseHandler {
   constructor(
     private readonly db: ReturnType<typeof getDb>,
     private readonly dataStore: ReturnType<typeof createStoreWithSchema>,
-    private readonly userId: string,
   ) {}
-  async loadAllFromDb() {
-    const dbRows = await this.readAllFromDb();
+  async loadAllFromDb(userId: string) {
+    const dbRows = await this.readAllFromDb(userId);
     this.dataStore.setTable(
       "plans",
       recordsToTable(
@@ -59,6 +57,7 @@ export class PlanHandler implements BaseHandler {
   async loadFromNotify(
     row: z.infer<typeof recordSchema>,
     type: "DELETE" | "INSERT" | "UPDATE",
+    userId: string,
   ) {
     const rowId = row.id;
     if (rowId !== "string") {
@@ -69,8 +68,8 @@ export class PlanHandler implements BaseHandler {
     } else {
       const dbRow = await this.db
         .selectFrom("plans")
-        .where("userId", "=", this.userId)
-        .where("isDeleted", "=", false)
+        .where("user_id", "=", userId)
+        .where("is_deleted", "=", false)
         .where("id", "=", rowId)
         .selectAll()
         .executeTakeFirstOrThrow();
@@ -78,28 +77,28 @@ export class PlanHandler implements BaseHandler {
       this.dataStore.setRow("plans", rowId, this.rowDb2Store(dbRow));
     }
   }
-  async loadRowFromStore(rowId: string) {
+  async loadRowFromStore(rowId: string, userId: string) {
     const row = this.dataStore.getRow("plans", rowId);
 
     await this.db
       .insertInto("plans")
       .values({
         id: row.id,
-        userId: this.userId,
+        user_id: userId,
         name: row.name,
         state: row.state,
-        startLat: row.startLat.toString(),
-        startLon: row.startLon.toString(),
-        startDesc: row.startDesc,
-        finishLat: row.finishLat !== null ? row.finishLat.toString() : null,
-        finishLon: row.finishLon !== null ? row.finishLon.toString() : null,
-        finishDesc: row.finishDesc,
+        start_lat: row.startLat.toString(),
+        start_lon: row.startLon.toString(),
+        start_desc: row.startDesc,
+        finish_lat: row.finishLat !== null ? row.finishLat.toString() : null,
+        finish_lon: row.finishLon !== null ? row.finishLon.toString() : null,
+        finish_desc: row.finishDesc,
         bearing: row.bearing !== null ? row.bearing.toString() : null,
         distance: row.distance.toString(),
-        createdAt: new Date(row.createdAt),
-        isDeleted: row.isDeleted || false,
-        tripType: row.tripType,
-        ruleSetId: row.ruleSetId,
+        created_at: new Date(row.createdAt),
+        is_deleted: row.isDeleted || false,
+        trip_type: row.tripType,
+        rule_set_id: row.ruleSetId,
         mapPreviewDark: row.mapPreviewDark,
         mapPreviewLight: row.mapPreviewLight,
         error: null,
@@ -131,10 +130,10 @@ export class PlanHandler implements BaseHandler {
       )
       .execute();
   }
-  private readAllFromDb() {
+  private readAllFromDb(userId: string) {
     return this.db
       .selectFrom("plans")
-      .where("userId", "=", this.userId)
+      .where("userId", "=", userId)
       .where("isDeleted", "=", false)
       .selectAll()
       .execute();
@@ -168,11 +167,10 @@ export class RouteHandler implements BaseHandler {
   constructor(
     private readonly db: ReturnType<typeof getDb>,
     private readonly dataStore: ReturnType<typeof createStoreWithSchema>,
-    private readonly userId: string,
   ) {}
 
-  async loadAllFromDb() {
-    const dbRows = await this.readAllFromDb();
+  async loadAllFromDb(userId: string) {
+    const dbRows = await this.readAllFromDb(userId);
     this.dataStore.setTable(
       "routes",
       recordsToTable(
@@ -185,6 +183,7 @@ export class RouteHandler implements BaseHandler {
   async loadFromNotify(
     row: z.infer<typeof recordSchema>,
     type: "DELETE" | "INSERT" | "UPDATE",
+    userId: string,
   ) {
     const rowId = row.id;
     if (rowId !== "string") {
@@ -195,7 +194,7 @@ export class RouteHandler implements BaseHandler {
     } else {
       const dbRow = await this.db
         .selectFrom("routes")
-        .where("userId", "=", this.userId)
+        .where("userId", "=", userId)
         .where("isDeleted", "=", false)
         .where("id", "=", rowId)
         .selectAll()
@@ -205,14 +204,14 @@ export class RouteHandler implements BaseHandler {
     }
   }
 
-  async loadRowFromStore(_rowId: string): Promise<void> {
+  async loadRowFromStore(_rowId: string, _userId: string): Promise<void> {
     throw new Error("RouteHandler is read-only - cannot update database");
   }
 
-  private readAllFromDb() {
+  private readAllFromDb(userId: string) {
     return this.db
       .selectFrom("routes")
-      .where("userId", "=", this.userId)
+      .where("userId", "=", userId)
       .where("isDeleted", "=", false)
       .selectAll()
       .execute();
@@ -243,11 +242,10 @@ export class RouteBreakdownStatHandler implements BaseHandler {
   constructor(
     private readonly db: ReturnType<typeof getDb>,
     private readonly dataStore: ReturnType<typeof createStoreWithSchema>,
-    private readonly userId: string,
   ) {}
 
-  async loadAllFromDb() {
-    const dbRows = await this.readAllFromDb();
+  async loadAllFromDb(userId: string) {
+    const dbRows = await this.readAllFromDb(userId);
     this.dataStore.setTable(
       "routeBreakdowns",
       recordsToTable(
@@ -260,6 +258,7 @@ export class RouteBreakdownStatHandler implements BaseHandler {
   async loadFromNotify(
     row: z.infer<typeof recordSchema>,
     type: "DELETE" | "INSERT" | "UPDATE",
+    userId: string,
   ) {
     const rowId = row.id;
     if (rowId !== "string") {
@@ -270,7 +269,7 @@ export class RouteBreakdownStatHandler implements BaseHandler {
     } else {
       const dbRow = await this.db
         .selectFrom("routeBreakdownStats")
-        .where("userId", "=", this.userId)
+        .where("userId", "=", userId)
         .where("id", "=", rowId)
         .selectAll()
         .executeTakeFirstOrThrow();
@@ -279,16 +278,16 @@ export class RouteBreakdownStatHandler implements BaseHandler {
     }
   }
 
-  async loadRowFromStore(_rowId: string): Promise<void> {
+  async loadRowFromStore(_rowId: string, _userId: string): Promise<void> {
     throw new Error(
       "RouteBreakdownStatHandler is read-only - cannot update database",
     );
   }
 
-  private readAllFromDb() {
+  private readAllFromDb(userId: string) {
     return this.db
-      .selectFrom("routeBreakdownStats")
-      .where("userId", "=", this.userId)
+      .selectFrom("rule_sets")
+      .where("user_id", "=", userId)
       .selectAll()
       .execute();
   }
@@ -298,10 +297,10 @@ export class RouteBreakdownStatHandler implements BaseHandler {
   ): z.infer<(typeof storeSchema)["routeBreakdowns"]> {
     return {
       id: row.id,
-      routeId: row.routeId,
-      statType: row.statType,
-      statName: row.statName,
-      lenM: Number(row.lenM),
+      routeId: row.route_id,
+      statType: row.stat_type,
+      statName: row.stat_name,
+      lenM: Number(row.len_m),
       percentage: Number(row.percentage),
     };
   }
@@ -311,11 +310,10 @@ export class RuleSetsHandler implements BaseHandler {
   constructor(
     private readonly db: ReturnType<typeof getDb>,
     private readonly dataStore: ReturnType<typeof createStoreWithSchema>,
-    private readonly userId: string,
   ) {}
 
-  async loadAllFromDb() {
-    const dbRows = await this.readAllFromDb();
+  async loadAllFromDb(userId: string) {
+    const dbRows = await this.readAllFromDb(userId);
     this.dataStore.setTable(
       "ruleSets",
       recordsToTable(
@@ -328,6 +326,7 @@ export class RuleSetsHandler implements BaseHandler {
   async loadFromNotify(
     row: z.infer<typeof recordSchema>,
     type: "DELETE" | "INSERT" | "UPDATE",
+    userId: string,
   ) {
     const rowId = row.id;
     if (rowId !== "string") {
@@ -339,7 +338,7 @@ export class RuleSetsHandler implements BaseHandler {
       const dbRow = await this.db
         .selectFrom("ruleSets")
         .where((eb) =>
-          eb.or([eb("userId", "=", this.userId), eb("userId", "is", null)]),
+          eb.or([eb("userId", "=", userId), eb("userId", "is", null)]),
         )
         .where("isDeleted", "=", false)
         .where("id", "=", rowId)
@@ -350,14 +349,14 @@ export class RuleSetsHandler implements BaseHandler {
     }
   }
 
-  async loadRowFromStore(rowId: string) {
+  async loadRowFromStore(rowId: string, userId: string) {
     const row = this.dataStore.getRow("ruleSets", rowId);
 
     await this.db
       .insertInto("ruleSets")
       .values({
         id: row.id,
-        userId: this.userId,
+        userId,
         name: row.name,
         defaultSet: false,
         isDeleted: row.isDeleted || false,
@@ -374,11 +373,11 @@ export class RuleSetsHandler implements BaseHandler {
       .execute();
   }
 
-  private readAllFromDb() {
+  private readAllFromDb(userId: string) {
     return this.db
       .selectFrom("ruleSets")
       .where((eb) =>
-        eb.or([eb("userId", "=", this.userId), eb("userId", "is", null)]),
+        eb.or([eb("userId", "=", userId), eb("userId", "is", null)]),
       )
       .where("isDeleted", "=", false)
       .selectAll()
@@ -403,11 +402,10 @@ export class RuleSetRoadTagsHandler implements BaseHandler {
   constructor(
     private readonly db: ReturnType<typeof getDb>,
     private readonly dataStore: ReturnType<typeof createStoreWithSchema>,
-    private readonly userId: string,
   ) {}
 
-  async loadAllFromDb() {
-    const dbRows = await this.readAllFromDb();
+  async loadAllFromDb(userId: string) {
+    const dbRows = await this.readAllFromDb(userId);
     this.dataStore.setTable(
       "ruleSetRoadTags",
       recordsToTable(
@@ -420,6 +418,7 @@ export class RuleSetRoadTagsHandler implements BaseHandler {
   async loadFromNotify(
     row: z.infer<typeof recordSchema>,
     type: "DELETE" | "INSERT" | "UPDATE",
+    userId: string,
   ) {
     const rowId = row.id;
     if (rowId !== "string") {
@@ -433,7 +432,7 @@ export class RuleSetRoadTagsHandler implements BaseHandler {
       const dbRow = await this.db
         .selectFrom("ruleSetRoadTags")
         .where((eb) =>
-          eb.or([eb("userId", "=", this.userId), eb("userId", "is", null)]),
+          eb.or([eb("userId", "=", userId), eb("userId", "is", null)]),
         )
         .where("ruleSetId", "=", ruleSetId)
         .where("tagKey", "=", tagKey)
@@ -444,13 +443,13 @@ export class RuleSetRoadTagsHandler implements BaseHandler {
     }
   }
 
-  async loadRowFromStore(rowId: string) {
+  async loadRowFromStore(rowId: string, userId: string) {
     const row = this.dataStore.getRow("ruleSetRoadTags", rowId);
 
     await this.db
       .insertInto("ruleSetRoadTags")
       .values({
-        userId: this.userId,
+        userId,
         ruleSetId: row.ruleSetId,
         tagKey: row.tag,
         value: row.value,
@@ -468,11 +467,11 @@ export class RuleSetRoadTagsHandler implements BaseHandler {
       .execute();
   }
 
-  private readAllFromDb() {
+  private readAllFromDb(userId: string) {
     return this.db
       .selectFrom("ruleSetRoadTags")
       .where((eb) =>
-        eb.or([eb("userId", "=", this.userId), eb("userId", "is", null)]),
+        eb.or([eb("userId", "=", userId), eb("userId", "is", null)]),
       )
       .selectAll()
       .execute();
@@ -494,10 +493,10 @@ export class RegionHandler implements BaseHandler {
   constructor(
     private readonly db: ReturnType<typeof getDb>,
     private readonly dataStore: ReturnType<typeof createStoreWithSchema>,
-    private readonly _userId: string,
   ) {}
 
-  async loadAllFromDb() {
+  async loadAllFromDb(_userId: string) {
+    console.log("================= loadAllFromDb regions");
     const dbRows = await this.readAllFromDb();
     this.dataStore.setTable(
       "regions",
@@ -511,6 +510,7 @@ export class RegionHandler implements BaseHandler {
   async loadFromNotify(
     row: z.infer<typeof recordSchema>,
     type: "DELETE" | "INSERT" | "UPDATE",
+    _userId: string,
   ) {
     const region = row.region;
     if (region !== "string") {
@@ -529,7 +529,7 @@ export class RegionHandler implements BaseHandler {
     }
   }
 
-  async loadRowFromStore(_rowId: string): Promise<void> {
+  async loadRowFromStore(_rowId: string, _userId: string): Promise<void> {
     throw new Error("RegionHandler is read-only - cannot update database");
   }
 
