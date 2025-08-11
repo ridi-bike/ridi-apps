@@ -256,6 +256,7 @@ export default function RulePackDetails() {
           <View className="fixed bottom-0 w-full bg-white p-4 dark:bg-gray-800">
             <Pressable
               role="button"
+              disabled={!unsavedChangesExist}
               onPress={() => {
                 if (unsavedChangesExist) {
                   posthogClient.captureEvent("rule-set-save", {
@@ -283,7 +284,7 @@ export default function RulePackDetails() {
                 },
               )}
             >
-              <Text className="text-center text-white">Ok</Text>
+              <Text className="text-center text-white">Save</Text>
             </Pressable>
           </View>
         )
@@ -339,6 +340,7 @@ export default function RulePackDetails() {
                           <Text className="dark:text-gray-200">Allowed:</Text>
                           <Pressable
                             role="button"
+                            aria-label={`Toggle group ${group[0]}`}
                             className={cn(
                               "h-8 w-14 rounded-full p-1 transition-colors",
                               {
@@ -360,6 +362,7 @@ export default function RulePackDetails() {
                           </Pressable>
                           <Pressable
                             role="button"
+                            aria-label={`${groupsExpanded.includes(groupIdx) ? "Collapse" : "Expand"} group ${group[0]}`}
                             onPress={() => toggleGroupExpanded(groupIdx)}
                             className={cn(
                               "border-[3px] mx-4 flex flex-row justify-center items-center w-24 dark:border-gray-700 border-black text-[#FF5937] rounded-lg p-1 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800",
@@ -388,6 +391,7 @@ export default function RulePackDetails() {
                             {!isGroupInSync(group) && (
                               <Pressable
                                 role="button"
+                                aria-label={`Reset group ${group[0]}`}
                                 onPress={() => setGroupValue(group, 0)}
                                 className="flex h-12 w-full flex-row items-center justify-center rounded-lg border border-black p-1 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
                               >
@@ -401,6 +405,7 @@ export default function RulePackDetails() {
                                     <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
                                   </View>
                                   <Slider
+                                    aria-label={`Priority for group ${group[0]}`}
                                     renderThumbComponent={() => (
                                       <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
                                     )}
@@ -461,6 +466,7 @@ export default function RulePackDetails() {
                                 </Pressable>
                               </View>
                               <Pressable
+                                aria-label={`Toggle tag ${tag[0]}`}
                                 role="button"
                                 className={cn(
                                   "h-8 w-14 rounded-full p-1 transition-colors",
@@ -489,6 +495,7 @@ export default function RulePackDetails() {
                                     <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
                                   </View>
                                   <Slider
+                                    aria-label={`Priority for tag ${tag[0]}`}
                                     renderThumbComponent={() => (
                                       <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
                                     )}

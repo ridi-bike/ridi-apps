@@ -1,0 +1,9 @@
+{
+  "extends": "@total-typescript/tsconfig/bundler/no-dom/library-monorepo", // For a library in a monorepo
+  "exclude": ["**/node_modules/**/*"],
+  "include": ["./**/*.ts"],
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "types": ["node"]
+  }
+}

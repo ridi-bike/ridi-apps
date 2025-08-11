@@ -1,0 +1,17 @@
+{
+  "name": "@ridi/tests-expo-app",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "scripts": {
+    "cy": "set -a && source ./.env.base && source ./.env && set +a && cypress run",
+    "cy:open": "set -a && source ./.env.base && source ./.env && set +a && cypress open",
+    "prepare": "./cypress.sh"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "axios": "^1.8.4",
+    "cypress": "^14.5.3"
+  }
+}

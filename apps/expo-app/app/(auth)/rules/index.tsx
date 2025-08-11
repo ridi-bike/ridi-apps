@@ -242,7 +242,15 @@ export default function RuleSetList() {
   return (
     <ScreenFrame
       title="Rule sets"
-      onGoBack={gotoNewScreen}
+      onGoBack={() =>
+        gotoNewScreen(
+          selectedId
+            ? {
+                rule: JSON.stringify(selectedId),
+              }
+            : undefined,
+        )
+      }
       floating={
         <View className="fixed bottom-0 w-full bg-white p-4 dark:bg-gray-800">
           <Pressable
@@ -310,6 +318,7 @@ export default function RuleSetList() {
                           </View>
                           <View className="flex-row gap-2">
                             <Pressable
+                              aria-label="Select rule set"
                               role="button"
                               onPress={() => {
                                 gotoNewScreen({
@@ -340,6 +349,7 @@ export default function RuleSetList() {
                             >
                               <Pressable
                                 role="button"
+                                aria-label="Open options"
                                 className="size-12 flex-row items-center justify-center rounded-xl border-[3px] border-gray-200 text-gray-400 transition-colors hover:border-gray-300 dark:border-gray-700 dark:text-gray-500"
                               >
                                 <MoreVertical className="size-5" />

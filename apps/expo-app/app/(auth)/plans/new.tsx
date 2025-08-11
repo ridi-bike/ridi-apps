@@ -461,6 +461,7 @@ export default function PlansNew() {
                       <Pressable
                         role="button"
                         onPress={getCurrentLocation}
+                        aria-label="Get Current Location"
                         className={cn(
                           "flex flex-row items-center justify-start gap-2 rounded-xl border-2 p-4 pointer-events-auto",
 
@@ -486,6 +487,7 @@ export default function PlansNew() {
                       )}
                       <Pressable
                         role="button"
+                        aria-label="Enable Map Center Point"
                         onPress={() => {
                           posthogClient.captureEvent(
                             "plan-new-selection-mode-set",
@@ -513,6 +515,7 @@ export default function PlansNew() {
                       <Link
                         href={`/search?isRoundTrip=${JSON.stringify(isRoundTrip || false)}`}
                         className="pointer-events-auto flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 border-black bg-white p-4 dark:border-gray-700 dark:bg-gray-900"
+                        aria-label="Search"
                       >
                         <Search className="size-4 dark:text-gray-200" />
                       </Link>
@@ -525,6 +528,7 @@ export default function PlansNew() {
                           setSearchPoints();
                         }}
                         className="pointer-events-auto flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 border-[#FF5937] bg-[#FF5937] p-4 text-white"
+                        aria-label="Clear Search"
                       >
                         <Search className="size-4 dark:text-gray-200" />
                       </Pressable>
@@ -665,6 +669,15 @@ export default function PlansNew() {
                 <Pressable
                   role="button"
                   key={rs.id}
+                  aria-label={
+                    rs.icon === "adv"
+                      ? "Adventure"
+                      : rs.icon === "touring"
+                        ? "Touring"
+                        : rs.icon === "dualsport"
+                          ? "Dualsport"
+                          : undefined
+                  }
                   onPress={() => {
                     posthogClient.captureEvent("plan-new-rule-set-selected", {
                       ruleSetId: rs.id,
@@ -702,6 +715,7 @@ export default function PlansNew() {
               ))}
             <Pressable
               role="button"
+              aria-label="Rule Set Overview"
               onPress={() => {
                 router.push({
                   pathname: "/rules",
@@ -795,6 +809,7 @@ export default function PlansNew() {
                         <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
                       </View>
                       <Slider
+                        id="bearing-slider"
                         renderThumbComponent={() => (
                           <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
                         )}
@@ -837,6 +852,7 @@ export default function PlansNew() {
                         <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
                       </View>
                       <Slider
+                        id="distance-slider"
                         renderThumbComponent={() => (
                           <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
                         )}

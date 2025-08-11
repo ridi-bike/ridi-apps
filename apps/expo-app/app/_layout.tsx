@@ -1,7 +1,7 @@
 import { PortalHost } from "@rn-primitives/portal";
 import * as Sentry from "@sentry/react-native";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
-import { router, Stack } from "expo-router";
+import { router, Stack, useSegments } from "expo-router";
 import maplibregl from "maplibre-gl";
 import { Protocol } from "pmtiles";
 import { useEffect } from "react";
@@ -53,17 +53,22 @@ export default Sentry.wrap(function App() {
     };
   }, []);
 
+  const segments = useSegments();
   useEffect(() => {
     return supabase.auth.onAuthStateChange((_event, session) => {
+      const inAuthGroup = segments[0] === "(auth)";
       if (!session) {
-        router.replace("/");
+        // Only redirect unauthenticated users when accessing protected routes
+        if (inAuthGroup) {
+          router.replace("/login");
+        }
       } else if (!session.user.is_anonymous) {
         posthogClient.identify(session.user.id, {
           email: session.user.email,
         });
       }
     }).data.subscription.unsubscribe;
-  }, []);
+  }, [segments]);
 
   return (
     <PhProvider>
