@@ -1,6 +1,8 @@
 describe("ridi basic", () => {
+  const baseUrl = Cypress.env("CYPRESS_RIDI_APP_URL");
+
   it("start-finish, dualsport, search, ok, ok", () => {
-    cy.visit(Cypress.env("RIDI_APP_URL"));
+    cy.visit(baseUrl);
 
     cy.get("button").contains("Try it out").click();
     cy.wait(2000);
@@ -34,8 +36,9 @@ describe("ridi basic", () => {
     cy.get("button").contains("Download Route GPX").click();
     cy.get("button").contains("Login").should("be.visible");
   });
+
   it("round-trip, map select, touring, back, ok", () => {
-    cy.visit(Cypress.env("RIDI_APP_URL"));
+    cy.visit(baseUrl);
 
     cy.get("button").contains("Try it out").click();
     cy.wait(2000);
@@ -71,9 +74,10 @@ describe("ridi basic", () => {
 
     cy.get("button").contains("Download Route GPX").click();
     cy.get("button").contains("Login").should("be.visible");
+  });
 
   it("point search", () => {
-    cy.visit(Cypress.env("RIDI_APP_URL"));
+    cy.visit(baseUrl);
 
     cy.get("button").contains("Try it out").click();
     cy.wait(2000);
@@ -117,8 +121,9 @@ describe("ridi basic", () => {
     );
     cy.contains("button", "Trip details").should("contain.text", "Raunas iela");
   });
+
   it("regions", () => {
-    cy.visit(Cypress.env("RIDI_APP_URL"));
+    cy.visit(baseUrl);
 
     cy.get("button").contains("Try it out").click();
     cy.wait(2000);
@@ -175,8 +180,9 @@ describe("ridi basic", () => {
     ).should("be.visible");
     cy.contains("button", "OK").should("be.disabled");
   });
+
   it("center mode", () => {
-    cy.visit(Cypress.env("RIDI_APP_URL"));
+    cy.visit(baseUrl);
 
     cy.get("button").contains("Try it out").click();
     cy.wait(2000);
@@ -208,8 +214,9 @@ describe("ridi basic", () => {
     cy.get("button").contains("Clear Point").click();
     cy.wait(2000);
   });
+
   it("hint", () => {
-    cy.visit(Cypress.env("RIDI_APP_URL"));
+    cy.visit(baseUrl);
 
     cy.get("button").contains("Try it out").click();
     cy.wait(2000);
@@ -238,8 +245,9 @@ describe("ridi basic", () => {
 
     cy.contains("div", "Try using map center selector").should("be.visible");
   });
+
   it("rules", () => {
-    cy.visit(Cypress.env("RIDI_APP_URL"));
+    cy.visit(baseUrl);
 
     cy.get("button").contains("Try it out").click();
     cy.wait(4000);

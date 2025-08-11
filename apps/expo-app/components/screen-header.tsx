@@ -46,7 +46,6 @@ export function ScreenHeader(props: ScreenHeaderProps) {
           <StarIcon className="size-8" />
         </Link>
         <Link
-          role="button"
           className="flex size-10 items-center justify-center text-gray-600 transition-colors hover:text-[#FF5937] dark:text-gray-400"
           aria-label="Profile"
           href="/settings"
