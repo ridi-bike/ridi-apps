@@ -402,7 +402,7 @@ importers:
         specifier: ^5.0.2
         version: 5.0.2
       tinybase:
-        specifier: ^6.3.0
+        specifier: ^6.5.1
         version: 6.5.1(expo-sqlite@15.2.14(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(babel-plugin-react-compiler@19.1.0-rc.2)(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0)))(babel-plugin-react-compiler@19.1.0-rc.2)(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react-native-mmkv@3.3.0(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.0.12)(react@19.0.0))(react@19.0.0))(react@19.0.0)
       xksuid:
         specifier: ^0.0.4
@@ -553,7 +553,7 @@ importers:
   libs/store-with-schema:
     dependencies:
       tinybase:
-        specifier: ^6.3.0
+        specifier: ^6.5.1
         version: 6.5.1(@cloudflare/workers-types@4.20250313.0)(expo-sqlite@15.2.14(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.1.8)(react@19.0.0)))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.1.8)(react@19.0.0))(react@19.0.0))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.1.8)(react@19.0.0))(react@19.0.0))(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.1.8)(react@19.0.0)))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.1.8)(react@19.0.0))(react@19.0.0))(postgres@3.4.5)(react-dom@19.0.0(react@19.0.0))(react-native-mmkv@3.3.0(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.1.8)(react@19.0.0))(react@19.0.0))(react@19.0.0)
       zod:
         specifier: ^3.25.73
@@ -626,7 +626,7 @@ importers:
         specifier: ^4.5.1
         version: 4.5.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       tinybase:
-        specifier: ^6.3.0
+        specifier: ^6.5.1
         version: 6.5.1(@cloudflare/workers-types@4.20250313.0)(expo-sqlite@15.2.14(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.1.8)(react@19.0.0)))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.1.8)(react@19.0.0))(react@19.0.0))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.1.8)(react@19.0.0))(react@19.0.0))(expo@53.0.11(@babel/core@7.27.4)(@expo/metro-runtime@5.0.4(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.1.8)(react@19.0.0)))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.1.8)(react@19.0.0))(react@19.0.0))(postgres@3.4.5)(react-dom@19.0.0(react@19.0.0))(react-native-mmkv@3.3.0(react-native@0.79.3(@babel/core@7.27.4)(@types/react@19.1.8)(react@19.0.0))(react@19.0.0))(react@19.0.0)
       zod:
         specifier: ^3.25.73

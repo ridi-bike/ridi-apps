@@ -4,6 +4,7 @@ import {
   type createStoreWithSchema,
 } from "@ridi/store-with-schema";
 import { type z } from "zod";
+import { recordSchema } from "./notify";
 
 function recordsToTable<TRow>(
   rows: TRow[],
@@ -18,11 +19,19 @@ function recordsToTable<TRow>(
   );
 }
 
+export type BaseHandlerConstructor = {
+  new (
+    db: ReturnType<typeof getDb>,
+    dataStore: ReturnType<typeof createStoreWithSchema>,
+    userId: string,
+  ): BaseHandler;
+};
+
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export interface BaseHandler {
   loadAllFromDb(): Promise<void>;
   loadFromNotify(
-    rowId: string,
+    row: z.infer<typeof recordSchema>,
     type: "DELETE" | "INSERT" | "UPDATE",
   ): Promise<void>;
   loadRowFromStore(rowId: string): Promise<void>;
@@ -47,7 +56,14 @@ export class PlanHandler implements BaseHandler {
       ),
     );
   }
-  async loadFromNotify(rowId: string, type: "DELETE" | "INSERT" | "UPDATE") {
+  async loadFromNotify(
+    row: z.infer<typeof recordSchema>,
+    type: "DELETE" | "INSERT" | "UPDATE",
+  ) {
+    const rowId = row.id;
+    if (rowId !== "string") {
+      throw new Error("Unexpected type for row id");
+    }
     if (type === "DELETE") {
       this.dataStore.delRow("plans", rowId);
     } else {
@@ -166,7 +182,14 @@ export class RouteHandler implements BaseHandler {
     );
   }
 
-  async loadFromNotify(rowId: string, type: "DELETE" | "INSERT" | "UPDATE") {
+  async loadFromNotify(
+    row: z.infer<typeof recordSchema>,
+    type: "DELETE" | "INSERT" | "UPDATE",
+  ) {
+    const rowId = row.id;
+    if (rowId !== "string") {
+      throw new Error("Unexpected type for row id");
+    }
     if (type === "DELETE") {
       this.dataStore.delRow("routes", rowId);
     } else {
@@ -234,7 +257,14 @@ export class RouteBreakdownStatHandler implements BaseHandler {
     );
   }
 
-  async loadFromNotify(rowId: string, type: "DELETE" | "INSERT" | "UPDATE") {
+  async loadFromNotify(
+    row: z.infer<typeof recordSchema>,
+    type: "DELETE" | "INSERT" | "UPDATE",
+  ) {
+    const rowId = row.id;
+    if (rowId !== "string") {
+      throw new Error("Unexpected type for row id");
+    }
     if (type === "DELETE") {
       this.dataStore.delRow("routeBreakdowns", rowId);
     } else {
@@ -295,7 +325,14 @@ export class RuleSetsHandler implements BaseHandler {
     );
   }
 
-  async loadFromNotify(rowId: string, type: "DELETE" | "INSERT" | "UPDATE") {
+  async loadFromNotify(
+    row: z.infer<typeof recordSchema>,
+    type: "DELETE" | "INSERT" | "UPDATE",
+  ) {
+    const rowId = row.id;
+    if (rowId !== "string") {
+      throw new Error("Unexpected type for row id");
+    }
     if (type === "DELETE") {
       this.dataStore.delRow("ruleSets", rowId);
     } else {
@@ -380,7 +417,14 @@ export class RuleSetRoadTagsHandler implements BaseHandler {
     );
   }
 
-  async loadFromNotify(rowId: string, type: "DELETE" | "INSERT" | "UPDATE") {
+  async loadFromNotify(
+    row: z.infer<typeof recordSchema>,
+    type: "DELETE" | "INSERT" | "UPDATE",
+  ) {
+    const rowId = row.id;
+    if (rowId !== "string") {
+      throw new Error("Unexpected type for row id");
+    }
     if (type === "DELETE") {
       this.dataStore.delRow("ruleSetRoadTags", rowId);
     } else {
@@ -464,17 +508,24 @@ export class RegionHandler implements BaseHandler {
     );
   }
 
-  async loadFromNotify(rowId: string, type: "DELETE" | "INSERT" | "UPDATE") {
+  async loadFromNotify(
+    row: z.infer<typeof recordSchema>,
+    type: "DELETE" | "INSERT" | "UPDATE",
+  ) {
+    const region = row.region;
+    if (region !== "string") {
+      throw new Error("Unexpected type for row id");
+    }
     if (type === "DELETE") {
-      this.dataStore.delRow("regions", rowId);
+      this.dataStore.delRow("regions", region);
     } else {
       const dbRow = await this.db
         .selectFrom("regions")
-        .where("region", "=", rowId)
+        .where("region", "=", region)
         .selectAll()
         .executeTakeFirstOrThrow();
 
-      this.dataStore.setRow("regions", rowId, this.rowDb2Store(dbRow));
+      this.dataStore.setRow("regions", region, this.rowDb2Store(dbRow));
     }
   }
 
@@ -495,3 +546,15 @@ export class RegionHandler implements BaseHandler {
     };
   }
 }
+
+export const dataHandlers: Record<
+  keyof typeof storeSchema,
+  BaseHandlerConstructor
+> = {
+  plans: PlanHandler,
+  regions: RegionHandler,
+  routeBreakdowns: RouteBreakdownStatHandler,
+  routes: RouteHandler,
+  ruleSetRoadTags: RuleSetRoadTagsHandler,
+  ruleSets: RuleSetsHandler,
+};

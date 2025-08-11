@@ -8,7 +8,7 @@
   },
   "type": "module",
   "dependencies": {
-    "tinybase": "^6.3.0",
+    "tinybase": "^6.5.1",
     "zod": "^3.25.73"
   },
   "peerDependencies": {

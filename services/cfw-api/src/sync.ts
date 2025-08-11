@@ -16,6 +16,7 @@ import {
   RouteHandler,
   RuleSetsHandler,
   RuleSetRoadTagsHandler,
+  dataHandlers,
 } from "./data-handlers";
 
 const recordSchema = z.record(z.union([z.string(), z.number(), z.boolean()]));
@@ -55,6 +56,7 @@ export class UserStoreDurableObject extends WsServerDurableObject {
   }
 
   private async isTokenOk(token: string) {
+    console.warn("TODO token check does not exist");
     return true;
   }
 
@@ -84,12 +86,12 @@ export class UserStoreDurableObject extends WsServerDurableObject {
     }
 
     const bodyString = await request.text();
-    this.processNotifyPayload(bodyString);
+    this.processNotifyPayload(bodyString, userId);
 
     return new Response("Ok", { status: 200 });
   }
 
-  processNotifyPayload(bodyString: string) {
+  processNotifyPayload(bodyString: string, userId: string) {
     let payload: z.infer<typeof notifyPayloadSchema>;
     try {
       const body = JSON.parse(bodyString);
@@ -107,25 +109,17 @@ export class UserStoreDurableObject extends WsServerDurableObject {
       );
     }
 
-    const dataMap = dataMappings.find((m) => m.dbTableName === tableId);
-    if (!dataMap) {
+    const DataHandler = dataHandlers[tableId as keyof typeof dataHandlers];
+    if (!DataHandler) {
       throw new Error(`missing mapping, unexpectedted tableId ${tableId}`);
     }
 
-    if (payload.type === "DELETE") {
-      const rowId = dataMap.idGetterFromDb(
-        dataMap.dbReadSchema.parse(payload.old_record),
-      );
-      this.dataStore.delRow(dataMap.storeTableName, rowId);
-    }
-    if (payload.type === "INSERT" || payload.type === "UPDATE") {
-      const row = dataMap.dbReadSchema.parse(payload.record);
-      this.dataStore.setRow(
-        dataMap.storeTableName,
-        dataMap.idGetterFromDb(row),
-        dataMap.mapperDbToStore(row),
-      );
-    }
+    const dataHandler = new DataHandler(this.db, this.dataStore, userId);
+
+    dataHandler.loadFromNotify(
+      payload.record || payload.old_record,
+      payload.type,
+    );
   }
 
   async syncAllDataFromDb(userId: string) {
@@ -155,28 +149,28 @@ export class UserStoreDurableObject extends WsServerDurableObject {
     const userId = this.getPathId().split("/")[2];
 
     this.store = createMergeableStore();
-    this.dataStore = createStoreWithSchema(this.store);
+    const dataStore = createStoreWithSchema(this.store);
+    this.dataStore = dataStore;
 
     this.store.addTablesListener((listenerStore) => {
       const changedTables = listenerStore.getTransactionChanges()[0];
       for (const [changedTableId, changedRows] of Object.entries(
         changedTables,
       )) {
-        const tableMapping = dataMappings.find(
-          (m) => m.storeTableName === changedTableId,
-        );
-        if (tableMapping?.mapperStoreToDb) {
-          for (const changedRowId of Object.keys(changedRows || {})) {
-            const changedRow = listenerStore.getRow(
-              changedTableId,
-              changedRowId,
-            );
-            const dbRow = tableMapping.mapperStoreToDb(
-              tableMapping.storeSchema.parse(changedRow),
-            );
+        if (!changedRows) {
+          continue;
+        }
+        const DataHandler =
+          dataHandlers[changedTableId as keyof typeof dataHandlers];
+        if (!DataHandler) {
+          throw new Error(
+            `missing mapping, unexpectedted tableId ${changedTableId}`,
+          );
+        }
 
-            tableMapping.writeToDb(this.db, { ...dbRow, userId });
-          }
+        const dataHandler = new DataHandler(this.db, dataStore, userId);
+        for (const changedRowId of Object.keys(changedRows || {})) {
+          dataHandler.loadRowFromStore(changedRowId);
         }
       }
     });
