@@ -102,7 +102,7 @@ export class Messaging {
 
       const messages = await readMessages(this.db, {
         queueName,
-        visibilityTimeoutSeconds: 5,
+        visibilityTimeoutSeconds: 10,
         qty: 1,
       });
 

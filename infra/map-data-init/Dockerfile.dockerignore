@@ -2,4 +2,5 @@
 !./libs
 !./services/map-data-init
 !./package.json
+!./husky.sh
 !./pnpm-workspace.yaml

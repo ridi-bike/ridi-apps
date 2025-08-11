@@ -40,7 +40,7 @@ export class MessageHandlerMapPreview {
       type: "route",
       reqId: routeId,
       route: (routeRecord.latLonArray as unknown as [number, number][]).filter(
-        (_c, i) => i % Math.ceil(routeRecord.latLonArray.length / 25) === 0,
+        (_c, i) => i % Math.ceil(routeRecord.latLonArray.length / 100) === 0,
       ),
     });
 

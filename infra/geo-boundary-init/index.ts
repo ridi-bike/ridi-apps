@@ -90,7 +90,6 @@ regions.forEach((region, regionIdx) => {
           backoffLimit: 10,
           template: {
             spec: {
-              hostNetwork: stackName === "dev",
               restartPolicy: "OnFailure",
               containers: [
                 {
@@ -110,7 +109,7 @@ regions.forEach((region, regionIdx) => {
                     },
                     {
                       name: "SUPABASE_DB_URL",
-                      value: config.requireSecret("supabase_db_url"),
+                      value: config.requireSecret("supabase_db_url_stateful"),
                     },
                     {
                       name: "RIDI_ENV",

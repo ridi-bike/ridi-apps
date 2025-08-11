@@ -2,4 +2,5 @@
 !./libs
 !./services/router-service
 !./package.json
+!./husky.sh
 !./pnpm-workspace.yaml

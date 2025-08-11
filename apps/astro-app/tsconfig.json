@@ -5,6 +5,8 @@
     "composite": true,
     "incremental": true,
     "jsxImportSource": "react"
+    "jsxImportSource": "react",
+    "strictNullChecks": true
   }
 }
 

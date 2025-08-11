@@ -7,7 +7,7 @@ import Layout from "../layouts/Layout.astro";
     <div class="max-w-screen-xl mx-auto px-6 lg:px-8 xl:px-10">
       <div class="max-w-3xl mx-auto">
         <h1 class="text-4xl font-medium mb-8">Privacy Policy</h1>
-        <p class="text-lg mb-4">Last Updated: 2025-03-26</p>
+        <p class="text-lg mb-4">Last Updated: 2025-07-11</p>
         <p class="text-lg mb-8">
           This Privacy Policy explains how Ridi ("we," "us," or "our") collects,
           uses, and protects your personal information when you use our route
@@ -16,20 +16,14 @@ import Layout from "../layouts/Layout.astro";
 
         <section class="mb-8">
           <h2 class="text-2xl font-medium mb-4">1. Information We Collect</h2>
-          <p class="text-lg mb-4">
-            We only collect data that you explicitly provide to us, including:
-          </p>
+          <h3 class="text-xl font-medium mt-6 mb-3">
+            Ridi explicit data collection
+          </h3>
           <ul class="list-disc pl-6 text-lg space-y-2">
             <li>Email address (for account creation and login)</li>
-            <li>Trip plans & route data (start and end points you enter)</li>
-          </ul>
-          <p class="text-lg mt-4 mb-4">We do not collect:</p>
-          <ul class="list-disc pl-6 text-lg space-y-2">
             <li>
-              Your real-time location (unless manually entered as a route point)
+              Trip plans & route data (start and end points you enter, etc)
             </li>
-            <li>Payment information (handled securely by Stripe)</li>
-            <li>Any data beyond what is necessary for app functionality</li>
           </ul>
           <h3 class="text-xl font-medium mt-6 mb-3">
             Automated Data Collection
@@ -40,6 +34,17 @@ import Layout from "../layouts/Layout.astro";
               case of errors)
             </li>
             <li>Session cookies (only for authentication, no tracking)</li>
+            <li>
+              PostHog (for usage analytics to understand what works and what
+              doesn't work in the app)
+            </li>
+            <li>Google Tag Manager (for tracking ad conversions)</li>
+          </ul>
+          <h3 class="text-xl font-medium mt-6 mb-3">
+            Third party explicit data collection
+          </h3>
+          <ul class="list-disc pl-6 text-lg space-y-2">
+            <li>Payment info handled by Stripe</li>
           </ul>
         </section>
 
@@ -50,6 +55,13 @@ import Layout from "../layouts/Layout.astro";
             <li>Provide route generation services</li>
             <li>Maintain your account and trip history</li>
             <li>Improve app stability (via Sentry crash reports)</li>
+            <li>
+              Analyze usage patterns to improve app functionality (via PostHog)
+            </li>
+            <li>
+              Track advertising conversion effectiveness (via Google Tag
+              Manager)
+            </li>
           </ul>
         </section>
 
@@ -69,7 +81,8 @@ import Layout from "../layouts/Layout.astro";
             4. Data Sharing & Disclosure
           </h2>
           <p class="text-lg mb-4">
-            We do not share your data with third parties except:
+            We share limited data with third-party services to provide our
+            functionality:
           </p>
           <ul class="list-disc pl-6 text-lg space-y-2">
             <li>
@@ -77,8 +90,14 @@ import Layout from "../layouts/Layout.astro";
               details).
             </li>
             <li>Sentry (only for crash analytics).</li>
+            <li>PostHog (for usage analytics to improve the app).</li>
+            <li>Google (for ad conversion tracking).</li>
             <li>If required by law (e.g., legal requests).</li>
           </ul>
+          <p class="text-lg mt-4 font-medium">
+            We do not sell your data or provide it to third parties for their
+            own marketing purposes.
+          </p>
         </section>
 
         <section class="mb-8">
@@ -93,11 +112,22 @@ import Layout from "../layouts/Layout.astro";
 
         <section class="mb-8">
           <h2 class="text-2xl font-medium mb-4">6. Cookies & Tracking</h2>
-          <p class="text-lg mb-4">We only use:</p>
+          <p class="text-lg mb-4">We use:</p>
           <ul class="list-disc pl-6 text-lg space-y-2">
             <li>Session cookies (for login).</li>
-            <li>No tracking, ads, or behavioral analytics.</li>
+            <li>
+              Usage tracking (PostHog) to analyze app performance and user
+              experience.
+            </li>
+            <li>
+              Ad conversion tracking (Google Tag Manager) to measure advertising
+              effectiveness.
+            </li>
           </ul>
+          <p class="text-lg mt-4">
+            This tracking is used solely to improve our service and is not sold
+            to third parties.
+          </p>
         </section>
 
         <section class="mb-8">

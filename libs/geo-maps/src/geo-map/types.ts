@@ -2,6 +2,7 @@ import { type MapRef } from "@vis.gl/react-maplibre";
 import { type PropsWithChildren } from "react";
 
 export type GeoMapPlanViewProps = {
+  initialCoords: [number, number];
   start: Coords | null;
   finish: Coords | null;
   bearing: number | null;

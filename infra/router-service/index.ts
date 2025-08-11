@@ -164,7 +164,11 @@ for (const region of regions) {
                   },
                   {
                     name: "CACHE_LOCATION",
-                    value: getCacheLocation(region.region, mapDataVersionDate),
+                    value: getCacheLocation(
+                      region.region,
+                      mapDataVersionDate,
+                      routerVersion,
+                    ),
                   },
                   {
                     name: "ROUTER_VERSION",

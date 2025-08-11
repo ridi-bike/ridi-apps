@@ -1,8 +1,9 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
+import slugify from "@sindresorhus/slugify";
 import { buildGPX, BaseBuilder } from "gpx-builder";
 import { Trophy, Trash2, Ruler } from "lucide-react-native";
 import { AnimatePresence, MotiView } from "moti";
-import { useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { View, Text, ScrollView, Pressable } from "react-native";
 
 import { Button } from "~/components/button";
@@ -236,6 +237,29 @@ export default function RouteDetails() {
   const breakdownRoadType = useRouteRoadStats(routeId, "type");
   const coords = useRouteCoords(routeId, false);
 
+  const getFileName = useCallback(() => {
+    function descOrLatLon(
+      desc: string | undefined,
+      lat: number,
+      lon: number,
+    ): string {
+      const latLon = `${lat.toFixed(3)}-${lon.toFixed(3)}`;
+      return desc
+        ? slugify(desc).split(",")[0]?.slice(0, 30) || latLon
+        : latLon;
+    }
+    const date = new Date(plan.createdAt).toISOString().substring(0, 10);
+    const startLoc = descOrLatLon(plan.startDesc, plan.startLat, plan.startLon);
+    const finishLoc =
+      plan.tripType === "start-finish"
+        ? descOrLatLon(plan.finishDesc, plan.finishLat, plan.finishLon)
+        : null;
+    const dist = Math.round(route.data.stats.lenM / 1000);
+    return plan.tripType === "start-finish"
+      ? `${startLoc}_${finishLoc}_${dist}km_${date}.gpx`
+      : `${startLoc}_${plan.bearing}deg_${dist}km_${date}.gpx`;
+  }, [plan, route]);
+
   return (
     <ScreenFrame
       title="Route details"
@@ -277,6 +301,76 @@ export default function RouteDetails() {
                             <Text className="font-bold text-[#FF5937]">
                               {Math.round(route.score)}
                             </Text>
+                          </View>
+                          <View className="flex flex-row items-center justify-center gap-4">
+                            <View className="flex flex-col items-end justify-center">
+                              <DeleteConfirmDialog
+                                onDelete={() => {
+                                  posthogClient.captureEvent("route-deleted", {
+                                    routeId: route.data.id,
+                                  });
+                                  routeDelete(route.data.id);
+                                  if (router.canGoBack()) {
+                                    router.back();
+                                  } else {
+                                    router.replace(`/plans/${planId}`);
+                                  }
+                                }}
+                              >
+                                <Pressable
+                                  role="button"
+                                  className={cn(
+                                    "dark:border-red-700 dark:hover:bg-red-950 w-full h-14 flex-row items-center px-4 gap-3 rounded-xl border-[3px] border-red-500 text-red-500 hover:bg-red-50 transition-colors",
+                                  )}
+                                >
+                                  <Trash2 className="size-6" />
+                                </Pressable>
+                              </DeleteConfirmDialog>
+                            </View>
+                            <View className="flex flex-col items-end justify-center">
+                              <DownloadGpxDialog
+                                downloadedAt={route.data.downloadedAt}
+                                onDownload={() => {
+                                  posthogClient.captureEvent(
+                                    "route-gpx-downloaded",
+                                    {
+                                      routeId: route.data.id,
+                                    },
+                                  );
+
+                                  const { Point } = BaseBuilder.MODELS;
+                                  const points = route.data.latLonArray.map(
+                                    (latLon) => new Point(latLon[0], latLon[1]),
+                                  );
+
+                                  const gpxData = new BaseBuilder();
+
+                                  gpxData.setSegmentPoints(points);
+
+                                  const link = document.createElement("a");
+
+                                  link.href = `data:application/gpx+xml;charset=utf-8,${encodeURIComponent(buildGPX(gpxData.toObject()))}`;
+                                  link.download = getFileName();
+                                  link.click();
+
+                                  routeSetDownloaded({
+                                    id: route.data.id,
+                                    downloadedAt: new Date(),
+                                  });
+                                }}
+                              >
+                                <Pressable
+                                  role="button"
+                                  className={cn(
+                                    "dark:border-green-700 dark:hover:bg-green-950 w-full h-14 flex-row items-center px-4 gap-3 rounded-xl border-[3px] border-green-500 text-green-500 hover:bg-green-50 transition-colors",
+                                  )}
+                                >
+                                  <Text className="dark:text-gray-200">
+                                    Download Route GPX
+                                  </Text>
+                                </Pressable>
+                              </DownloadGpxDialog>
+                            </View>
                           </View>
                         </View>
                       </>

@@ -64,8 +64,8 @@ export function GeoMapPlanView(props: GeoMapPlanViewProps) {
               bounds: updateBBox(bbox),
             }
           : {
-              longitude: 24.853,
-              latitude: 57.153,
+              longitude: props.initialCoords[1],
+              latitude: props.initialCoords[0],
               zoom: 4,
             }
       }

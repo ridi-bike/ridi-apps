@@ -1,0 +1,83 @@
+---
+import { getCollection, render } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import Prose from "../../components/Prose.astro";
+
+export async function getStaticPaths() {
+  const articleList = await getCollection("articles");
+  return articleList.map((article) => ({
+    params: { slug: article.data.slug },
+    props: { article },
+  }));
+}
+
+const { article } = Astro.props;
+const { Content } = await render(article);
+---
+
+<Layout title={article.data.title} description={article.data.description}>
+  <main class="pt-32 pb-20">
+    <div class="max-w-screen-xl mx-auto px-6 lg:px-8 xl:px-10">
+      <div class="max-w-3xl mx-auto">
+        <ol class="flex items-center whitespace-nowrap">
+          <li class="inline-flex items-center">
+            <a
+              class="flex items-center text-sm text-gray-500 hover:text-ridiorange focus:outline-hidden focus:text-ridiorange dark:text-neutral-500 dark:hover:text-ridiorange dark:focus:text-ridiorange"
+              href="/"
+            >
+              Home
+            </a>
+            <svg
+              class="shrink-0 mx-2 size-4 text-gray-400 dark:text-neutral-600"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="m9 18 6-6-6-6"></path>
+            </svg>
+          </li>
+          <li class="inline-flex items-center">
+            <a
+              class="flex items-center text-sm text-gray-500 hover:text-ridiorange focus:outline-hidden focus:text-ridiorange dark:text-neutral-500 dark:hover:text-ridiorange dark:focus:text-ridiorange"
+              href="/articles"
+            >
+              Articles
+              <svg
+                class="shrink-0 mx-2 size-4 text-gray-400 dark:text-neutral-600"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="m9 18 6-6-6-6"></path>
+              </svg>
+            </a>
+          </li>
+          <li
+            class="inline-flex items-center text-sm font-semibold text-gray-800 truncate dark:text-neutral-200"
+            aria-current="page"
+          >
+            {article.data.title}
+          </li>
+        </ol>
+        <p class="text-sm text-gray-500 my-2">
+          Published: {article.data.publish_date.toISOString().slice(0, 10)}
+        </p>
+        <Prose>
+          <Content />
+        </Prose>
+      </div>
+    </div>
+  </main>
+</Layout>

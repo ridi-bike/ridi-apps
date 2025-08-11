@@ -65,7 +65,6 @@ regions.reduce((prevDelay, region) => {
                   nodeSelector: {
                     "node.ridi.bike/name": node.metadata.name,
                   },
-                  hostNetwork: stackName === "dev",
                   restartPolicy: "OnFailure",
                   initContainers: [getMapDataInitContainer(region)],
                   containers: [getRouterCacheInitContainer(region)],

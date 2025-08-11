@@ -1,4 +1,5 @@
 import { getMapStyle } from "@ridi/geo-maps";
+
 import * as turf from "@turf/turf";
 import {
   Layer,
@@ -62,6 +63,7 @@ export function GeoMapCoordsSelector({
   regions,
   children,
   onCoordsSelectCancel,
+  initialCoords,
 }: GeoMapCoordsSelectorProps) {
   const { colorScheme } = useColorScheme();
   const mapRef = useRef<MapRef>(null);
@@ -155,6 +157,7 @@ export function GeoMapCoordsSelector({
 
   return (
     <MapLibre
+      id="map-coords-selector"
       ref={mapRef}
       mapLib={maplibre}
       initialViewState={
@@ -163,9 +166,9 @@ export function GeoMapCoordsSelector({
               bounds: mapBounds,
             }
           : {
-              longitude: 24.853,
-              latitude: 57.153,
-              zoom: 4,
+              longitude: initialCoords[1],
+              latitude: initialCoords[0],
+              zoom: 5,
             }
       }
       mapStyle={getMapStyle(colorScheme)}
@@ -193,12 +196,15 @@ export function GeoMapCoordsSelector({
           key={`${point.coords.lat},${point.coords.lon}`}
           lat={point.coords.lat}
           lon={point.coords.lon}
-          title="Point"
+          title="Search point"
           setStart={() => setStart(point.coords)}
           setFinish={isRoundTrip ? undefined : () => setFinish(point.coords)}
           onCancel={onCoordsSelectCancel}
         >
-          <CircleFadingPlusIcon className="size-8 text-blue-500" />
+          <CircleFadingPlusIcon
+            id="search-point"
+            className="size-8 text-blue-500"
+          />
         </MapMarker>
       ))}
       {start && (
@@ -209,7 +215,7 @@ export function GeoMapCoordsSelector({
           unset={() => setStart(null)}
           onCancel={onCoordsSelectCancel}
         >
-          <CirclePlayIcon className="size-8 text-green-500" />
+          <CirclePlayIcon id="start" className="size-8 text-green-500" />
         </MapMarker>
       )}
       {finish && (
@@ -220,19 +226,19 @@ export function GeoMapCoordsSelector({
           unset={() => setFinish(null)}
           onCancel={onCoordsSelectCancel}
         >
-          <CirclePauseIcon className="size-8 text-red-500" />
+          <CirclePauseIcon id="finish" className="size-8 text-red-500" />
         </MapMarker>
       )}
       {current && (
         <MapMarker
           lat={current.lat}
           lon={current.lon}
-          title="Finish"
+          title="Current"
           setStart={() => setStart(current)}
           setFinish={isRoundTrip ? undefined : () => setFinish(current)}
           onCancel={onCoordsSelectCancel}
         >
-          <CircleUserIcon className="size-8 text-teal-500" />
+          <CircleUserIcon id="current" className="size-8 text-teal-500" />
         </MapMarker>
       )}
       {findCoordsCurr && (
@@ -240,7 +246,7 @@ export function GeoMapCoordsSelector({
           key={`${findCoordsCurr.lat},${findCoordsCurr.lon}`}
           lat={findCoordsCurr.lat}
           lon={findCoordsCurr.lon}
-          title="Point"
+          title="Center"
           setStart={() => {
             setStart(findCoordsCurr);
             setFindCoordsCurr(null);
@@ -256,7 +262,7 @@ export function GeoMapCoordsSelector({
           isDialogOpen={findCoordsCurr.tapped}
           onCancel={onCoordsSelectCancel}
         >
-          <CircleDotIcon className="size-8 text-yellow-500" />
+          <CircleDotIcon id="center" className="size-8 text-yellow-500" />
         </MapMarker>
       )}
       {rountdTripLayer}

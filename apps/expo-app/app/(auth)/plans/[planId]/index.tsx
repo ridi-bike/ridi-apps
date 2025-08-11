@@ -377,7 +377,8 @@ export default function PlanDetails() {
                             className={cn("font-bold", {
                               "text-gray-600":
                                 plan.state === "new" ||
-                                plan.state === "planning",
+                                plan.state === "planning" ||
+                                plan.state === "planning-wider",
                               "text-green-500": plan.state === "done",
                               "text-red-500": plan.state === "error",
                             })}

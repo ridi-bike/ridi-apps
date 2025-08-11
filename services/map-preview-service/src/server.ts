@@ -14,6 +14,7 @@ const server = Fastify();
 
 await server.register(FastifyVite, {
   root: path.resolve(import.meta.dirname, "../"),
+  distDir: path.resolve(import.meta.dirname, "../dist/client/"),
   dev: process.argv.includes("--dev"),
   spa: true,
 });

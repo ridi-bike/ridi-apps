@@ -137,7 +137,10 @@ export const PlanCard = ({ planId }: RouteCardProps) => {
             <Text className="font-bold dark:text-gray-100">Status</Text>
             <Text
               className={cn("font-bold", {
-                "text-gray-600": state === "new" || state === "planning",
+                "text-gray-600":
+                  state === "new" ||
+                  state === "planning" ||
+                  state === "planning-wider",
                 "text-green-500": state === "done",
                 "text-red-500": state === "error",
               })}

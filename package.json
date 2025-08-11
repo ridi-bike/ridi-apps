@@ -8,7 +8,8 @@
   "license": "ISC",
   "scripts": {
     "container:build:ridi-router": "podman build -f ./infra/router-service/Containerfile --build-arg-file=./services/router-service/.env.latvia -t=ridi-router-service .",
-    "container:run:ridi-router": "podman run --env-file=./services/router-service/.env ridi-router-service"
+    "container:run:ridi-router": "podman run --env-file=./services/router-service/.env ridi-router-service",
+    "prepare": "./husky.sh"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.7",
@@ -30,6 +31,7 @@
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-tailwindcss": "^3.18.0",
     "globals": "^16.0.0",
+    "husky": "^9.1.7",
     "prettier": "^3.4.2",
     "prettier-plugin-astro": "^0.14.1"
   },

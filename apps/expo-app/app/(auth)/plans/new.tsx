@@ -74,7 +74,7 @@ const CANCEL_TRIGGER_TIMES = 5;
 
 export default function PlansNew() {
   const router = useRouter();
-  const { planCreate } = usePlansUpdate();
+  const { planAdd, data: plans, loading: plansLoading } = useStorePlans();
   const [startCoords, setStartCoords] = useUrlParams("start", coordsSchema);
   const [finishCoords, setFinishCoords] = useUrlParams("finish", coordsSchema);
   const [cancelPressedTimes, setCancelPressedTimes] = useState(0);
@@ -225,7 +225,11 @@ export default function PlansNew() {
       return;
     }
 
-    const location = await Location.getCurrentPositionAsync({});
+    const location = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Balanced,
+      distanceInterval: 1000, // 1km
+      timeInterval: 10 * 60 * 1000, // 10 min
+    });
 
     if (location) {
       posthogClient.captureEvent("plan-new-current-location-gotten");
@@ -256,6 +260,14 @@ export default function PlansNew() {
   ]);
 
   const [mapMode, setMapMode] = useUrlParams("map-mode", z.boolean());
+
+  const initialCoords = useMemo(() => {
+    const prevPlan = plans?.[0];
+    if (!plansLoading && !prevPlan) {
+      return [57.153614, 24.85391];
+    }
+    return prevPlan ? [prevPlan.startLat, prevPlan.startLon] : null;
+  }, [plans, plansLoading]);
 
   return (
     <ScreenFrame
@@ -375,7 +387,7 @@ export default function PlansNew() {
     >
       <View className="flex flex-col items-center justify-start">
         <AnimatePresence>
-          {mapMode && (
+          {mapMode && initialCoords && (
             <MotiView
               key="big-map"
               className="fixed top-0 z-50 mt-16 w-[98vw] bg-white p-4 pb-40 dark:bg-gray-900"
@@ -385,6 +397,7 @@ export default function PlansNew() {
               transition={{ type: "timing" }}
             >
               <GeoMapCoordsSelector
+                initialCoords={initialCoords}
                 onCoordsSelectCancel={() => {
                   setCancelPressedTimes((t) => t + 1);
                   if (cancelPressedTimes >= CANCEL_TRIGGER_TIMES) {
@@ -442,6 +455,7 @@ export default function PlansNew() {
                       <Pressable
                         role="button"
                         onPress={getCurrentLocation}
+                        aria-label="Get Current Location"
                         className={cn(
                           "flex flex-row items-center justify-start gap-2 rounded-xl border-2 p-4 pointer-events-auto",
 
@@ -467,6 +481,7 @@ export default function PlansNew() {
                       )}
                       <Pressable
                         role="button"
+                        aria-label="Enable Map Center Point"
                         onPress={() => {
                           posthogClient.captureEvent(
                             "plan-new-selection-mode-set",
@@ -494,6 +509,7 @@ export default function PlansNew() {
                       <Link
                         href={`/search?isRoundTrip=${JSON.stringify(isRoundTrip || false)}`}
                         className="pointer-events-auto flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 border-black bg-white p-4 dark:border-gray-700 dark:bg-gray-900"
+                        aria-label="Search"
                       >
                         <Search className="size-4 dark:text-gray-200" />
                       </Link>
@@ -506,6 +522,7 @@ export default function PlansNew() {
                           setSearchPoints();
                         }}
                         className="pointer-events-auto flex flex-1 flex-row items-center justify-start gap-2 rounded-xl border-2 border-[#FF5937] bg-[#FF5937] p-4 text-white"
+                        aria-label="Clear Search"
                       >
                         <Search className="size-4 dark:text-gray-200" />
                       </Pressable>
@@ -646,6 +663,15 @@ export default function PlansNew() {
                 <Pressable
                   role="button"
                   key={rs.id}
+                  aria-label={
+                    rs.icon === "adv"
+                      ? "Adventure"
+                      : rs.icon === "touring"
+                        ? "Touring"
+                        : rs.icon === "dualsport"
+                          ? "Dualsport"
+                          : undefined
+                  }
                   onPress={() => {
                     posthogClient.captureEvent("plan-new-rule-set-selected", {
                       ruleSetId: rs.id,
@@ -683,10 +709,13 @@ export default function PlansNew() {
               ))}
             <Pressable
               role="button"
+              aria-label="Rule Set Overview"
               onPress={() => {
-                router.navigate("/rules");
-                router.setParams({
-                  "selected-rule-id": JSON.stringify(ruleSetId),
+                router.push({
+                  pathname: "/rules",
+                  params: {
+                    rule: JSON.stringify(ruleSetId),
+                  },
                 });
               }}
               className={cn(
@@ -717,23 +746,26 @@ export default function PlansNew() {
             }}
           >
             <GroupWithTitle title="Overview" className="h-48">
-              <GeoMapPlanView
-                bearing={isRoundTrip ? (bearing ?? null) : null}
-                distance={(selectedDistance || 0) * 1000}
-                start={
-                  startCoords
-                    ? {
-                        lat: startCoords[0],
-                        lon: startCoords[1],
-                      }
-                    : null
-                }
-                finish={
-                  finishCoords
-                    ? { lat: finishCoords[0], lon: finishCoords[1] }
-                    : null
-                }
-              />
+              {!!initialCoords && (
+                <GeoMapPlanView
+                  bearing={isRoundTrip ? (bearing ?? null) : null}
+                  distance={(selectedDistance || 0) * 1000}
+                  initialCoords={initialCoords}
+                  start={
+                    startCoords
+                      ? {
+                          lat: startCoords[0],
+                          lon: startCoords[1],
+                        }
+                      : null
+                  }
+                  finish={
+                    finishCoords
+                      ? { lat: finishCoords[0], lon: finishCoords[1] }
+                      : null
+                  }
+                />
+              )}
             </GroupWithTitle>
           </Pressable>
           <AnimatePresence>
@@ -771,6 +803,7 @@ export default function PlansNew() {
                         <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
                       </View>
                       <Slider
+                        id="bearing-slider"
                         renderThumbComponent={() => (
                           <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
                         )}
@@ -813,6 +846,7 @@ export default function PlansNew() {
                         <View className="h-2 w-full rounded-lg bg-gray-200 dark:bg-gray-700" />
                       </View>
                       <Slider
+                        id="distance-slider"
                         renderThumbComponent={() => (
                           <View className="size-12 rounded-lg border-2 border-[#FF5937] bg-[#FF5937]" />
                         )}

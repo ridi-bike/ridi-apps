@@ -199,28 +199,32 @@ export class MessageHandlerNewPlan {
       (r: (typeof okRoutes)[number]) =>
         (!fromMod || r.stats.lenM > distance * distanceModifier * fromMod) &&
         (!toMod || r.stats.lenM <= distance * distanceModifier * toMod);
-    const filterBuckeLevels = [
-      [filter(0, 1), filter(1, 1.5), filter(1.5, 2)],
-      [filter(2, 2.5), filter(2.5, 3), filter(3, 0)],
+    const filterBucketLevels = [
+      filter(0, 1),
+      filter(1, 1.5),
+      filter(1.5, 2),
+      filter(2, 2.5),
+      filter(2.5, 3),
+      filter(3, 0),
     ];
-    const num_of_best_routes = 8;
+
+    const okRoutesInDistBuckets = filterBucketLevels.map((filter) =>
+      okRoutes.filter(filter).sort(sort),
+    );
+    const numOfBestRoutes = 8;
     const bestRoutes: typeof okRoutes = [];
-    if (okRoutes.length <= num_of_best_routes) {
-      bestRoutes.push(...okRoutes);
-    } else {
-      for (const filterBuckes of filterBuckeLevels) {
-        let step = 0;
-        while (
-          bestRoutes.length < num_of_best_routes &&
-          step <= filterBuckes.length * num_of_best_routes
-        ) {
-          const bucket = step % filterBuckes.length;
-          const iter = Math.floor(step / filterBuckes.length);
-          const route = okRoutes.filter(filterBuckes[bucket]!).sort(sort)[iter];
-          if (route) {
-            bestRoutes.push(route);
+
+    while (
+      bestRoutes.length < numOfBestRoutes &&
+      okRoutesInDistBuckets.some((bucket) => bucket.length > 0)
+    ) {
+      for (const distBucket of okRoutesInDistBuckets) {
+        const bestRoute = distBucket.shift();
+        if (bestRoute) {
+          bestRoutes.push(bestRoute);
+          if (bestRoutes.length === numOfBestRoutes) {
+            break;
           }
-          step++;
         }
       }
     }

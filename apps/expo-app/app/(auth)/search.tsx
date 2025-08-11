@@ -1,8 +1,4 @@
-import {
-  useLocalSearchParams,
-  useRootNavigationState,
-  useRouter,
-} from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import {
   Search,
   MapPin,
@@ -31,7 +27,7 @@ type Location = {
 type LocationCardProps = {
   isRoundTrip: boolean;
   location: Location;
-  gotoNewScreen: () => void;
+  gotoNewScreen: (params?: Record<string, string>) => void;
 };
 
 function LocationCard({
@@ -39,7 +35,6 @@ function LocationCard({
   gotoNewScreen,
   isRoundTrip,
 }: LocationCardProps) {
-  const router = useRouter();
   return (
     <PointSelectDialog
       title="Select"
@@ -48,8 +43,7 @@ function LocationCard({
       lon={parseFloat(location.lon)}
       setStart={() => {
         posthogClient.captureEvent("point-search-start-select");
-        gotoNewScreen();
-        router.setParams({
+        gotoNewScreen({
           start: JSON.stringify([
             parseFloat(location.lat),
             parseFloat(location.lon),
@@ -61,8 +55,7 @@ function LocationCard({
           ? undefined
           : () => {
               posthogClient.captureEvent("point-search-finish-select");
-              gotoNewScreen();
-              router.setParams({
+              gotoNewScreen({
                 finish: JSON.stringify([
                   parseFloat(location.lat),
                   parseFloat(location.lon),
@@ -103,8 +96,6 @@ function LocationCard({
 }
 
 export default function LocationSearch() {
-  const router = useRouter();
-  const navState = useRootNavigationState();
   const [searchQuery, setSearchQuery] = useState("");
   const [locations, setLocations] = useState<Location[]>([]);
   const [searching, setSearching] = useState(false);
@@ -147,15 +138,14 @@ export default function LocationSearch() {
     }
   };
 
-  const gotoNewScreen = useCallback(() => {
-    if (
-      navState.routes[(navState.index || 0) - 1]?.name === "(auth)/plans/new"
-    ) {
-      router.back(); // TODO not quite working, seems to be replacing
+  const gotoNewScreen = useCallback((params?: Record<string, string>) => {
+    if (router.canGoBack()) {
+      router.back();
     } else {
       router.replace("/plans/new");
     }
-  }, [navState.index, navState.routes, router]);
+    setTimeout(() => router.setParams(params), 500);
+  }, []);
 
   return (
     <ScreenFrame
@@ -175,8 +165,7 @@ export default function LocationSearch() {
                 posthogClient.captureEvent("point-search-show-all-on-map", {
                   locationCount: locations.length,
                 });
-                gotoNewScreen();
-                router.setParams({
+                gotoNewScreen({
                   "map-mode": "true",
                   "search-results": JSON.stringify(
                     locations.map((l) => [
@@ -203,6 +192,7 @@ export default function LocationSearch() {
               />
               <Pressable
                 role="button"
+                aria-label="Start Search"
                 onPress={handleSearch}
                 className={cn(
                   "flex-row items-center justify-center rounded-xl bg-[#FF5937] px-6 py-3",
@@ -237,7 +227,7 @@ export default function LocationSearch() {
                       }
                       key={index}
                       location={location}
-                      gotoNewScreen={gotoNewScreen}
+                      gotoNewScreen={(params) => gotoNewScreen(params)}
                     />
                   ))}
                 </>

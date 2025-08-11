@@ -1,6 +1,11 @@
 import { type RuleSet } from "@ridi/store-with-schema";
 import { useRootNavigationState, useRouter } from "expo-router";
 import {
+  type RuleSetsSetRequest,
+  type RuleSetsListResponse,
+} from "@ridi/api-contracts";
+import { router } from "expo-router";
+import {
   Copy,
   Eye,
   MoreVertical,
@@ -101,7 +106,6 @@ function ActionDialog({
   onDelete: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const router = useRouter();
   return (
     <AlertDialog
       className="w-full"
@@ -194,19 +198,27 @@ export default function RuleSetList() {
     z.string(),
   );
 
-  const navState = useRootNavigationState();
-  const gotoNewScreen = useCallback(() => {
-    if (navState.routes[(navState.index || 0) - 1]?.name === "plans/new") {
-      router.back(); // TODO not quite working, seems to be replacing
+  const gotoNewScreen = useCallback((params?: Record<string, string>) => {
+    if (router.canGoBack()) {
+      router.back();
     } else {
       router.replace("/plans/new");
     }
-  }, [navState.index, navState.routes, router]);
+    setTimeout(() => router.setParams(params), 500);
+  }, []);
 
   return (
     <ScreenFrame
       title="Rule sets"
-      onGoBack={gotoNewScreen}
+      onGoBack={() =>
+        gotoNewScreen(
+          selectedId
+            ? {
+                rule: JSON.stringify(selectedId),
+              }
+            : undefined,
+        )
+      }
       floating={
         <View className="fixed bottom-0 w-full bg-white p-4 dark:bg-gray-800">
           <Pressable
@@ -256,11 +268,10 @@ export default function RuleSetList() {
                           </View>
                           <View className="flex-row gap-2">
                             <Pressable
+                              aria-label="Select rule set"
                               role="button"
                               onPress={() => {
-                                setSelectedId(ruleSet.id);
-                                gotoNewScreen();
-                                router.setParams({
+                                gotoNewScreen({
                                   rule: JSON.stringify(ruleSet.id),
                                 });
                               }}
@@ -288,6 +299,7 @@ export default function RuleSetList() {
                             >
                               <Pressable
                                 role="button"
+                                aria-label="Open options"
                                 className="size-12 flex-row items-center justify-center rounded-xl border-[3px] border-gray-200 text-gray-400 transition-colors hover:border-gray-300 dark:border-gray-700 dark:text-gray-500"
                               >
                                 <MoreVertical className="size-5" />

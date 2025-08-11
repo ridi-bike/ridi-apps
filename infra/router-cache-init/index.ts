@@ -78,7 +78,11 @@ export const getRouterCacheInitContainer = (
       },
       {
         name: "CACHE_LOCATION",
-        value: getCacheLocation(region.region, mapDataVersionDateNext),
+        value: getCacheLocation(
+          region.region,
+          mapDataVersionDateNext,
+          routerVersionNext,
+        ),
       },
       {
         name: "ROUTER_VERSION",

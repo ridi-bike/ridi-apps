@@ -1,4 +1,3 @@
-import { Agent } from "node:https";
 import { setTimeout } from "node:timers/promises";
 
 import { type RidiLogger } from "@ridi/logger";
@@ -6,13 +5,8 @@ import {
   ridiRouterContract,
   type RouteReq,
 } from "@ridi/router-service-contracts";
-import { initClient } from "@ts-rest/core";
-import axios, {
-  type Method,
-  type AxiosError,
-  type AxiosResponse,
-  isAxiosError,
-} from "axios";
+import { initClient, type ApiFetcherArgs } from "@ts-rest/core";
+import axios, { isAxiosError } from "axios";
 
 import { env } from "./env";
 
@@ -41,6 +35,33 @@ export class RouterServiceLookup {
     const client = initClient(ridiRouterContract, {
       baseUrl: `http://${routerServiceUrl}`,
       validateResponse: true,
+      api: async (args: ApiFetcherArgs) => {
+        try {
+          const result = await axios.request({
+            method: args.method,
+            url: args.path,
+            headers: args.headers,
+            data: args.body,
+            params: args.rawQuery,
+          });
+          return {
+            status: result.status,
+            body: result.data,
+            headers: new Headers(result.headers as Record<string, string>),
+          };
+        } catch (error) {
+          if (isAxiosError(error) && error.response) {
+            return {
+              status: error.response.status,
+              body: error.response.data,
+              headers: new Headers(
+                error.response.headers as Record<string, string>,
+              ),
+            };
+          }
+          throw error;
+        }
+      },
     });
 
     const retryIfUnderSecs = 5;

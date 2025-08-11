@@ -113,7 +113,7 @@ export const apiContract = c.router({
             })
             .nullable(),
           stripeUrl: z.string().nullable(),
-          prices: z.array(priceSchema).nullable(),
+          prices: z.array(priceSchema.nullable()).nullable(),
         }),
       }),
       500: z.object({ message: z.string() }),

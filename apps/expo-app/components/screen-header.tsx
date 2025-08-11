@@ -15,6 +15,7 @@ export function ScreenHeader(props: ScreenHeaderProps) {
       <View className="flex h-full w-14 items-center justify-center">
         {(props.onGoBack || props.headerProps.navigation.canGoBack()) && (
           <Pressable
+            aria-label="Go back"
             role="button"
             onPress={() => {
               if (props.onGoBack) {
@@ -45,7 +46,6 @@ export function ScreenHeader(props: ScreenHeaderProps) {
           <StarIcon className="size-8" />
         </Link>
         <Link
-          role="button"
           className="flex size-10 items-center justify-center text-gray-600 transition-colors hover:text-[#FF5937] dark:text-gray-400"
           aria-label="Profile"
           href="/settings"

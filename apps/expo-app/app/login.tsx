@@ -147,36 +147,44 @@ export default function LoginScreen() {
         </View>
         {!showEmailInput ? (
           <View className="w-full space-y-4">
-            <Button
-              className="flex flex-row items-center justify-center gap-2"
-              variant="secondary"
-              fullWidth
-              onPress={() => performOAuth("github")}
-            >
-              <GithubIcon className="size-6" />
+            {process.env.EXPO_PUBLIC_RIDI_ENV === "prod" && (
+              <>
+                <Button
+                  className="flex flex-row items-center justify-center gap-2"
+                  variant="secondary"
+                  fullWidth
+                  onPress={() => performOAuth("github")}
+                >
+                  <GithubIcon className="size-6" />
 
-              <Text className="dark:text-gray-500">Continue with GitHub</Text>
-            </Button>
-            <Button
-              className="flex flex-row items-center justify-center gap-2"
-              variant="secondary"
-              fullWidth
-              onPress={() => performOAuth("google")}
-            >
-              <GoogleIcon className="size-6" />
+                  <Text className="dark:text-gray-500">
+                    Continue with GitHub
+                  </Text>
+                </Button>
+                <Button
+                  className="flex flex-row items-center justify-center gap-2"
+                  variant="secondary"
+                  fullWidth
+                  onPress={() => performOAuth("google")}
+                >
+                  <GoogleIcon className="size-6" />
 
-              <Text className="dark:text-gray-500">Continue with Google</Text>
-            </Button>
-            <View className="relative w-full py-4">
-              <View className="absolute inset-0 flex flex-row items-center">
-                <View className="w-full border-t border-gray-300 dark:border-gray-700" />
-              </View>
-              <View className="relative flex flex-row justify-center">
-                <Text className="bg-white px-2 text-sm text-gray-500 dark:bg-gray-900 dark:text-gray-200">
-                  Or
-                </Text>
-              </View>
-            </View>
+                  <Text className="dark:text-gray-500">
+                    Continue with Google
+                  </Text>
+                </Button>
+                <View className="relative w-full py-4">
+                  <View className="absolute inset-0 flex flex-row items-center">
+                    <View className="w-full border-t border-gray-300 dark:border-gray-700" />
+                  </View>
+                  <View className="relative flex flex-row justify-center">
+                    <Text className="bg-white px-2 text-sm text-gray-500 dark:bg-gray-900 dark:text-gray-200">
+                      Or
+                    </Text>
+                  </View>
+                </View>
+              </>
+            )}
             <Button
               variant="primary"
               fullWidth

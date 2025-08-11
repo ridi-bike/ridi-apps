@@ -21,6 +21,14 @@ export class MapPreviewGenerator {
     this.browser = await puppeteer.launch({
       executablePath: env.CHROME_BIN,
       headless: !env.PUPPETEER_WINDOWED,
+      args: [
+        "--use-gl=angle",
+        "--use-angle=swiftshader",
+        "--enable-unsafe-swiftshader",
+        ...(env.PUPPETEER_WINDOWED
+          ? ["--enable-features=UseOzonePlatform", "--ozone-platform=wayland"]
+          : []),
+      ],
     });
     this.state = "running";
   }
