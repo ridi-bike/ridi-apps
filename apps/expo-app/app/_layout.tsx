@@ -75,6 +75,7 @@ export default Sentry.wrap(function App() {
       <QueryClientProvider client={queryClient}>
         <Stack
           screenOptions={{
+            headerShown: false,
             contentStyle: {
               overflow: "hidden",
             },

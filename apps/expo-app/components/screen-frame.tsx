@@ -7,7 +7,7 @@ import { usePhScreenCapture } from "~/lib/posthog/hooks";
 
 import { VersionCheck } from "./version-check";
 
-type ScreenFramePropsn = {
+type ScreenFrameProps = {
   title: string;
   children: React.ReactNode;
   floating?: React.ReactNode;
@@ -18,7 +18,7 @@ export function ScreenFrame({
   floating,
   title,
   onGoBack,
-}: ScreenFramePropsn) {
+}: ScreenFrameProps) {
   const insets = useSafeAreaInsets();
 
   usePhScreenCapture();

@@ -1,4 +1,4 @@
-import { Slot } from "expo-router";
+import { Slot, Stack } from "expo-router";
 import { useEffect } from "react";
 
 import { initSync } from "~/lib/data-stores/data-store";
@@ -11,5 +11,14 @@ export default function Layout() {
       initSync(user.user?.userId);
     }
   }, [user]);
-  return <Slot />;
+
+  return (
+    <Stack
+      screenOptions={{
+        contentStyle: {
+          overflow: "hidden",
+        },
+      }}
+    />
+  );
 }
