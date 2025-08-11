@@ -99,32 +99,32 @@ export class PlanHandler implements BaseHandler {
         is_deleted: row.isDeleted || false,
         trip_type: row.tripType,
         rule_set_id: row.ruleSetId,
-        mapPreviewDark: row.mapPreviewDark,
-        mapPreviewLight: row.mapPreviewLight,
+        map_preview_dark: row.mapPreviewDark,
+        map_preview_light: row.mapPreviewLight,
         error: null,
-        modifiedAt: new Date(),
+        modified_at: new Date(),
         region: null,
       })
       .onConflict((oc) =>
         oc.column("id").doUpdateSet({
           name: (eb) => eb.ref("excluded.name"),
           state: (eb) => eb.ref("excluded.state"),
-          startLat: (eb) => eb.ref("excluded.startLat"),
-          startLon: (eb) => eb.ref("excluded.startLon"),
-          startDesc: (eb) => eb.ref("excluded.startDesc"),
-          finishLat: (eb) => eb.ref("excluded.finishLat"),
-          finishLon: (eb) => eb.ref("excluded.finishLon"),
-          finishDesc: (eb) => eb.ref("excluded.finishDesc"),
+          start_lat: (eb) => eb.ref("excluded.start_lat"),
+          start_lon: (eb) => eb.ref("excluded.start_lon"),
+          start_desc: (eb) => eb.ref("excluded.start_desc"),
+          finish_lat: (eb) => eb.ref("excluded.finish_lat"),
+          finish_lon: (eb) => eb.ref("excluded.finish_lon"),
+          finish_desc: (eb) => eb.ref("excluded.finish_desc"),
           bearing: (eb) => eb.ref("excluded.bearing"),
           distance: (eb) => eb.ref("excluded.distance"),
-          createdAt: (eb) => eb.ref("excluded.createdAt"),
-          isDeleted: (eb) => eb.ref("excluded.isDeleted"),
-          tripType: (eb) => eb.ref("excluded.tripType"),
-          ruleSetId: (eb) => eb.ref("excluded.ruleSetId"),
-          mapPreviewDark: (eb) => eb.ref("excluded.mapPreviewDark"),
-          mapPreviewLight: (eb) => eb.ref("excluded.mapPreviewLight"),
+          created_at: (eb) => eb.ref("excluded.created_at"),
+          is_deleted: (eb) => eb.ref("excluded.is_deleted"),
+          trip_type: (eb) => eb.ref("excluded.trip_type"),
+          rule_set_id: (eb) => eb.ref("excluded.rule_set_id"),
+          map_preview_dark: (eb) => eb.ref("excluded.map_preview_dark"),
+          map_preview_light: (eb) => eb.ref("excluded.map_preview_light"),
           error: (eb) => eb.ref("excluded.error"),
-          modifiedAt: (eb) => eb.ref("excluded.modifiedAt"),
+          modified_at: (eb) => eb.ref("excluded.modified_at"),
           region: (eb) => eb.ref("excluded.region"),
         }),
       )
@@ -133,8 +133,8 @@ export class PlanHandler implements BaseHandler {
   private readAllFromDb(userId: string) {
     return this.db
       .selectFrom("plans")
-      .where("userId", "=", userId)
-      .where("isDeleted", "=", false)
+      .where("user_id", "=", userId)
+      .where("is_deleted", "=", false)
       .selectAll()
       .execute();
   }
@@ -145,20 +145,20 @@ export class PlanHandler implements BaseHandler {
       id: row.id,
       name: row.name,
       state: row.state,
-      startLat: Number(row.startLat),
-      startLon: Number(row.startLon),
-      startDesc: row.startDesc,
-      finishLat: row.finishLat !== null ? Number(row.finishLat) : null,
-      finishLon: row.finishLon !== null ? Number(row.finishLon) : null,
-      finishDesc: row.finishDesc,
+      startLat: Number(row.start_lat),
+      startLon: Number(row.start_lon),
+      startDesc: row.start_desc,
+      finishLat: row.finish_lat !== null ? Number(row.finish_lat) : null,
+      finishLon: row.finish_lon !== null ? Number(row.finish_lon) : null,
+      finishDesc: row.finish_desc,
       bearing: row.bearing !== null ? Number(row.bearing) : null,
       distance: Number(row.distance),
-      createdAt: row.createdAt.toISOString(),
-      isDeleted: row.isDeleted,
-      tripType: row.tripType,
-      ruleSetId: row.ruleSetId,
-      mapPreviewDark: row.mapPreviewDark,
-      mapPreviewLight: row.mapPreviewLight,
+      createdAt: row.created_at.toISOString(),
+      isDeleted: row.is_deleted,
+      tripType: row.trip_type,
+      ruleSetId: row.rule_set_id,
+      mapPreviewDark: row.map_preview_dark,
+      mapPreviewLight: row.map_preview_light,
     };
   }
 }
@@ -194,8 +194,8 @@ export class RouteHandler implements BaseHandler {
     } else {
       const dbRow = await this.db
         .selectFrom("routes")
-        .where("userId", "=", userId)
-        .where("isDeleted", "=", false)
+        .where("user_id", "=", userId)
+        .where("is_deleted", "=", false)
         .where("id", "=", rowId)
         .selectAll()
         .executeTakeFirstOrThrow();
@@ -211,8 +211,8 @@ export class RouteHandler implements BaseHandler {
   private readAllFromDb(userId: string) {
     return this.db
       .selectFrom("routes")
-      .where("userId", "=", userId)
-      .where("isDeleted", "=", false)
+      .where("user_id", "=", userId)
+      .where("is_deleted", "=", false)
       .selectAll()
       .execute();
   }
@@ -222,16 +222,16 @@ export class RouteHandler implements BaseHandler {
   ): z.infer<(typeof storeSchema)["routes"]> {
     return {
       id: row.id,
-      planId: row.planId,
-      createdAt: row.createdAt.toISOString(),
-      isDeleted: row.isDeleted,
-      downloadedAt: row.downloadedAt?.toISOString() || null,
-      junctionCount: Number(row.statsJunctionCount),
-      lenM: Number(row.statsLenM),
+      planId: row.plan_id,
+      createdAt: row.created_at.toISOString(),
+      isDeleted: row.is_deleted,
+      downloadedAt: row.downloaded_at?.toISOString() || null,
+      junctionCount: Number(row.stats_junction_count),
+      lenM: Number(row.stats_len_m),
       name: row.name,
-      score: Number(row.statsScore),
-      mapPreviewDark: row.mapPreviewDark,
-      mapPreviewLight: row.mapPreviewLight,
+      score: Number(row.stats_score),
+      mapPreviewDark: row.map_preview_dark,
+      mapPreviewLight: row.map_preview_light,
       coordsArrayString: row.linestring || "[]",
       coordsOverviewArrayString: row.linestring || "[]",
     };
@@ -268,8 +268,8 @@ export class RouteBreakdownStatHandler implements BaseHandler {
       this.dataStore.delRow("routeBreakdowns", rowId);
     } else {
       const dbRow = await this.db
-        .selectFrom("routeBreakdownStats")
-        .where("userId", "=", userId)
+        .selectFrom("route_breakdown_stats")
+        .where("user_id", "=", userId)
         .where("id", "=", rowId)
         .selectAll()
         .executeTakeFirstOrThrow();
@@ -286,7 +286,7 @@ export class RouteBreakdownStatHandler implements BaseHandler {
 
   private readAllFromDb(userId: string) {
     return this.db
-      .selectFrom("rule_sets")
+      .selectFrom("route_breakdown_stats")
       .where("user_id", "=", userId)
       .selectAll()
       .execute();
@@ -336,11 +336,11 @@ export class RuleSetsHandler implements BaseHandler {
       this.dataStore.delRow("ruleSets", rowId);
     } else {
       const dbRow = await this.db
-        .selectFrom("ruleSets")
+        .selectFrom("rule_sets")
         .where((eb) =>
-          eb.or([eb("userId", "=", userId), eb("userId", "is", null)]),
+          eb.or([eb("user_id", "=", userId), eb("user_id", "is", null)]),
         )
-        .where("isDeleted", "=", false)
+        .where("is_deleted", "=", false)
         .where("id", "=", rowId)
         .selectAll()
         .executeTakeFirstOrThrow();
@@ -353,20 +353,20 @@ export class RuleSetsHandler implements BaseHandler {
     const row = this.dataStore.getRow("ruleSets", rowId);
 
     await this.db
-      .insertInto("ruleSets")
+      .insertInto("rule_sets")
       .values({
         id: row.id,
-        userId,
+        user_id: userId,
         name: row.name,
-        defaultSet: false,
-        isDeleted: row.isDeleted || false,
+        default_set: false,
+        is_deleted: row.isDeleted || false,
         icon: row.icon,
       })
       .onConflict((oc) =>
         oc.column("id").doUpdateSet({
           name: (eb) => eb.ref("excluded.name"),
-          defaultSet: (eb) => eb.ref("excluded.defaultSet"),
-          isDeleted: (eb) => eb.ref("excluded.isDeleted"),
+          default_set: (eb) => eb.ref("excluded.default_set"),
+          is_deleted: (eb) => eb.ref("excluded.is_deleted"),
           icon: (eb) => eb.ref("excluded.icon"),
         }),
       )
@@ -375,11 +375,11 @@ export class RuleSetsHandler implements BaseHandler {
 
   private readAllFromDb(userId: string) {
     return this.db
-      .selectFrom("ruleSets")
+      .selectFrom("rule_sets")
       .where((eb) =>
-        eb.or([eb("userId", "=", userId), eb("userId", "is", null)]),
+        eb.or([eb("user_id", "=", userId), eb("user_id", "is", null)]),
       )
-      .where("isDeleted", "=", false)
+      .where("is_deleted", "=", false)
       .selectAll()
       .execute();
   }
@@ -392,8 +392,8 @@ export class RuleSetsHandler implements BaseHandler {
       icon: row.icon,
       name: row.name,
       isDefault: false,
-      isDeleted: row.isDeleted,
-      isSystem: !row.userId,
+      isDeleted: row.is_deleted,
+      isSystem: !row.user_id,
     };
   }
 }
@@ -430,12 +430,12 @@ export class RuleSetRoadTagsHandler implements BaseHandler {
       // Parse the composite ID to get ruleSetId and tagKey
       const [ruleSetId, tagKey] = rowId.split("-");
       const dbRow = await this.db
-        .selectFrom("ruleSetRoadTags")
+        .selectFrom("rule_set_road_tags")
         .where((eb) =>
-          eb.or([eb("userId", "=", userId), eb("userId", "is", null)]),
+          eb.or([eb("user_id", "=", userId), eb("user_id", "is", null)]),
         )
-        .where("ruleSetId", "=", ruleSetId)
-        .where("tagKey", "=", tagKey)
+        .where("rule_set_id", "=", ruleSetId)
+        .where("tag_key", "=", tagKey)
         .selectAll()
         .executeTakeFirstOrThrow();
 
@@ -447,20 +447,20 @@ export class RuleSetRoadTagsHandler implements BaseHandler {
     const row = this.dataStore.getRow("ruleSetRoadTags", rowId);
 
     await this.db
-      .insertInto("ruleSetRoadTags")
+      .insertInto("rule_set_road_tags")
       .values({
-        userId,
-        ruleSetId: row.ruleSetId,
-        tagKey: row.tag,
+        user_id: userId,
+        rule_set_id: row.ruleSetId,
+        tag_key: row.tag,
         value: row.value,
       })
       .onConflict((oc) =>
         oc
-          .column("ruleSetId")
-          .column("tagKey")
+          .column("rule_set_id")
+          .column("tag_key")
           .doUpdateSet({
-            ruleSetId: (eb) => eb.ref("excluded.ruleSetId"),
-            tagKey: (eb) => eb.ref("excluded.tagKey"),
+            rule_set_id: (eb) => eb.ref("excluded.rule_set_id"),
+            tag_key: (eb) => eb.ref("excluded.tag_key"),
             value: (eb) => eb.ref("excluded.value"),
           }),
       )
@@ -469,9 +469,9 @@ export class RuleSetRoadTagsHandler implements BaseHandler {
 
   private readAllFromDb(userId: string) {
     return this.db
-      .selectFrom("ruleSetRoadTags")
+      .selectFrom("rule_set_road_tags")
       .where((eb) =>
-        eb.or([eb("userId", "=", userId), eb("userId", "is", null)]),
+        eb.or([eb("user_id", "=", userId), eb("user_id", "is", null)]),
       )
       .selectAll()
       .execute();
@@ -481,9 +481,9 @@ export class RuleSetRoadTagsHandler implements BaseHandler {
     row: Awaited<ReturnType<typeof this.readAllFromDb>>[number],
   ): z.infer<(typeof storeSchema)["ruleSetRoadTags"]> {
     return {
-      id: `${row.ruleSetId}-${row.tagKey}`,
-      ruleSetId: row.ruleSetId,
-      tag: storeSchema.ruleSetRoadTags.shape.tag.parse(row.tagKey),
+      id: `${row.rule_set_id}-${row.tag_key}`,
+      ruleSetId: row.rule_set_id,
+      tag: storeSchema.ruleSetRoadTags.shape.tag.parse(row.tag_key),
       value: row.value,
     };
   }

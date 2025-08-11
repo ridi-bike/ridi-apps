@@ -34,7 +34,6 @@ case "$1" in
   ;;
 "kysely")
   (cd ./libs/db-queries/ && pnpm run typegen)
-  sed -i 's/import/import type /g' ./libs/db-queries/src/queries_sql.ts
   ;;
 "sqlc")
   devbox run sqlc
