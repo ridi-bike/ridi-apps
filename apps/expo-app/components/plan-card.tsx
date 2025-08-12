@@ -58,7 +58,9 @@ export const PlanCard = ({ planId }: RouteCardProps) => {
             initialCoords={[0, 0]}
             start={{ lat: startLat, lon: startLon }}
             finish={
-              finishLat && finishLon ? { lat: finishLat, lon: finishLon } : null
+              finishLat && finishLon
+                ? { lat: finishLat, lon: finishLon }
+                : undefined
             }
             bearing={bearing}
             distance={distance}

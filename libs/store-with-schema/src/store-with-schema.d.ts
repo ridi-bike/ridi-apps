@@ -1,0 +1,42 @@
+import { type Store, type Ids } from "tinybase";
+import { z } from "zod";
+export type StoreSchema = Record<string, z.SomeZodObject>;
+export type TypedTable<TSchema extends StoreSchema, TTableId extends keyof TSchema> = Record<string, z.infer<TSchema[TTableId]>>;
+export type TableCellId<TSchema extends StoreSchema, TTableId extends keyof TSchema> = keyof TypedTable<TSchema, TTableId>[string];
+export type TypedTables<TSchema extends StoreSchema> = {
+    [tableId in keyof TSchema]: TypedTable<TSchema, tableId>;
+};
+export type StoreSchemaValidator<TSchema extends StoreSchema> = {
+    validateTables: (tables: Record<string, Record<string, Record<string, unknown>>>) => asserts tables is TypedTables<TSchema>;
+    validateTable: <TTableId extends keyof TSchema>(tableId: Extract<TTableId, string>, table: Record<string, Record<string, unknown>>) => asserts table is TypedTable<TSchema, TTableId>;
+    validateRow: <TTableId extends keyof TSchema>(tableId: Extract<TTableId, string>, row: unknown) => asserts row is z.infer<TSchema[TTableId]>;
+    validatePartialRow: <TTableId extends keyof TSchema>(tableId: Extract<TTableId, string>, partialRow: Record<string, unknown>) => asserts partialRow is Partial<z.infer<TSchema[TTableId]>>;
+    validateCell: <TTableId extends keyof TSchema, TCellId extends TableCellId<TSchema, TTableId>>(tableId: Extract<TTableId, string>, cellId: Extract<TCellId, string>, cell: unknown) => asserts cell is z.infer<TSchema[TTableId]>[TCellId];
+    validateCellIds: <TTableId extends keyof TSchema>(tableId: Extract<TTableId, string>, cellIds: unknown[]) => asserts cellIds is TableCellId<TSchema, TTableId>[];
+    validateTableIds: (tableIds: unknown) => asserts tableIds is keyof TypedTables<TSchema>;
+};
+export declare function createStoreSchemaValidators<TSchema extends StoreSchema>(schema: TSchema): StoreSchemaValidator<TSchema>;
+export type StoreWithSchema<TSchema extends StoreSchema> = {
+    getInternalValidator: () => StoreSchemaValidator<TSchema>;
+    getInternalStore: () => Store;
+    getValues: Store["getValues"];
+    getValuesIds: Store["getValueIds"];
+    getTableIds: Store["getTableIds"];
+    getTables: () => TypedTables<TSchema>;
+    setTables: (tables: {
+        [tableId in keyof TSchema]: tableId extends string ? TypedTable<TSchema, tableId> : never;
+    }) => void;
+    getTable: <TTableId extends keyof TSchema>(tableId: Extract<TTableId, string>) => TypedTable<TSchema, TTableId>;
+    setTable: <TTableId extends keyof TSchema>(tableId: Extract<TTableId, string>, table: TypedTable<TSchema, TTableId>) => void;
+    getTableCellIds: <TTableId extends keyof TSchema>(tableId: Extract<TTableId, string>) => TableCellId<TSchema, TTableId>[];
+    getRowIds: <TTableId extends keyof TSchema>(tableId: Extract<TTableId, string>) => string[];
+    getSortedRowIds: <TTableId extends keyof TSchema, TCellId extends keyof TypedTable<TSchema, TTableId>[string]>(tableId: Extract<TTableId, string>, cellId?: Extract<TCellId, string>, descending?: boolean, ofset?: number, limit?: number) => Ids;
+    getRow: <TTableId extends keyof TSchema>(tableId: Extract<TTableId, string>, rowId: string) => z.infer<TSchema[TTableId]>;
+    setRow: <TTableId extends keyof TSchema>(tableId: Extract<TTableId, string>, rowId: string, row: z.infer<TSchema[TTableId]>) => void;
+    delRow: <TTableId extends keyof TSchema>(tableId: Extract<TTableId, string>, rowId: string) => void;
+    setPartialRow: <TTableId extends keyof TSchema>(tableId: Extract<TTableId, string>, rowId: string, row: Partial<z.infer<TSchema[TTableId]>>) => void;
+    getCellIds: <TTableId extends keyof TSchema>(tableId: Extract<TTableId, string>, rowId: string) => TableCellId<TSchema, TTableId>[];
+    getCell: <TTableId extends keyof TSchema, TCellId extends TableCellId<TSchema, TTableId>>(tableId: Extract<TTableId, string>, rowId: string, cellId: Extract<TCellId, string>) => z.infer<TSchema[TTableId]>[TCellId];
+    setCell: <TTableId extends keyof TSchema, TCellId extends TableCellId<TSchema, TTableId>>(tableId: Extract<TTableId, string>, rowId: string, cellId: Extract<TCellId, string>, cell: z.infer<TSchema[TTableId]>[TCellId] | ((v: z.infer<TSchema[TTableId]>[TCellId]) => z.infer<TSchema[TTableId]>[TCellId])) => void;
+};
+export declare function withSchema<TSchema extends StoreSchema>(store: Store, schema: TSchema): StoreWithSchema<TSchema>;

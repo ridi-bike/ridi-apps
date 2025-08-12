@@ -115,12 +115,12 @@ export default function RulePackDetails() {
       const groupTagTags = getGroupTags(group).map((t) => t.tag);
       const setValue = (
         tag: (typeof groupTagTags)[number],
-        value: number | null,
+        value: number | undefined,
       ) => {
         if (!groupTagTags.includes(tag)) {
           return value;
         }
-        return shouldDisable ? null : 0;
+        return shouldDisable ? undefined : 0;
       };
       setRoadTags((tags) =>
         tags.map((t) => {
@@ -188,7 +188,7 @@ export default function RulePackDetails() {
         tags.map((t) => {
           return {
             ...t,
-            value: t.id === tag.id ? null : t.value,
+            value: t.id === tag.id ? undefined : t.value,
           };
         }),
       );

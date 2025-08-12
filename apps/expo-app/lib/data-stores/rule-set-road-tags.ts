@@ -12,7 +12,7 @@ export function useRuleSetRoadTags(ruleSetId: unknown) {
 
 export function useRuleSetRoadTagsUpdate() {
   const roadTagSetValues = useCallback(
-    (roadTagValues: { id: string; value: number | null }[]) => {
+    (roadTagValues: { id: string; value?: number | undefined }[]) => {
       roadTagValues.forEach((v) =>
         dataStore.setCell("ruleSetRoadTags", v.id, "value", v.value),
       );

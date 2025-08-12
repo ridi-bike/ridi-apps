@@ -90,10 +90,12 @@ export class PlanHandler implements BaseHandler {
         start_lat: row.startLat.toString(),
         start_lon: row.startLon.toString(),
         start_desc: row.startDesc,
-        finish_lat: row.finishLat !== null ? row.finishLat.toString() : null,
-        finish_lon: row.finishLon !== null ? row.finishLon.toString() : null,
+        finish_lat:
+          row.finishLat !== undefined ? row.finishLat.toString() : undefined,
+        finish_lon:
+          row.finishLon !== undefined ? row.finishLon.toString() : undefined,
         finish_desc: row.finishDesc,
-        bearing: row.bearing !== null ? row.bearing.toString() : null,
+        bearing: row.bearing !== undefined ? row.bearing.toString() : undefined,
         distance: row.distance.toString(),
         created_at: new Date(row.createdAt),
         is_deleted: row.isDeleted || false,
@@ -101,9 +103,9 @@ export class PlanHandler implements BaseHandler {
         rule_set_id: row.ruleSetId,
         map_preview_dark: row.mapPreviewDark,
         map_preview_light: row.mapPreviewLight,
-        error: null,
+        error: undefined,
         modified_at: new Date(),
-        region: null,
+        region: undefined,
       })
       .onConflict((oc) =>
         oc.column("id").doUpdateSet({
@@ -148,17 +150,19 @@ export class PlanHandler implements BaseHandler {
       startLat: Number(row.start_lat),
       startLon: Number(row.start_lon),
       startDesc: row.start_desc,
-      finishLat: row.finish_lat !== null ? Number(row.finish_lat) : null,
-      finishLon: row.finish_lon !== null ? Number(row.finish_lon) : null,
-      finishDesc: row.finish_desc,
-      bearing: row.bearing !== null ? Number(row.bearing) : null,
+      finishLat:
+        row.finish_lat !== undefined ? Number(row.finish_lat) : undefined,
+      finishLon:
+        row.finish_lon !== undefined ? Number(row.finish_lon) : undefined,
+      finishDesc: row.finish_desc ?? undefined,
+      bearing: row.bearing !== undefined ? Number(row.bearing) : undefined,
       distance: Number(row.distance),
       createdAt: row.created_at.toISOString(),
       isDeleted: row.is_deleted,
       tripType: row.trip_type,
       ruleSetId: row.rule_set_id,
-      mapPreviewDark: row.map_preview_dark,
-      mapPreviewLight: row.map_preview_light,
+      mapPreviewDark: row.map_preview_dark ?? undefined,
+      mapPreviewLight: row.map_preview_light ?? undefined,
     };
   }
 }
@@ -225,13 +229,13 @@ export class RouteHandler implements BaseHandler {
       planId: row.plan_id,
       createdAt: row.created_at.toISOString(),
       isDeleted: row.is_deleted,
-      downloadedAt: row.downloaded_at?.toISOString() || null,
+      downloadedAt: row.downloaded_at?.toISOString() || undefined,
       junctionCount: Number(row.stats_junction_count),
       lenM: Number(row.stats_len_m),
       name: row.name,
       score: Number(row.stats_score),
-      mapPreviewDark: row.map_preview_dark,
-      mapPreviewLight: row.map_preview_light,
+      mapPreviewDark: row.map_preview_dark ?? undefined,
+      mapPreviewLight: row.map_preview_light ?? undefined,
       coordsArrayString: row.linestring || "[]",
       coordsOverviewArrayString: row.linestring || "[]",
     };
@@ -389,7 +393,7 @@ export class RuleSetsHandler implements BaseHandler {
   ): z.infer<(typeof storeSchema)["ruleSets"]> {
     return {
       id: row.id,
-      icon: row.icon,
+      icon: row.icon ?? undefined,
       name: row.name,
       isDefault: false,
       isDeleted: row.is_deleted,
@@ -484,7 +488,7 @@ export class RuleSetRoadTagsHandler implements BaseHandler {
       id: `${row.rule_set_id}-${row.tag_key}`,
       ruleSetId: row.rule_set_id,
       tag: storeSchema.ruleSetRoadTags.shape.tag.parse(row.tag_key),
-      value: row.value,
+      value: row.value ?? undefined,
     };
   }
 }

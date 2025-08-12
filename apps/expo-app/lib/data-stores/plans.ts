@@ -48,10 +48,10 @@ export function usePlanRoute(planId: unknown, routeId: unknown) {
 type PlanNew = {
   startLat: number;
   startLon: number;
-  finishLat: number | null;
-  finishLon: number | null;
+  finishLat?: number;
+  finishLon?: number;
   distance: number;
-  bearing: number | null;
+  bearing?: number;
   tripType: "round-trip" | "start-finish";
   ruleSetId: string;
 };
@@ -72,8 +72,6 @@ export function usePlansUpdate() {
       state: "new",
       isDeleted: false,
       createdAt: new Date().toISOString(),
-      mapPreviewDark: null,
-      mapPreviewLight: null,
     });
     return planId;
   }, []);

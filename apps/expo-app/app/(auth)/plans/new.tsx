@@ -29,7 +29,6 @@ import { DIRECTIONS, getCardinalDirection } from "~/components/geo-map/util";
 import { LocationPermsNotGiven } from "~/components/LocationPermsNotGiven";
 import { ScreenFrame } from "~/components/screen-frame";
 import { coordsAddressGet } from "~/lib/coords-details";
-import { dataStore } from "~/lib/data-stores/data-store";
 import { usePlans, usePlansUpdate } from "~/lib/data-stores/plans";
 import { findRegions } from "~/lib/data-stores/regions";
 import { useRuleSets, useRuleSetDefaultId } from "~/lib/data-stores/rule-sets";
@@ -112,21 +111,21 @@ export default function PlansNew() {
   const [currentCoords, setCurrentCoords] = useState<Coords | null>(null);
 
   const [startRegions, setStartRegions] = useState<Region[] | null>(null);
-  useEffect(() => {
-    if (startCoords) {
-      findRegions(startCoords).then((regions) => setStartRegions(regions));
-    } else {
-      setStartRegions(null);
-    }
-  }, [startCoords]);
+  // useEffect(() => {
+  //   if (startCoords) {
+  //     findRegions(startCoords).then((regions) => setStartRegions(regions));
+  //   } else {
+  //     setStartRegions(null);
+  //   }
+  // }, [startCoords]);
   const [finishRegions, setFinishRegions] = useState<Region[] | null>(null);
-  useEffect(() => {
-    if (finishCoords) {
-      findRegions(finishCoords).then((regions) => setFinishRegions(regions));
-    } else {
-      setFinishRegions(null);
-    }
-  }, [finishCoords]);
+  // useEffect(() => {
+  //   if (finishCoords) {
+  //     findRegions(finishCoords).then((regions) => setFinishRegions(regions));
+  //   } else {
+  //     setFinishRegions(null);
+  //   }
+  // }, [finishCoords]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   useEffect(() => {
     if ((startCoords && startRegions) || (finishCoords && finishRegions)) {
@@ -166,6 +165,7 @@ export default function PlansNew() {
       if (isRoundTrip) {
         if (finishCoords) {
           setFinishCoords();
+          setFinishRegions(null);
         }
         if (bearing === undefined) {
           setBearing(0);
@@ -272,10 +272,6 @@ export default function PlansNew() {
     return [prevPlan.startLat, prevPlan.startLon];
   }, [plans]);
 
-  console.log("ruleSets", useRuleSets());
-  const allRegions = dataStore.getTable("regions");
-  console.log({ allRegions });
-
   return (
     <ScreenFrame
       title="New plan"
@@ -361,9 +357,9 @@ export default function PlansNew() {
                     const planId = planCreate({
                       startLat: startCoords[0],
                       startLon: startCoords[1],
-                      finishLat: finishCoords ? finishCoords[0] : null,
-                      finishLon: finishCoords ? finishCoords[1] : null,
-                      bearing: isRoundTrip ? bearing || 0 : null,
+                      finishLat: finishCoords ? finishCoords[0] : undefined,
+                      finishLon: finishCoords ? finishCoords[1] : undefined,
+                      bearing: isRoundTrip ? bearing || 0 : undefined,
                       distance,
                       tripType: isRoundTrip ? "round-trip" : "start-finish",
                       ruleSetId,
@@ -441,12 +437,18 @@ export default function PlansNew() {
                     coords: c,
                   });
                   setStartCoords(c ? [c.lat, c.lon] : undefined);
+                  if (c) {
+                    setStartRegions(findRegions([c.lat, c.lon]));
+                  }
                 }}
                 setFinish={(c) => {
                   posthogClient.captureEvent("plan-new-coords-finish-select", {
                     coords: c,
                   });
                   setFinishCoords(c ? [c.lat, c.lon] : undefined);
+                  if (c) {
+                    setFinishRegions(findRegions([c.lat, c.lon]));
+                  }
                 }}
               >
                 <View className="pointer-events-none flex w-full flex-row items-start justify-end">
@@ -755,7 +757,7 @@ export default function PlansNew() {
             <GroupWithTitle title="Overview" className="h-48">
               {!!initialCoords && (
                 <GeoMapPlanView
-                  bearing={isRoundTrip ? (bearing ?? null) : null}
+                  bearing={isRoundTrip ? bearing : undefined}
                   distance={(selectedDistance || 0) * 1000}
                   initialCoords={initialCoords}
                   start={
@@ -764,12 +766,12 @@ export default function PlansNew() {
                           lat: startCoords[0],
                           lon: startCoords[1],
                         }
-                      : null
+                      : undefined
                   }
                   finish={
                     finishCoords
                       ? { lat: finishCoords[0], lon: finishCoords[1] }
-                      : null
+                      : undefined
                   }
                 />
               )}

@@ -3,9 +3,9 @@ import { type PropsWithChildren } from "react";
 
 export type GeoMapPlanViewProps = {
   initialCoords: [number, number];
-  start: Coords | null;
-  finish: Coords | null;
-  bearing: number | null;
+  start: Coords | undefined;
+  finish: Coords | undefined;
+  bearing: number | undefined;
   distance: number;
   colorScheme: "light" | "dark";
   mapRef?: (map: MapRef) => void;

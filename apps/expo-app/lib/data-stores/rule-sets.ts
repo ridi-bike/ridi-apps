@@ -37,7 +37,6 @@ export function useRuleSetsUpdate() {
     dataStore.setRow("ruleSets", newRuleSetId, {
       id: newRuleSetId,
       name: "New rule set",
-      icon: null,
       isDeleted: false,
       isSystem: false,
       isDefault: false,

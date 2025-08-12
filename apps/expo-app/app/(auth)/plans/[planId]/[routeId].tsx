@@ -37,7 +37,7 @@ function DownloadGpxDialog({
 }: {
   children: React.ReactNode;
   onDownload: () => void;
-  downloadedAt: string | null;
+  downloadedAt: string | undefined;
 }) {
   const router = useRouter();
   const user = useUser();

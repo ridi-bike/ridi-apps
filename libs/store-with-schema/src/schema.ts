@@ -8,7 +8,7 @@ const dateSchema = z
 const lat = z.number().min(-90).max(90);
 const lon = z.number().min(-180).max(180);
 
-const bearing = z.number().min(0).max(360).nullable();
+const bearing = z.number().min(0).max(360).optional();
 
 const planStateSchema = z.enum([
   "new",
@@ -25,18 +25,18 @@ const planSchema = z.object({
   startLat: lat,
   startLon: lon,
   startDesc: z.string(),
-  finishLat: lat.nullable(),
-  finishLon: lon.nullable(),
-  finishDesc: z.string().nullable(),
+  finishLat: lat.optional(),
+  finishLon: lon.optional(),
+  finishDesc: z.string().optional(),
   state: planStateSchema,
   createdAt: dateSchema,
   tripType: planTypeSchema,
   distance: z.coerce.number(),
   bearing: bearing,
   ruleSetId: z.string(),
-  mapPreviewLight: z.string().nullable(),
-  mapPreviewDark: z.string().nullable(),
-  isDeleted: z.boolean().nullable(),
+  mapPreviewLight: z.string().optional(),
+  mapPreviewDark: z.string().optional(),
+  isDeleted: z.boolean().optional(),
 });
 
 const routeSchema = z.object({
@@ -44,15 +44,15 @@ const routeSchema = z.object({
   planId: z.string(),
   name: z.string(),
   createdAt: dateSchema,
-  downloadedAt: dateSchema.nullable(),
-  mapPreviewLight: z.string().nullable(),
-  mapPreviewDark: z.string().nullable(),
+  downloadedAt: dateSchema.optional(),
+  mapPreviewLight: z.string().optional(),
+  mapPreviewDark: z.string().optional(),
   lenM: z.number(),
   score: z.number(),
   junctionCount: z.number(),
   coordsArrayString: z.string(),
   coordsOverviewArrayString: z.string(),
-  isDeleted: z.boolean().nullable(),
+  isDeleted: z.boolean().optional(),
 });
 
 // const routeCoordsSchema = z.object({
@@ -78,10 +78,10 @@ const ruleSetSchema = z.object({
   name: z.string(),
   icon: z
     .union([z.literal("adv"), z.literal("touring"), z.literal("dualsport")])
-    .nullable(),
+    .optional(),
   isSystem: z.boolean(),
   isDefault: z.boolean(),
-  isDeleted: z.boolean().nullable(),
+  isDeleted: z.boolean().optional(),
 });
 
 export type RuleSet = z.infer<typeof ruleSetSchema>;
@@ -168,7 +168,7 @@ const ruleSetRoadTagSchema = z.object({
   id: z.string(),
   ruleSetId: z.string(),
   tag: z.enum(ruleSetTags),
-  value: z.number().nullable(),
+  value: z.number().optional(),
 });
 
 export type RuleSetRoagTag = z.infer<typeof ruleSetRoadTagSchema>;

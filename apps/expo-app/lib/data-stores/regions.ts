@@ -3,7 +3,7 @@ import { type GeoJSON } from "zod-geojson";
 
 import { dataStore } from "./data-store";
 
-export async function findRegions(coords: [number, number]) {
+export function findRegions(coords: [number, number]) {
   const allRegions = dataStore.getTable("regions");
   const matchingRegions = Object.values(allRegions).filter(
     ({ geojsonString }) => {

@@ -20,7 +20,7 @@ export function GeoMapPlanView(
                 ...props.start,
                 icon: <CirclePlay className="size-8 text-green-500" />,
               }
-            : null
+            : undefined
         }
         finish={
           props.finish
@@ -28,7 +28,7 @@ export function GeoMapPlanView(
                 ...props.finish,
                 icon: <CirclePause className="size-8 text-red-500" />,
               }
-            : null
+            : undefined
         }
         colorScheme={colorScheme}
       />

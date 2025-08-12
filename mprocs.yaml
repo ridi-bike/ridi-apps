@@ -4,6 +4,9 @@ procs:
   cloudflare-worker-api:
     shell: "pnpm dev"
     cwd: "./services/cfw-api"
+  cloudflare-worker-tsc:
+    shell: "pnpm tsc"
+    cwd: "./services/cfw-api"
   astro:
     shell: "pnpm start"
     cwd: "./apps/astro-app"
