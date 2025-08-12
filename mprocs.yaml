@@ -5,7 +5,7 @@ procs:
     shell: "pnpm dev"
     cwd: "./services/cfw-api"
   cloudflare-worker-tsc:
-    shell: "pnpm tsc"
+    shell: "pnpm tsc --noEmit"
     cwd: "./services/cfw-api"
   astro:
     shell: "pnpm start"
