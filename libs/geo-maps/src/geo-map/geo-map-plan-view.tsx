@@ -12,7 +12,7 @@ import { combineBBox, updateBBox, useRoundTripPolygon } from "./util";
 
 export function GeoMapPlanView(props: GeoMapPlanViewProps) {
   const { roundTripPolygon, rountdTripLayer } = useRoundTripPolygon(
-    props.bearing !== null,
+    props.bearing !== undefined,
     props.start,
     props.bearing ?? undefined,
     props.distance / 1000,

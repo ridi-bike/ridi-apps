@@ -111,21 +111,21 @@ export default function PlansNew() {
   const [currentCoords, setCurrentCoords] = useState<Coords | null>(null);
 
   const [startRegions, setStartRegions] = useState<Region[] | null>(null);
-  // useEffect(() => {
-  //   if (startCoords) {
-  //     findRegions(startCoords).then((regions) => setStartRegions(regions));
-  //   } else {
-  //     setStartRegions(null);
-  //   }
-  // }, [startCoords]);
+  useEffect(() => {
+    if (startCoords) {
+      setStartRegions(findRegions(startCoords));
+    } else {
+      setStartRegions(null);
+    }
+  }, [startCoords]);
   const [finishRegions, setFinishRegions] = useState<Region[] | null>(null);
-  // useEffect(() => {
-  //   if (finishCoords) {
-  //     findRegions(finishCoords).then((regions) => setFinishRegions(regions));
-  //   } else {
-  //     setFinishRegions(null);
-  //   }
-  // }, [finishCoords]);
+  useEffect(() => {
+    if (finishCoords) {
+      setFinishRegions(findRegions(finishCoords));
+    } else {
+      setFinishRegions(null);
+    }
+  }, [finishCoords]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   useEffect(() => {
     if ((startCoords && startRegions) || (finishCoords && finishRegions)) {
@@ -437,18 +437,12 @@ export default function PlansNew() {
                     coords: c,
                   });
                   setStartCoords(c ? [c.lat, c.lon] : undefined);
-                  if (c) {
-                    setStartRegions(findRegions([c.lat, c.lon]));
-                  }
                 }}
                 setFinish={(c) => {
                   posthogClient.captureEvent("plan-new-coords-finish-select", {
                     coords: c,
                   });
                   setFinishCoords(c ? [c.lat, c.lon] : undefined);
-                  if (c) {
-                    setFinishRegions(findRegions([c.lat, c.lon]));
-                  }
                 }}
               >
                 <View className="pointer-events-none flex w-full flex-row items-start justify-end">
