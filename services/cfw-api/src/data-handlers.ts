@@ -1,4 +1,5 @@
 import { type getDb } from "@ridi/db-queries";
+import { type Messaging } from "@ridi/messaging";
 import {
   storeSchema,
   type createStoreWithSchema,
@@ -23,6 +24,7 @@ function recordsToTable<TRow>(
 export type BaseHandlerConstructor = new (
   db: ReturnType<typeof getDb>,
   dataStore: ReturnType<typeof createStoreWithSchema>,
+  messaging: Messaging,
 ) => BaseHandler;
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
@@ -40,6 +42,7 @@ export class PlanHandler implements BaseHandler {
   constructor(
     private readonly db: ReturnType<typeof getDb>,
     private readonly dataStore: ReturnType<typeof createStoreWithSchema>,
+    private readonly messaging: Messaging,
   ) {}
   async loadAllFromDb(userId: string) {
     const dbRows = await this.readAllFromDb(userId);
@@ -80,6 +83,12 @@ export class PlanHandler implements BaseHandler {
   async loadRowFromStore(rowId: string, userId: string) {
     const row = this.dataStore.getRow("plans", rowId);
 
+    const oldPlan = await this.db
+      .selectFrom("plans")
+      .select("id")
+      .where("id", "=", rowId)
+      .executeTakeFirst();
+
     await this.db
       .insertInto("plans")
       .values({
@@ -90,12 +99,10 @@ export class PlanHandler implements BaseHandler {
         start_lat: row.startLat.toString(),
         start_lon: row.startLon.toString(),
         start_desc: row.startDesc,
-        finish_lat:
-          row.finishLat !== undefined ? row.finishLat.toString() : undefined,
-        finish_lon:
-          row.finishLon !== undefined ? row.finishLon.toString() : undefined,
+        finish_lat: row.finishLat?.toString(),
+        finish_lon: row.finishLon?.toString(),
         finish_desc: row.finishDesc,
-        bearing: row.bearing !== undefined ? row.bearing.toString() : undefined,
+        bearing: row.bearing?.toString(),
         distance: row.distance.toString(),
         created_at: new Date(row.createdAt),
         is_deleted: row.isDeleted || false,
@@ -103,9 +110,9 @@ export class PlanHandler implements BaseHandler {
         rule_set_id: row.ruleSetId,
         map_preview_dark: row.mapPreviewDark,
         map_preview_light: row.mapPreviewLight,
-        error: undefined,
+        error: undefined, // TODO pick up error
         modified_at: new Date(),
-        region: undefined,
+        region: row.region,
       })
       .onConflict((oc) =>
         oc.column("id").doUpdateSet({
@@ -131,6 +138,9 @@ export class PlanHandler implements BaseHandler {
         }),
       )
       .execute();
+    if (!oldPlan) {
+      await this.messaging.send("plan_new", { planId: rowId });
+    }
   }
   private readAllFromDb(userId: string) {
     return this.db
@@ -163,6 +173,7 @@ export class PlanHandler implements BaseHandler {
       ruleSetId: row.rule_set_id,
       mapPreviewDark: row.map_preview_dark ?? undefined,
       mapPreviewLight: row.map_preview_light ?? undefined,
+      region: row.region ?? undefined,
     };
   }
 }

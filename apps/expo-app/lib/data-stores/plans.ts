@@ -54,6 +54,7 @@ type PlanNew = {
   bearing?: number;
   tripType: "round-trip" | "start-finish";
   ruleSetId: string;
+  region: string;
 };
 
 export function usePlansUpdate() {

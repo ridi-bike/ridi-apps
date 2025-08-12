@@ -30,6 +30,8 @@ import {
 import postgres from "postgres";
 import { Resend } from "resend";
 import { getWsServerDurableObjectFetch } from "tinybase/synchronizers/synchronizer-ws-server-durable-object";
+import { notifyPayloadSchema } from "./notify";
+import z from "zod";
 
 export { UserStoreDurableObject } from "./sync";
 
@@ -436,6 +438,23 @@ export default Sentry.withSentry(
       if (url.pathname.startsWith("/sync")) {
         return getWsServerDurableObjectFetch("UserStoreDurableObject")(
           request,
+          env,
+        );
+      }
+      if (url.pathname.startsWith("/notify")) {
+        const payload = (await request.json()) as z.infer<
+          typeof notifyPayloadSchema
+        >;
+        const url = new URL(request.url);
+        url.pathname = `/sync/${payload.record?.user_id || payload.old_record?.user_id}`;
+        return getWsServerDurableObjectFetch("UserStoreDurableObject")(
+          new Request(url, {
+            method: request.method,
+            body: JSON.stringify(payload),
+            redirect: request.redirect,
+            headers: request.headers,
+            cf: { apps: false },
+          }),
           env,
         );
       }

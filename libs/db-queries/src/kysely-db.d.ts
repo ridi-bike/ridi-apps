@@ -520,6 +520,11 @@ export interface PrivateUsers {
   user_id: string;
 }
 
+export interface PrivateWebhooks {
+  secret: string;
+  url: string;
+}
+
 export interface RealtimeMessages {
   event: string | null;
   extension: string;
@@ -783,6 +788,7 @@ export interface DB {
   "postgis.spatial_ref_sys": PostgisSpatialRefSys;
   "private.codes": PrivateCodes;
   "private.users": PrivateUsers;
+  "private.webhooks": PrivateWebhooks;
   "realtime.messages": RealtimeMessages;
   "realtime.schema_migrations": RealtimeSchemaMigrations;
   "realtime.subscription": RealtimeSubscription;

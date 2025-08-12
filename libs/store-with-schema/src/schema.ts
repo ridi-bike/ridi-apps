@@ -37,6 +37,7 @@ const planSchema = z.object({
   mapPreviewLight: z.string().optional(),
   mapPreviewDark: z.string().optional(),
   isDeleted: z.boolean().optional(),
+  region: z.string().optional(),
 });
 
 const routeSchema = z.object({
@@ -54,13 +55,6 @@ const routeSchema = z.object({
   coordsOverviewArrayString: z.string(),
   isDeleted: z.boolean().optional(),
 });
-
-// const routeCoordsSchema = z.object({
-//   id: z.string(),
-//   routeId: z.string(),
-//   coordsArrayString: z.string(),
-//   coordsOverviewArrayString: z.string(),
-// });
 
 export type Route = z.infer<typeof routeSchema>;
 
@@ -183,7 +177,6 @@ export type Region = z.infer<typeof regionsSchema>;
 export const storeSchema = {
   plans: planSchema,
   routes: routeSchema,
-  // routeCoords: routeCoordsSchema,
   routeBreakdowns: routeBreakdownSchema,
   ruleSets: ruleSetSchema,
   ruleSetRoadTags: ruleSetRoadTagSchema,

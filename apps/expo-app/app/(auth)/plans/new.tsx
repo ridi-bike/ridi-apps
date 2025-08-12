@@ -363,6 +363,7 @@ export default function PlansNew() {
                       distance,
                       tripType: isRoundTrip ? "round-trip" : "start-finish",
                       ruleSetId,
+                      region: startRegions!.at(0)!.region, // this should always be set as it is validated
                     });
                     router.replace({
                       pathname: "/plans/[planId]",
