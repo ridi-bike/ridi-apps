@@ -1,6 +1,3 @@
-insert into private.webhooks (url, secret)
-values ('http://host.docker.internal:8787/notify', 'very-special-secret');
-
 insert into regions (region, geojson, polygon)
 values (
 	'europe/greece',

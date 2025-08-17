@@ -8,6 +8,7 @@ const envSchema = z.object({
   MAP_PREVIEW_SERVICE_URL: z.string(),
   RESEND_SECRET: z.string(),
   RESEND_AUDIENCE_ID: z.string(),
+  API_URL: z.string(),
 });
 
 export const env = envSchema.parse(process.env);

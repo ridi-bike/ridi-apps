@@ -11,10 +11,11 @@ SELECT
     enqueued_at::timestamp,
     vt::timestamp as visibility_timeout,
     message:: jsonb
-FROM pgmq.read(
-  queue_name => sqlc.arg(queue_name)::text,
-  vt         => sqlc.arg(visibility_timeout_seconds)::integer,
-  qty        => sqlc.arg(qty)::integer
+FROM pgmq.read_with_poll(
+  queue_name        => sqlc.arg(queue_name)::text,
+  vt                => sqlc.arg(visibility_timeout_seconds)::integer,
+  qty               => sqlc.arg(qty)::integer,
+  poll_interval_ms  => sqlc.arg(poll_interval_ms)::integer
 );
 
 -- name: ArchiveMessage :exec

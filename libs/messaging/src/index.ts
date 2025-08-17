@@ -1,5 +1,6 @@
 import { type RidiLogger } from "@ridi/logger";
 import type postgres from "postgres";
+import type z from "zod";
 
 import {
   archiveMessage,
@@ -9,35 +10,17 @@ import {
   sendMessage,
   updateVisibilityTimeout,
 } from "./messaging_sql.ts";
+import { notifyPayloadSchema } from "./notify.ts";
+
+export { notifyPayloadSchema };
 
 export type Messages = {
   plan_map_gen: { planId: string };
   route_map_gen: { routeId: string };
   plan_new: { planId: string; widerRetryNum?: number };
   user_new: { userId: string };
+  data_sync_notify: z.infer<typeof notifyPayloadSchema>;
 };
-
-async function retryUntil(
-  work: () => Promise<unknown>,
-  errorOnRetryHandler: (err: unknown, failCount: number) => void,
-  errorOnFailHandler: (err: unknown, failCount: number) => Error,
-  maxFailureCount: number,
-) {
-  let failCount = 0;
-  while (true) {
-    try {
-      await work();
-      failCount = 0;
-    } catch (error) {
-      failCount++;
-      if (failCount >= maxFailureCount) {
-        throw errorOnFailHandler(error, failCount);
-      } else {
-        errorOnRetryHandler(error, failCount);
-      }
-    }
-  }
-}
 
 export type MessageHandler<
   TName extends keyof Messages,
@@ -70,43 +53,20 @@ export class Messaging {
     await sendMessage(this.db, { queueName, message });
   }
 
-  listen<TName extends keyof Messages>(
+  async listen<TName extends keyof Messages>(
     queueName: TName,
     messageHandler: MessageHandler<TName, Messages[TName]>,
-  ) {
-    retryUntil(
-      () => this.runListener(queueName, messageHandler),
-      (error, failCount) =>
-        this.logger.warn("Retry from queue listener with error", {
-          error,
-          queueName,
-          failCount,
-        }),
-      (error, failCount) =>
-        this.logger.error("Error from queue listener", {
-          error,
-          queueName,
-          failCount,
-        }),
-      10,
-    ).catch(() => {
-      this.stopped = true;
-    });
-  }
-  private async runListener<TName extends keyof Messages>(
-    queueName: TName,
-    messageHandler: MessageHandler<TName, Messages[TName]>,
+    concurrencyLimit: number | null,
   ) {
     while (!this.stopped) {
-      await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-
       const messages = await readMessages(this.db, {
         queueName,
         visibilityTimeoutSeconds: 10,
-        qty: 1,
+        qty: concurrencyLimit || 100,
+        pollIntervalMs: 90_000, // 1,5 min
       });
 
-      await Promise.all(
+      const messagePromises = Promise.allSettled(
         messages.map((message) =>
           messageHandler({
             message,
@@ -147,6 +107,9 @@ export class Messaging {
             ),
         ),
       );
+      if (concurrencyLimit) {
+        await messagePromises;
+      }
     }
   }
 

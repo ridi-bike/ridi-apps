@@ -1,10 +1,10 @@
 import z from "zod";
 
 export const recordSchema = z.record(
-  z.union([z.string(), z.number(), z.boolean()]),
+  z.union([z.null(), z.string(), z.number(), z.boolean()]),
 );
 
-const notifyPayloadSchema = z.discriminatedUnion("type", [
+export const notifyPayloadSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("INSERT"),
     table: z.string(),

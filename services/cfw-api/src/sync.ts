@@ -67,9 +67,9 @@ export class UserStoreDurableObject extends WsServerDurableObject {
     if (!this.userId || this.listenerId) {
       return;
     }
+
     this.listenerId =
       this.store?.addTablesListener((listenerStore) => {
-        console.log("++++++++++++++++ omg omg sync callbask");
         const changedTables = listenerStore.getTransactionChanges()[0];
         for (const [changedTableId, changedRows] of Object.entries(
           changedTables,
@@ -99,37 +99,44 @@ export class UserStoreDurableObject extends WsServerDurableObject {
       }) || null;
   }
 
-  private async isTokenOk(_token: string) {
+  private async isTokenOk(_type: string, _token: string) {
     console.warn("TODO token check does not exist");
     return true;
   }
 
   async fetch(request: Request): Promise<Response> {
-    const url = new URL(request.url);
-    const userId = url.pathname.split("/")[2];
-    // if this.userId is not set, this is the first fetch after new object construction
-    // if it is set, it's been restored after hybernation and db sync should have been executed
-    if (!this.userId) {
-      this.syncAllDataFromDb(userId);
+    const auth = request.headers.get("Authorization")?.split(" ");
+    if (!auth) {
+      return new Response("Missing token", { status: 401 });
     }
-    this.userId = userId;
+    const [type, token] = auth;
 
-    const action = url.searchParams.get("action");
-    const token = url.searchParams.get("token");
-
-    if (typeof token !== "string") {
+    if (typeof type !== "string" || typeof token !== "string") {
       return new Response("Missing token", { status: 401 });
     }
 
-    if (!this.isTokenOk(token)) {
+    if (!this.isTokenOk(type, token)) {
       return new Response("Invalid token", { status: 401 });
     }
+
+    const url = new URL(request.url);
+    const userId = url.pathname.split("/")[2];
+
+    const action = url.searchParams.get("action");
 
     if (action !== "sync" && action !== "notify") {
       return new Response("Missing action", { status: 400 });
     }
+
     if (action === "sync") {
-      console.log("=============== omg omg sync action");
+      // if this.userId is not set, this is the first fetch after new object construction
+      // if it is set, it's been restored after hybernation and db sync should have been executed
+      if (!this.userId) {
+        this.ctx.waitUntil(this.syncAllDataFromDb(userId));
+      }
+
+      this.userId = userId;
+
       this.checkAddDataListener();
 
       const wsResponse = super.fetch?.(request);
@@ -140,12 +147,16 @@ export class UserStoreDurableObject extends WsServerDurableObject {
     }
 
     const bodyString = await request.text();
-    this.processNotifyPayload(bodyString, userId);
+    this.ctx.waitUntil(this.processNotifyPayload(bodyString, userId));
 
     return new Response("Ok", { status: 200 });
   }
 
-  processNotifyPayload(bodyString: string, userId: string) {
+  async processNotifyPayload(bodyString: string, userId: string) {
+    if (!this.dataStore?.getInternalStore().getValue("data-synced")) {
+      return;
+    }
+
     let payload: z.infer<typeof notifyPayloadSchema>;
     try {
       const body = JSON.parse(bodyString);
@@ -174,7 +185,7 @@ export class UserStoreDurableObject extends WsServerDurableObject {
       this.messaging,
     );
 
-    dataHandler.loadFromNotify(
+    await dataHandler.loadFromNotify(
       payload.record || payload.old_record,
       payload.type,
       userId,
@@ -182,6 +193,7 @@ export class UserStoreDurableObject extends WsServerDurableObject {
   }
 
   async syncAllDataFromDb(userId: string) {
+    console.log("===========--------------- sync all");
     if (!this.dataStore) {
       throw new Error("Missing store, something went wrong");
     }
@@ -197,6 +209,8 @@ export class UserStoreDurableObject extends WsServerDurableObject {
         ).loadAllFromDb(userId);
       }),
     );
+
+    this.dataStore.getInternalStore().setValue("data-synced", true);
   }
 
   createPersister() {

@@ -241,6 +241,7 @@ export interface AuthSsoDomains {
 
 export interface AuthSsoProviders {
   created_at: Timestamp | null;
+  disabled: boolean | null;
   id: string;
   /**
    * Auth: Uniquely identifies a SSO provider according to a user-chosen resource ID (case insensitive), useful in infrastructure as code.
@@ -369,6 +370,15 @@ export interface NetHttpResponse {
   timed_out: boolean | null;
 }
 
+export interface PgmqADataSyncNotify {
+  archived_at: Generated<Timestamp>;
+  enqueued_at: Generated<Timestamp>;
+  message: Json | null;
+  msg_id: Int8;
+  read_ct: Generated<number>;
+  vt: Timestamp;
+}
+
 export interface PgmqAPlanMapGen {
   archived_at: Generated<Timestamp>;
   enqueued_at: Generated<Timestamp>;
@@ -410,6 +420,14 @@ export interface PgmqMeta {
   is_partitioned: boolean;
   is_unlogged: boolean;
   queue_name: string;
+}
+
+export interface PgmqQDataSyncNotify {
+  enqueued_at: Generated<Timestamp>;
+  message: Json | null;
+  msg_id: Generated<Int8>;
+  read_ct: Generated<number>;
+  vt: Timestamp;
 }
 
 export interface PgmqQPlanMapGen {
@@ -518,11 +536,6 @@ export interface PrivateUsers {
   stripe_subscription_id: string | null;
   sub_type: Generated<PrivateUserSubType>;
   user_id: string;
-}
-
-export interface PrivateWebhooks {
-  secret: string;
-  url: string;
 }
 
 export interface RealtimeMessages {
@@ -773,11 +786,13 @@ export interface DB {
   geo_boundaries: GeoBoundaries;
   "net._http_response": NetHttpResponse;
   "net.http_request_queue": NetHttpRequestQueue;
+  "pgmq.a_data_sync_notify": PgmqADataSyncNotify;
   "pgmq.a_plan_map_gen": PgmqAPlanMapGen;
   "pgmq.a_plan_new": PgmqAPlanNew;
   "pgmq.a_route_map_gen": PgmqARouteMapGen;
   "pgmq.a_user_new": PgmqAUserNew;
   "pgmq.meta": PgmqMeta;
+  "pgmq.q_data_sync_notify": PgmqQDataSyncNotify;
   "pgmq.q_plan_map_gen": PgmqQPlanMapGen;
   "pgmq.q_plan_new": PgmqQPlanNew;
   "pgmq.q_route_map_gen": PgmqQRouteMapGen;
@@ -788,7 +803,6 @@ export interface DB {
   "postgis.spatial_ref_sys": PostgisSpatialRefSys;
   "private.codes": PrivateCodes;
   "private.users": PrivateUsers;
-  "private.webhooks": PrivateWebhooks;
   "realtime.messages": RealtimeMessages;
   "realtime.schema_migrations": RealtimeSchemaMigrations;
   "realtime.subscription": RealtimeSubscription;

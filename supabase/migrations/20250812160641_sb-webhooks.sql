@@ -1,92 +1,81 @@
-create table if not exists private.webhooks (
-  url text not null,
-  secret text not null
-);
 
-create extension if not exists pg_net with schema net;
+SELECT pgmq.create('data_sync_notify');
 
-create or replace function public.sync_data()
+create or replace function public.data_sync_notify_send()
 returns trigger
 language plpgsql
 security definer
 set search_path = public
 as $$
 declare
-  v_url text;
-  v_secret text;
-  v_headers jsonb;
-  v_body jsonb;
+  payload jsonb;
 begin
-  select w.url, w.secret
-    into v_url, v_secret
-  from private.webhooks as w
-  limit 1;
+  payload := jsonb_build_object(
+    'type', TG_OP,
+    'table', TG_TABLE_NAME,
+    'schema', TG_TABLE_SCHEMA
+  );
 
-  if v_url is null or v_secret is null then
-    raise exception 'private.webhooks must contain one row with url and secret';
+  if TG_OP = 'INSERT' then
+    payload := payload || jsonb_build_object(
+      'record', to_jsonb(NEW),
+      'old_record', 'null'::jsonb
+    );
+  elsif TG_OP = 'UPDATE' then
+    payload := payload || jsonb_build_object(
+      'record', to_jsonb(NEW),
+      'old_record', to_jsonb(OLD)
+    );
+  elsif TG_OP = 'DELETE' then
+    payload := payload || jsonb_build_object(
+      'record', 'null'::jsonb,
+      'old_record', to_jsonb(OLD)
+    );
   end if;
 
-  v_headers := jsonb_build_object(
-    'Content-Type', 'application/json'
-  );
-
-  v_body := jsonb_build_object(
-    'type', TG_OP,
-    'schema', TG_TABLE_SCHEMA,
-    'table', TG_TABLE_NAME,
-    'record', to_jsonb(NEW),
-    'old_record', to_jsonb(OLD)
-  );
-
-  perform net.http_post(
-    url := v_url || '?token=' || v_secret,
-    headers := v_headers,
-    body := v_body,
-    timeout_milliseconds := 1000
-  );
-
-  return NEW;
+  perform pgmq.send('data_sync_notify', payload);
+  if TG_OP = 'DELETE' then
+    return OLD;
+  else
+    return NEW;
+  end if;
 end;
 $$;
 
-drop trigger if exists "sync_regions" on "public"."regions";
+drop trigger if exists tr_data_sync_notify_plans on public.plans;
+drop trigger if exists tr_data_sync_notify_regions on public.regions;
+drop trigger if exists tr_data_sync_notify_route_breakdown_stats on public.route_breakdown_stats;
+drop trigger if exists tr_data_sync_notify_routes on public.routes;
+drop trigger if exists tr_data_sync_notify_rule_sets on public.rule_sets;
+drop trigger if exists tr_data_sync_notify_rule_set_road_tags on public.rule_set_road_tags;
 
-create trigger "sync_regions"
-after insert on "public"."regions"
+create trigger tr_data_sync_notify_plans
+after insert or update or delete on public.plans
 for each row
-execute function public.sync_data();
+execute function public.data_sync_notify_send();
 
-drop trigger if exists "sync_plans" on "public"."plans";
-
-create trigger "sync_plans"
-after insert on "public"."plans"
+create trigger tr_data_sync_notify_regions
+after insert or update or delete on public.regions
 for each row
-execute function public.sync_data();
+execute function public.data_sync_notify_send();
 
-drop trigger if exists "sync_routes" on "public"."routes";
-
-create trigger "sync_routes"
-after insert on "public"."routes"
+create trigger tr_data_sync_notify_route_breakdown_stats
+after insert or update or delete on public.route_breakdown_stats
 for each row
-execute function public.sync_data();
+execute function public.data_sync_notify_send();
 
-drop trigger if exists "sync_route_breakdown_stats" on "public"."route_breakdown_stats";
-
-create trigger "sync_route_breakdown_stats"
-after insert on "public"."route_breakdown_stats"
+create trigger tr_data_sync_notify_routes
+after insert or update or delete on public.routes
 for each row
-execute function public.sync_data();
+execute function public.data_sync_notify_send();
 
-drop trigger if exists "sync_rule_sets" on "public"."rule_sets";
-
-create trigger "sync_rule_sets"
-after insert on "public"."rule_sets"
+create trigger tr_data_sync_notify_rule_sets
+after insert or update or delete on public.rule_sets
 for each row
-execute function public.sync_data();
+execute function public.data_sync_notify_send();
 
-drop trigger if exists "sync_rule_set_road_tags" on "public"."rule_set_road_tags";
-
-create trigger "sync_rule_set_road_tags"
-after insert on "public"."rule_set_road_tags"
+create trigger tr_data_sync_notify_rule_set_road_tags
+after insert or update or delete on public.rule_set_road_tags
 for each row
-execute function public.sync_data();
+execute function public.data_sync_notify_send();
+

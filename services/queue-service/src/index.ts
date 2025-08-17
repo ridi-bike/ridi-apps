@@ -11,6 +11,7 @@ import { MessageHandlerNewPlan } from "./message-handler-new-plan.ts";
 import { MessageHandlerUserNew } from "./message-handler-user-new.ts";
 import { ResendClient } from "./resend-client.ts";
 import { RouterServiceLookup } from "./router-service-lookup.ts";
+import { MessageHandlerDataSyncNotify } from "./message-handler-data-sync-notify.ts";
 
 const pgClient = postgres(env.SUPABASE_DB_URL);
 
@@ -32,6 +33,10 @@ const messageHandlerUserNew = new MessageHandlerUserNew(
   logger,
   pgClient,
   new ResendClient(),
+);
+const messageHandlerDataSyncNotify = new MessageHandlerDataSyncNotify(
+  logger,
+  pgClient,
 );
 
 const MAX_RETRY_COUNT = 10;
@@ -96,18 +101,28 @@ messaging.listen(
   constructMessageHandler("user_new", (data) =>
     messageHandlerUserNew.handleUserNew(data.userId),
   ),
+  null,
 );
 messaging.listen(
   "plan_map_gen",
   constructMessageHandler("plan_map_gen", (data) =>
     messageHandlerMapPreview.handlePlanMapPreview(data.planId),
   ),
+  null,
 );
 messaging.listen(
   "route_map_gen",
   constructMessageHandler("route_map_gen", (data) =>
     messageHandlerMapPreview.handleRouteMapPreview(data.routeId),
   ),
+  null,
+);
+messaging.listen(
+  "data_sync_notify",
+  constructMessageHandler("data_sync_notify", (data) =>
+    messageHandlerDataSyncNotify.handleDataSyncNotify(data),
+  ),
+  null,
 );
 messaging.listen(
   "plan_new",
@@ -120,16 +135,17 @@ messaging.listen(
       ),
     (data) => messageHandlerNewPlan.onNewPlanError(data.planId),
   ),
+  1,
 );
 
 // catches uncaught exceptions
 process.on("uncaughtException", (error, origin) => {
   logger.error("uncaughtException", { error, origin });
-  process.exit();
+  process.exit(1);
 });
 process.on("unhandledRejection", (reason, promise) => {
   logger.error("unhandledRejection", { reason, promise });
-  process.exit();
+  process.exit(1);
 });
 
 const server = createServer(async (_req, res) => {

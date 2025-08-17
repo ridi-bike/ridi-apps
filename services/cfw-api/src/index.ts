@@ -176,6 +176,18 @@ const router = tsr
     if (version !== "v1") {
       throw ctx.logger.error("Wrong version", { version });
     }
+    const userId = ctx.request.user.id;
+    const email = ctx.request.user.email;
+
+    if (!userId || !email) {
+      return {
+        status: 400,
+        body: {
+          message: "Prices only for registered users",
+        },
+      };
+    }
+
     const stripeApi = new StripeApi(
       ctx.db,
       ctx.logger,
@@ -190,6 +202,7 @@ const router = tsr
     if (!privateUser) {
       throw new Error("User must exist");
     }
+
     if (privateUser.subType === "code") {
       return {
         status: 200,
@@ -205,9 +218,10 @@ const router = tsr
       };
     }
     const prices = await stripeApi.getPrices({
-      id: ctx.request.user.id,
-      email: ctx.request.user.email,
+      id: userId,
+      email,
     });
+
     return {
       status: 200,
       body: {

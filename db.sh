@@ -27,6 +27,7 @@ case "$1" in
   rm -rf ./services/ridi-router/.ridi-data/pbf
   rm -rf ./services/ridi-router/.ridi-data/cache
   rm -rf ./services/ridi-router/.ridi-data/db
+  rm -rf ./services/cfw-api/.wrangler
   # supabase gen types --lang=typescript --local >./services/ridi-router/packages/lib/supabase.ts
   # supabase gen types --lang=typescript --local >./services/cfw-api/src/supabase.ts
   ./db.sh sqlc

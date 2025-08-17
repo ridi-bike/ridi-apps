@@ -5,6 +5,7 @@
   "type": "module",
   "dependencies": {
     "@ridi/logger": "workspace:^",
-    "postgres": "^3.4.5"
+    "postgres": "^3.4.5",
+    "zod": "^3.25.76"
   }
 }

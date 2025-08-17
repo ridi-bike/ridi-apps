@@ -266,6 +266,19 @@ export async function userGet(sql: Sql, args: UserGetArgs): Promise<UserGetRow |
     };
 }
 
+export const userGetAllIdsQuery = `-- name: UserGetAllIds :many
+select id from auth.users`;
+
+export interface UserGetAllIdsRow {
+    id: string;
+}
+
+export async function userGetAllIds(sql: Sql): Promise<UserGetAllIdsRow[]> {
+    return (await sql.unsafe(userGetAllIdsQuery, []).values()).map(row => ({
+        id: row[0]
+    }));
+}
+
 export const geoBoundariesFindCoordsQuery = `-- name: GeoBoundariesFindCoords :many
 select id, name, polygon, level, updated_at from geo_boundaries
 where postgis.st_within(postgis.st_point($1, $2), geo_boundaries.polygon)`;
