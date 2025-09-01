@@ -1154,7 +1154,7 @@ values ($1, $2, $3)
 on conflict (region) do update
 set geojson = excluded.geojson,
   polygon = excluded.polygon
-returning region, geojson, polygon`;
+returning region, geojson, polygon, id`;
 
 export interface RegionInsertOrUpdateArgs {
     region: string;
@@ -1166,6 +1166,7 @@ export interface RegionInsertOrUpdateRow {
     region: string;
     geojson: any;
     polygon: string | null;
+    id: string;
 }
 
 export async function regionInsertOrUpdate(sql: Sql, args: RegionInsertOrUpdateArgs): Promise<RegionInsertOrUpdateRow | null> {
@@ -1180,7 +1181,8 @@ export async function regionInsertOrUpdate(sql: Sql, args: RegionInsertOrUpdateA
     return {
         region: row[0],
         geojson: row[1],
-        polygon: row[2]
+        polygon: row[2],
+        id: row[3]
     };
 }
 
@@ -1673,24 +1675,26 @@ export async function planUpsert(sql: Sql, args: PlanUpsertArgs): Promise<void> 
 }
 
 export const regionGetQuery = `-- name: RegionGet :many
-select region, geojson, polygon from regions`;
+select region, geojson, polygon, id from regions`;
 
 export interface RegionGetRow {
     region: string;
     geojson: any;
     polygon: string | null;
+    id: string;
 }
 
 export async function regionGet(sql: Sql): Promise<RegionGetRow[]> {
     return (await sql.unsafe(regionGetQuery, []).values()).map(row => ({
         region: row[0],
         geojson: row[1],
-        polygon: row[2]
+        polygon: row[2],
+        id: row[3]
     }));
 }
 
 export const regionFindFromCoordsQuery = `-- name: RegionFindFromCoords :many
-select region, geojson, polygon from public.regions
+select region, geojson, polygon, id from public.regions
 where postgis.st_within(postgis.st_point($1, $2), regions.polygon)`;
 
 export interface RegionFindFromCoordsArgs {
@@ -1702,13 +1706,15 @@ export interface RegionFindFromCoordsRow {
     region: string;
     geojson: any;
     polygon: string | null;
+    id: string;
 }
 
 export async function regionFindFromCoords(sql: Sql, args: RegionFindFromCoordsArgs): Promise<RegionFindFromCoordsRow[]> {
     return (await sql.unsafe(regionFindFromCoordsQuery, [args.lon, args.lat]).values()).map(row => ({
         region: row[0],
         geojson: row[1],
-        polygon: row[2]
+        polygon: row[2],
+        id: row[3]
     }));
 }
 
@@ -2006,5 +2012,82 @@ export async function routeBreakdownStatsInsert(sql: Sql, args: RouteBreakdownSt
         lenM: row[5],
         percentage: row[6]
     };
+}
+
+export const syncTokenCreateQuery = `-- name: SyncTokenCreate :one
+insert into private.sync_tokens (user_id)
+values ($1)
+returning id, user_id, created_at`;
+
+export interface SyncTokenCreateArgs {
+    userId: string;
+}
+
+export interface SyncTokenCreateRow {
+    id: string;
+    userId: string;
+    createdAt: Date;
+}
+
+export async function syncTokenCreate(sql: Sql, args: SyncTokenCreateArgs): Promise<SyncTokenCreateRow | null> {
+    const rows = await sql.unsafe(syncTokenCreateQuery, [args.userId]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        userId: row[1],
+        createdAt: row[2]
+    };
+}
+
+export const syncTokenGetQuery = `-- name: SyncTokenGet :one
+select id, user_id, created_at from private.sync_tokens
+where id = $1
+  and user_id = $2
+  and created_at >= $3`;
+
+export interface SyncTokenGetArgs {
+    id: string;
+    userId: string;
+    createdAt: Date;
+}
+
+export interface SyncTokenGetRow {
+    id: string;
+    userId: string;
+    createdAt: Date;
+}
+
+export async function syncTokenGet(sql: Sql, args: SyncTokenGetArgs): Promise<SyncTokenGetRow | null> {
+    const rows = await sql.unsafe(syncTokenGetQuery, [args.id, args.userId, args.createdAt]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    if (!row) {
+        return null;
+    }
+    return {
+        id: row[0],
+        userId: row[1],
+        createdAt: row[2]
+    };
+}
+
+export const syncTokenDeleteQuery = `-- name: SyncTokenDelete :exec
+delete from private.sync_tokens
+where id = $1`;
+
+export interface SyncTokenDeleteArgs {
+    id: string;
+}
+
+export async function syncTokenDelete(sql: Sql, args: SyncTokenDeleteArgs): Promise<void> {
+    await sql.unsafe(syncTokenDeleteQuery, [args.id]);
 }
 

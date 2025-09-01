@@ -522,6 +522,12 @@ export interface PrivateCodes {
   id: Generated<string>;
 }
 
+export interface PrivateSyncTokens {
+  created_at: Generated<Timestamp>;
+  id: Generated<string>;
+  user_id: string;
+}
+
 export interface PrivateUsers {
   download_count_remain: Generated<number>;
   stripe_cancel_at_period_end: boolean | null;
@@ -566,6 +572,7 @@ export interface RealtimeSubscription {
 
 export interface Regions {
   geojson: Json;
+  id: Generated<string>;
   polygon: string | null;
   region: string;
 }
@@ -802,6 +809,7 @@ export interface DB {
   "postgis.geometry_columns": PostgisGeometryColumns;
   "postgis.spatial_ref_sys": PostgisSpatialRefSys;
   "private.codes": PrivateCodes;
+  "private.sync_tokens": PrivateSyncTokens;
   "private.users": PrivateUsers;
   "realtime.messages": RealtimeMessages;
   "realtime.schema_migrations": RealtimeSchemaMigrations;

@@ -1,4 +1,7 @@
 
+alter table regions
+  add column id text unique not null default ksuid();
+
 SELECT pgmq.create('data_sync_notify');
 
 create or replace function public.data_sync_notify_send()
@@ -79,3 +82,8 @@ after insert or update or delete on public.rule_set_road_tags
 for each row
 execute function public.data_sync_notify_send();
 
+create table private.sync_tokens (
+	id text not null default ksuid() primary key,
+	user_id uuid not null references auth.users on delete cascade on update cascade,
+	created_at timestamp not null default now()
+);

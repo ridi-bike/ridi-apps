@@ -1,8 +1,8 @@
 import { createStoreWithSchema } from "@ridi/store-with-schema";
-import * as SQLite from "expo-sqlite";
 import { createMergeableStore } from "tinybase";
-import { createExpoSqlitePersister } from "tinybase/persisters/persister-expo-sqlite";
 import { createWsSynchronizer } from "tinybase/synchronizers/synchronizer-ws-client";
+import { apiClient, getSuccessResponseOrThrow } from "../api";
+import { setUpPersister } from "./persister";
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 if (!apiUrl) {
@@ -12,12 +12,11 @@ if (!apiUrl) {
 const store = createMergeableStore();
 
 export async function initSync(userId: string) {
-  const db = await SQLite.openDatabaseAsync("databaseName");
-  const dataStorePersister = createExpoSqlitePersister(store, db);
-  dataStorePersister.startAutoPersisting();
+  const token = getSuccessResponseOrThrow(200, await apiClient.syncTokenGet());
+  await setUpPersister(store);
   const synchronizer = await createWsSynchronizer(
     store,
-    new WebSocket(`${apiUrl}/sync/${userId}?token=dfsdfsd&action=sync`),
+    new WebSocket(`${apiUrl}/sync/${userId}?token=${token.token}&action=sync`),
   );
   await synchronizer.startSync();
 }

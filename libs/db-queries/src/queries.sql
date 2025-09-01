@@ -517,3 +517,19 @@ values (
   $6
 )
 returning *;
+
+-- name: SyncTokenCreate :one
+insert into private.sync_tokens (user_id)
+values ($1)
+returning *;
+
+-- name: SyncTokenGet :one
+select * from private.sync_tokens
+where id = $1
+  and user_id = $2
+  and created_at >= $3;
+
+
+-- name: SyncTokenDelete :exec
+delete from private.sync_tokens
+where id = $1;

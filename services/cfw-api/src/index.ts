@@ -15,6 +15,7 @@ import {
   userClaimRuleSets,
   userClaimRuleSetRoadTags,
   geoBoundariesFindCoords,
+  syncTokenCreate,
 } from "@ridi/db-queries";
 import { RidiLogger } from "@ridi/logger";
 import { Messaging } from "@ridi/messaging";
@@ -51,6 +52,23 @@ const router = tsr
     logger: RidiLogger;
   }>()
   .routerWithMiddleware(apiContract)<{ user: User }>({
+  syncTokenGet: async (_req, ctx) => {
+    const userId = ctx.request.user.id;
+    const token = await syncTokenCreate(ctx.db, {
+      userId,
+    });
+
+    if (!token) {
+      throw ctx.logger.error("Sync Token failed to create", { userId });
+    }
+
+    return {
+      status: 200,
+      body: {
+        token: token?.id,
+      },
+    };
+  },
   userClaimData: async ({ body }, ctx) => {
     if (body.version !== "v1") {
       throw ctx.logger.error("Wrong version", { version: body.version });

@@ -17,6 +17,14 @@ const priceSchema = z.object({
 });
 
 export const apiContract = c.router({
+  syncTokenGet: {
+    method: "GET",
+    path: "/user/sync/token",
+    responses: {
+      200: z.object({ token: z.string() }),
+      500: z.object({ message: z.string() }),
+    },
+  },
   userClaimData: {
     method: "POST",
     path: "/user/data/claim",

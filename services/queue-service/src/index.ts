@@ -6,12 +6,12 @@ import postgres from "postgres";
 
 import { env } from "./env.ts";
 import { MapPreviewServiceClient } from "./map-preview-service-client.ts";
+import { MessageHandlerDataSyncNotify } from "./message-handler-data-sync-notify.ts";
 import { MessageHandlerMapPreview } from "./message-handler-map-preview.ts";
 import { MessageHandlerNewPlan } from "./message-handler-new-plan.ts";
 import { MessageHandlerUserNew } from "./message-handler-user-new.ts";
 import { ResendClient } from "./resend-client.ts";
 import { RouterServiceLookup } from "./router-service-lookup.ts";
-import { MessageHandlerDataSyncNotify } from "./message-handler-data-sync-notify.ts";
 
 const pgClient = postgres(env.SUPABASE_DB_URL);
 

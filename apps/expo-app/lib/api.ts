@@ -3,7 +3,7 @@ import { initClient, tsRestFetchApi } from "@ts-rest/core";
 import { router } from "expo-router";
 
 import { supabase } from "./supabase";
-import { deleteIndexDb } from "./data-stores/data-store.web";
+import { deletePersister } from "./data-stores/persister";
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 if (!apiUrl) {
@@ -41,7 +41,7 @@ export function getSuccessResponseOrThrow<
   if (response.status === 401) {
     supabase.auth.signOut({ scope: "local" }).then(() => {
       router.replace("/");
-      deleteIndexDb();
+      deletePersister();
     });
   }
   console.error(

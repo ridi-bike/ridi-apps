@@ -99,30 +99,39 @@ export class UserStoreDurableObject extends WsServerDurableObject {
       }) || null;
   }
 
-  private async isTokenOk(_type: string, _token: string) {
-    console.warn("TODO token check does not exist");
+  private async isTokenOk(token: string, userId: string) {
+    const tokenEntry = await this.db
+      .selectFrom("private.sync_tokens")
+      .select("id")
+      .where("id", "=", token)
+      .where("user_id", "=", userId)
+      .where("created_at", ">=", new Date(Date.now() - 10 * 60 * 1000))
+      .executeTakeFirst();
+    if (!tokenEntry) {
+      return false;
+    }
+    await this.db
+      .deleteFrom("private.sync_tokens")
+      .where("id", "=", tokenEntry.id)
+      .execute();
+
     return true;
   }
 
   async fetch(request: Request): Promise<Response> {
-    const auth = request.headers.get("Authorization")?.split(" ");
-    if (!auth) {
-      return new Response("Missing token", { status: 401 });
-    }
-    const [type, token] = auth;
-
-    if (typeof type !== "string" || typeof token !== "string") {
-      return new Response("Missing token", { status: 401 });
-    }
-
-    if (!this.isTokenOk(type, token)) {
-      return new Response("Invalid token", { status: 401 });
-    }
-
     const url = new URL(request.url);
     const userId = url.pathname.split("/")[2];
 
+    const token = url.searchParams.get("token");
     const action = url.searchParams.get("action");
+
+    if (typeof token !== "string") {
+      return new Response("Missing token", { status: 401 });
+    }
+
+    if (!this.isTokenOk(token, userId)) {
+      return new Response("Invalid token", { status: 401 });
+    }
 
     if (action !== "sync" && action !== "notify") {
       return new Response("Missing action", { status: 400 });
