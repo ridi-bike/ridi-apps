@@ -31,8 +31,9 @@ import {
 import postgres from "postgres";
 import { Resend } from "resend";
 import { getWsServerDurableObjectFetch } from "tinybase/synchronizers/synchronizer-ws-server-durable-object";
-import { notifyPayloadSchema } from "./notify";
-import z from "zod";
+import type z from "zod";
+
+import { type notifyPayloadSchema } from "./notify";
 
 export { UserStoreDurableObject } from "./sync";
 
@@ -468,6 +469,27 @@ export default Sentry.withSentry(
       }
 
       if (url.pathname.startsWith("/sync")) {
+        const url = new URL(request.url);
+        const userId = url.pathname.split("/")[2];
+
+        const action = url.searchParams.get("action");
+
+        if (action !== "sync" && action !== "notify") {
+          return new Response("Missing action", { status: 400 });
+        }
+        if (action === "notify") {
+          // getPathId copied from tinybase sync code
+          // begin
+          const strMatch = (str: string | undefined, regex: RegExp) =>
+            str?.match(regex);
+          const PATH_REGEX = /\/([^?]*)/;
+          const getPathId = (request: Request): string =>
+            strMatch(new URL(request.url).pathname, PATH_REGEX)?.[1] ?? "";
+          return env.UserStoreDurableObject.get(
+            env.UserStoreDurableObject.idFromName(getPathId(request)),
+          ).fetch(request);
+          // end
+        }
         return getWsServerDurableObjectFetch("UserStoreDurableObject")(
           request,
           env,

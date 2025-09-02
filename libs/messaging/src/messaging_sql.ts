@@ -28,13 +28,15 @@ FROM pgmq.read_with_poll(
   queue_name        => $1::text,
   vt                => $2::integer,
   qty               => $3::integer,
-  poll_interval_ms  => $4::integer
+  max_poll_seconds  => $4::integer,
+	poll_interval_ms 	=> $5::integer
 )`;
 
 export interface ReadMessagesArgs {
     queueName: string;
     visibilityTimeoutSeconds: number;
     qty: number;
+    maxPollSeconds: number;
     pollIntervalMs: number;
 }
 
@@ -47,7 +49,7 @@ export interface ReadMessagesRow {
 }
 
 export async function readMessages(sql: Sql, args: ReadMessagesArgs): Promise<ReadMessagesRow[]> {
-    return (await sql.unsafe(readMessagesQuery, [args.queueName, args.visibilityTimeoutSeconds, args.qty, args.pollIntervalMs]).values()).map(row => ({
+    return (await sql.unsafe(readMessagesQuery, [args.queueName, args.visibilityTimeoutSeconds, args.qty, args.maxPollSeconds, args.pollIntervalMs]).values()).map(row => ({
         msgId: row[0],
         readCt: row[1],
         enqueuedAt: row[2],
@@ -130,47 +132,6 @@ export interface DeleteMessagesRow {
 
 export async function deleteMessages(sql: Sql, args: DeleteMessagesArgs): Promise<void> {
     await sql.unsafe(deleteMessagesQuery, [args.queueName, args.messageId]);
-}
-
-export const readMessagesWithLongPollQuery = `-- name: ReadMessagesWithLongPoll :many
-SELECT
-    msg_id::bigint,
-    read_ct::integer,
-    enqueued_at::timestamp,
-    vt::timestamp as visibility_timeout,
-    message:: jsonb
-FROM pgmq.read_with_poll(
-  $1::text,
-  $2::integer,
-  $3::integer,
-  $4::integer,
-  $5::integer
-)`;
-
-export interface ReadMessagesWithLongPollArgs {
-    queueName: string;
-    visibilityTimeoutSeconds: number;
-    qty: number;
-    maxPollSeconds: number;
-    internalPollMs: number;
-}
-
-export interface ReadMessagesWithLongPollRow {
-    msgId: string;
-    readCt: number;
-    enqueuedAt: Date;
-    visibilityTimeout: Date;
-    message: any;
-}
-
-export async function readMessagesWithLongPoll(sql: Sql, args: ReadMessagesWithLongPollArgs): Promise<ReadMessagesWithLongPollRow[]> {
-    return (await sql.unsafe(readMessagesWithLongPollQuery, [args.queueName, args.visibilityTimeoutSeconds, args.qty, args.maxPollSeconds, args.internalPollMs]).values()).map(row => ({
-        msgId: row[0],
-        readCt: row[1],
-        enqueuedAt: row[2],
-        visibilityTimeout: row[3],
-        message: row[4]
-    }));
 }
 
 export const updateVisibilityTimeoutQuery = `-- name: UpdateVisibilityTimeout :one

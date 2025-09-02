@@ -31,7 +31,7 @@ export class MessageHandlerDataSyncNotify {
         await this.publishUpdate(userId.id, payload);
       }
     } else {
-      const userId = (payload.record || payload.old_record).userId;
+      const userId = (payload.record || payload.old_record).user_id;
       if (typeof userId !== "string") {
         throw this.logger.error("Unexpected type for userId field in record.", {
           userId,

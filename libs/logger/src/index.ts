@@ -14,8 +14,26 @@ export class RidiLogger {
             (serialized, [key, value]) => {
               if (value instanceof Error) {
                 serialized[key] = pino.stdSerializers.err(value);
-              } else if (typeof value === "object") {
-                serialized[key] = "[stripped-object]";
+              } else if (
+                typeof value === "object" &&
+                value !== null &&
+                value !== Date
+              ) {
+                serialized[key] = Object.entries(value).reduce(
+                  (obj, [key, value]) => {
+                    if (
+                      typeof value === "object" &&
+                      value !== null &&
+                      value !== Date
+                    ) {
+                      obj[key] = "[truncated object]";
+                    } else {
+                      obj[key] = value;
+                    }
+                    return obj;
+                  },
+                  {} as Record<string, unknown>,
+                );
               } else {
                 serialized[key] = value;
               }

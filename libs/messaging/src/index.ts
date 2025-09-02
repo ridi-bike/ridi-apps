@@ -6,9 +6,9 @@ import {
   archiveMessage,
   deleteMessage,
   readMessages,
-  type ReadMessagesWithLongPollRow,
   sendMessage,
   updateVisibilityTimeout,
+  type ReadMessagesRow,
 } from "./messaging_sql.ts";
 import { notifyPayloadSchema } from "./notify.ts";
 
@@ -26,7 +26,7 @@ export type MessageHandler<
   TName extends keyof Messages,
   TData extends Messages[TName],
 > = (args: {
-  message: ReadMessagesWithLongPollRow;
+  message: ReadMessagesRow;
   data: TData;
   actions: {
     deleteMessage: () => Promise<void>;
@@ -63,7 +63,8 @@ export class Messaging {
         queueName,
         visibilityTimeoutSeconds: 10,
         qty: concurrencyLimit || 100,
-        pollIntervalMs: 90_000, // 1,5 min
+        maxPollSeconds: 90_000, // 1,5 min
+        pollIntervalMs: 100,
       });
 
       const messagePromises = Promise.allSettled(

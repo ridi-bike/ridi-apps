@@ -6,7 +6,7 @@ import {
 } from "@ridi/store-with-schema";
 import { type z } from "zod";
 
-import { type recordSchema } from "./notify";
+import { type recordSchema } from "./sync";
 
 function recordsToTable<TRow>(
   rows: TRow[],
@@ -63,7 +63,7 @@ export class PlanHandler implements BaseHandler {
     userId: string,
   ) {
     const rowId = row.id;
-    if (rowId !== "string") {
+    if (typeof rowId !== "string") {
       throw new Error("Unexpected type for row id");
     }
     if (type === "DELETE") {
@@ -201,7 +201,7 @@ export class RouteHandler implements BaseHandler {
     userId: string,
   ) {
     const rowId = row.id;
-    if (rowId !== "string") {
+    if (typeof rowId !== "string") {
       throw new Error("Unexpected type for row id");
     }
     if (type === "DELETE") {
@@ -276,7 +276,7 @@ export class RouteBreakdownStatHandler implements BaseHandler {
     userId: string,
   ) {
     const rowId = row.id;
-    if (rowId !== "string") {
+    if (typeof rowId !== "string") {
       throw new Error("Unexpected type for row id");
     }
     if (type === "DELETE") {
@@ -344,7 +344,7 @@ export class RuleSetsHandler implements BaseHandler {
     userId: string,
   ) {
     const rowId = row.id;
-    if (rowId !== "string") {
+    if (typeof rowId !== "string") {
       throw new Error("Unexpected type for row id");
     }
     if (type === "DELETE") {
@@ -436,7 +436,7 @@ export class RuleSetRoadTagsHandler implements BaseHandler {
     userId: string,
   ) {
     const rowId = row.id;
-    if (rowId !== "string") {
+    if (typeof rowId !== "string") {
       throw new Error("Unexpected type for row id");
     }
     if (type === "DELETE") {
@@ -511,7 +511,6 @@ export class RegionHandler implements BaseHandler {
   ) {}
 
   async loadAllFromDb(_userId: string) {
-    console.log("================= loadAllFromDb regions");
     const dbRows = await this.readAllFromDb();
     this.dataStore.setTable(
       "regions",
@@ -528,7 +527,7 @@ export class RegionHandler implements BaseHandler {
     _userId: string,
   ) {
     const region = row.region;
-    if (region !== "string") {
+    if (typeof region !== "string") {
       throw new Error("Unexpected type for row id");
     }
     if (type === "DELETE") {
@@ -562,14 +561,11 @@ export class RegionHandler implements BaseHandler {
   }
 }
 
-export const dataHandlers: Record<
-  keyof typeof storeSchema,
-  BaseHandlerConstructor
-> = {
+export const dataHandlers: Record<string, BaseHandlerConstructor> = {
   plans: PlanHandler,
   regions: RegionHandler,
-  routeBreakdowns: RouteBreakdownStatHandler,
+  route_breakdown_stats: RouteBreakdownStatHandler,
   routes: RouteHandler,
-  ruleSetRoadTags: RuleSetRoadTagsHandler,
-  ruleSets: RuleSetsHandler,
+  rule_set_road_tags: RuleSetRoadTagsHandler,
+  rule_sets: RuleSetsHandler,
 };

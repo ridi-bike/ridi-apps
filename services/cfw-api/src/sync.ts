@@ -14,7 +14,7 @@ import { type StoreWithSchema } from "../../../libs/store-with-schema/src/store-
 
 import { dataHandlers } from "./data-handlers";
 
-const recordSchema = z.record(z.union([z.string(), z.number(), z.boolean()]));
+export const recordSchema = z.record(z.unknown());
 
 const notifyPayloadSchema = z.discriminatedUnion("type", [
   z.object({
@@ -119,6 +119,10 @@ export class UserStoreDurableObject extends WsServerDurableObject {
   }
 
   async fetch(request: Request): Promise<Response> {
+    console.log("===========", request.url);
+    if (!this.dataStore) {
+      throw new Error("Missing store, something went wrong");
+    }
     const url = new URL(request.url);
     const userId = url.pathname.split("/")[2];
 
@@ -138,10 +142,8 @@ export class UserStoreDurableObject extends WsServerDurableObject {
     }
 
     if (action === "sync") {
-      // if this.userId is not set, this is the first fetch after new object construction
-      // if it is set, it's been restored after hybernation and db sync should have been executed
-      if (!this.userId) {
-        this.ctx.waitUntil(this.syncAllDataFromDb(userId));
+      if (!this.dataStore.getInternalStore().getValue("data-synced")) {
+        await this.syncAllDataFromDb(userId);
       }
 
       this.userId = userId;
@@ -156,20 +158,29 @@ export class UserStoreDurableObject extends WsServerDurableObject {
     }
 
     const bodyString = await request.text();
-    this.ctx.waitUntil(this.processNotifyPayload(bodyString, userId));
+    await this.processNotifyPayload(bodyString, userId);
 
     return new Response("Ok", { status: 200 });
   }
 
   async processNotifyPayload(bodyString: string, userId: string) {
-    if (!this.dataStore?.getInternalStore().getValue("data-synced")) {
+    if (!this.dataStore) {
+      throw new Error("Missing store, something went wrong");
+    }
+    if (!this.dataStore.getInternalStore().getValue("data-synced")) {
       return;
     }
 
     let payload: z.infer<typeof notifyPayloadSchema>;
     try {
       const body = JSON.parse(bodyString);
-      payload = notifyPayloadSchema.parse(body);
+      const result = notifyPayloadSchema.safeParse(body);
+      if (result.success) {
+        payload = result.data;
+      } else {
+        console.error("Failed to validate payload", result.error.toString());
+        return;
+      }
     } catch (err) {
       console.error("Failed to parse notify payload", err);
       return;
@@ -219,6 +230,7 @@ export class UserStoreDurableObject extends WsServerDurableObject {
       }),
     );
 
+    console.log("++++++++++++++++++++ set value");
     this.dataStore.getInternalStore().setValue("data-synced", true);
   }
 

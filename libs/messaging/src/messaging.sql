@@ -15,7 +15,8 @@ FROM pgmq.read_with_poll(
   queue_name        => sqlc.arg(queue_name)::text,
   vt                => sqlc.arg(visibility_timeout_seconds)::integer,
   qty               => sqlc.arg(qty)::integer,
-  poll_interval_ms  => sqlc.arg(poll_interval_ms)::integer
+  max_poll_seconds  => sqlc.arg(max_poll_seconds)::integer,
+	poll_interval_ms 	=> sqlc.arg(poll_interval_ms)::integer
 );
 
 -- name: ArchiveMessage :exec
@@ -40,21 +41,6 @@ SELECT pgmq.delete(
 SELECT pgmq.delete(
   queue_name => sqlc.arg(queue_name)::text,
   msg_ids    => sqlc.arg(message_id)::bigint[]
-);
-
--- name: ReadMessagesWithLongPoll :many
-SELECT
-    msg_id::bigint,
-    read_ct::integer,
-    enqueued_at::timestamp,
-    vt::timestamp as visibility_timeout,
-    message:: jsonb
-FROM pgmq.read_with_poll(
-  sqlc.arg(queue_name)::text,
-  sqlc.arg(visibility_timeout_seconds)::integer,
-  sqlc.arg(qty)::integer,
-  sqlc.arg(max_poll_seconds)::integer,
-  sqlc.arg(internal_poll_ms)::integer
 );
 
 -- name: UpdateVisibilityTimeout :one
