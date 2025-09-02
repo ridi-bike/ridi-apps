@@ -59,12 +59,11 @@ export class Messaging {
     concurrencyLimit: number | null,
   ) {
     while (!this.stopped) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       const messages = await readMessages(this.db, {
         queueName,
         visibilityTimeoutSeconds: 10,
         qty: concurrencyLimit || 100,
-        maxPollSeconds: 90_000, // 1,5 min
-        pollIntervalMs: 100,
       });
 
       const messagePromises = Promise.allSettled(

@@ -77,6 +77,8 @@ export interface _RealtimeTenants {
   max_concurrent_users: Generated<number>;
   max_events_per_second: Generated<number>;
   max_joins_per_second: Generated<number>;
+  max_payload_size_in_kb: Generated<number | null>;
+  max_presence_events_per_second: Generated<number | null>;
   migrations_ran: Generated<number | null>;
   name: string | null;
   notify_private_alpha: Generated<boolean | null>;

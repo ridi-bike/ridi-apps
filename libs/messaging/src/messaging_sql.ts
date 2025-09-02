@@ -24,20 +24,16 @@ SELECT
     enqueued_at::timestamp,
     vt::timestamp as visibility_timeout,
     message:: jsonb
-FROM pgmq.read_with_poll(
+FROM pgmq.read(
   queue_name        => $1::text,
   vt                => $2::integer,
-  qty               => $3::integer,
-  max_poll_seconds  => $4::integer,
-	poll_interval_ms 	=> $5::integer
+  qty               => $3::integer
 )`;
 
 export interface ReadMessagesArgs {
     queueName: string;
     visibilityTimeoutSeconds: number;
     qty: number;
-    maxPollSeconds: number;
-    pollIntervalMs: number;
 }
 
 export interface ReadMessagesRow {
@@ -49,7 +45,7 @@ export interface ReadMessagesRow {
 }
 
 export async function readMessages(sql: Sql, args: ReadMessagesArgs): Promise<ReadMessagesRow[]> {
-    return (await sql.unsafe(readMessagesQuery, [args.queueName, args.visibilityTimeoutSeconds, args.qty, args.maxPollSeconds, args.pollIntervalMs]).values()).map(row => ({
+    return (await sql.unsafe(readMessagesQuery, [args.queueName, args.visibilityTimeoutSeconds, args.qty]).values()).map(row => ({
         msgId: row[0],
         readCt: row[1],
         enqueuedAt: row[2],

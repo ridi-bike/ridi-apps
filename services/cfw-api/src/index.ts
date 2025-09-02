@@ -33,7 +33,7 @@ import { Resend } from "resend";
 import { getWsServerDurableObjectFetch } from "tinybase/synchronizers/synchronizer-ws-server-durable-object";
 import type z from "zod";
 
-import { type notifyPayloadSchema } from "./notify";
+import { type notifyPayloadSchema } from "./sync";
 
 export { UserStoreDurableObject } from "./sync";
 

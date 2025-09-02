@@ -1,4 +1,4 @@
-import { type getDb } from "@ridi/db-queries";
+import { type getDb, sql } from "@ridi/db-queries";
 import { type Messaging } from "@ridi/messaging";
 import {
   storeSchema,
@@ -213,6 +213,9 @@ export class RouteHandler implements BaseHandler {
         .where("is_deleted", "=", false)
         .where("id", "=", rowId)
         .selectAll()
+        .select(
+          sql<string>`postgis.ST_AsGeoJSON(linestring)`.as("inestring_geojson"),
+        )
         .executeTakeFirstOrThrow();
 
       this.dataStore.setRow("routes", rowId, this.rowDb2Store(dbRow));
@@ -229,6 +232,9 @@ export class RouteHandler implements BaseHandler {
       .where("user_id", "=", userId)
       .where("is_deleted", "=", false)
       .selectAll()
+      .select(
+        sql<string>`postgis.ST_AsGeoJSON(linestring)`.as("linestring_geojson"),
+      )
       .execute();
   }
 
@@ -247,8 +253,8 @@ export class RouteHandler implements BaseHandler {
       score: Number(row.stats_score),
       mapPreviewDark: row.map_preview_dark ?? undefined,
       mapPreviewLight: row.map_preview_light ?? undefined,
-      coordsArrayString: row.linestring || "[]",
-      coordsOverviewArrayString: row.linestring || "[]",
+      coordsArrayString: row.linestring_geojson || "[]",
+      coordsOverviewArrayString: row.linestring_geojson || "[]",
     };
   }
 }
@@ -561,11 +567,42 @@ export class RegionHandler implements BaseHandler {
   }
 }
 
-export const dataHandlers: Record<string, BaseHandlerConstructor> = {
+const dbTableNames = [
+  "plans",
+  "regions",
+  "routes",
+  "route_breakdown_stats",
+  "rule_set_road_tags",
+  "rule_sets",
+] as const;
+const storeTableNames = [
+  "plans",
+  "regions",
+  "routes",
+  "routeBreakdowns",
+  "ruleSetRoadTags",
+  "ruleSets",
+] as const;
+
+export const dataHandlersDbNames: Record<
+  (typeof dbTableNames)[number],
+  BaseHandlerConstructor
+> = {
   plans: PlanHandler,
   regions: RegionHandler,
   route_breakdown_stats: RouteBreakdownStatHandler,
   routes: RouteHandler,
   rule_set_road_tags: RuleSetRoadTagsHandler,
   rule_sets: RuleSetsHandler,
+};
+export const dataHandlersStoreNames: Record<
+  (typeof storeTableNames)[number],
+  BaseHandlerConstructor
+> = {
+  plans: PlanHandler,
+  regions: RegionHandler,
+  routeBreakdowns: RouteBreakdownStatHandler,
+  routes: RouteHandler,
+  ruleSetRoadTags: RuleSetRoadTagsHandler,
+  ruleSets: RuleSetsHandler,
 };

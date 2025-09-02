@@ -12,11 +12,11 @@ import { z } from "zod";
 
 import { type StoreWithSchema } from "../../../libs/store-with-schema/src/store-with-schema";
 
-import { dataHandlers } from "./data-handlers";
+import { dataHandlersDbNames, dataHandlersStoreNames } from "./data-handlers";
 
 export const recordSchema = z.record(z.unknown());
 
-const notifyPayloadSchema = z.discriminatedUnion("type", [
+export const notifyPayloadSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("INSERT"),
     table: z.string(),
@@ -78,7 +78,9 @@ export class UserStoreDurableObject extends WsServerDurableObject {
             continue;
           }
           const DataHandler =
-            dataHandlers[changedTableId as keyof typeof dataHandlers];
+            dataHandlersStoreNames[
+              changedTableId as keyof typeof dataHandlersStoreNames
+            ];
           if (!DataHandler) {
             throw new Error(
               `missing mapping, unexpectedted tableId ${changedTableId}`,
@@ -194,7 +196,8 @@ export class UserStoreDurableObject extends WsServerDurableObject {
       );
     }
 
-    const DataHandler = dataHandlers[tableId as keyof typeof dataHandlers];
+    const DataHandler =
+      dataHandlersDbNames[tableId as keyof typeof dataHandlersDbNames];
     if (!DataHandler) {
       throw new Error(`missing mapping, unexpectedted tableId ${tableId}`);
     }
@@ -219,9 +222,9 @@ export class UserStoreDurableObject extends WsServerDurableObject {
     }
 
     await Promise.allSettled(
-      Object.keys(dataHandlers).map((handlerKey) => {
+      Object.keys(dataHandlersDbNames).map((handlerKey) => {
         const DataHandler =
-          dataHandlers[handlerKey as keyof typeof dataHandlers];
+          dataHandlersDbNames[handlerKey as keyof typeof dataHandlersDbNames];
         return new DataHandler(
           this.db,
           this.dataStore!,

@@ -36,7 +36,11 @@ begin
     );
   end if;
 
-  perform pgmq.send('data_sync_notify', payload);
+	perform pgmq.send(
+		queue_name => 'data_sync_notify',
+		msg        => payload,
+		delay      => 2
+	);
   if TG_OP = 'DELETE' then
     return OLD;
   else

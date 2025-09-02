@@ -5,6 +5,7 @@ import { Pool } from "pg";
 import type { DB } from "./kysely-db.d.ts"; // this is the Database interface we defined earlier
 
 export * from "./queries_sql.ts";
+export * from "kysely"
 
 export function getDb(connectionString: string) {
   const dialect = new PostgresDialect({
