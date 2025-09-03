@@ -16,7 +16,7 @@ export function useRouteRoadStats(
   const routeBreakdowns = useTable(dataStore, "routeBreakdowns");
   return useMemo(
     () =>
-      routeId !== "string"
+      typeof routeId !== "string"
         ? []
         : Object.values(routeBreakdowns)
             .filter((rb) => rb.routeId === routeId && rb.statType === statType)

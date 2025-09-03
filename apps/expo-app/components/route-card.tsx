@@ -5,7 +5,7 @@ import { View, Text } from "react-native";
 
 import {
   useRoute,
-  useRouteCoords,
+  useRouteGeojson,
   useRouteRoadStats,
 } from "~/lib/data-stores/routes";
 import { useColorScheme } from "~/lib/useColorScheme";
@@ -23,12 +23,13 @@ const blurhash =
 export function RouteCard({ routeId }: RouteCardProps) {
   const route = useRoute(routeId);
   const routeStats = useRouteRoadStats(routeId, "surface");
+  console.log({ routeStats });
 
   const { colorScheme } = useColorScheme();
   const mapImgUrl =
     colorScheme === "dark" ? route?.mapPreviewDark : route?.mapPreviewLight;
 
-  const routeOverview = useRouteCoords(routeId, true);
+  const routeGeojson = useRouteGeojson(routeId, true);
 
   return (
     <ScreenCard
@@ -44,14 +45,17 @@ export function RouteCard({ routeId }: RouteCardProps) {
             />
           ) : (
             <>
-              {!!routeOverview && (
+              {!!routeGeojson && (
                 <MotiView
                   key="map"
                   className="size-full"
                   from={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                 >
-                  <GeoMapRouteView route={routeOverview} interactive={false} />
+                  <GeoMapRouteView
+                    routeGeojson={routeGeojson}
+                    interactive={false}
+                  />
                 </MotiView>
               )}
             </>
@@ -100,9 +104,10 @@ export function RouteCard({ routeId }: RouteCardProps) {
                 </AnimatePresence>
               </Text>
               <View className="flex flex-row gap-2 text-sm">
-                {!!routeStats && (
-                  <>
-                    {Array(3).map((_, idx) => (
+                {!!routeStats &&
+                  Array(3)
+                    .fill("")
+                    .map((_, idx) => (
                       <View key={idx} className="flex-1">
                         {!!routeStats[idx] && (
                           <>
@@ -120,8 +125,6 @@ export function RouteCard({ routeId }: RouteCardProps) {
                         )}
                       </View>
                     ))}
-                  </>
-                )}
               </View>
             </MotiView>
           )}

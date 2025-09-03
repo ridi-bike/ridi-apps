@@ -1,6 +1,6 @@
 import { type MapRef } from "@vis.gl/react-maplibre";
-import { type PropsWithChildren } from "react";
 import { type GeoJSON } from "geojson";
+import { type PropsWithChildren } from "react";
 
 export type GeoMapPlanViewProps = {
   initialCoords: [number, number];
@@ -12,7 +12,7 @@ export type GeoMapPlanViewProps = {
   mapRef?: (map: MapRef) => void;
 };
 export type GeoMapRouteViewProps = {
-  routeGeojson: GeoJSON
+  routeGeojson: GeoJSON;
   interactive: boolean;
   colorScheme: "light" | "dark";
   mapRef?: (map: MapRef) => void;
