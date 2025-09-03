@@ -1,5 +1,7 @@
 import { useTable, useRow } from "@ridi/store-with-schema/hooks";
+import { type GeoJSON } from "geojson";
 import { useMemo, useCallback } from "react";
+import { GeoJSONSchema } from "zod-geojson";
 
 import { dataStore } from "./data-store";
 
@@ -23,10 +25,10 @@ export function useRouteRoadStats(
   );
 }
 
-export function useRouteCoords(
+export function useRouteGeojson(
   routeId: unknown,
   overview: boolean,
-): null | [number, number][] {
+): null | GeoJSON {
   const routes = useRow(
     dataStore,
     "routes",
@@ -36,9 +38,15 @@ export function useRouteCoords(
     if (!routes) {
       return null;
     }
-    return JSON.parse(
+    const json = JSON.parse(
       overview ? routes.coordsOverviewArrayString : routes.coordsArrayString,
     );
+    const res = GeoJSONSchema.safeParse(json);
+    if (res.success) {
+      return res.data as GeoJSON;
+    }
+    console.error("Failed to validate geojson", res.error);
+    return null;
   }, [routes, overview]);
 }
 

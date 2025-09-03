@@ -1,5 +1,5 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
 import slugify from "@sindresorhus/slugify";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { buildGPX, BaseBuilder } from "gpx-builder";
 import { Trophy, Trash2, Ruler } from "lucide-react-native";
 import { AnimatePresence, MotiView } from "moti";
@@ -22,7 +22,7 @@ import {
 } from "~/components/ui/alert-dialog";
 import { usePlan, usePlanRoute } from "~/lib/data-stores/plans";
 import {
-  useRouteCoords,
+  useRouteGeojson,
   useRouteRoadStats,
   useRoutesUpdate,
 } from "~/lib/data-stores/routes";
@@ -235,7 +235,7 @@ export default function RouteDetails() {
   const { routeDelete, routeSetDownloaded } = useRoutesUpdate();
   const breakdownSurface = useRouteRoadStats(routeId, "surface");
   const breakdownRoadType = useRouteRoadStats(routeId, "type");
-  const coords = useRouteCoords(routeId, false);
+  const routeGeojson = useRouteGeojson(routeId, false);
 
   const getFileName = useCallback(() => {
     if (!plan || !route) {
@@ -276,37 +276,56 @@ export default function RouteDetails() {
     >
       <View className="flex w-full flex-col items-center justify-start">
         <AnimatePresence>
-          {!!route && !!breakdownSurface && !!breakdownRoadType && !!coords && (
-            <MotiView
-              key="plan"
-              from={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mx-2 w-full max-w-5xl gap-4"
-            >
-              <ScrollView className="h-[calc(100vh-100px)] pb-12">
-                <View className="mx-2 max-w-5xl flex-1 gap-4 pb-24">
-                  <ScreenCard
-                    topClassName="h-[65vh]"
-                    top={<GeoMapRouteView route={coords} interactive={true} />}
-                    middle={
-                      <>
-                        <View className="flex flex-row items-center justify-between">
-                          {!!plan && (
-                            <>
-                              <Text className="text-lg font-bold dark:text-gray-200">
-                                {plan.startDesc}
-                              </Text>
-                              {!!plan.finishDesc && (
+          {!!route &&
+            !!breakdownSurface &&
+            !!breakdownRoadType &&
+            !!routeGeojson && (
+              <MotiView
+                key="plan"
+                from={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mx-2 w-full max-w-5xl gap-4"
+              >
+                <ScrollView className="h-[calc(100vh-100px)] pb-12">
+                  <View className="mx-2 max-w-5xl flex-1 gap-4 pb-24">
+                    <ScreenCard
+                      topClassName="h-[65vh]"
+                      top={
+                        <GeoMapRouteView
+                          routeGeojson={routeGeojson}
+                          interactive={true}
+                        />
+                      }
+                      middle={
+                        <>
+                          <View className="flex flex-row items-center justify-between">
+                            {!!plan && (
+                              <>
                                 <Text className="text-lg font-bold dark:text-gray-200">
-                                  {plan.finishDesc}
+                                  {plan.startDesc}
                                 </Text>
-                              )}
-                            </>
-                          )}
-                          <View className="flex flex-row items-center gap-2">
-                            <Trophy className="size-5 text-[#FF5937]" />
-                            <Text className="font-bold text-[#FF5937]">
-                              {Math.round(route.score)}
+                                {!!plan.finishDesc && (
+                                  <Text className="text-lg font-bold dark:text-gray-200">
+                                    {plan.finishDesc}
+                                  </Text>
+                                )}
+                              </>
+                            )}
+                            <View className="flex flex-row items-center gap-2">
+                              <Trophy className="size-5 text-[#FF5937]" />
+                              <Text className="font-bold text-[#FF5937]">
+                                {Math.round(route.score)}
+                              </Text>
+                            </View>
+                          </View>
+                        </>
+                      }
+                      bottom={
+                        <View className="flex flex-row items-center justify-between">
+                          <View className="flex flex-row items-center justify-start gap-2">
+                            <Ruler className="size-5 text-[#FF5937]" />
+                            <Text className="font-bold dark:text-gray-200">
+                              {metersToDisplay(route.lenM)}
                             </Text>
                           </View>
                           <View className="flex flex-row items-center justify-center gap-4">
@@ -346,13 +365,18 @@ export default function RouteDetails() {
                                   );
 
                                   const { Point } = BaseBuilder.MODELS;
-                                  const points = (
-                                    JSON.parse(route.coordsArrayString) as [
-                                      number,
-                                      number,
-                                    ][]
-                                  ).map(
-                                    (latLon) => new Point(latLon[0], latLon[1]),
+                                  if (routeGeojson.type !== "LineString") {
+                                    throw new Error("Unexpected geojson shape");
+                                  }
+                                  const points = routeGeojson.coordinates.map(
+                                    (coords) => {
+                                      const lat = coords[1];
+                                      const lon = coords[0];
+                                      if (!lat || !lon) {
+                                        throw new Error("missing points");
+                                      }
+                                      return new Point(lat, lon);
+                                    },
                                   );
 
                                   const gpxData = new BaseBuilder();
@@ -382,214 +406,148 @@ export default function RouteDetails() {
                             </View>
                           </View>
                         </View>
-                      </>
-                    }
-                    bottom={
-                      <View className="flex flex-row items-center justify-between">
-                        <View className="flex flex-row items-center justify-start gap-2">
-                          <Ruler className="size-5 text-[#FF5937]" />
-                          <Text className="font-bold dark:text-gray-200">
-                            {metersToDisplay(route.lenM)}
+                      }
+                    />
+                    <ScreenCard
+                      middle={
+                        <View>
+                          <Text
+                            role="heading"
+                            aria-level={2}
+                            className="mb-4 text-lg font-bold dark:text-gray-200"
+                          >
+                            Surface Type Breakdown
                           </Text>
-                        </View>
-                        <View className="flex flex-row items-center justify-center gap-4">
-                          <View className="flex flex-col items-end justify-center">
-                            <DeleteConfirmDialog
-                              onDelete={() => {
-                                posthogClient.captureEvent("route-deleted", {
-                                  routeId: route.id,
-                                });
-                                routeDelete(route.id);
-                                if (router.canGoBack()) {
-                                  router.back();
-                                } else {
-                                  router.replace(`/plans/${planId}`);
-                                }
-                              }}
-                            >
-                              <Pressable
-                                role="button"
-                                className={cn(
-                                  "dark:border-red-700 dark:hover:bg-red-950 w-full h-14 flex-row items-center px-4 gap-3 rounded-xl border-[3px] border-red-500 text-red-500 hover:bg-red-50 transition-colors",
-                                )}
-                              >
-                                <Trash2 className="size-6" />
-                              </Pressable>
-                            </DeleteConfirmDialog>
-                          </View>
-                          <View className="flex flex-col items-end justify-center">
-                            <DownloadGpxDialog
-                              downloadedAt={route.downloadedAt}
-                              onDownload={() => {
-                                posthogClient.captureEvent(
-                                  "route-gpx-downloaded",
-                                  {
-                                    routeId: route.id,
-                                  },
-                                );
-
-                                const { Point } = BaseBuilder.MODELS;
-                                const points = coords.map(
-                                  (latLon) => new Point(latLon[0], latLon[1]),
-                                );
-
-                                const gpxData = new BaseBuilder();
-
-                                gpxData.setSegmentPoints(points);
-
-                                const link = document.createElement("a");
-
-                                link.href = `data:application/gpx+xml;charset=utf-8,${encodeURIComponent(buildGPX(gpxData.toObject()))}`;
-                                link.download = "route.gpx";
-                                link.click();
-
-                                routeSetDownloaded(route.id);
-                              }}
-                            >
-                              <Pressable
-                                role="button"
-                                className={cn(
-                                  "dark:border-green-700 dark:hover:bg-green-950 w-full h-14 flex-row items-center px-4 gap-3 rounded-xl border-[3px] border-green-500 text-green-500 hover:bg-green-50 transition-colors",
-                                )}
-                              >
-                                <Text className="dark:text-gray-200">
-                                  Download Route GPX
-                                </Text>
-                              </Pressable>
-                            </DownloadGpxDialog>
+                          <View className="flex flex-row gap-2 text-sm">
+                            <View className="flex-1">
+                              {breakdownSurface[0] && (
+                                <>
+                                  <View
+                                    className="mb-1 h-2 rounded-full bg-[#FF5937]"
+                                    style={{
+                                      width: `${Math.round(breakdownSurface[0].percentage)}%`,
+                                    }}
+                                  />
+                                  <Text className="dark:text-gray-200">
+                                    {breakdownSurface[0].statName}{" "}
+                                    {Math.round(breakdownSurface[0].percentage)}
+                                    %
+                                  </Text>
+                                </>
+                              )}
+                            </View>
+                            <View className="flex-1">
+                              {breakdownSurface[1] && (
+                                <>
+                                  <View
+                                    className="mb-1 h-2 rounded-full bg-[#FFA37F]"
+                                    style={{
+                                      width: `${Math.round(breakdownSurface[1].percentage)}%`,
+                                    }}
+                                  />
+                                  <Text className="dark:text-gray-200">
+                                    {breakdownSurface[1].statName}{" "}
+                                    {Math.round(breakdownSurface[1].percentage)}
+                                    %
+                                  </Text>
+                                </>
+                              )}
+                            </View>
+                            <View className="flex-1">
+                              {breakdownSurface[2] && (
+                                <>
+                                  <View
+                                    className="mb-1 h-2 rounded-full bg-[#FFD7C9]"
+                                    style={{
+                                      width: `${Math.round(breakdownSurface[2].percentage)}%`,
+                                    }}
+                                  />
+                                  <Text className="dark:text-gray-200">
+                                    {breakdownSurface[2].statName}{" "}
+                                    {Math.round(breakdownSurface[2].percentage)}
+                                    %
+                                  </Text>
+                                </>
+                              )}
+                            </View>
                           </View>
                         </View>
-                      </View>
-                    }
-                  />
-                  <ScreenCard
-                    middle={
-                      <View>
-                        <Text
-                          role="heading"
-                          aria-level={2}
-                          className="mb-4 text-lg font-bold dark:text-gray-200"
-                        >
-                          Surface Type Breakdown
-                        </Text>
-                        <View className="flex flex-row gap-2 text-sm">
-                          <View className="flex-1">
-                            {breakdownSurface[0] && (
-                              <>
-                                <View
-                                  className="mb-1 h-2 rounded-full bg-[#FF5937]"
-                                  style={{
-                                    width: `${Math.round(breakdownSurface[0].percentage)}%`,
-                                  }}
-                                />
-                                <Text className="dark:text-gray-200">
-                                  {breakdownSurface[0].statName}{" "}
-                                  {Math.round(breakdownSurface[0].percentage)}%
-                                </Text>
-                              </>
-                            )}
-                          </View>
-                          <View className="flex-1">
-                            {breakdownSurface[1] && (
-                              <>
-                                <View
-                                  className="mb-1 h-2 rounded-full bg-[#FFA37F]"
-                                  style={{
-                                    width: `${Math.round(breakdownSurface[1].percentage)}%`,
-                                  }}
-                                />
-                                <Text className="dark:text-gray-200">
-                                  {breakdownSurface[1].statName}{" "}
-                                  {Math.round(breakdownSurface[1].percentage)}%
-                                </Text>
-                              </>
-                            )}
-                          </View>
-                          <View className="flex-1">
-                            {breakdownSurface[2] && (
-                              <>
-                                <View
-                                  className="mb-1 h-2 rounded-full bg-[#FFD7C9]"
-                                  style={{
-                                    width: `${Math.round(breakdownSurface[2].percentage)}%`,
-                                  }}
-                                />
-                                <Text className="dark:text-gray-200">
-                                  {breakdownSurface[2].statName}{" "}
-                                  {Math.round(breakdownSurface[2].percentage)}%
-                                </Text>
-                              </>
-                            )}
-                          </View>
-                        </View>
-                      </View>
-                    }
-                    bottom={
-                      <View>
-                        <Text
-                          role="heading"
-                          aria-level={2}
-                          className="mb-4 text-lg font-bold dark:text-gray-200"
-                        >
-                          Road Type Breakdown
-                        </Text>
-                        <View className="flex flex-row gap-2 text-sm">
-                          <View className="flex-1">
-                            {breakdownRoadType[0] && (
-                              <>
-                                <View
-                                  className="mb-1 h-2 rounded-full bg-[#FF5937]"
-                                  style={{
-                                    width: `${Math.round(breakdownRoadType[0].percentage)}%`,
-                                  }}
-                                />
-                                <Text className="dark:text-gray-200">
-                                  {breakdownRoadType[0].statName}{" "}
-                                  {Math.round(breakdownRoadType[0].percentage)}%
-                                </Text>
-                              </>
-                            )}
-                          </View>
-                          <View className="flex-1">
-                            {breakdownRoadType[1] && (
-                              <>
-                                <View
-                                  className="mb-1 h-2 rounded-full bg-[#FFA37F]"
-                                  style={{
-                                    width: `${Math.round(breakdownRoadType[1].percentage)}%`,
-                                  }}
-                                />
-                                <Text className="dark:text-gray-200">
-                                  {breakdownRoadType[1].statName}{" "}
-                                  {Math.round(breakdownRoadType[1].percentage)}%
-                                </Text>
-                              </>
-                            )}
-                          </View>
-                          <View className="flex-1">
-                            {breakdownRoadType[2] && (
-                              <>
-                                <View
-                                  className="mb-1 h-2 rounded-full bg-[#FFD7C9]"
-                                  style={{
-                                    width: `${Math.round(breakdownRoadType[2].percentage)}%`,
-                                  }}
-                                />
-                                <Text className="dark:text-gray-200">
-                                  {breakdownRoadType[2].statName}{" "}
-                                  {Math.round(breakdownRoadType[2].percentage)}%
-                                </Text>
-                              </>
-                            )}
+                      }
+                      bottom={
+                        <View>
+                          <Text
+                            role="heading"
+                            aria-level={2}
+                            className="mb-4 text-lg font-bold dark:text-gray-200"
+                          >
+                            Road Type Breakdown
+                          </Text>
+                          <View className="flex flex-row gap-2 text-sm">
+                            <View className="flex-1">
+                              {breakdownRoadType[0] && (
+                                <>
+                                  <View
+                                    className="mb-1 h-2 rounded-full bg-[#FF5937]"
+                                    style={{
+                                      width: `${Math.round(breakdownRoadType[0].percentage)}%`,
+                                    }}
+                                  />
+                                  <Text className="dark:text-gray-200">
+                                    {breakdownRoadType[0].statName}{" "}
+                                    {Math.round(
+                                      breakdownRoadType[0].percentage,
+                                    )}
+                                    %
+                                  </Text>
+                                </>
+                              )}
+                            </View>
+                            <View className="flex-1">
+                              {breakdownRoadType[1] && (
+                                <>
+                                  <View
+                                    className="mb-1 h-2 rounded-full bg-[#FFA37F]"
+                                    style={{
+                                      width: `${Math.round(breakdownRoadType[1].percentage)}%`,
+                                    }}
+                                  />
+                                  <Text className="dark:text-gray-200">
+                                    {breakdownRoadType[1].statName}{" "}
+                                    {Math.round(
+                                      breakdownRoadType[1].percentage,
+                                    )}
+                                    %
+                                  </Text>
+                                </>
+                              )}
+                            </View>
+                            <View className="flex-1">
+                              {breakdownRoadType[2] && (
+                                <>
+                                  <View
+                                    className="mb-1 h-2 rounded-full bg-[#FFD7C9]"
+                                    style={{
+                                      width: `${Math.round(breakdownRoadType[2].percentage)}%`,
+                                    }}
+                                  />
+                                  <Text className="dark:text-gray-200">
+                                    {breakdownRoadType[2].statName}{" "}
+                                    {Math.round(
+                                      breakdownRoadType[2].percentage,
+                                    )}
+                                    %
+                                  </Text>
+                                </>
+                              )}
+                            </View>
                           </View>
                         </View>
-                      </View>
-                    }
-                  />
-                </View>
-              </ScrollView>
-            </MotiView>
-          )}
+                      }
+                    />
+                  </View>
+                </ScrollView>
+              </MotiView>
+            )}
         </AnimatePresence>
       </View>
     </ScreenFrame>

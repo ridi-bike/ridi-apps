@@ -7,7 +7,6 @@ import {
   NavigationControl,
 } from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { type FeatureCollection } from "geojson";
 import maplibre from "maplibre-gl";
 import { useEffect, useMemo, useRef } from "react";
 
@@ -16,7 +15,7 @@ import { type GeoMapRouteViewProps } from "./types";
 import { combineBBox, updateBBox } from "./util";
 
 export function GeoMapRouteView({
-  route,
+  routeGeojson,
   interactive,
   colorScheme,
   mapRef: mapRefExt,
@@ -24,13 +23,9 @@ export function GeoMapRouteView({
   const mapRef = useRef<MapRef | null>(null);
 
   const mapBounds = useMemo(() => {
-    if (!route.length) {
-      return null;
-    }
-    const features = turf.points(route);
-    const mapBounds = turf.bbox(features);
+    const mapBounds = turf.bbox(routeGeojson);
     return combineBBox(mapBounds, null);
-  }, [route]);
+  }, [routeGeojson]);
 
   useEffect(() => {
     if (mapRef.current && mapBounds) {
@@ -39,9 +34,6 @@ export function GeoMapRouteView({
   }, [mapBounds]);
 
   const routeLayer = useMemo(() => {
-    if (!route) {
-      return null;
-    }
     const routeLayerId = "route-layer";
     const layerStyle = {
       id: "route-layer",
@@ -52,25 +44,12 @@ export function GeoMapRouteView({
         "line-width": 3,
       },
     } as const;
-    const geojson: FeatureCollection = {
-      type: "FeatureCollection",
-      features: [
-        {
-          type: "Feature",
-          properties: {},
-          geometry: {
-            type: "LineString",
-            coordinates: route,
-          },
-        },
-      ],
-    };
     return (
-      <Source id={routeLayerId} type="geojson" data={geojson}>
+      <Source id={routeLayerId} type="geojson" data={routeGeojson}>
         <Layer {...layerStyle} />
       </Source>
     );
-  }, [route]);
+  }, [routeGeojson]);
 
   return (
     <MapLibre
