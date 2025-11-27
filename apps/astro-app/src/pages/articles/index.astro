@@ -17,7 +17,7 @@ console.log({ articleList });
       >
         <h1 class="text-4xl font-medium mb-8 text-ridiorange">Articles</h1>
         {
-          articleList.toReversed().map((article) => (
+				articleList.sort((a, b) => a.data.publish_date > b.data.publish_date ? -1 : 1).map((article) => (
             <a
               href={`/articles/${article.data.slug}`}
               class="border-l-2 border-ridiorange w-full pl-4"
