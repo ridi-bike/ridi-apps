@@ -785,7 +785,6 @@ export default Sentry.withSentry(
         return new Response();
       }
 
-      const dbCon = postgres(env.SUPABASE_DB_URL);
 
       if (url.pathname.startsWith("/get-notified")) {
         const email = url.searchParams.get("email");
@@ -799,6 +798,8 @@ export default Sentry.withSentry(
             subject: "Subscription to Ridi News",
             to: email,
             html: `
+			// const dbCon = postgres(env.SUPABASE_DB_URL);
+			const dbCon = {} as ReturnType<typeof postgres>;
               <div style="width: 375px; margin: 0 auto; background-color: #f4f4f5;">
                 <table width="100%" cellpadding="0" cellspacing="0" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
                   <tr>
